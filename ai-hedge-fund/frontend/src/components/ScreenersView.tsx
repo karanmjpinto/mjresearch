@@ -11,6 +11,7 @@ import { api } from "@/lib/api";
 import { AppNav } from "./AppNav";
 import { PersonaOpinionGrid, humanizePersonaId } from "./PersonaOpinionCards";
 import { YartsevaPanel } from "./YartsevaPanel";
+import { AcquisitionCompounderPanel } from "./AcquisitionCompounderPanel";
 
 function tickerLooksValid(t: string): boolean {
   const s = t.trim();
@@ -164,16 +165,33 @@ export function ScreenersView() {
 
           <div className="mt-4">
             <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Screening criteria (draft)</p>
-            <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
-              {active.criteria.map((c) => (
-                <li key={c}>{c}</li>
-              ))}
-            </ul>
+            {active.criteriaSections && active.criteriaSections.length > 0 ? (
+              <div className="space-y-5">
+                {active.criteriaSections.map((sec) => (
+                  <div key={sec.title}>
+                    <p className="text-sm font-medium text-gray-200 mb-2">{sec.title}</p>
+                    <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
+                      {sec.items.map((c, i) => (
+                        <li key={`${sec.title}-${i}`}>{c}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
+                {active.criteria.map((c) => (
+                  <li key={c}>{c}</li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 
-        {active.usesApi ? (
+        {active.usesApi && active.id === "yartseva" ? (
           <YartsevaPanel />
+        ) : active.usesApi && active.id === "acquisition_compounder" ? (
+          <AcquisitionCompounderPanel />
         ) : (
           <div className="bg-surface-card rounded-xl border border-border/60 overflow-hidden">
             <div className="px-5 py-3 border-b border-border/60 flex items-center justify-between">

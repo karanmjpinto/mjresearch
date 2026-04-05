@@ -6,9 +6,89 @@
     "THYAO.IS", "EREGL.IS", "BIMAS.IS", "KCHOL.IS", "SAHOL.IS",
     "TUPRS.IS", "AKBNK.IS", "GARAN.IS", "SISE.IS", "ASELS.IS"
   ],
+  "canada": [
+    "SHOP.TO", "RY.TO", "TD.TO", "ENB.TO", "CNQ.TO", "CP.TO",
+    "BMO.TO", "BNS.TO", "TRP.TO", "SU.TO", "MFC.TO", "CNR.TO",
+    "WCN.TO", "ATD.TO", "L.TO", "FNV.TO", "CSU.TO", "GIB-A.TO"
+  ],
+  "japan": [
+    "7203.T", "6758.T", "9984.T", "6861.T", "6954.T", "8306.T",
+    "6098.T", "9432.T", "9433.T", "4063.T", "4519.T", "4568.T",
+    "7974.T", "7267.T", "6501.T", "6503.T", "8058.T", "2914.T"
+  ],
+  "europe": [
+    "ASML.AS", "SAP.DE", "SIE.DE", "VOW3.DE", "BMW.DE", "BAYN.DE",
+    "OR.PA", "AIR.PA", "SAN.PA", "MC.PA", "TTE.PA", "EL.PA",
+    "SHEL.L", "BP.L", "HSBA.L", "GSK.L", "DGE.L", "ULVR.L",
+    "NESN.SW", "ROG.SW", "NOVN.SW", "ISP.MI", "ENI.MI", "UCG.MI"
+  ],
   "nordic": [
     "NOVO-B.CO", "VOLV-B.ST", "ATLAS-COPCO-A.ST", "NESTE.HE",
-    "MAERSK-B.CO", "SAND.ST", "ESSITY-B.ST"
+    "MAERSK-B.CO", "SAND.ST", "ESSITY-B.ST", "ERIC-B.ST",
+    "ABB.ST", "ASSA-B.ST", "EVO.ST", "HEXA-B.ST",
+    "SAMPO.HE", "UPM.HE", "NOKIA.HE", "KEMIRA.HE",
+    "DANSKE.CO", "VESTAS.CO", "CARL-B.CO", "GN.CO",
+    "EQNR.OL", "YAR.OL", "SUBC.OL", "FRO.OL"
+  ],
+  "asia_hk": [
+    "0700.HK", "9988.HK", "0941.HK", "1299.HK", "0388.HK", "2318.HK",
+    "3690.HK", "1810.HK", "1211.HK", "2269.HK", "0883.HK", "0005.HK",
+    "0011.HK", "0002.HK", "1038.HK", "2018.HK"
+  ],
+  "asia_india": [
+    "RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "INFY.NS", "ICICIBANK.NS",
+    "BHARTIARTL.NS", "SBIN.NS", "HINDUNILVR.NS", "ITC.NS", "KOTAKBANK.NS",
+    "LT.NS", "AXISBANK.NS", "MARUTI.NS", "TITAN.NS", "SUNPHARMA.NS",
+    "BAJFINANCE.NS", "WIPRO.NS", "ONGC.NS", "NTPC.NS", "POWERGRID.NS"
+  ],
+  "asia_korea": [
+    "005930.KS", "000660.KS", "035420.KS", "005380.KS", "051910.KS",
+    "006400.KS", "035720.KS", "068270.KS", "207940.KS", "000270.KS",
+    "028260.KS", "012330.KS", "066570.KS", "105560.KS", "055550.KS",
+    "032830.KS", "034730.KS", "086790.KS", "015760.KS", "009540.KS"
+  ],
+  "asia_taiwan": [
+    "2330.TW", "2317.TW", "2454.TW", "2308.TW", "2882.TW",
+    "2303.TW", "3711.TW", "2881.TW", "2886.TW", "2412.TW",
+    "3008.TW", "2357.TW", "2891.TW", "2912.TW", "6505.TW"
+  ],
+  "asia_australia_nz": [
+    "BHP.AX", "CBA.AX", "CS.AX", "WBC.AX", "NAB.AX", "ANZ.AX",
+    "MQG.AX", "FMG.AX", "RIO.AX", "WDS.AX", "TLS.AX", "WOW.AX",
+    "GMG.AX", "ALL.AX", "QBE.AX", "FPH.NZ", "AIR.NZ", "SPK.NZ"
+  ],
+  "asia_sea": [
+    "D05.SI", "O39.SI", "U11.SI", "Z74.SI", "J36.SI", "C6L.SI",
+    "C09.SI", "BN4.SI", "S68.SI", "V03.SI", "PTT.BK", "AOT.BK",
+    "CPALL.BK", "BBL.BK", "ADVANC.BK"
+  ],
+  "china_adr": [
+    "BABA", "JD", "PDD", "BIDU", "NIO", "XPEV", "LI", "BILI",
+    "TME", "NTES", "TCOM", "YUMC", "BEKE", "ZTO", "VIPS"
+  ],
+  "latam_brazil": [
+    "PETR4.SA", "VALE3.SA", "ITUB4.SA", "BBDC4.SA", "ABEV3.SA",
+    "B3SA3.SA", "WEGE3.SA", "RENT3.SA", "SUZB3.SA", "RADL3.SA",
+    "MGLU3.SA", "ELET3.SA", "BBAS3.SA", "SANB11.SA", "BPAC11.SA",
+    "ITSA4.SA", "CMIG4.SA", "CSAN3.SA", "GOLL4.SA", "PRIO3.SA"
+  ],
+  "latam_mexico": [
+    "AMXB.MX", "FEMSAUBD.MX", "BIMBOA.MX", "GFNORTEO.MX", "WALMEX.MX",
+    "CEMEXCPO.MX", "KOFUBL.MX", "GRUMAB.MX", "GMEXICOB.MX", "ALFAA.MX",
+    "PE&OLES.MX", "VOLARA.MX", "LABB.MX", "ALSEA.MX", "MEGACPO.MX"
+  ],
+  "latam_southern_cone": [
+    "GGAL.BA", "YPFD.BA", "PAMP.BA", "BMA.BA", "TXAR.BA", "TGS.BA",
+    "CMPC.SN", "ENELAM.SN", "SQM-B.SN", "COPEC.SN", "FALABELLA.SN",
+    "EC", "BAP"
+  ],
+  "africa_sa": [
+    "NPN.JO", "SHP.JO", "AGL.JO", "FSR.JO", "SLM.JO", "BHG.JO",
+    "VOD.JO", "MNP.JO", "CPI.JO", "SOL.JO", "REM.JO", "IMP.JO"
+  ],
+  "middle_east": [
+    "2222.SR", "1180.SR", "7010.SR", "1120.SR", "1150.SR",
+    "QNBK.QA", "IQCD.QA", "MARK.QA"
   ],
   "macro_watch": [
     "SPY", "QQQ", "TLT", "GLD", "DX-Y.NYB", "CL=F"

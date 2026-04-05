@@ -53,9 +53,47 @@ export interface YartsevaResultRow {
 export interface YartsevaScreenerResponse {
   macro_regime_note: string;
   watchlist_group: string | null;
+  universe?: string | null;
+  universe_total?: number | null;
+  universe_truncated?: boolean;
+  max_symbols?: number | null;
   tickers: string[];
   count: number;
   results: YartsevaResultRow[];
+}
+
+export interface AcquisitionCompounderResultRow {
+  ticker: string;
+  stage1_passed: boolean;
+  stage1_failures: string[];
+  tier2_passed: boolean;
+  red_flags: string[];
+  industry_avoid: boolean;
+  industry_prefer_match: boolean;
+  total_score: number | null;
+  tier: string | null;
+  scores: Record<string, number>;
+  error?: string | null;
+  snapshot?: Record<string, unknown>;
+}
+
+export interface AcquisitionCompounderScreenerResponse {
+  methodology_note: string;
+  watchlist_group: string | null;
+  universe?: string | null;
+  universe_total?: number | null;
+  universe_truncated?: boolean;
+  max_symbols?: number | null;
+  tickers: string[];
+  count: number;
+  results: AcquisitionCompounderResultRow[];
+}
+
+export interface ScreenerUniverseMeta {
+  id: string;
+  label: string;
+  description: string;
+  approx_count: number;
 }
 
 async function patchJSON<T>(path: string, data: unknown): Promise<T> {
@@ -305,8 +343,23 @@ export const api = {
     fetchJSON<Record<string, string[]>>("/data/watchlists"),
 
   /** Yartseva Multibagger screener (yfinance fundamentals). */
-  runYartsevaScreener: (body: { tickers?: string[]; watchlist_group?: string }) =>
-    postJSON<YartsevaScreenerResponse>("/screeners/yartseva", body),
+  runYartsevaScreener: (body: {
+    tickers?: string[];
+    watchlist_group?: string;
+    universe?: string;
+    max_symbols?: number;
+  }) => postJSON<YartsevaScreenerResponse>("/screeners/yartseva", body),
+
+  runAcquisitionCompounderScreener: (body: {
+    tickers?: string[];
+    watchlist_group?: string;
+    universe?: string;
+    max_symbols?: number;
+  }) => postJSON<AcquisitionCompounderScreenerResponse>("/screeners/acquisition-compounder", body),
+
+  /** Index universes (S&P 500, NASDAQ-100, …) for screeners. */
+  getScreenerUniverses: () =>
+    fetchJSON<{ universes: ScreenerUniverseMeta[] }>("/screeners/universes"),
 
   // --- Research ---
 

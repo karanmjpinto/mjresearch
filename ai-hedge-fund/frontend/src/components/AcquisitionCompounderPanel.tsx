@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 import {
   api,
   type ScreenerUniverseMeta,
-  type YartsevaResultRow,
-  type YartsevaScreenerResponse,
+  type AcquisitionCompounderResultRow,
+  type AcquisitionCompounderScreenerResponse,
 } from "@/lib/api";
 
 const FALLBACK_UNIVERSES: ScreenerUniverseMeta[] = [
@@ -15,60 +15,34 @@ const FALLBACK_UNIVERSES: ScreenerUniverseMeta[] = [
   { id: "russell2000", label: "Russell 2000 (IWM)", description: "", approx_count: 2000 },
 ];
 
-function tierLabel(tier: string | null): string {
-  switch (tier) {
-    case "strong":
-      return "Strong (75+)";
-    case "watch":
-      return "Watch (55–74)";
-    case "borderline":
-      return "Borderline (35–54)";
-    case "fail":
-      return "Fail (<35)";
-    default:
-      return "—";
-  }
-}
-
 function tierClass(tier: string | null): string {
   switch (tier) {
-    case "strong":
+    case "elite":
       return "text-accent-green";
-    case "watch":
+    case "strong":
       return "text-blue-300";
-    case "borderline":
+    case "watch":
       return "text-amber-200";
-    case "fail":
+    case "weak":
       return "text-gray-500";
     default:
       return "text-gray-500";
   }
 }
 
-function fmtNum(v: number | null | undefined, decimals = 2): string {
-  if (v == null || Number.isNaN(v)) return "—";
-  return v.toFixed(decimals);
-}
-
-function downloadYartsevaJson(data: YartsevaScreenerResponse) {
-  const payload = {
-    exported_at: new Date().toISOString(),
-    source: "yartseva-panel",
-    ...data,
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {
-    type: "application/json",
-  });
+function downloadJson(data: AcquisitionCompounderScreenerResponse) {
+  const payload = { exported_at: new Date().toISOString(), source: "acquisition-compounder-panel", ...data };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   a.href = url;
-  a.download = `yartseva-screener-${stamp}.json`;
+  a.download = `acquisition-compounder-${stamp}.json`;
   a.click();
   URL.revokeObjectURL(url);
 }
 
-export function YartsevaPanel() {
+export function AcquisitionCompounderPanel() {
   const watchlists = useQuery({ queryKey: ["watchlists"], queryFn: api.getWatchlists });
   const universes = useQuery({ queryKey: ["screener-universes"], queryFn: api.getScreenerUniverses });
   const groups = useMemo(
@@ -76,11 +50,10 @@ export function YartsevaPanel() {
     [watchlists.data],
   );
   const indexList = universes.data?.universes?.length ? universes.data.universes : FALLBACK_UNIVERSES;
-  /** wl:<name> or u:<universeId> */
   const [selection, setSelection] = useState("wl:default");
   const [maxSymbols, setMaxSymbols] = useState(500);
   const [custom, setCustom] = useState("");
-  const [last, setLast] = useState<YartsevaScreenerResponse | null>(null);
+  const [last, setLast] = useState<AcquisitionCompounderScreenerResponse | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -99,17 +72,17 @@ export function YartsevaPanel() {
           .split(/[\s,]+/)
           .map((t) => t.trim().toUpperCase())
           .filter(Boolean);
-        return api.runYartsevaScreener({ tickers });
+        return api.runAcquisitionCompounderScreener({ tickers });
       }
       if (selection.startsWith("u:")) {
         const universe = selection.slice(2);
-        return api.runYartsevaScreener({
+        return api.runAcquisitionCompounderScreener({
           universe,
           max_symbols: Math.min(5000, Math.max(1, maxSymbols)),
         });
       }
       const wl = selection.startsWith("wl:") ? selection.slice(3) : "default";
-      return api.runYartsevaScreener({ watchlist_group: wl });
+      return api.runAcquisitionCompounderScreener({ watchlist_group: wl });
     },
     onSuccess: (data) => {
       setLast(data);
@@ -130,11 +103,11 @@ export function YartsevaPanel() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-[18rem]">
-          <label htmlFor="yartseva-universe" className="block text-xs text-gray-500 mb-1">
+          <label htmlFor="acq-universe" className="block text-xs text-gray-500 mb-1">
             Universe
           </label>
           <select
-            id="yartseva-universe"
+            id="acq-universe"
             value={selection}
             onChange={(e) => setSelection(e.target.value)}
             disabled={!!custom.trim() || run.isPending}
@@ -159,11 +132,11 @@ export function YartsevaPanel() {
         </div>
         {selection.startsWith("u:") && !custom.trim() && (
           <div>
-            <label htmlFor="yartseva-max-symbols" className="block text-xs text-gray-500 mb-1">
+            <label htmlFor="acq-max-symbols" className="block text-xs text-gray-500 mb-1">
               Max symbols (cap)
             </label>
             <input
-              id="yartseva-max-symbols"
+              id="acq-max-symbols"
               type="number"
               min={1}
               max={5000}
@@ -173,20 +146,15 @@ export function YartsevaPanel() {
               className="w-28 bg-surface-elevated border border-border rounded-lg px-3 py-2 text-sm text-white font-mono"
               aria-label="Maximum symbols to screen from index"
             />
-            <p className="text-[11px] text-gray-600 mt-1 max-w-[14rem]">
-              Large runs are slow (one API call per ticker). Raise to cover full S&amp;P 500 or Russell.
-            </p>
           </div>
         )}
         <div className="grow min-w-[200px] max-w-xl">
-          <label className="block text-xs text-gray-500 mb-1">
-            Or paste tickers (overrides universe)
-          </label>
+          <label className="block text-xs text-gray-500 mb-1">Or paste tickers (overrides universe)</label>
           <input
             type="text"
             value={custom}
             onChange={(e) => setCustom(e.target.value)}
-            placeholder="e.g. SIGA PLAY (space or comma separated)"
+            placeholder="e.g. MSFT V RTX (space or comma separated)"
             className="w-full bg-surface-elevated border border-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-gray-600"
           />
         </div>
@@ -200,14 +168,12 @@ export function YartsevaPanel() {
         </button>
       </div>
 
-      {run.isError && (
-        <p className="text-sm text-red-400">{(run.error as Error).message}</p>
-      )}
+      {run.isError && <p className="text-sm text-red-400">{(run.error as Error).message}</p>}
 
       {last && (
         <div className="rounded-xl border border-border/60 bg-surface-card/50 p-4 text-sm text-gray-400">
-          <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Macro regime (portfolio-level)</p>
-          <p>{last.macro_regime_note}</p>
+          <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Methodology</p>
+          <p>{last.methodology_note}</p>
         </div>
       )}
 
@@ -230,7 +196,7 @@ export function YartsevaPanel() {
               </span>
               <button
                 type="button"
-                onClick={() => downloadYartsevaJson(last)}
+                onClick={() => downloadJson(last)}
                 className="text-xs px-2.5 py-1 rounded-lg border border-border text-gray-300 hover:bg-surface-elevated"
               >
                 Export JSON
@@ -238,21 +204,21 @@ export function YartsevaPanel() {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[960px]">
+            <table className="w-full text-left border-collapse min-w-[1020px]">
               <thead>
                 <tr className="text-gray-500 text-xs uppercase tracking-wider border-b border-border">
                   <th className="py-3 pl-2 pr-1 w-8 font-medium" aria-label="Expand" />
                   <th className="py-3 px-5 font-medium">Ticker</th>
                   <th className="py-3 pr-3 font-medium">Stage 1</th>
-                  <th className="py-3 pr-3 font-medium">Composite</th>
+                  <th className="py-3 pr-3 font-medium">Tier 2</th>
+                  <th className="py-3 pr-3 font-medium">Score /45</th>
                   <th className="py-3 pr-3 font-medium">Tier</th>
-                  <th className="py-3 pr-3 font-medium">Short flag</th>
-                  <th className="py-3 pr-4 font-medium">Sub-scores</th>
+                  <th className="py-3 pr-4 font-medium">Red flags</th>
                   <th className="py-3 pr-4 font-medium">Failures / error</th>
                 </tr>
               </thead>
               <tbody>
-                {last.results.map((r: YartsevaResultRow) => (
+                {last.results.map((r: AcquisitionCompounderResultRow) => (
                   <Fragment key={r.ticker}>
                     <tr className="border-b border-border/50 text-sm">
                       <td className="py-3 pl-2 pr-1 align-top">
@@ -278,24 +244,15 @@ export function YartsevaPanel() {
                           <span className="text-gray-500">Fail</span>
                         )}
                       </td>
-                      <td className="py-3 pr-3 font-mono text-white">
-                        {r.composite != null ? r.composite.toFixed(2) : "—"}
-                      </td>
-                      <td className={`py-3 pr-3 ${tierClass(r.tier)}`}>{tierLabel(r.tier)}</td>
                       <td className="py-3 pr-3">
-                        {r.short_sell_flag ? <span className="text-amber-300">Yes</span> : "—"}
+                        {r.tier2_passed ? <span className="text-accent-green">Yes</span> : "—"}
                       </td>
-                      <td className="py-3 pr-4 text-xs text-gray-400 font-mono max-w-[22rem]">
-                        {r.stage1_passed ? (
-                          <>
-                            FCF {r.fcf_yield_score?.toFixed(0) ?? "—"} · V {r.value_score?.toFixed(0) ?? "—"} · P{" "}
-                            {r.profitability_score?.toFixed(0) ?? "—"} · IQ{" "}
-                            {r.investment_quality_score?.toFixed(0) ?? "—"} · Sz {r.size_score?.toFixed(0) ?? "—"} · En{" "}
-                            {r.entry_timing_score?.toFixed(0) ?? "—"}
-                          </>
-                        ) : (
-                          "—"
-                        )}
+                      <td className="py-3 pr-3 font-mono text-white">
+                        {r.total_score != null ? r.total_score.toFixed(1) : "—"}
+                      </td>
+                      <td className={`py-3 pr-3 capitalize ${tierClass(r.tier)}`}>{r.tier ?? "—"}</td>
+                      <td className="py-3 pr-4 text-xs text-amber-200/90 max-w-[14rem]">
+                        {r.red_flags?.length ? r.red_flags.join(", ") : "—"}
                       </td>
                       <td className="py-3 pr-4 text-xs text-gray-500 max-w-xs">
                         {r.error && <span className="text-amber-200">{r.error} · </span>}
@@ -307,44 +264,28 @@ export function YartsevaPanel() {
                         <td colSpan={8} className="px-5 py-4">
                           <div className="grid gap-4 md:grid-cols-2">
                             <div>
-                              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Stage 2 scores (0–100)</p>
+                              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">
+                                9-factor scores (1–5)
+                              </p>
                               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-                                <dt className="text-gray-500">FCF yield (30%)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.fcf_yield_score, 1)}</dd>
-                                <dt className="text-gray-500">Value (25%)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.value_score, 1)}</dd>
-                                <dt className="text-gray-500">Profitability (15%)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.profitability_score, 1)}</dd>
-                                <dt className="text-gray-500">Investment quality (15%)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.investment_quality_score, 1)}</dd>
-                                <dt className="text-gray-500">Size (10%)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.size_score, 1)}</dd>
-                                <dt className="text-gray-500">Entry timing (5%)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.entry_timing_score, 1)}</dd>
+                                {Object.entries(r.scores ?? {}).map(([k, v]) => (
+                                  <Fragment key={k}>
+                                    <dt className="text-gray-500">{k.replace(/_/g, " ")}</dt>
+                                    <dd className="font-mono text-gray-200">{v}</dd>
+                                  </Fragment>
+                                ))}
                               </dl>
                             </div>
                             <div>
-                              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Drivers & ratios</p>
-                              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-                                <dt className="text-gray-500">FCF yield %</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.fcf_yield_pct, 2)}</dd>
-                                <dt className="text-gray-500">Book / market</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.book_to_market, 3)}</dd>
-                                <dt className="text-gray-500">ROA %</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.roa_pct, 2)}</dd>
-                                <dt className="text-gray-500">Asset growth % (YoY)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.asset_growth_pct, 2)}</dd>
-                                <dt className="text-gray-500">EBITDA growth % (TTM vs prior)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.ebitda_growth_pct, 2)}</dd>
-                                <dt className="text-gray-500">Inv excess (pp)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.inv_excess_pp, 2)}</dd>
-                                <dt className="text-gray-500">52w range position %</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.entry_range_pct, 2)}</dd>
-                              </dl>
+                              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Industry</p>
+                              <p className="text-sm text-gray-400">
+                                Prefer match: {r.industry_prefer_match ? "yes" : "no"} · Avoid list hit:{" "}
+                                {r.industry_avoid ? "yes" : "no"}
+                              </p>
                             </div>
                           </div>
                           <div className="mt-4">
-                            <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Raw snapshot (yfinance)</p>
+                            <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Snapshot (yfinance)</p>
                             <pre className="text-xs font-mono text-gray-400 bg-black/50 rounded-lg p-3 overflow-x-auto max-h-64 overflow-y-auto border border-border/60">
                               {JSON.stringify(r.snapshot ?? {}, null, 2)}
                             </pre>
@@ -362,8 +303,7 @@ export function YartsevaPanel() {
 
       {!last && !run.isPending && (
         <p className="text-sm text-gray-500">
-          Choose a watchlist or enter tickers, then run. Large lists may take a while (one yfinance fetch per
-          symbol).
+          Choose a watchlist or enter tickers, then run. Large lists may take a while (one yfinance fetch per symbol).
         </p>
       )}
     </div>

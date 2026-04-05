@@ -13,12 +13,19 @@ export type ScreenerPlay = {
   notes?: string;
 };
 
+export type ScreenerCriteriaSection = {
+  title: string;
+  items: string[];
+};
+
 export type ScreenerViewDef = {
   id: string;
   label: string;
   description: string;
   /** Screening intent — swap for your real filters / signals. */
   criteria: string[];
+  /** When set, the UI shows grouped sections instead of a flat bullet list. */
+  criteriaSections?: ScreenerCriteriaSection[];
   plays: ScreenerPlay[];
   /** When true, the UI runs the backend screener instead of static plays. */
   usesApi?: boolean;
@@ -81,6 +88,19 @@ export const SCREENER_VIEWS: ScreenerViewDef[] = [
       "Tiers: 75+ strong, 55–74 watch, 35–54 borderline, <35 fail",
       "Short-sell flag when equity ≤ 0, margin < 0, cap < $200M, and assets shrinking (independent check)",
       "Macro regime (Fed) is portfolio-level — see results note after running",
+    ],
+    plays: [],
+  },
+  {
+    id: "acquisition_compounder",
+    label: "Acquisition Compounder",
+    description:
+      "Automated from yfinance: growth, ROIC, FCF conversion, leverage, margin trends, dilution, industry avoid-list, 9-factor score (/45), optional quality tier. Short history uses span CAGR / info fallbacks — verify in filings.",
+    usesApi: true,
+    criteria: [
+      "Hard filters: revenue & EPS/FCF-per-share growth, revenue YoY proxy >3%, ROIC, FCF/NI, margin trends, net debt/EBITDA, interest coverage, share CAGR, goodwill impairment heuristic",
+      "Tier 2 (optional): stricter growth/ROIC/FCF margin/FCF-ps vs revenue / leverage",
+      "Score tiers: 35+ strong, 40+ elite (weak below 28)",
     ],
     plays: [],
   },
