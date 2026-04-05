@@ -1,0 +1,30 @@
+# Add secret RAILWAY_TOKEN = Railway project token (project → Settings → Tokens).
+# Deploys on push to main. Fails until the secret is set.
+
+name: Deploy Railway
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ai-hedge-fund/**"
+      - ".github/workflows/deploy-railway.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy
+        working-directory: ai-hedge-fund
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: railway up --ci

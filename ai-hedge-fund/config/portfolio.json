@@ -1,0 +1,13 @@
+{
+  "cash": 15000.00,
+  "currency": "USD",
+  "holdings": [
+    {"ticker": "AAPL", "shares": 82, "avg_cost": 178.50, "currency": "USD"},
+    {"ticker": "NVDA", "shares": 25, "avg_cost": 820.00, "currency": "USD"},
+    {"ticker": "MSFT", "shares": 45, "avg_cost": 398.00, "currency": "USD"},
+    {"ticker": "THYAO.IS", "shares": 500, "avg_cost": 280.60, "currency": "TRY"},
+    {"ticker": "NOVO-B.CO", "shares": 30, "avg_cost": 390.00, "currency": "DKK"},
+    {"ticker": "EREGL.IS", "shares": 1200, "avg_cost": 48.50, "currency": "TRY"}
+  ],
+  "benchmark": "SPY"
+}

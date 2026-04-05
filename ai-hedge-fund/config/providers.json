@@ -1,0 +1,56 @@
+{
+  "providers": {
+    "openbb": {
+      "priority": 0,
+      "requires_key": false,
+      "rate_limit_per_minute": 120,
+      "categories": ["price", "fundamentals", "technicals", "news"]
+    },
+    "yfinance_enhanced": {
+      "priority": 1,
+      "requires_key": false,
+      "rate_limit_per_minute": 120,
+      "categories": [
+        "price", "fundamentals", "technicals", "earnings", "analyst",
+        "insider", "institutional", "options", "news", "peers"
+      ]
+    },
+    "pandas_datareader": {
+      "priority": 1,
+      "requires_key": false,
+      "rate_limit_per_minute": 60,
+      "categories": ["macro", "fama_french"]
+    },
+    "finnhub": {
+      "priority": 2,
+      "requires_key": true,
+      "env_key": "FINNHUB_API_KEY",
+      "rate_limit_per_minute": 60,
+      "categories": [
+        "esg", "news", "sentiment", "sec_filings",
+        "congressional", "insider", "analyst"
+      ]
+    },
+    "twelvedata": {
+      "priority": 3,
+      "requires_key": true,
+      "env_key": "TWELVEDATA_API_KEY",
+      "rate_limit_per_minute": 8,
+      "categories": ["technicals", "price"]
+    },
+    "alpha_vantage": {
+      "priority": 4,
+      "requires_key": true,
+      "env_key": "ALPHA_VANTAGE_API_KEY",
+      "rate_limit_per_minute": 5,
+      "categories": ["sector_performance", "price"]
+    },
+    "financial_datasets": {
+      "priority": 2,
+      "requires_key": true,
+      "env_key": "FINANCIAL_DATASETS_API_KEY",
+      "rate_limit_per_minute": 60,
+      "categories": ["price", "fundamentals"]
+    }
+  }
+}

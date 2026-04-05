@@ -1,0 +1,14 @@
+# Optional: run the upstream OpenBB Platform API for Workspace "Connect backend"
+# or raw ODP REST. MJ Research (FastAPI :8000) stays separate unless you add a proxy.
+#
+# Usage:
+#   docker compose -f docker-compose.openbb.yml up --build
+#
+# Then in OpenBB Workspace → Apps → Connect backend → http://127.0.0.1:6900
+services:
+  openbb-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.openbb-api
+    ports:
+      - "6900:6900"

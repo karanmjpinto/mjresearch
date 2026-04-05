@@ -1,0 +1,16 @@
+{
+  "default": [
+    "AAPL", "NVDA", "MSFT", "GOOGL", "AMZN", "META", "TSLA"
+  ],
+  "bist": [
+    "THYAO.IS", "EREGL.IS", "BIMAS.IS", "KCHOL.IS", "SAHOL.IS",
+    "TUPRS.IS", "AKBNK.IS", "GARAN.IS", "SISE.IS", "ASELS.IS"
+  ],
+  "nordic": [
+    "NOVO-B.CO", "VOLV-B.ST", "ATLAS-COPCO-A.ST", "NESTE.HE",
+    "MAERSK-B.CO", "SAND.ST", "ESSITY-B.ST"
+  ],
+  "macro_watch": [
+    "SPY", "QQQ", "TLT", "GLD", "DX-Y.NYB", "CL=F"
+  ]
+}

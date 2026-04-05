@@ -1,0 +1,12 @@
+# Railway: connect repo, set root directory to this folder if the repo is a monorepo.
+# Required env (minimum): FRONTEND_URL=https://<your-service>.up.railway.app
+# Optional: SENTRY_DSN, VITE_SENTRY_DSN (same DSN for browser), OLLAMA_* or OpenAI keys, etc.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"

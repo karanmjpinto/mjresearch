@@ -1,0 +1,12 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+
+.cursor/
+.claude/
+**/.pytest_cache/
+**/.ruff_cache/
+**/.vite/
+**/*.tsbuildinfo
+ai-hedge-fund/.gstack/
