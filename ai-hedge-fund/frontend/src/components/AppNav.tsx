@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export type AppNavActive = "home" | "research" | "screeners" | "portfolio";
+export type AppNavActive = "home" | "research" | "screeners" | "optimize" | "portfolio";
 
 const link = "text-sm text-gray-500 hover:text-gray-300";
 const activeLink = "text-sm font-medium text-blue-400";
@@ -27,11 +27,14 @@ export function AppNav({ active, end }: Props) {
         <Link to="/screeners" className={active === "screeners" ? activeLink : link}>
           Screeners
         </Link>
+        <Link to="/optimize" className={active === "optimize" ? activeLink : link}>
+          Optimize
+        </Link>
         <Link to="/portfolio" className={active === "portfolio" ? activeLink : link}>
           Portfolio
         </Link>
       </div>
-      {end != null && <div className="shrink-0">{end}</div>}
+      {end != null && <div className="hidden sm:flex shrink-0">{end}</div>}
     </nav>
   );
 }

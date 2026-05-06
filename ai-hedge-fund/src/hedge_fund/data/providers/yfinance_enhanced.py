@@ -88,6 +88,17 @@ class YFinanceEnhancedProvider(BaseProvider):
         if not info or info.get("regularMarketPrice") is None:
             return None
 
+        # 52w high/low: info dict first, fast_info as fallback
+        _52w_high = info.get("fiftyTwoWeekHigh")
+        _52w_low = info.get("fiftyTwoWeekLow")
+        if _52w_high is None or _52w_low is None:
+            try:
+                fi = t.fast_info
+                _52w_high = _52w_high if _52w_high is not None else getattr(fi, "fifty_two_week_high", None)
+                _52w_low = _52w_low if _52w_low is not None else getattr(fi, "fifty_two_week_low", None)
+            except Exception:
+                pass
+
         result = {
             "ticker": ticker,
             "name": info.get("longName", ticker),
@@ -100,8 +111,8 @@ class YFinanceEnhancedProvider(BaseProvider):
             "price_to_book": info.get("priceToBook"),
             "dividend_yield": info.get("dividendYield"),
             "beta": info.get("beta"),
-            "52w_high": info.get("fiftyTwoWeekHigh"),
-            "52w_low": info.get("fiftyTwoWeekLow"),
+            "52w_high": _safe_float(_52w_high),
+            "52w_low": _safe_float(_52w_low),
             "avg_volume": info.get("averageVolume"),
             "currency": info.get("currency", "USD"),
             "exchange": info.get("exchange"),
@@ -122,9 +133,19 @@ class YFinanceEnhancedProvider(BaseProvider):
                 )
             if not inc.empty:
                 latest = inc.iloc[:, 0]
-                result["revenue"] = _safe_float(latest.get("Total Revenue"))
-                result["net_income"] = _safe_float(latest.get("Net Income"))
-                result["ebitda"] = _safe_float(latest.get("EBITDA"))
+                # Try multiple key names — yfinance column names vary by version/region
+                result["revenue"] = _safe_float(
+                    latest.get("Total Revenue") or latest.get("Revenue")
+                )
+                result["net_income"] = _safe_float(
+                    latest.get("Net Income")
+                    or latest.get("Net Income From Continuing Operations")
+                    or latest.get("Net Income Common Stockholders")
+                )
+                result["ebitda"] = _safe_float(
+                    latest.get("EBITDA")
+                    or latest.get("Normalized EBITDA")
+                )
             if not cf.empty:
                 latest = cf.iloc[:, 0]
                 result["free_cash_flow"] = _safe_float(latest.get("Free Cash Flow"))
