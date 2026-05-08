@@ -119,6 +119,8 @@ export interface ESGScores {
   environment_score: number | null;
   social_score: number | null;
   governance_score: number | null;
+  controversy_level?: number | null;
+  peer_group?: string | null;
   source: string;
 }
 
@@ -230,8 +232,8 @@ export interface SECFiling {
   form_type: string;
   filed_date: string | null;
   accepted_date: string | null;
-  report_url: string;
-  filing_url: string;
+  report_url: string | null;
+  description?: string | null;
   source: string;
 }
 
@@ -239,15 +241,19 @@ export interface CongressionalTrade {
   ticker: string;
   representative: string;
   transaction_type: string;
-  amount_range: string;
+  amount_range: string | null;
   transaction_date: string | null;
+  disclosure_date?: string | null;
+  chamber?: string | null;
   source: string;
 }
 
 export interface PeerComparison {
   ticker: string;
+  peers: string[];
   sector: string | null;
   industry: string | null;
+  metrics: Record<string, Record<string, number | null>>;
   source: string;
 }
 
@@ -257,6 +263,105 @@ export interface ProviderStatus {
   categories: string[];
   priority: number;
   rate_limit: Record<string, unknown> | null;
+}
+
+// ------------------------------------------------------------------
+// Backtest types
+// ------------------------------------------------------------------
+
+export interface BacktestStrategyDef {
+  id: string;
+  name: string;
+  description: string;
+  default_params: Record<string, number>;
+  category: "trend" | "mean_reversion" | "volatility" | "benchmark";
+}
+
+export interface BacktestMetrics {
+  total_return: number;
+  cagr: number;
+  volatility: number;
+  sharpe: number;
+  sortino: number;
+  max_drawdown: number;
+  calmar: number;
+  win_rate: number;
+  time_in_market: number;
+  num_trades: number;
+  n_bars: number;
+  years: number;
+}
+
+export interface BacktestTrade {
+  entry_date: string;
+  entry_price: number;
+  exit_date: string;
+  exit_price: number;
+  return_pct: number;
+  days_held: number;
+}
+
+export interface BacktestResult {
+  ticker: string;
+  strategy_id: string;
+  strategy_name: string;
+  strategy_description: string;
+  params: Record<string, number>;
+  start_date: string;
+  end_date: string;
+  equity_curve: Array<{ date: string; equity: number; benchmark: number; position: number }>;
+  metrics: BacktestMetrics;
+  benchmark_metrics: BacktestMetrics;
+  trades: BacktestTrade[];
+}
+
+// ------------------------------------------------------------------
+// Portfolio optimization types
+// ------------------------------------------------------------------
+
+export interface OptimizeMethodDef {
+  id: string;
+  name: string;
+  description: string;
+  uses_conviction: boolean;
+  uses_returns: boolean;
+  category: "baseline" | "signal" | "optimization" | "risk";
+}
+
+export interface PortfolioMetrics {
+  expected_return: number;
+  volatility: number;
+  sharpe: number;
+  sortino: number;
+  max_drawdown: number;
+  calmar: number;
+  total_return: number;
+  hhi_concentration: number;
+  effective_n: number;
+  diversification_ratio: number;
+  n_bars: number;
+  equity_curve: Array<{ date: string; equity: number }>;
+}
+
+export interface OptimizeAsset {
+  ticker: string;
+  weight: number;
+  expected_return: number;
+  volatility: number;
+  conviction: number | null;
+}
+
+export interface OptimizeResult {
+  method_id: string;
+  method_name: string;
+  method_description: string;
+  start_date: string;
+  end_date: string;
+  n_bars: number;
+  assets: OptimizeAsset[];
+  metrics: PortfolioMetrics;
+  equal_weight_metrics: PortfolioMetrics;
+  excluded_tickers: string[];
 }
 
 // ------------------------------------------------------------------
@@ -341,6 +446,36 @@ export const api = {
   /** Named ticker lists — edit `config/watchlists.json` on the server. */
   getWatchlists: () =>
     fetchJSON<Record<string, string[]>>("/data/watchlists"),
+
+  // --- Backtest ---
+
+  listStrategies: () =>
+    fetchJSON<{ strategies: BacktestStrategyDef[] }>("/backtest/strategies"),
+
+  runBacktest: (
+    ticker: string,
+    strategy: string,
+    opts: { days?: number; fee_bps?: number } = {},
+  ) => {
+    const params = new URLSearchParams({ strategy });
+    if (opts.days) params.set("days", String(opts.days));
+    if (opts.fee_bps != null) params.set("fee_bps", String(opts.fee_bps));
+    return fetchJSON<BacktestResult>(
+      `/backtest/${ticker}?${params.toString()}`,
+    );
+  },
+
+  // --- Portfolio optimization ---
+
+  listOptimizeMethods: () =>
+    fetchJSON<{ methods: OptimizeMethodDef[] }>("/optimize/methods"),
+
+  optimizePortfolio: (body: {
+    tickers: string[];
+    method: string;
+    days?: number;
+    convictions?: Record<string, number>;
+  }) => postJSON<OptimizeResult>("/optimize", body),
 
   /** Yartseva Multibagger screener (yfinance fundamentals). */
   runYartsevaScreener: (body: {

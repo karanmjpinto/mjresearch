@@ -33,50 +33,6 @@ export type ScreenerViewDef = {
 
 export const SCREENER_VIEWS: ScreenerViewDef[] = [
   {
-    id: "breakout",
-    label: "Breakouts",
-    description: "Momentum and range-break candidates with defined risk.",
-    criteria: [
-      "52-week proximity or fresh highs",
-      "Volume confirmation vs 20d average",
-      "Trend alignment (e.g. price > 50d MA)",
-    ],
-    plays: [
-      {
-        ticker: "—",
-        setup: "Add your first watch via data or manual rows",
-        entry: "—",
-        stop: "—",
-        target: "—",
-        sizePct: undefined,
-        sizeNotes: "Risk per trade / max position %",
-        notes: "Replace this placeholder when you wire criteria.",
-      },
-    ],
-  },
-  {
-    id: "pullback",
-    label: "Pullbacks",
-    description: "Trend-following entries on controlled dips.",
-    criteria: [
-      "Uptrend intact on higher timeframe",
-      "Pullback to support or moving average",
-      "No broken structure / lower lows on the swing",
-    ],
-    plays: [],
-  },
-  {
-    id: "catalyst",
-    label: "Catalysts",
-    description: "Event-driven setups (earnings, FDA, product, M&A).",
-    criteria: [
-      "Dated catalyst within your horizon",
-      "Liquidity and spread acceptable for size",
-      "Scenario table: bull / base / bear",
-    ],
-    plays: [],
-  },
-  {
     id: "yartseva",
     label: "Yartseva Multibagger",
     description:

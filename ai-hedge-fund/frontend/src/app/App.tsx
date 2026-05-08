@@ -3,6 +3,7 @@ import { Dashboard } from "@/components/Dashboard";
 import { ResearchReport } from "@/components/ResearchReport";
 import PortfolioView from "@/components/PortfolioView";
 import { ScreenersView } from "@/components/ScreenersView";
+import { OptimizeView } from "@/components/OptimizeView";
 import { DEFAULT_SCREENER_ID } from "@/config/screeners";
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/portfolio" element={<PortfolioView />} />
         <Route path="/screeners" element={<Navigate to={`/screeners/${DEFAULT_SCREENER_ID}`} replace />} />
         <Route path="/screeners/:screenId" element={<ScreenersView />} />
+        <Route path="/optimize" element={<OptimizeView />} />
       </Routes>
     </div>
   );

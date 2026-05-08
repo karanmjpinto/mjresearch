@@ -131,15 +131,15 @@ export function ScreenersView() {
     <div className="flex flex-col min-h-screen">
       <AppNav
         active="screeners"
-        end={<span className="text-xs text-gray-600 font-mono">AI hedge fund</span>}
+        end={<span className="text-xs text-gray-600 font-mono">Ollama · yfinance · committee</span>}
       />
 
       <div className="p-6 max-w-7xl mx-auto w-full flex flex-col gap-6 grow">
         <div>
           <h1 className="text-2xl font-bold text-white">Screeners</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Switch views to screen different setups. Each view can list plays with entry, risk, targets, and sizing —
-            wire your rules in config or an API when ready.
+            Fundamental screeners powered by yfinance. Each model applies hard filters and a weighted scoring
+            framework — results link directly to research for AI committee analysis.
           </p>
         </div>
 
@@ -164,7 +164,7 @@ export function ScreenersView() {
           <p className="text-gray-400 text-sm mt-1">{active.description}</p>
 
           <div className="mt-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Screening criteria (draft)</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Screening criteria</p>
             {active.criteriaSections && active.criteriaSections.length > 0 ? (
               <div className="space-y-5">
                 {active.criteriaSections.map((sec) => (
