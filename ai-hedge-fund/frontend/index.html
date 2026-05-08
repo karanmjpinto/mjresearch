@@ -4,6 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MJ Research</title>
+    <!-- GitHub Pages SPA redirect — restores path from 404.html query param -->
+    <script>
+      (function () {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+        // Also handle the ?p= query param set by 404.html
+        var search = window.location.search;
+        if (search.slice(1, 3) === "p=") {
+          var decoded = search.slice(1).split("&").map(function (s) { return s.replace(/~and~/g, "&"); });
+          window.history.replaceState(null, null,
+            window.location.pathname.slice(0, -1) +
+            (decoded[0] ? "/" + decoded[0].slice(2) : "") +
+            (decoded[1] ? "?" + decoded[1].slice(2) : "") +
+            window.location.hash
+          );
+        }
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   </head>
