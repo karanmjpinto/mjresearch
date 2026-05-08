@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import App from "./app/App";
 import "./index.css";
 
@@ -36,10 +36,8 @@ const root = (
       }
     >
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/*" element={<App />} />
-          </Routes>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
+          <App />
         </BrowserRouter>
       </QueryClientProvider>
     </Sentry.ErrorBoundary>
