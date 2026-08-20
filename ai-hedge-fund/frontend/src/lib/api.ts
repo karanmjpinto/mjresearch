@@ -1,8 +1,14 @@
 /**
- * API client — all calls go through the Vite proxy to FastAPI at :8000.
+ * API client.
+ *
+ * In development, calls are relative and the Vite proxy forwards /api to
+ * FastAPI on :8000. A static deploy (GitHub Pages) has no backend on its own
+ * origin, so set VITE_API_BASE_URL at build time to the deployed API root —
+ * otherwise every request 404s against the static host.
  */
 
-const BASE = "/api";
+const CONFIGURED = import.meta.env.VITE_API_BASE_URL?.trim();
+const BASE = CONFIGURED ? `${CONFIGURED.replace(/\/+$/, "")}/api` : "/api";
 
 async function fetchJSON<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`);
