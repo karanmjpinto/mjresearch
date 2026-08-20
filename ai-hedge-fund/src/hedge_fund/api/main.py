@@ -9,7 +9,17 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from hedge_fund.api.routes import data, portfolio, research, screeners, simulation
+from hedge_fund.api.routes import (
+    backtest,
+    data,
+    methodology,
+    optimize as optimize_route,
+    portfolio,
+    research,
+    runs,
+    screeners,
+    simulation,
+)
 from hedge_fund.db.session import init_db
 from hedge_fund.settings import settings
 
@@ -54,6 +64,10 @@ app.include_router(research.router, prefix="/api/research", tags=["research"])
 app.include_router(simulation.router, prefix="/api/simulation", tags=["simulation"])
 app.include_router(portfolio.router, prefix="/api/portfolio", tags=["portfolio"])
 app.include_router(screeners.router, prefix="/api/screeners", tags=["screeners"])
+app.include_router(backtest.router, prefix="/api/backtest", tags=["backtest"])
+app.include_router(optimize_route.router, prefix="/api/optimize", tags=["optimize"])
+app.include_router(runs.router, prefix="/api/runs", tags=["runs"])
+app.include_router(methodology.router, prefix="/api/methodology", tags=["methodology"])
 
 
 @app.get("/api/health")
