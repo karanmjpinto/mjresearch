@@ -6,6 +6,7 @@ import json
 import re
 from typing import Any
 
+from hedge_fund.agents.context import build_bundle
 from hedge_fund.agents.schemas import ResearchAnalysisOutput
 from hedge_fund.settings import settings
 
@@ -25,11 +26,20 @@ def sanitize_ticker(ticker: str) -> str:
 
 
 def truncate_context(data: dict[str, Any], max_chars: int | None = None) -> str:
-    max_chars = max_chars or settings.research_max_context_chars
-    raw = json.dumps(data, default=str, ensure_ascii=False)
-    if len(raw) <= max_chars:
-        return raw
-    return raw[: max_chars - 20] + "\n…[truncated]"
+    """Serialize the snapshot for the prompt, reducing by field if it overflows.
+
+    Always returns parseable JSON. See :mod:`hedge_fund.agents.context` for why
+    character-slicing a serialized bundle is not an acceptable fallback.
+    """
+    text, _manifest = build_bundle(data, max_chars or settings.research_max_context_chars)
+    return text
+
+
+def truncate_context_with_manifest(
+    data: dict[str, Any], max_chars: int | None = None
+) -> tuple[str, dict[str, Any]]:
+    """As :func:`truncate_context`, but also returns what was dropped."""
+    return build_bundle(data, max_chars or settings.research_max_context_chars)
 
 
 def parse_json_output(text: str) -> ResearchAnalysisOutput:
