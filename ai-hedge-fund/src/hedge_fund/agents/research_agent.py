@@ -24,21 +24,30 @@ from hedge_fund.agents.guardrails import (
     truncate_context_with_manifest,
     validate_output,
 )
-from hedge_fund.agents.llm import LLMResult, LLMUnavailable, call_json
+from hedge_fund.agents.llm import LLMResult, LLMUnavailable, OutputTruncated, call_json
 from hedge_fund.agents.personas import (
     SYNTHESIS_SYSTEM,
     build_pm_synthesis_user_prompt,
     get_persona_system_prompt,
 )
 from hedge_fund.agents.prompts import RESEARCH_SYSTEM, build_user_prompt
+from hedge_fund.agents.schemas import ResearchAnalysisOutput
 from hedge_fund.agents.verifier import verify_analysis
 from hedge_fund.runs import RunRecord, save_run
 
 logger = logging.getLogger(__name__)
 
+# Constrains generation to the analysis shape, not merely to valid JSON.
+ANALYSIS_SCHEMA = ResearchAnalysisOutput.model_json_schema()
+
 
 def _llm_failure(exc: Exception) -> dict[str, Any]:
-    kind = "llm_unavailable" if isinstance(exc, LLMUnavailable) else "llm_error"
+    if isinstance(exc, OutputTruncated):
+        kind = "output_truncated"
+    elif isinstance(exc, LLMUnavailable):
+        kind = "llm_unavailable"
+    else:
+        kind = "llm_error"
     return {"error": kind, "message": str(exc)}
 
 
@@ -91,7 +100,7 @@ async def _analyze(
     user_msg = build_user_prompt(ticker.upper(), bundle)
 
     try:
-        result = await call_json(system, user_msg)
+        result = await call_json(system, user_msg, ANALYSIS_SCHEMA)
     except Exception as e:
         logger.exception("LLM call failed for %s", ticker)
         return _llm_failure(e)
@@ -179,7 +188,7 @@ async def run_pm_synthesis(
     )
 
     try:
-        result = await call_json(system, user_msg)
+        result = await call_json(system, user_msg, ANALYSIS_SCHEMA)
     except Exception as e:
         logger.exception("LLM synthesis failed for %s", ticker)
         return _llm_failure(e)

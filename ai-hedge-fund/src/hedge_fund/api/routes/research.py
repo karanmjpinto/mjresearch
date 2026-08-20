@@ -93,9 +93,11 @@ async def check_ticker(req: CheckRequest):
         "stance": None,
         "ai_error": None,
         "evaluation": None,
+        "verification": None,
         "ai_model": None,
         "ai_usage": None,
         "persona_id": None,
+        "dissent": None,
         "committee": None,
         "synthesis": None,
     }
@@ -142,9 +144,12 @@ async def check_ticker(req: CheckRequest):
         payload["analysis"] = analysis.get("investment_thesis")
         payload["ai_full"] = analysis
         payload["evaluation"] = synth.get("evaluation")
+        payload["verification"] = synth.get("verification")
+        payload["dissent"] = ai.get("dissent")
         payload["ai_model"] = synth.get("model")
         payload["ai_usage"] = {"per_call": ai.get("usage_total"), "synthesis": synth.get("usage")}
         payload["synthesis"] = synth
+        payload["run_uid"] = ai.get("run_uid")
         return payload
 
     ai = await run_research_analysis(ticker, data_snapshot, persona_id=persona)
@@ -158,9 +163,11 @@ async def check_ticker(req: CheckRequest):
     payload["analysis"] = analysis.get("investment_thesis")
     payload["ai_full"] = analysis
     payload["evaluation"] = ai.get("evaluation")
+    payload["verification"] = ai.get("verification")
     payload["ai_model"] = ai.get("model")
     payload["ai_usage"] = ai.get("usage")
     payload["persona_id"] = ai.get("persona_id")
+    payload["run_uid"] = ai.get("run_uid")
     return payload
 
 

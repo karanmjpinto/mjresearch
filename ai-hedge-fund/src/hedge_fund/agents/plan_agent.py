@@ -31,7 +31,8 @@ from hedge_fund.agents.guardrails import (
     sanitize_ticker,
     validate_output,
 )
-from hedge_fund.agents.llm import LLMUnavailable, call_json
+from hedge_fund.agents.llm import LLMUnavailable, OutputTruncated, call_json
+from hedge_fund.agents.schemas import ResearchAnalysisOutput
 from hedge_fund.agents.verifier import verify_analysis
 from hedge_fund.plan import (
     AnalysisPlan,
@@ -53,9 +54,18 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_QUESTION = "Is this an attractive investment at current levels?"
 
+# Each stage is constrained to the shape it must produce.
+PLAN_SCHEMA = AnalysisPlan.model_json_schema()
+ANALYSIS_SCHEMA = ResearchAnalysisOutput.model_json_schema()
+
 
 def _llm_failure(exc: Exception) -> dict[str, Any]:
-    kind = "llm_unavailable" if isinstance(exc, LLMUnavailable) else "llm_error"
+    if isinstance(exc, OutputTruncated):
+        kind = "output_truncated"
+    elif isinstance(exc, LLMUnavailable):
+        kind = "llm_unavailable"
+    else:
+        kind = "llm_error"
     return {"error": kind, "message": str(exc)}
 
 
@@ -83,7 +93,7 @@ async def build_plan(
     user = build_planner_prompt(ticker, question, style)
 
     try:
-        result = await call_json(system, user)
+        result = await call_json(system, user, PLAN_SCHEMA)
     except Exception as e:
         logger.exception("Planner call failed for %s", ticker)
         return None, _llm_failure(e)
@@ -174,7 +184,7 @@ async def run_plan_analysis(
     user = build_narrator_prompt(ticker.upper(), question, facts_block, data_snapshot)
 
     try:
-        result = await call_json(system, user)
+        result = await call_json(system, user, ANALYSIS_SCHEMA)
     except Exception as e:
         logger.exception("Narrator call failed for %s", ticker)
         return {**_llm_failure(e), "plan": plan.as_dict(), "execution": execution}

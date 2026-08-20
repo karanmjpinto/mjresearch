@@ -229,3 +229,91 @@ async def test_context_window_is_sent_and_recorded(ollama, monkeypatch):
     result = await call_json("sys", "user")
     assert client.requests[0]["options"]["num_ctx"] == 16384
     assert result.params["num_ctx"] == 16384
+
+
+async def test_hitting_the_token_ceiling_is_named(ollama):
+    """A truncated generation must not surface as an opaque JSON parse error."""
+    from hedge_fund.agents.llm import OutputTruncated
+
+    ollama(
+        [FakeResponse(payload={"message": {"content": '{"stance": "HO'}, "done_reason": "length"})]
+    )
+    with pytest.raises(OutputTruncated, match="LLM_MAX_OUTPUT_TOKENS"):
+        await call_json("sys", "user")
+
+
+async def test_normal_stop_is_not_treated_as_truncation(ollama):
+    ollama([FakeResponse(payload={"message": {"content": "{}"}, "done_reason": "stop"})])
+    result = await call_json("sys", "user")
+    assert result.usage["done_reason"] == "stop"
+
+
+async def test_repeat_penalty_is_sent(ollama):
+    client = ollama([_ok_response()])
+    await call_json("sys", "user")
+    assert client.requests[0]["options"]["repeat_penalty"] == 1.1
+
+
+# ----------------------------------------------------------------------
+# Schema sanitising
+# ----------------------------------------------------------------------
+
+
+def test_length_constraints_are_stripped_from_the_grammar():
+    """Ollama drops the whole grammar on a large maxLength, silently."""
+    from hedge_fund.agents.llm import gbnf_safe_schema
+
+    safe = gbnf_safe_schema(
+        {
+            "type": "object",
+            "properties": {"a": {"type": "string", "maxLength": 12000, "minLength": 2}},
+            "required": ["a"],
+        }
+    )
+    assert "maxLength" not in json.dumps(safe)
+    assert "minLength" not in json.dumps(safe)
+    assert safe["required"] == ["a"]
+
+
+def test_sanitising_preserves_structure_and_enums():
+    from hedge_fund.agents.llm import gbnf_safe_schema
+
+    safe = gbnf_safe_schema(
+        {
+            "type": "object",
+            "properties": {
+                "stance": {"type": "string", "enum": ["BUY", "SELL"]},
+                "items": {"type": "array", "items": {"type": "string"}, "maxItems": 12},
+            },
+        }
+    )
+    assert safe["properties"]["stance"]["enum"] == ["BUY", "SELL"]
+    assert safe["properties"]["items"]["items"] == {"type": "string"}
+    assert "maxItems" not in safe["properties"]["items"]
+
+
+def test_analysis_schema_is_grammar_safe():
+    from hedge_fund.agents.llm import gbnf_safe_schema
+    from hedge_fund.agents.schemas import ResearchAnalysisOutput
+
+    safe = json.dumps(gbnf_safe_schema(ResearchAnalysisOutput.model_json_schema()))
+    for hostile in ("maxLength", "minLength", "pattern"):
+        assert hostile not in safe
+
+
+async def test_schema_reaches_ollama_sanitised(ollama):
+    client = ollama([_ok_response()])
+    await call_json(
+        "sys",
+        "user",
+        {"type": "object", "properties": {"a": {"type": "string", "maxLength": 5}}},
+    )
+    fmt = client.requests[0]["format"]
+    assert fmt["type"] == "object"
+    assert "maxLength" not in json.dumps(fmt)
+
+
+async def test_absent_schema_falls_back_to_json_mode(ollama):
+    client = ollama([_ok_response()])
+    await call_json("sys", "user")
+    assert client.requests[0]["format"] == "json"

@@ -47,6 +47,11 @@ class Settings(BaseSettings):
     # plus the metric catalog and the output budget, so 16k is ample headroom.
     ollama_num_ctx: int = 16384
 
+    # Greedy decoding (temperature 0) is unusually prone to degenerate
+    # repetition. Ollama's own default is 1.1; it is set explicitly here so the
+    # value is recorded on every run rather than inherited silently.
+    ollama_repeat_penalty: float = 1.1
+
     # Persist every research run (snapshot, prompts, params, output) for replay.
     research_run_persistence: bool = True
     research_run_retention: int = 2000

@@ -52,7 +52,7 @@ def stub_pipeline(monkeypatch):
     async def fake_snapshot(ticker, ds, **kw):
         return {k: v for k, v in SNAP.items()}, dict(SNAP)
 
-    async def fake_call_json(system, user):
+    async def fake_call_json(system, user, schema=None):
         payload = PLAN_JSON if "planning stage" in system else NARRATIVE
         return LLMResult(
             content=json.dumps(payload),
@@ -217,9 +217,9 @@ def test_taught_methodology_reaches_the_prompt(stub_pipeline, isolated_db, monke
     seen: list[str] = []
     original = plan_agent.call_json
 
-    async def capture(system, user):
+    async def capture(system, user, schema=None):
         seen.append(system)
-        return await original(system, user)
+        return await original(system, user, schema)
 
     monkeypatch.setattr(plan_agent, "call_json", capture)
 
@@ -227,3 +227,40 @@ def test_taught_methodology_reaches_the_prompt(stub_pipeline, isolated_db, monke
     client.post("/api/research/plan", json={"ticker": "AAPL"})
 
     assert any(LESSON in s for s in seen)
+
+
+def test_check_endpoint_exposes_verification_and_run_id(isolated_db, monkeypatch):
+    """The evaluation cites verification, so the caller must be able to see it."""
+    import hedge_fund.agents.research_agent as agent
+    import hedge_fund.api.routes.research as research_route
+
+    async def fake_snapshot(ticker, ds, **kw):
+        return dict(SNAP), dict(SNAP)
+
+    async def fake_call_json(system, user, schema=None):
+        return LLMResult(
+            content=json.dumps(
+                {
+                    "conviction_score": 55,
+                    "stance": "HOLD",
+                    "investment_thesis": "A P/E ratio of 31.2 is full for the growth on offer here today.",
+                    "bull_case": "Quality franchise.",
+                    "bear_case": "Rich multiple.",
+                    "key_risks": ["Multiple compression"],
+                    "time_horizon": "long_term",
+                    "confidence_in_data": 3,
+                }
+            ),
+            model="stub:test",
+            params={"temperature": 0.0},
+            prompt_sha256="h" * 64,
+        )
+
+    monkeypatch.setattr(research_route, "assemble_research_snapshot", fake_snapshot)
+    monkeypatch.setattr(agent, "call_json", fake_call_json)
+
+    body = client.post("/api/research/check", json={"ticker": "AAPL", "include_ai": True}).json()
+    assert body["ai_error"] is None
+    assert body["verification"]["status"] == "clean"
+    assert body["verification"]["verified"] == 1
+    assert body["run_uid"]

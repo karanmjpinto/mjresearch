@@ -81,7 +81,7 @@ def _stub_llm(monkeypatch, plan_payload=PLAN_JSON, narrative=NARRATIVE):
     """Return the plan on the first call and the narrative on the second."""
     calls: list[dict] = []
 
-    async def fake_call_json(system, user):
+    async def fake_call_json(system, user, schema=None):
         is_planner = "planning stage" in system
         calls.append(
             {"role": "planner" if is_planner else "narrator", "system": system, "user": user}
@@ -225,7 +225,7 @@ async def test_plan_with_bad_params_is_rejected(monkeypatch):
 
 
 async def test_unreachable_model_is_reported_cleanly(monkeypatch):
-    async def boom(system, user):
+    async def boom(system, user, schema=None):
         raise LLMUnavailable("ollama is not running")
 
     monkeypatch.setattr(plan_agent, "call_json", boom)

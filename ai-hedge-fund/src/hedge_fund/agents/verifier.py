@@ -35,6 +35,9 @@ _SCALES: dict[str, float] = {
 
 _NUMBER = re.compile(
     r"""
+    # An explicit sign, but only when it is not the hyphen inside a compound
+    # word: "30-day low of 302.25" must not read as negative 302.25.
+    (?P<sign>(?<![A-Za-z0-9])-)?\s*
     (?P<currency>[$€£₺])?\s*
     (?P<value>\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)
     \s*
@@ -252,6 +255,8 @@ def _parse_number(match: re.Match[str]) -> float | None:
     scale = (match.group("scale") or "").lower()
     if scale:
         value *= _SCALES.get(scale, 1.0)
+    if match.group("sign"):
+        value = -value
     return value
 
 
@@ -306,6 +311,8 @@ class _NumberHit:
     excerpt: str
     span: tuple[int, int]
     distance: int
+    # Whether the sign was written in the text rather than inferred from prose.
+    signed: bool = False
 
 
 # Prose usually writes the metric before its value ("P/E ratio of 31.2"), but not
@@ -330,6 +337,7 @@ def _number_candidates(text: str, alias_end: int, alias_start: int) -> list[_Num
                     excerpt=text[max(0, alias_start - 15) : alias_end + m.end() + 2].strip(),
                     span=(abs_start, alias_end + m.end()),
                     distance=m.start(),
+                    signed=bool(m.group("sign")),
                 )
             )
 
@@ -347,6 +355,7 @@ def _number_candidates(text: str, alias_end: int, alias_start: int) -> list[_Num
                     excerpt=text[abs_start : alias_end + 5].strip(),
                     span=(abs_start, before_start + m.end()),
                     distance=(len(before) - m.end()) + BACKWARD_PENALTY,
+                    signed=bool(m.group("sign")),
                 )
             )
 
@@ -424,7 +433,9 @@ def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
             continue
 
         stated = hit.value
-        if spec.directional:
+        # Only infer direction from surrounding verbs when the text did not
+        # state a sign outright; "-4.48% change" needs no interpretation.
+        if spec.directional and not hit.signed:
             direction = _read_direction(text, hit.span[0], start)
             if direction < 0:
                 stated = -abs(stated)

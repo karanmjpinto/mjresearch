@@ -28,21 +28,30 @@ def dumps(obj: Any) -> str:
     return json.dumps(obj, default=str, ensure_ascii=False)
 
 
-def _collapse_provenance(work: dict[str, Any]) -> str | None:
-    """Keep the provenance verdict, drop the per-slot detail."""
-    prov = work.get("provenance")
-    if not isinstance(prov, dict) or "slots" not in prov:
+def summarize_provenance(snapshot: dict[str, Any]) -> dict[str, Any] | None:
+    """Reduce provenance to the part that bears on the analysis.
+
+    Which provider answered and when is operator diagnostics, not market data.
+    Handing the model that nested detail invites it to copy the structure back
+    into its answer — observed in practice as a response that echoed the
+    provenance block and then degenerated into a whitespace loop. What the model
+    legitimately needs is whether the data is trustworthy, which is a warning
+    list and a count.
+    """
+    prov = snapshot.get("provenance")
+    if not isinstance(prov, dict):
         return None
-    slots = prov.get("slots") or {}
-    if not slots:
-        return None
-    work["provenance"] = {
-        "providers_used": prov.get("providers_used", []),
-        "warnings": prov.get("warnings", []),
-        "slot_count": len(slots),
-        "detail_omitted": True,
+    warnings = prov.get("warnings") or []
+    return {
+        "data_quality_warnings": warnings,
+        "warning_count": len(warnings),
+        "note": "Lower confidence_in_data when warnings are present.",
     }
-    return f"provenance.slots ({len(slots)} entries)"
+
+
+def _collapse_provenance(work: dict[str, Any]) -> str | None:
+    """Already summarized before reduction begins; nothing further to drop."""
+    return None
 
 
 def _cap_news(work: dict[str, Any], cap: int) -> str | None:
@@ -118,11 +127,16 @@ def build_bundle(data: dict[str, Any], max_chars: int) -> tuple[str, dict[str, A
     at or above :data:`MIN_USEFUL_LIMIT`. The manifest always carries a
     ``truncated`` flag so callers never have to probe for optional keys.
     """
-    raw = dumps(data)
+    model_view = dict(data)
+    summary = summarize_provenance(data)
+    if summary is not None:
+        model_view["provenance"] = summary
+
+    raw = dumps(model_view)
     if len(raw) <= max_chars:
         return raw, {"truncated": False}
 
-    work = deepcopy(data)
+    work = deepcopy(model_view)
     dropped: list[str] = []
 
     for step in _reduction_steps():
@@ -143,7 +157,7 @@ def build_bundle(data: dict[str, Any], max_chars: int) -> tuple[str, dict[str, A
             return text, candidate["_truncation"]
 
     # Structural reduction was not enough: shed essentials from least to most.
-    minimal = _minimal_bundle(data, max_chars)
+    minimal = _minimal_bundle(model_view, max_chars)
     text = dumps(minimal)
     for key in reversed(ESSENTIAL_KEYS[1:]):
         if len(text) <= max_chars:
@@ -154,7 +168,7 @@ def build_bundle(data: dict[str, Any], max_chars: int) -> tuple[str, dict[str, A
 
     if len(text) > max_chars:
         minimal = {
-            "ticker": data.get("ticker"),
+            "ticker": model_view.get("ticker"),
             "_truncation": {"truncated": True, "severe": True, "limit_chars": max_chars},
         }
         text = dumps(minimal)

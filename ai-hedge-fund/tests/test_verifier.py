@@ -207,3 +207,39 @@ def test_report_handles_empty_snapshot():
 def test_non_finite_snapshot_values_are_treated_as_absent():
     snap = {"fundamentals": {"pe_ratio": float("nan")}}
     assert _claim("A P/E ratio of 31.2.", "pe_ratio", snap).verdict == "unverifiable"
+
+
+# ----------------------------------------------------------------------
+# Explicit signs
+# ----------------------------------------------------------------------
+
+
+def test_explicit_minus_sign_is_read():
+    """ "-4.48% change" states its own sign; no verb is needed to infer it."""
+    assert (
+        _claim("The stock saw a -4.48% change over the past month.", "change_30d_pct").stated
+        == -4.48
+    )
+
+
+def test_explicit_sign_verifies_against_a_negative_actual():
+    assert (
+        _verdicts("Volatility with a -2.99% change over the past month.")["change_30d_pct"]
+        == "verified"
+    )
+
+
+def test_hyphen_inside_a_compound_word_is_not_a_sign():
+    """ "30-day low of 302.25" must not parse as negative 302.25."""
+    assert _claim("Trading near its 30-day low of 302.25.", "low_30d").stated == 302.25
+
+
+def test_explicit_sign_overrides_a_misleading_verb():
+    claim = _claim(
+        "Momentum rose, but the 30-day change was -2.99% over the past month.", "change_30d_pct"
+    )
+    assert claim.stated == -2.99
+
+
+def test_negative_currency_amount_parses():
+    assert _claim("The current price of -5.0 is nonsense.", "price").stated == -5.0

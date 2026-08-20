@@ -32,6 +32,10 @@ class LLMUnavailable(RuntimeError):
     """The provider could not be reached — distinct from a bad response."""
 
 
+class OutputTruncated(RuntimeError):
+    """Generation stopped at the token limit, so the JSON is incomplete."""
+
+
 def prompt_hash(system: str, user: str) -> str:
     """Stable identity for a prompt pair, independent of formatting noise."""
     h = hashlib.sha256()
@@ -63,6 +67,25 @@ class LLMResult:
         }
 
 
+# JSON Schema keywords that Ollama's grammar compiler cannot express cheaply.
+# A `maxLength: 12000` becomes a grammar with twelve thousand alternatives; in
+# practice the constraint is dropped silently and the model returns unconstrained
+# prose — which is worse than not asking for a schema at all. Length and pattern
+# limits stay enforced where they belong, in Pydantic validation after parsing.
+_GBNF_HOSTILE_KEYS = frozenset(
+    {"maxLength", "minLength", "pattern", "maxItems", "minItems", "format", "default"}
+)
+
+
+def gbnf_safe_schema(schema: Any) -> Any:
+    """Strip schema keywords that break grammar-constrained decoding."""
+    if isinstance(schema, dict):
+        return {k: gbnf_safe_schema(v) for k, v in schema.items() if k not in _GBNF_HOSTILE_KEYS}
+    if isinstance(schema, list):
+        return [gbnf_safe_schema(v) for v in schema]
+    return schema
+
+
 def sampling_params() -> dict[str, Any]:
     """The sampling configuration applied to every research call."""
     params: dict[str, Any] = {
@@ -73,12 +96,15 @@ def sampling_params() -> dict[str, Any]:
     }
     if settings.llm_provider == "ollama":
         params["num_ctx"] = settings.ollama_num_ctx
+        params["repeat_penalty"] = settings.ollama_repeat_penalty
         if settings.ollama_think is not None:
             params["think"] = settings.ollama_think
     return params
 
 
-async def _ollama_chat(system: str, user: str) -> tuple[str, dict[str, Any], str, None]:
+async def _ollama_chat(
+    system: str, user: str, schema: dict[str, Any] | None = None
+) -> tuple[str, dict[str, Any], str, None]:
     url = f"{settings.ollama_base_url.rstrip('/')}/api/chat"
     payload: dict[str, Any] = {
         "model": settings.ollama_model,
@@ -87,13 +113,18 @@ async def _ollama_chat(system: str, user: str) -> tuple[str, dict[str, Any], str
             {"role": "user", "content": user},
         ],
         "stream": False,
-        "format": "json",
+        # A bare "json" format only constrains syntax, so a prompt ending in a
+        # large JSON bundle invites the model to echo that bundle back as its
+        # answer — observed with qwen3:30b. Passing the schema constrains the
+        # shape as well, which makes that failure structurally impossible.
+        "format": gbnf_safe_schema(schema) if schema is not None else "json",
         "options": {
             "temperature": settings.llm_temperature,
             "seed": settings.llm_seed,
             "top_p": settings.llm_top_p,
             "num_predict": settings.llm_max_output_tokens,
             "num_ctx": settings.ollama_num_ctx,
+            "repeat_penalty": settings.ollama_repeat_penalty,
         },
     }
     if settings.ollama_think is not None:
@@ -128,14 +159,27 @@ async def _ollama_chat(system: str, user: str) -> tuple[str, dict[str, Any], str
     data = r.json()
     msg = data.get("message") or {}
     content = (msg.get("content") or "").strip()
+
+    # Hitting the token ceiling truncates the JSON mid-object, which then
+    # surfaces as an opaque parse error. Name the actual cause instead.
+    if data.get("done_reason") == "length":
+        raise OutputTruncated(
+            f"{settings.ollama_model} hit the {settings.llm_max_output_tokens}-token "
+            "output limit and the JSON is incomplete. Raise LLM_MAX_OUTPUT_TOKENS, "
+            "or reduce RESEARCH_MAX_CONTEXT_CHARS so the model writes less."
+        )
+
     usage = {
         "prompt_tokens": data.get("prompt_eval_count"),
         "completion_tokens": data.get("eval_count"),
+        "done_reason": data.get("done_reason"),
     }
     return content, usage, f"ollama:{settings.ollama_model}", None
 
 
-async def _openai_chat(system: str, user: str) -> tuple[str, dict[str, Any], str, str | None]:
+async def _openai_chat(
+    system: str, user: str, schema: dict[str, Any] | None = None
+) -> tuple[str, dict[str, Any], str, str | None]:
     try:
         from openai import AsyncOpenAI
     except ImportError as e:
@@ -167,17 +211,23 @@ async def _openai_chat(system: str, user: str) -> tuple[str, dict[str, Any], str
     return content, usage, f"openai:{settings.llm_model}", getattr(resp, "system_fingerprint", None)
 
 
-async def call_json(system: str, user: str) -> LLMResult:
-    """Run one JSON-mode completion, recording everything needed to replay it.
+async def call_json(system: str, user: str, schema: dict[str, Any] | None = None) -> LLMResult:
+    """Run one JSON completion, recording everything needed to replay it.
 
-    Raises :class:`LLMUnavailable` when the provider is unreachable, and
+    Pass ``schema`` (a JSON Schema, e.g. from ``Model.model_json_schema()``) to
+    constrain the output shape rather than merely its syntax. Strongly preferred:
+    it removes a whole class of failure where the model returns well-formed JSON
+    that is not the object you asked for.
+
+    Raises :class:`LLMUnavailable` when the provider is unreachable,
+    :class:`OutputTruncated` when generation hit the token ceiling, and
     ``RuntimeError`` for provider-side errors.
     """
     started = time.perf_counter()
     if settings.llm_provider == "ollama":
-        content, usage, model, fingerprint = await _ollama_chat(system, user)
+        content, usage, model, fingerprint = await _ollama_chat(system, user, schema)
     else:
-        content, usage, model, fingerprint = await _openai_chat(system, user)
+        content, usage, model, fingerprint = await _openai_chat(system, user, schema)
     elapsed_ms = int((time.perf_counter() - started) * 1000)
 
     return LLMResult(

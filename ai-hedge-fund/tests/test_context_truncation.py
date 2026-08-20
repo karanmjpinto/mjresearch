@@ -72,18 +72,15 @@ def test_model_is_told_truncation_is_not_absence():
     assert "not as absent from the market" in obj["_truncation"]["note"]
 
 
-def test_provenance_detail_is_dropped_before_news():
-    """Slot detail is the cheapest thing to lose; headlines are not."""
-    text = truncate_context(_snapshot(n_news=3), max_chars=1500)
-    obj = json.loads(text)
-    assert obj.get("provenance", {}).get("detail_omitted") is True
-    assert obj.get("news"), "news was dropped before provenance detail"
+def test_news_survives_when_the_bundle_is_tight():
+    """Headlines carry analysis value and should outlast optional sections."""
+    obj = json.loads(truncate_context(_snapshot(n_news=3), max_chars=1500))
+    assert obj.get("news"), "news was dropped while the bundle still fit"
 
 
-def test_provenance_warnings_survive_slot_collapse():
-    text = truncate_context(_snapshot(n_news=3), max_chars=1500)
-    obj = json.loads(text)
-    assert obj["provenance"]["warnings"]
+def test_data_quality_warnings_survive_reduction():
+    obj = json.loads(truncate_context(_snapshot(n_news=3), max_chars=1500))
+    assert obj["provenance"]["data_quality_warnings"]
 
 
 def test_long_free_text_fields_are_capped_not_sliced_off():
@@ -118,3 +115,16 @@ def test_manifest_always_carries_a_truncated_flag():
     for limit in (100, 1200, 100_000):
         _t, manifest = truncate_context_with_manifest(_snapshot(), max_chars=limit)
         assert "truncated" in manifest
+
+
+def test_provenance_detail_never_reaches_the_model():
+    """Fetch metadata is operator diagnostics; sending it invites echoing."""
+    text = truncate_context(_snapshot(n_news=2), max_chars=100_000)
+    assert "fetched_at" not in text
+    assert "slots" not in text
+
+
+def test_data_quality_warnings_still_reach_the_model():
+    obj = json.loads(truncate_context(_snapshot(n_news=2), max_chars=100_000))
+    assert obj["provenance"]["warning_count"] == 1
+    assert "confidence_in_data" in obj["provenance"]["note"]
