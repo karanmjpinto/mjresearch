@@ -12,5 +12,7 @@ class ResearchAnalysisOutput(BaseModel):
     bull_case: str = Field(max_length=4000)
     bear_case: str = Field(max_length=4000)
     key_risks: list[str] = Field(default_factory=list, description="Up to 12 material risks")
-    time_horizon: str = Field(default="medium_term", description="e.g. short_term, medium_term, long_term")
+    time_horizon: str = Field(
+        default="medium_term", description="e.g. short_term, medium_term, long_term"
+    )
     confidence_in_data: int = Field(ge=1, le=5, description="How complete the data felt")

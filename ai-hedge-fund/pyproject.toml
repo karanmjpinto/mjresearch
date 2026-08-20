@@ -24,6 +24,8 @@ dependencies = [
     "setuptools>=82.0.1",
     "sqlalchemy>=2.0",
     "sentry-sdk[fastapi]>=2.19",
+    "scipy>=1.17.1",
+    "mcp>=1.0",
 ]
 
 [project.optional-dependencies]
@@ -45,6 +47,7 @@ sentiment = [
 
 [project.scripts]
 check-data = "hedge_fund.cli:main"
+hedge-fund-mcp = "hedge_fund.mcp.server:main"
 
 [build-system]
 requires = ["hatchling"]

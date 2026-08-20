@@ -45,7 +45,9 @@ class ScreenerRunRequest(BaseModel):
 YartsevaRequest = ScreenerRunRequest
 
 
-def _resolve_screener_tickers(req: ScreenerRunRequest) -> tuple[list[str], str | None, int | None, bool]:
+def _resolve_screener_tickers(
+    req: ScreenerRunRequest,
+) -> tuple[list[str], str | None, int | None, bool]:
     """Returns (tickers, universe_id, universe_total, truncated)."""
     universe_id: str | None = None
     universe_total: int | None = None
@@ -131,9 +133,7 @@ async def run_yartseva(req: ScreenerRunRequest):
             "Macro regime is portfolio-level: Fed stable/cutting = full weight; "
             "active hiking raise strong threshold to ~65+; aggressive hiking (>150bps) reduce exposure."
         ),
-        "watchlist_group": req.watchlist_group
-        if not req.tickers and not universe_id
-        else None,
+        "watchlist_group": req.watchlist_group if not req.tickers and not universe_id else None,
         "universe": universe_id,
         "universe_total": universe_total,
         "universe_truncated": truncated,
@@ -175,9 +175,7 @@ async def run_acquisition_compounder(req: ScreenerRunRequest):
             "uses YoY revenue growth as a proxy. Goodwill impairments may be incomplete. "
             "Not investment advice."
         ),
-        "watchlist_group": req.watchlist_group
-        if not req.tickers and not universe_id
-        else None,
+        "watchlist_group": req.watchlist_group if not req.tickers and not universe_id else None,
         "universe": universe_id,
         "universe_total": universe_total,
         "universe_truncated": truncated,

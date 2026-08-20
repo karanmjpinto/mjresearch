@@ -66,6 +66,15 @@ async def get_macro(series: str, days: int = Query(1825, ge=30, le=7300)):
     return {"series": series, "count": len(df), "data": df.to_dict(orient="records")}
 
 
+@router.get("/bubble")
+async def get_bubble(days: int = Query(3650, ge=365, le=7300)):
+    """Market-wide bubble detector — composite macro valuation & complacency gauges."""
+    result = _ds.get_bubble_detector(days=days)
+    if "error" in result:
+        raise HTTPException(503, result["error"])
+    return result
+
+
 @router.get("/news")
 async def get_news(q: str = Query(..., min_length=1), limit: int = Query(10, ge=1, le=50)):
     """News search."""
@@ -221,8 +230,5 @@ def _serialize(obj):
     if hasattr(obj, "model_dump"):
         return obj.model_dump()
     if isinstance(obj, list):
-        return [
-            item.model_dump() if hasattr(item, "model_dump") else item
-            for item in obj
-        ]
+        return [item.model_dump() if hasattr(item, "model_dump") else item for item in obj]
     return obj

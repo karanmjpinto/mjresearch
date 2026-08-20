@@ -81,9 +81,7 @@ def compute_technicals_from_ohlcv(
             "upper": _safe_round(bb_upper.iloc[-1]),
             "middle": _safe_round(sma20.iloc[-1]),
             "lower": _safe_round(bb_lower.iloc[-1]),
-            "width": _safe_round(
-                (bb_upper.iloc[-1] - bb_lower.iloc[-1]) / sma20.iloc[-1] * 100
-            ),
+            "width": _safe_round((bb_upper.iloc[-1] - bb_lower.iloc[-1]) / sma20.iloc[-1] * 100),
         },
         "sma_50": _safe_round(sma50.iloc[-1]),
         "sma_200": _safe_round(sma200.iloc[-1]),

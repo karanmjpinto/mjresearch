@@ -73,8 +73,7 @@ def _show_ticker(ticker: str, as_json: bool):
         pct = (change / prev) * 100
         color = "green" if change >= 0 else "red"
         console.print(
-            f"\n  Price: [bold]{last:.2f}[/bold]  "
-            f"[{color}]{change:+.2f} ({pct:+.2f}%)[/{color}]\n"
+            f"\n  Price: [bold]{last:.2f}[/bold]  [{color}]{change:+.2f} ({pct:+.2f}%)[/{color}]\n"
         )
 
 

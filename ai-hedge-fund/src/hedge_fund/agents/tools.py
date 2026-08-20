@@ -55,6 +55,15 @@ def tool_technicals(ticker: str) -> dict[str, Any]:
     return {"ok": True, "ticker": sym, "data": result}
 
 
+def tool_bubble_detector() -> dict[str, Any]:
+    """Market-wide bubble detector — macro valuation & complacency gauges."""
+    ds = get_data_service()
+    result = ds.get_bubble_detector()
+    if "error" in result:
+        return {"ok": False, "error": result.get("error"), "data": {}}
+    return {"ok": True, "data": result}
+
+
 def tool_news(query: str, limit: int = 10) -> dict[str, Any]:
     """News articles for a ticker or search string."""
     ds = get_data_service()
@@ -100,6 +109,7 @@ AGENT_TOOLS: dict[str, Any] = {
     "price_history": tool_price_history,
     "fundamentals": tool_fundamentals,
     "technicals": tool_technicals,
+    "bubble_detector": tool_bubble_detector,
     "news": tool_news,
     "research_snapshot": tool_research_snapshot,
 }

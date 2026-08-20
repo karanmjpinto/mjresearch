@@ -73,6 +73,7 @@ class TestNordicHelpers:
 # Integration tests (require network)
 # ------------------------------------------------------------------
 
+
 @pytest.mark.skipif(not _openbb_installed(), reason="openbb not installed")
 class TestDataServiceIntegration:
     ds = DataService()
@@ -93,8 +94,4 @@ class TestDataServiceIntegration:
         assert "rsi_14" in result
         assert "macd" in result
         # Provider-dependent: top-level trend vs SMA flags vs MACD subdict
-        assert (
-            "trend" in result
-            or "above_sma50" in result
-            or isinstance(result.get("macd"), dict)
-        )
+        assert "trend" in result or "above_sma50" in result or isinstance(result.get("macd"), dict)

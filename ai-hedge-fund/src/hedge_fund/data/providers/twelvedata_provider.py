@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import date, timedelta
 from typing import Any
 
 import pandas as pd
@@ -74,14 +73,7 @@ class TwelveDataProvider(BaseProvider):
     def _technicals(self, ticker: str, **kwargs: Any) -> dict | None:
         """Fetch rich technical indicators via Twelve Data."""
         try:
-            # Build a time series with multiple indicators
-            ts = self._td.time_series(
-                symbol=ticker,
-                interval="1day",
-                outputsize=200,
-            )
-
-            # Fetch individual indicators
+            # Indicators are fetched individually; each call is its own request.
             rsi = self._td.rsi(symbol=ticker, interval="1day", time_period=14).as_json()
             macd = self._td.macd(symbol=ticker, interval="1day").as_json()
             bbands = self._td.bbands(symbol=ticker, interval="1day", time_period=20).as_json()

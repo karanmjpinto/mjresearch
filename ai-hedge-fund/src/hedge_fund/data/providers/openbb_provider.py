@@ -85,11 +85,7 @@ class OpenBBProvider(BaseProvider):
         prow = p.iloc[0] if not p.empty else None
 
         name = str(prow["name"]) if prow is not None and "name" in prow.index else ticker
-        sector = (
-            str(prow["sector"])
-            if prow is not None and "sector" in prow.index
-            else "N/A"
-        )
+        sector = str(prow["sector"]) if prow is not None and "sector" in prow.index else "N/A"
         industry = (
             str(prow["industry_category"])
             if prow is not None and "industry_category" in prow.index

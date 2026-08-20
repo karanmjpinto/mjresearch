@@ -94,8 +94,12 @@ class YFinanceEnhancedProvider(BaseProvider):
         if _52w_high is None or _52w_low is None:
             try:
                 fi = t.fast_info
-                _52w_high = _52w_high if _52w_high is not None else getattr(fi, "fifty_two_week_high", None)
-                _52w_low = _52w_low if _52w_low is not None else getattr(fi, "fifty_two_week_low", None)
+                _52w_high = (
+                    _52w_high if _52w_high is not None else getattr(fi, "fifty_two_week_high", None)
+                )
+                _52w_low = (
+                    _52w_low if _52w_low is not None else getattr(fi, "fifty_two_week_low", None)
+                )
             except Exception:
                 pass
 
@@ -129,7 +133,8 @@ class YFinanceEnhancedProvider(BaseProvider):
                 result["total_assets"] = _safe_float(latest.get("Total Assets"))
                 result["total_debt"] = _safe_float(latest.get("Total Debt"))
                 result["total_equity"] = _safe_float(
-                    latest.get("Stockholders Equity") or latest.get("Total Equity Gross Minority Interest")
+                    latest.get("Stockholders Equity")
+                    or latest.get("Total Equity Gross Minority Interest")
                 )
             if not inc.empty:
                 latest = inc.iloc[:, 0]
@@ -143,15 +148,12 @@ class YFinanceEnhancedProvider(BaseProvider):
                     or latest.get("Net Income Common Stockholders")
                 )
                 result["ebitda"] = _safe_float(
-                    latest.get("EBITDA")
-                    or latest.get("Normalized EBITDA")
+                    latest.get("EBITDA") or latest.get("Normalized EBITDA")
                 )
             if not cf.empty:
                 latest = cf.iloc[:, 0]
                 result["free_cash_flow"] = _safe_float(latest.get("Free Cash Flow"))
-                result["operating_cash_flow"] = _safe_float(
-                    latest.get("Operating Cash Flow")
-                )
+                result["operating_cash_flow"] = _safe_float(latest.get("Operating Cash Flow"))
         except Exception:
             pass
 
@@ -178,26 +180,31 @@ class YFinanceEnhancedProvider(BaseProvider):
             earnings_dates = []
             if dates_df is not None and not dates_df.empty:
                 for idx, row in dates_df.head(8).iterrows():
-                    earnings_dates.append({
-                        "date": str(idx.date()) if hasattr(idx, "date") else str(idx),
-                        "eps_estimate": _safe_float(row.get("EPS Estimate")),
-                        "reported_eps": _safe_float(row.get("Reported EPS")),
-                        "surprise_pct": _safe_float(row.get("Surprise(%)")),
-                    })
+                    earnings_dates.append(
+                        {
+                            "date": str(idx.date()) if hasattr(idx, "date") else str(idx),
+                            "eps_estimate": _safe_float(row.get("EPS Estimate")),
+                            "reported_eps": _safe_float(row.get("Reported EPS")),
+                            "surprise_pct": _safe_float(row.get("Surprise(%)")),
+                        }
+                    )
 
             quarterly_list = []
             if quarterly is not None and not quarterly.empty:
                 for idx, row in quarterly.iterrows():
-                    quarterly_list.append({
-                        "quarter": str(idx),
-                        "revenue": _safe_float(row.get("Revenue")),
-                        "earnings": _safe_float(row.get("Earnings")),
-                    })
+                    quarterly_list.append(
+                        {
+                            "quarter": str(idx),
+                            "revenue": _safe_float(row.get("Revenue")),
+                            "earnings": _safe_float(row.get("Earnings")),
+                        }
+                    )
 
             # Next earnings date
             next_date = None
             if earnings_dates:
                 from datetime import date as dt_date
+
                 today = dt_date.today()
                 for ed in earnings_dates:
                     try:
@@ -231,12 +238,14 @@ class YFinanceEnhancedProvider(BaseProvider):
             rec_history = []
             if recs is not None and not recs.empty:
                 for idx, row in recs.tail(10).iterrows():
-                    rec_history.append({
-                        "date": str(idx.date()) if hasattr(idx, "date") else str(idx),
-                        "firm": row.get("Firm", ""),
-                        "grade": row.get("To Grade", ""),
-                        "action": row.get("Action", ""),
-                    })
+                    rec_history.append(
+                        {
+                            "date": str(idx.date()) if hasattr(idx, "date") else str(idx),
+                            "firm": row.get("Firm", ""),
+                            "grade": row.get("To Grade", ""),
+                            "action": row.get("Action", ""),
+                        }
+                    )
 
             target_mean = info.get("targetMeanPrice")
             current = info.get("currentPrice") or info.get("regularMarketPrice")
@@ -274,16 +283,20 @@ class YFinanceEnhancedProvider(BaseProvider):
 
             results = []
             for _, row in txns.head(20).iterrows():
-                results.append(InsiderTransaction(
-                    ticker=ticker,
-                    name=str(row.get("Insider", "Unknown")),
-                    title=str(row.get("Position", "")) if pd.notna(row.get("Position")) else None,
-                    transaction_type=str(row.get("Transaction", "Unknown")),
-                    shares=int(row.get("Shares", 0)) if pd.notna(row.get("Shares")) else 0,
-                    value=_safe_float(row.get("Value")),
-                    date=_safe_date(row.get("Start Date")),
-                    source="yfinance",
-                ))
+                results.append(
+                    InsiderTransaction(
+                        ticker=ticker,
+                        name=str(row.get("Insider", "Unknown")),
+                        title=str(row.get("Position", ""))
+                        if pd.notna(row.get("Position"))
+                        else None,
+                        transaction_type=str(row.get("Transaction", "Unknown")),
+                        shares=int(row.get("Shares", 0)) if pd.notna(row.get("Shares")) else 0,
+                        value=_safe_float(row.get("Value")),
+                        date=_safe_date(row.get("Start Date")),
+                        source="yfinance",
+                    )
+                )
             return results
         except Exception as e:
             logger.warning("yfinance insider error for %s: %s", ticker, e)
@@ -302,15 +315,17 @@ class YFinanceEnhancedProvider(BaseProvider):
 
             results = []
             for _, row in holders.head(20).iterrows():
-                results.append(InstitutionalHolder(
-                    ticker=ticker,
-                    holder=str(row.get("Holder", "Unknown")),
-                    shares=int(row.get("Shares", 0)) if pd.notna(row.get("Shares")) else 0,
-                    value=_safe_float(row.get("Value")),
-                    pct_held=_safe_float(row.get("% Out")),
-                    date_reported=_safe_date(row.get("Date Reported")),
-                    source="yfinance",
-                ))
+                results.append(
+                    InstitutionalHolder(
+                        ticker=ticker,
+                        holder=str(row.get("Holder", "Unknown")),
+                        shares=int(row.get("Shares", 0)) if pd.notna(row.get("Shares")) else 0,
+                        value=_safe_float(row.get("Value")),
+                        pct_held=_safe_float(row.get("% Out")),
+                        date_reported=_safe_date(row.get("Date Reported")),
+                        source="yfinance",
+                    )
+                )
             return results
         except Exception as e:
             logger.warning("yfinance institutional error for %s: %s", ticker, e)
@@ -359,14 +374,16 @@ class YFinanceEnhancedProvider(BaseProvider):
                 return []
             results = []
             for item in news[:10]:
-                results.append({
-                    "title": item.get("title", ""),
-                    "publisher": item.get("publisher", ""),
-                    "link": item.get("link", ""),
-                    "published": item.get("providerPublishTime", ""),
-                    "type": item.get("type", ""),
-                    "source": "yfinance",
-                })
+                results.append(
+                    {
+                        "title": item.get("title", ""),
+                        "publisher": item.get("publisher", ""),
+                        "link": item.get("link", ""),
+                        "published": item.get("providerPublishTime", ""),
+                        "type": item.get("type", ""),
+                        "source": "yfinance",
+                    }
+                )
             return results
         except Exception as e:
             logger.warning("yfinance news error for %s: %s", ticker, e)
@@ -429,8 +446,7 @@ def _clean_records(records: list[dict]) -> list[dict]:
     """Replace NaN values with None in a list of dicts."""
     cleaned = []
     for rec in records:
-        cleaned.append({
-            k: (None if isinstance(v, float) and pd.isna(v) else v)
-            for k, v in rec.items()
-        })
+        cleaned.append(
+            {k: (None if isinstance(v, float) and pd.isna(v) else v) for k, v in rec.items()}
+        )
     return cleaned

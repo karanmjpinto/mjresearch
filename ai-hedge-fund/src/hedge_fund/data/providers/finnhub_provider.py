@@ -106,15 +106,17 @@ class FinnhubProvider(BaseProvider):
 
             results = []
             for item in news[:limit]:
-                results.append({
-                    "title": item.get("headline", ""),
-                    "publisher": item.get("source", ""),
-                    "link": item.get("url", ""),
-                    "published": item.get("datetime", ""),
-                    "summary": item.get("summary", ""),
-                    "category": item.get("category", ""),
-                    "source": "finnhub",
-                })
+                results.append(
+                    {
+                        "title": item.get("headline", ""),
+                        "publisher": item.get("source", ""),
+                        "link": item.get("url", ""),
+                        "published": item.get("datetime", ""),
+                        "summary": item.get("summary", ""),
+                        "category": item.get("category", ""),
+                        "source": "finnhub",
+                    }
+                )
             return results if results else None
         except Exception as e:
             logger.warning("Finnhub news error for %s: %s", ticker, e)
@@ -161,15 +163,17 @@ class FinnhubProvider(BaseProvider):
 
             results = []
             for f in filings[:20]:
-                results.append(SECFiling(
-                    ticker=ticker,
-                    form_type=f.get("form", ""),
-                    filed_date=f.get("filedDate"),
-                    accepted_date=f.get("acceptedDate"),
-                    report_url=f.get("reportUrl", ""),
-                    filing_url=f.get("filingUrl", ""),
-                    source="finnhub",
-                ))
+                results.append(
+                    SECFiling(
+                        ticker=ticker,
+                        form_type=f.get("form", ""),
+                        filed_date=f.get("filedDate"),
+                        accepted_date=f.get("acceptedDate"),
+                        report_url=f.get("reportUrl", ""),
+                        filing_url=f.get("filingUrl", ""),
+                        source="finnhub",
+                    )
+                )
             return results if results else None
         except Exception as e:
             logger.warning("Finnhub filings error for %s: %s", ticker, e)
@@ -187,14 +191,16 @@ class FinnhubProvider(BaseProvider):
 
             results = []
             for item in data["data"][:20]:
-                results.append(CongressionalTrade(
-                    ticker=ticker,
-                    representative=item.get("name", "Unknown"),
-                    transaction_type=item.get("transactionType", ""),
-                    amount_range=item.get("transactionAmount", ""),
-                    transaction_date=item.get("transactionDate"),
-                    source="finnhub",
-                ))
+                results.append(
+                    CongressionalTrade(
+                        ticker=ticker,
+                        representative=item.get("name", "Unknown"),
+                        transaction_type=item.get("transactionType", ""),
+                        amount_range=item.get("transactionAmount", ""),
+                        transaction_date=item.get("transactionDate"),
+                        source="finnhub",
+                    )
+                )
             return results if results else None
         except Exception as e:
             logger.warning("Finnhub congressional error for %s: %s", ticker, e)
@@ -212,15 +218,17 @@ class FinnhubProvider(BaseProvider):
 
             results = []
             for item in data["data"][:20]:
-                results.append(InsiderTransaction(
-                    ticker=ticker,
-                    name=item.get("name", "Unknown"),
-                    transaction_type=item.get("transactionType", ""),
-                    shares=item.get("share", 0),
-                    value=_safe_float(item.get("transactionPrice")),
-                    date=item.get("transactionDate"),
-                    source="finnhub",
-                ))
+                results.append(
+                    InsiderTransaction(
+                        ticker=ticker,
+                        name=item.get("name", "Unknown"),
+                        transaction_type=item.get("transactionType", ""),
+                        shares=item.get("share", 0),
+                        value=_safe_float(item.get("transactionPrice")),
+                        date=item.get("transactionDate"),
+                        source="finnhub",
+                    )
+                )
             return results if results else None
         except Exception as e:
             logger.warning("Finnhub insider error for %s: %s", ticker, e)
@@ -238,15 +246,17 @@ class FinnhubProvider(BaseProvider):
 
             results = []
             for r in recs[:6]:
-                results.append({
-                    "period": r.get("period", ""),
-                    "strong_buy": r.get("strongBuy", 0),
-                    "buy": r.get("buy", 0),
-                    "hold": r.get("hold", 0),
-                    "sell": r.get("sell", 0),
-                    "strong_sell": r.get("strongSell", 0),
-                    "source": "finnhub",
-                })
+                results.append(
+                    {
+                        "period": r.get("period", ""),
+                        "strong_buy": r.get("strongBuy", 0),
+                        "buy": r.get("buy", 0),
+                        "hold": r.get("hold", 0),
+                        "sell": r.get("sell", 0),
+                        "strong_sell": r.get("strongSell", 0),
+                        "source": "finnhub",
+                    }
+                )
             return results if results else None
         except Exception as e:
             logger.warning("Finnhub analyst error for %s: %s", ticker, e)

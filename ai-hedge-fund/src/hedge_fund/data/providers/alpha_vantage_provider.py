@@ -66,7 +66,10 @@ class AlphaVantageProvider(BaseProvider):
                 if not period_data:
                     return []
                 return [
-                    {"sector": k, "change_pct": float(v.strip("%")) if isinstance(v, str) else float(v)}
+                    {
+                        "sector": k,
+                        "change_pct": float(v.strip("%")) if isinstance(v, str) else float(v),
+                    }
                     for k, v in period_data.items()
                 ]
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
@@ -49,6 +50,20 @@ DEFAULT_TTLS: dict[DataCategory, int] = {
     DataCategory.CONGRESSIONAL: 86400,  # 24 hr
     DataCategory.PEERS: 86400,  # 24 hr
 }
+
+
+@dataclass(frozen=True)
+class CachedValue:
+    """A cached payload plus the identity of the source that produced it.
+
+    Provider attribution has to survive caching: a cache hit that reports no
+    provider is indistinguishable from a fallback silently changing sources.
+    """
+
+    value: Any
+    provider: str | None = None
+    fetched_at: str | None = None
+    checks: dict[str, Any] = field(default_factory=dict)
 
 
 class TTLCache:
