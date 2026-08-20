@@ -262,7 +262,12 @@ def apply_stock_split(
         )
     )
     db.commit()
-    return {"ok": True, "ticker": ticker, "shares": float(row.shares), "avg_cost": float(row.avg_cost)}
+    return {
+        "ok": True,
+        "ticker": ticker,
+        "shares": float(row.shares),
+        "avg_cost": float(row.avg_cost),
+    }
 
 
 def apply_cash_dividend(
@@ -366,9 +371,7 @@ def build_portfolio_view(db: Session, account_id: int) -> dict[str, Any]:
     total_mv = _finite_float(total_mv, cash0)
 
     for h in holdings:
-        h.weight_pct = (
-            (h.market_value / total_mv * 100) if total_mv > 0 else 0.0
-        )
+        h.weight_pct = (h.market_value / total_mv * 100) if total_mv > 0 else 0.0
         h.weight_pct = _finite_float(h.weight_pct, 0.0)
 
     cash_pct = (cash0 / total_mv * 100) if total_mv > 0 else 0.0
@@ -407,7 +410,6 @@ def risk_weighted(db: Session, account_id: int, *, days: int = 252) -> dict[str,
         return {"error": "no holdings for risk calculation"}
 
     prices: list[np.ndarray] = []
-    weights: list[float] = []
     live_mv: list[float] = []
 
     for h in rows:

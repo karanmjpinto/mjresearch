@@ -279,7 +279,9 @@ def fetch_acquisition_snapshot(ticker: str) -> AcquisitionSnapshot:
     snap = AcquisitionSnapshot(ticker=ticker.strip().upper())
     try:
         info = t.info or {}
-        if not info or (info.get("regularMarketPrice") is None and info.get("currentPrice") is None):
+        if not info or (
+            info.get("regularMarketPrice") is None and info.get("currentPrice") is None
+        ):
             snap.error = "no_quote_or_info"
             return snap
 
@@ -460,7 +462,11 @@ def fetch_acquisition_snapshot(ticker: str) -> AcquisitionSnapshot:
             tr = _f(info.get("taxRate"))
             ce = _latest_q_bs(
                 q_bs,
-                ("Stockholders Equity", "Common Stock Equity", "Total Equity Gross Minority Interest"),
+                (
+                    "Stockholders Equity",
+                    "Common Stock Equity",
+                    "Total Equity Gross Minority Interest",
+                ),
             )
             snap.roic = _compute_roic_fallback(ebit_ttm, tr, total_debt, cash, ce)
 

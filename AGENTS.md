@@ -15,4 +15,4 @@
 - **Tickers** are not a fixed whitelist: symbols must pass **`sanitize_ticker`** / guardrail format rules; real coverage depends on configured providers. Example groups live in **`config/watchlists.json`**.
 - Optional **FinBERT** headline sentiment uses the **`[sentiment]`** extra (`uv sync --extra sentiment`); see **`NEWS_SENTIMENT_ENABLED`** / **`FINBERT_MODEL_ID`** and the README when that path matters.
 - **`OLLAMA_MODEL`** in **`.env`** should match an installed Ollama model (e.g. **`llama3.2`** aligns with **`llama3.2:latest`** from **`ollama list`**).
-- The frontend includes a **Screeners** top-nav area for multiple screening views (plays with entry/sizing, etc., as wired).
+- **Screeners** (`/screeners`): Yartseva Multibagger and Acquisition Compounder are served via **`POST /api/screeners/yartseva`** and **`POST /api/screeners/acquisition-compounder`**; index universes for screening use **`GET /api/screeners/universes`** backed by **`hedge_fund/data/universes.py`** (ticker groups remain in **`config/watchlists.json`**).

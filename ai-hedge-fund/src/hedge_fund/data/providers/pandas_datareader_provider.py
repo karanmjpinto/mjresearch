@@ -27,6 +27,7 @@ class PandasDataReaderProvider(BaseProvider):
         self._pdr = None
         try:
             import pandas_datareader as pdr
+
             self._pdr = pdr
         except ImportError:
             logger.info("pandas-datareader not installed — FRED/Fama-French unavailable")
@@ -47,9 +48,7 @@ class PandasDataReaderProvider(BaseProvider):
         end = date.today()
         start = end - timedelta(days=days)
         try:
-            df = self._pdr.DataReader(
-                series_id, "fred", start=start, end=end
-            )
+            df = self._pdr.DataReader(series_id, "fred", start=start, end=end)
             if df.empty:
                 return None
             return df
@@ -60,9 +59,7 @@ class PandasDataReaderProvider(BaseProvider):
     def _fama_french(self, **kwargs: Any) -> FamaFrenchFactors | None:
         """Fetch Fama-French 5-factor data."""
         try:
-            data = self._pdr.DataReader(
-                "F-F_Research_Data_5_Factors_2x3", "famafrench"
-            )
+            data = self._pdr.DataReader("F-F_Research_Data_5_Factors_2x3", "famafrench")
             # data is a dict with integer keys; 0 = monthly, 1 = annual
             monthly = data[0]
             if monthly.empty:
@@ -72,15 +69,17 @@ class PandasDataReaderProvider(BaseProvider):
             recent = monthly.tail(60)
             factors = []
             for idx, row in recent.iterrows():
-                factors.append({
-                    "date": str(idx),
-                    "Mkt-RF": round(float(row.get("Mkt-RF", 0)), 4),
-                    "SMB": round(float(row.get("SMB", 0)), 4),
-                    "HML": round(float(row.get("HML", 0)), 4),
-                    "RMW": round(float(row.get("RMW", 0)), 4),
-                    "CMA": round(float(row.get("CMA", 0)), 4),
-                    "RF": round(float(row.get("RF", 0)), 4),
-                })
+                factors.append(
+                    {
+                        "date": str(idx),
+                        "Mkt-RF": round(float(row.get("Mkt-RF", 0)), 4),
+                        "SMB": round(float(row.get("SMB", 0)), 4),
+                        "HML": round(float(row.get("HML", 0)), 4),
+                        "RMW": round(float(row.get("RMW", 0)), 4),
+                        "CMA": round(float(row.get("CMA", 0)), 4),
+                        "RF": round(float(row.get("RF", 0)), 4),
+                    }
+                )
 
             return FamaFrenchFactors(
                 period="monthly",

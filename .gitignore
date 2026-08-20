@@ -10,3 +10,4 @@
 **/.vite/
 **/*.tsbuildinfo
 ai-hedge-fund/.gstack/
+.gstack/

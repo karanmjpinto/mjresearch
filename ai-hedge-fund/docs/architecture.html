@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>MJ Research — Architecture</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0b;
+      --surface: #121214;
+      --surface-2: #18181b;
+      --border: #27272a;
+      --border-strong: #3f3f46;
+      --fg: #fafafa;
+      --muted: #a1a1aa;
+      --dim: #71717a;
+      --subtle: #52525b;
+      --blue: #3b82f6;
+      --blue-dim: #60a5fa;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --info: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "DM Sans", -apple-system, system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    body { padding: 48px 24px 120px; }
+    main { max-width: 1120px; margin: 0 auto; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 40px;
+    }
+    header .pill {
+      display: inline-block;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      color: var(--blue);
+      background: rgba(59, 130, 246, 0.10);
+      border: 1px solid rgba(59, 130, 246, 0.30);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+    header h1 {
+      font-size: 34px; font-weight: 700;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    header p { color: var(--muted); margin: 0; max-width: 720px; }
+    nav.toc {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin: 24px 0 40px;
+      padding: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    nav.toc a {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      transition: color 120ms, background 120ms;
+    }
+    nav.toc a:hover { color: var(--fg); background: var(--surface-2); }
+    section {
+      margin-bottom: 72px;
+    }
+    section h2 {
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0 0 4px;
+      letter-spacing: -0.01em;
+    }
+    section .lede {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0 0 24px;
+      max-width: 780px;
+    }
+    .diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px;
+      margin-bottom: 16px;
+    }
+    .diagram svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .notes {
+      color: var(--dim);
+      font-size: 13px;
+      max-width: 780px;
+    }
+    .notes ul { padding-left: 18px; margin: 8px 0; }
+    .notes li { margin-bottom: 4px; }
+    .notes code, code {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--surface-2);
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+    }
+    /* SVG primitives */
+    .node-rect { fill: var(--surface-2); stroke: var(--border-strong); stroke-width: 1; }
+    .node-rect.accent { stroke: var(--blue); }
+    .node-rect.data { stroke: var(--green); }
+    .node-rect.external { stroke: var(--dim); stroke-dasharray: 4 3; }
+    .node-rect.ai { fill: rgba(59, 130, 246, 0.06); stroke: var(--blue); }
+    .node-rect.output { fill: rgba(34, 197, 94, 0.06); stroke: var(--green); }
+    .node-rect.cluster { fill: transparent; stroke: var(--border); stroke-dasharray: 4 4; }
+    .node-text { font-family: "DM Sans", sans-serif; fill: var(--fg); font-size: 13px; font-weight: 600; }
+    .node-text.sm { font-size: 12px; font-weight: 500; }
+    .node-sub { font-family: "JetBrains Mono", monospace; fill: var(--muted); font-size: 10px; }
+    .edge { stroke: var(--subtle); stroke-width: 1.2; fill: none; }
+    .edge.dashed { stroke-dasharray: 4 4; }
+    .edge.accent { stroke: var(--blue); }
+    .edge-label { font-family: "JetBrains Mono", monospace; fill: var(--muted); font-size: 10px; }
+    .cluster-label {
+      font-family: "JetBrains Mono", monospace;
+      fill: var(--dim);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    /* Legend chip */
+    .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--muted); margin-top: 16px; }
+    .legend .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: "JetBrains Mono", monospace;
+    }
+    .legend .sw { width: 10px; height: 10px; border-radius: 2px; border: 1px solid; }
+    .legend .sw.blue { border-color: var(--blue); background: rgba(59,130,246,0.08); }
+    .legend .sw.green { border-color: var(--green); background: rgba(34,197,94,0.08); }
+    .legend .sw.neutral { border-color: var(--border-strong); background: var(--surface-2); }
+    .legend .sw.ext { border-color: var(--dim); background: transparent; border-style: dashed; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="pill">ARCHITECTURE · v0.1</span>
+    <h1>MJ Research — System Architecture</h1>
+    <p>Local-first AI research and portfolio workstation. Five diagrams that together describe how a ticker flows from browser click to AI committee thesis and back, plus how the whole stack is also exposed as an MCP server.</p>
+  </header>
+
+  <nav class="toc">
+    <a href="#overview">1 · System overview</a>
+    <a href="#data">2 · Multi-provider data layer</a>
+    <a href="#research">3 · AI research graph</a>
+    <a href="#lifecycle">4 · Request lifecycle</a>
+    <a href="#mcp">5 · MCP integration</a>
+    <a href="#deploy">6 · Deployment topology</a>
+  </nav>
+
+  <!-- =============================================================== -->
+  <!-- 1. SYSTEM OVERVIEW -->
+  <!-- =============================================================== -->
+  <section id="overview">
+    <h2>1 · System overview</h2>
+    <p class="lede">Three client surfaces (browser, CLI, Claude Desktop), one core stack. Everything local-first: Ollama runs the LLM; SQLite is the portfolio book; external APIs are called only when keys are configured.</p>
+    <div class="diagram">
+      <svg viewBox="0 0 1040 680" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#52525b"/>
+          </marker>
+          <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#3b82f6"/>
+          </marker>
+        </defs>
+
+        <!-- Clients row -->
+        <text x="40" y="28" class="cluster-label">Clients</text>
+        <rect x="40" y="40" width="960" height="100" class="node-rect cluster" rx="10"/>
+
+        <rect x="80" y="60" width="240" height="60" class="node-rect accent" rx="8"/>
+        <text x="200" y="85" text-anchor="middle" class="node-text">Web UI (React 19 + Vite)</text>
+        <text x="200" y="104" text-anchor="middle" class="node-sub">localhost:5173 · 5 routes · Recharts</text>
+
+        <rect x="400" y="60" width="240" height="60" class="node-rect" rx="8"/>
+        <text x="520" y="85" text-anchor="middle" class="node-text">CLI</text>
+        <text x="520" y="104" text-anchor="middle" class="node-sub">uv run check-data</text>
+
+        <rect x="720" y="60" width="240" height="60" class="node-rect accent" rx="8"/>
+        <text x="840" y="85" text-anchor="middle" class="node-text">Claude Desktop / Cursor</text>
+        <text x="840" y="104" text-anchor="middle" class="node-sub">MCP stdio transport</text>
+
+        <!-- HTTP / stdio -->
+        <line x1="200" y1="120" x2="200" y2="170" class="edge" marker-end="url(#arrow)"/>
+        <text x="212" y="148" class="edge-label">HTTP/JSON</text>
+        <line x1="520" y1="120" x2="520" y2="170" class="edge" marker-end="url(#arrow)"/>
+        <text x="532" y="148" class="edge-label">import</text>
+        <line x1="840" y1="120" x2="840" y2="170" class="edge accent" marker-end="url(#arrow-blue)"/>
+        <text x="852" y="148" class="edge-label">MCP · stdio</text>
+
+        <!-- API layer -->
+        <text x="40" y="195" class="cluster-label">API layer</text>
+        <rect x="40" y="205" width="960" height="90" class="node-rect cluster" rx="10"/>
+
+        <rect x="80" y="220" width="560" height="60" class="node-rect" rx="8"/>
+        <text x="360" y="245" text-anchor="middle" class="node-text">FastAPI — 7 route modules</text>
+        <text x="360" y="264" text-anchor="middle" class="node-sub">data · research · backtest · optimize · portfolio · screeners · simulation</text>
+
+        <rect x="720" y="220" width="240" height="60" class="node-rect accent" rx="8"/>
+        <text x="840" y="245" text-anchor="middle" class="node-text">FastMCP server</text>
+        <text x="840" y="264" text-anchor="middle" class="node-sub">7 tools · hedge-fund-mcp</text>
+
+        <!-- API → core -->
+        <line x1="360" y1="280" x2="360" y2="330" class="edge" marker-end="url(#arrow)"/>
+        <line x1="840" y1="280" x2="360" y2="330" class="edge" marker-end="url(#arrow)"/>
+
+        <!-- Core services -->
+        <text x="40" y="350" class="cluster-label">Core services</text>
+        <rect x="40" y="360" width="960" height="130" class="node-rect cluster" rx="10"/>
+
+        <rect x="60" y="380" width="180" height="90" class="node-rect" rx="8"/>
+        <text x="150" y="410" text-anchor="middle" class="node-text">DataService</text>
+        <text x="150" y="428" text-anchor="middle" class="node-sub">service.py</text>
+        <text x="150" y="448" text-anchor="middle" class="node-sub">price · fund · tech …</text>
+
+        <rect x="260" y="380" width="180" height="90" class="node-rect ai" rx="8"/>
+        <text x="350" y="410" text-anchor="middle" class="node-text">ResearchAgent</text>
+        <text x="350" y="428" text-anchor="middle" class="node-sub">13 personas</text>
+        <text x="350" y="448" text-anchor="middle" class="node-sub">parallel committee</text>
+
+        <rect x="460" y="380" width="180" height="90" class="node-rect" rx="8"/>
+        <text x="550" y="410" text-anchor="middle" class="node-text">Quant · Backtest</text>
+        <text x="550" y="428" text-anchor="middle" class="node-sub">6 strategies</text>
+        <text x="550" y="448" text-anchor="middle" class="node-sub">vectorized</text>
+
+        <rect x="660" y="380" width="180" height="90" class="node-rect" rx="8"/>
+        <text x="750" y="410" text-anchor="middle" class="node-text">Quant · Portfolio</text>
+        <text x="750" y="428" text-anchor="middle" class="node-sub">HRP · MV · Conv</text>
+        <text x="750" y="448" text-anchor="middle" class="node-sub">5 methods</text>
+
+        <rect x="860" y="380" width="120" height="90" class="node-rect" rx="8"/>
+        <text x="920" y="410" text-anchor="middle" class="node-text">Screeners</text>
+        <text x="920" y="428" text-anchor="middle" class="node-sub">Yartseva</text>
+        <text x="920" y="448" text-anchor="middle" class="node-sub">Acq-Comp</text>
+
+        <!-- Core → data + portfolio -->
+        <line x1="150" y1="470" x2="150" y2="540" class="edge" marker-end="url(#arrow)"/>
+        <line x1="350" y1="470" x2="350" y2="540" class="edge" marker-end="url(#arrow)"/>
+        <line x1="550" y1="470" x2="160" y2="540" class="edge" marker-end="url(#arrow)"/>
+        <line x1="750" y1="470" x2="170" y2="540" class="edge" marker-end="url(#arrow)"/>
+        <line x1="920" y1="470" x2="180" y2="540" class="edge" marker-end="url(#arrow)"/>
+
+        <!-- Persistence + external -->
+        <text x="40" y="558" class="cluster-label">Persistence · External</text>
+        <rect x="40" y="568" width="960" height="100" class="node-rect cluster" rx="10"/>
+
+        <rect x="60" y="586" width="180" height="70" class="node-rect data" rx="8"/>
+        <text x="150" y="610" text-anchor="middle" class="node-text">Provider Registry</text>
+        <text x="150" y="628" text-anchor="middle" class="node-sub">9 providers</text>
+        <text x="150" y="644" text-anchor="middle" class="node-sub">cache · rate-limit</text>
+
+        <rect x="260" y="586" width="160" height="70" class="node-rect" rx="8"/>
+        <text x="340" y="614" text-anchor="middle" class="node-text">SQLite book</text>
+        <text x="340" y="632" text-anchor="middle" class="node-sub">data/fund.db</text>
+
+        <rect x="440" y="586" width="160" height="70" class="node-rect ai" rx="8"/>
+        <text x="520" y="614" text-anchor="middle" class="node-text">Ollama</text>
+        <text x="520" y="632" text-anchor="middle" class="node-sub">localhost:11434</text>
+
+        <rect x="620" y="586" width="160" height="70" class="node-rect external" rx="8"/>
+        <text x="700" y="614" text-anchor="middle" class="node-text">OpenAI · optional</text>
+        <text x="700" y="632" text-anchor="middle" class="node-sub">uv sync --extra openai</text>
+
+        <rect x="800" y="586" width="180" height="70" class="node-rect external" rx="8"/>
+        <text x="890" y="614" text-anchor="middle" class="node-text">EDGAR · yfinance · …</text>
+        <text x="890" y="632" text-anchor="middle" class="node-sub">via Provider Registry</text>
+
+        <!-- Data → external -->
+        <line x1="150" y1="656" x2="890" y2="676" class="edge dashed"/>
+        <line x1="350" y1="470" x2="520" y2="586" class="edge" marker-end="url(#arrow)"/>
+      </svg>
+      <div class="legend">
+        <span class="chip"><span class="sw blue"></span>AI / LLM path</span>
+        <span class="chip"><span class="sw green"></span>Data layer</span>
+        <span class="chip"><span class="sw neutral"></span>Core service</span>
+        <span class="chip"><span class="sw ext"></span>External / optional</span>
+      </div>
+    </div>
+    <div class="notes">
+      Clients don't talk to core services directly — everything goes through FastAPI or FastMCP. This keeps the research graph,
+      backtester, optimizer, and screeners behind stable interfaces that both the web UI and Claude Desktop can use identically.
+    </div>
+  </section>
+
+  <!-- =============================================================== -->
+  <!-- 2. DATA LAYER -->
+  <!-- =============================================================== -->
+  <section id="data">
+    <h2>2 · Multi-provider data layer</h2>
+    <p class="lede">A single <code>ProviderRegistry</code> routes a <code>DataCategory</code> request through an ordered chain of providers, handling caching, rate limits, and graceful fallback. JSON config is authoritative for priority.</p>
+    <div class="diagram">
+      <svg viewBox="0 0 1040 660" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#52525b"/>
+          </marker>
+          <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#22c55e"/>
+          </marker>
+        </defs>
+
+        <!-- Caller -->
+        <rect x="60" y="30" width="200" height="60" class="node-rect accent" rx="8"/>
+        <text x="160" y="55" text-anchor="middle" class="node-text">DataService.get_*()</text>
+        <text x="160" y="74" text-anchor="middle" class="node-sub">typed facade</text>
+
+        <!-- Registry core -->
+        <rect x="340" y="30" width="320" height="60" class="node-rect data" rx="8"/>
+        <text x="500" y="55" text-anchor="middle" class="node-text">ProviderRegistry.get(category, key)</text>
+        <text x="500" y="74" text-anchor="middle" class="node-sub">_build_chains → priority-sorted per category</text>
+
+        <line x1="260" y1="60" x2="340" y2="60" class="edge accent" marker-end="url(#arrow-blue)"/>
+
+        <!-- Cache + rate limiter sidecars -->
+        <rect x="700" y="10" width="140" height="40" class="node-rect" rx="6"/>
+        <text x="770" y="34" text-anchor="middle" class="node-text sm">TTLCache</text>
+        <rect x="700" y="60" width="140" height="40" class="node-rect" rx="6"/>
+        <text x="770" y="84" text-anchor="middle" class="node-text sm">RateLimiter</text>
+        <line x1="660" y1="60" x2="700" y2="40" class="edge" marker-end="url(#arrow-2)"/>
+        <line x1="660" y1="60" x2="700" y2="80" class="edge" marker-end="url(#arrow-2)"/>
+
+        <!-- Chain fan-out -->
+        <line x1="500" y1="90" x2="500" y2="150" class="edge" marker-end="url(#arrow-2)"/>
+        <text x="515" y="125" class="edge-label">for p in chain[cat]</text>
+
+        <text x="40" y="170" class="cluster-label">Provider chain (ordered by priority — config/providers.json)</text>
+        <rect x="40" y="180" width="960" height="140" class="node-rect cluster" rx="10"/>
+
+        <rect x="60" y="200" width="130" height="100" class="node-rect" rx="6"/>
+        <text x="125" y="222" text-anchor="middle" class="node-text sm">openbb</text>
+        <text x="125" y="240" text-anchor="middle" class="node-sub">p = 0</text>
+        <text x="125" y="260" text-anchor="middle" class="node-sub">price · fund</text>
+        <text x="125" y="275" text-anchor="middle" class="node-sub">tech · news</text>
+
+        <rect x="200" y="200" width="130" height="100" class="node-rect accent" rx="6"/>
+        <text x="265" y="222" text-anchor="middle" class="node-text sm">edgar</text>
+        <text x="265" y="240" text-anchor="middle" class="node-sub">p = 1</text>
+        <text x="265" y="260" text-anchor="middle" class="node-sub">filings · peers</text>
+        <text x="265" y="275" text-anchor="middle" class="node-sub">SIC group</text>
+
+        <rect x="340" y="200" width="130" height="100" class="node-rect" rx="6"/>
+        <text x="405" y="222" text-anchor="middle" class="node-text sm">pandas-dr</text>
+        <text x="405" y="240" text-anchor="middle" class="node-sub">p = 1</text>
+        <text x="405" y="260" text-anchor="middle" class="node-sub">macro · FRED</text>
+        <text x="405" y="275" text-anchor="middle" class="node-sub">Fama-French</text>
+
+        <rect x="480" y="200" width="130" height="100" class="node-rect" rx="6"/>
+        <text x="545" y="222" text-anchor="middle" class="node-text sm">yfinance</text>
+        <text x="545" y="240" text-anchor="middle" class="node-sub">p = 2</text>
+        <text x="545" y="260" text-anchor="middle" class="node-sub">earnings · opts</text>
+        <text x="545" y="275" text-anchor="middle" class="node-sub">insider · inst</text>
+
+        <rect x="620" y="200" width="130" height="100" class="node-rect" rx="6"/>
+        <text x="685" y="222" text-anchor="middle" class="node-text sm">finnhub</text>
+        <text x="685" y="240" text-anchor="middle" class="node-sub">p = 2 · key</text>
+        <text x="685" y="260" text-anchor="middle" class="node-sub">ESG · congress</text>
+        <text x="685" y="275" text-anchor="middle" class="node-sub">sentiment</text>
+
+        <rect x="760" y="200" width="110" height="100" class="node-rect" rx="6"/>
+        <text x="815" y="222" text-anchor="middle" class="node-text sm">twelvedata</text>
+        <text x="815" y="240" text-anchor="middle" class="node-sub">p = 3 · key</text>
+        <text x="815" y="260" text-anchor="middle" class="node-sub">price</text>
+        <text x="815" y="275" text-anchor="middle" class="node-sub">technicals</text>
+
+        <rect x="880" y="200" width="100" height="100" class="node-rect" rx="6"/>
+        <text x="930" y="222" text-anchor="middle" class="node-text sm">alpha_v</text>
+        <text x="930" y="240" text-anchor="middle" class="node-sub">p = 4 · key</text>
+        <text x="930" y="260" text-anchor="middle" class="node-sub">sectors</text>
+        <text x="930" y="275" text-anchor="middle" class="node-sub">price</text>
+
+        <!-- External endpoints -->
+        <line x1="125" y1="300" x2="125" y2="370" class="edge dashed" marker-end="url(#arrow-2)"/>
+        <line x1="265" y1="300" x2="265" y2="370" class="edge dashed" marker-end="url(#arrow-2)"/>
+        <line x1="405" y1="300" x2="405" y2="370" class="edge dashed" marker-end="url(#arrow-2)"/>
+        <line x1="545" y1="300" x2="545" y2="370" class="edge dashed" marker-end="url(#arrow-2)"/>
+        <line x1="685" y1="300" x2="685" y2="370" class="edge dashed" marker-end="url(#arrow-2)"/>
+        <line x1="815" y1="300" x2="815" y2="370" class="edge dashed" marker-end="url(#arrow-2)"/>
+        <line x1="930" y1="300" x2="930" y2="370" class="edge dashed" marker-end="url(#arrow-2)"/>
+
+        <text x="40" y="390" class="cluster-label">External endpoints</text>
+        <rect x="40" y="400" width="960" height="80" class="node-rect cluster" rx="10"/>
+
+        <rect x="60" y="415" width="130" height="50" class="node-rect external" rx="6"/>
+        <text x="125" y="435" text-anchor="middle" class="node-text sm">OpenBB OSS</text>
+        <text x="125" y="454" text-anchor="middle" class="node-sub">local pkg</text>
+
+        <rect x="200" y="415" width="130" height="50" class="node-rect external" rx="6"/>
+        <text x="265" y="435" text-anchor="middle" class="node-text sm">SEC EDGAR</text>
+        <text x="265" y="454" text-anchor="middle" class="node-sub">data.sec.gov · free</text>
+
+        <rect x="340" y="415" width="130" height="50" class="node-rect external" rx="6"/>
+        <text x="405" y="435" text-anchor="middle" class="node-text sm">FRED (St Louis)</text>
+        <text x="405" y="454" text-anchor="middle" class="node-sub">fred.stlouisfed.org</text>
+
+        <rect x="480" y="415" width="130" height="50" class="node-rect external" rx="6"/>
+        <text x="545" y="435" text-anchor="middle" class="node-text sm">Yahoo Finance</text>
+        <text x="545" y="454" text-anchor="middle" class="node-sub">yfinance scrape</text>
+
+        <rect x="620" y="415" width="130" height="50" class="node-rect external" rx="6"/>
+        <text x="685" y="435" text-anchor="middle" class="node-text sm">Finnhub API</text>
+        <text x="685" y="454" text-anchor="middle" class="node-sub">finnhub.io · key</text>
+
+        <rect x="760" y="415" width="110" height="50" class="node-rect external" rx="6"/>
+        <text x="815" y="435" text-anchor="middle" class="node-text sm">Twelve Data</text>
+        <text x="815" y="454" text-anchor="middle" class="node-sub">twelvedata.com</text>
+
+        <rect x="880" y="415" width="100" height="50" class="node-rect external" rx="6"/>
+        <text x="930" y="435" text-anchor="middle" class="node-text sm">Alpha V.</text>
+        <text x="930" y="454" text-anchor="middle" class="node-sub">alphavantage.co</text>
+
+        <!-- Flow semantics box -->
+        <rect x="40" y="510" width="960" height="130" class="node-rect cluster" rx="10"/>
+        <text x="40" y="502" class="cluster-label">Flow semantics</text>
+
+        <rect x="60" y="530" width="220" height="90" class="node-rect" rx="8"/>
+        <text x="170" y="552" text-anchor="middle" class="node-text sm">① Cache check (TTL)</text>
+        <text x="170" y="572" text-anchor="middle" class="node-sub">key = ticker[|end=…|days=…]</text>
+        <text x="170" y="590" text-anchor="middle" class="node-sub">PEERS · 24h</text>
+        <text x="170" y="605" text-anchor="middle" class="node-sub">INSIDER · 1h</text>
+
+        <rect x="300" y="530" width="220" height="90" class="node-rect" rx="8"/>
+        <text x="410" y="552" text-anchor="middle" class="node-text sm">② Rate-limit acquire</text>
+        <text x="410" y="572" text-anchor="middle" class="node-sub">per-provider token bucket</text>
+        <text x="410" y="590" text-anchor="middle" class="node-sub">RPM from config</text>
+        <text x="410" y="605" text-anchor="middle" class="node-sub">(ex: EDGAR 300, Finnhub 60)</text>
+
+        <rect x="540" y="530" width="220" height="90" class="node-rect" rx="8"/>
+        <text x="650" y="552" text-anchor="middle" class="node-text sm">③ Provider.fetch()</text>
+        <text x="650" y="572" text-anchor="middle" class="node-sub">if None / raises →</text>
+        <text x="650" y="590" text-anchor="middle" class="node-sub">next provider in chain</text>
+        <text x="650" y="605" text-anchor="middle" class="node-sub">(graceful fallback)</text>
+
+        <rect x="780" y="530" width="220" height="90" class="node-rect" rx="8"/>
+        <text x="890" y="552" text-anchor="middle" class="node-text sm">④ Cache.set + return</text>
+        <text x="890" y="572" text-anchor="middle" class="node-sub">Pydantic model or dict</text>
+        <text x="890" y="590" text-anchor="middle" class="node-sub">None if all failed</text>
+        <text x="890" y="605" text-anchor="middle" class="node-sub">(caller decides)</text>
+      </svg>
+      <div class="legend">
+        <span class="chip"><span class="sw green"></span>Registry · cache · limiter</span>
+        <span class="chip"><span class="sw blue"></span>Primary for a category</span>
+        <span class="chip"><span class="sw neutral"></span>Secondary / fallback</span>
+        <span class="chip"><span class="sw ext"></span>External API / package</span>
+      </div>
+    </div>
+    <div class="notes">
+      <ul>
+        <li><code>DataCategory</code> has 17 values (PRICE, FUNDAMENTALS, TECHNICALS, MACRO, NEWS, ESG, INSIDER, INSTITUTIONAL, EARNINGS, ANALYST, SENTIMENT, SECTOR_PERFORMANCE, FAMA_FRENCH, OPTIONS, SEC_FILINGS, CONGRESSIONAL, PEERS).</li>
+        <li>Priority is read from <code>config/providers.json</code> and overrides the class-level default — change it there, not in code.</li>
+        <li>Providers self-register via <code>BaseProvider.__init_subclass__</code>; adding a new one is two files (<code>providers/foo.py</code> + config entry).</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================================================== -->
+  <!-- 3. AI RESEARCH GRAPH -->
+  <!-- =============================================================== -->
+  <section id="research">
+    <h2>3 · AI research graph (fan-out → reduce)</h2>
+    <p class="lede">Committee mode fans the same market snapshot out to N named investor personas in parallel, then reduces their JSON analyses into a single Portfolio Manager synthesis. Execution model: <code>parallel_fanout_then_reduce</code>.</p>
+    <div class="diagram">
+      <svg viewBox="0 0 1040 540" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#3b82f6"/>
+          </marker>
+        </defs>
+
+        <!-- Input -->
+        <rect x="60" y="220" width="200" height="100" class="node-rect data" rx="10"/>
+        <text x="160" y="250" text-anchor="middle" class="node-text">Market snapshot</text>
+        <text x="160" y="268" text-anchor="middle" class="node-sub">price · fundamentals</text>
+        <text x="160" y="283" text-anchor="middle" class="node-sub">technicals · news</text>
+        <text x="160" y="298" text-anchor="middle" class="node-sub">FinBERT sentiment</text>
+        <text x="160" y="313" text-anchor="middle" class="node-sub">[ alt data ]</text>
+
+        <!-- Fan-out arrows -->
+        <path d="M260,260 C340,260 360,120 450,120" class="edge accent" fill="none" marker-end="url(#arrow-r)"/>
+        <path d="M260,270 C340,270 360,220 450,220" class="edge accent" fill="none" marker-end="url(#arrow-r)"/>
+        <path d="M260,280 C340,280 360,320 450,320" class="edge accent" fill="none" marker-end="url(#arrow-r)"/>
+        <path d="M260,290 C340,290 360,420 450,420" class="edge accent" fill="none" marker-end="url(#arrow-r)"/>
+
+        <text x="330" y="108" class="edge-label">asyncio.gather(*tasks)</text>
+
+        <!-- Persona nodes -->
+        <rect x="450" y="90" width="210" height="60" class="node-rect ai" rx="8"/>
+        <text x="555" y="114" text-anchor="middle" class="node-text">Warren Buffett</text>
+        <text x="555" y="132" text-anchor="middle" class="node-sub">"wonderful biz at fair price"</text>
+
+        <rect x="450" y="190" width="210" height="60" class="node-rect ai" rx="8"/>
+        <text x="555" y="214" text-anchor="middle" class="node-text">Ben Graham</text>
+        <text x="555" y="232" text-anchor="middle" class="node-sub">"margin of safety"</text>
+
+        <rect x="450" y="290" width="210" height="60" class="node-rect ai" rx="8"/>
+        <text x="555" y="314" text-anchor="middle" class="node-text">Cathie Wood</text>
+        <text x="555" y="332" text-anchor="middle" class="node-sub">"disruptive innovation"</text>
+
+        <rect x="450" y="390" width="210" height="60" class="node-rect ai" rx="8"/>
+        <text x="555" y="414" text-anchor="middle" class="node-text">Michael Burry</text>
+        <text x="555" y="432" text-anchor="middle" class="node-sub">"asymmetric payoff"</text>
+
+        <!-- Each persona hits Ollama -->
+        <line x1="660" y1="120" x2="720" y2="120" class="edge dashed" marker-end="url(#arrow-r)"/>
+        <line x1="660" y1="220" x2="720" y2="220" class="edge dashed" marker-end="url(#arrow-r)"/>
+        <line x1="660" y1="320" x2="720" y2="320" class="edge dashed" marker-end="url(#arrow-r)"/>
+        <line x1="660" y1="420" x2="720" y2="420" class="edge dashed" marker-end="url(#arrow-r)"/>
+
+        <rect x="720" y="100" width="120" height="40" class="node-rect" rx="6"/>
+        <text x="780" y="124" text-anchor="middle" class="node-text sm">Ollama chat</text>
+        <rect x="720" y="200" width="120" height="40" class="node-rect" rx="6"/>
+        <text x="780" y="224" text-anchor="middle" class="node-text sm">Ollama chat</text>
+        <rect x="720" y="300" width="120" height="40" class="node-rect" rx="6"/>
+        <text x="780" y="324" text-anchor="middle" class="node-text sm">Ollama chat</text>
+        <rect x="720" y="400" width="120" height="40" class="node-rect" rx="6"/>
+        <text x="780" y="424" text-anchor="middle" class="node-text sm">Ollama chat</text>
+
+        <!-- Fan-in to synthesis -->
+        <path d="M840,120 C900,120 900,220 870,240" class="edge accent" fill="none"/>
+        <path d="M840,220 C880,220 880,250 870,260" class="edge accent" fill="none"/>
+        <path d="M840,320 C880,320 880,290 870,280" class="edge accent" fill="none"/>
+        <path d="M840,420 C900,420 900,320 870,300" class="edge accent" fill="none"/>
+        <line x1="870" y1="260" x2="280" y2="260" class="edge accent"/>
+        <path d="M280,260 L300,260" class="edge accent"/>
+
+        <!-- Synthesis node -->
+        <text x="310" y="380" class="cluster-label">Reduce step</text>
+        <rect x="310" y="390" width="200" height="80" class="node-rect ai" rx="10"/>
+        <text x="410" y="418" text-anchor="middle" class="node-text">Portfolio Manager</text>
+        <text x="410" y="436" text-anchor="middle" class="node-sub">synthesize n analyses →</text>
+        <text x="410" y="452" text-anchor="middle" class="node-sub">conviction · stance · thesis</text>
+
+        <line x1="510" y1="430" x2="570" y2="460" class="edge accent" marker-end="url(#arrow-r)"/>
+
+        <!-- Output -->
+        <rect x="580" y="430" width="200" height="80" class="node-rect output" rx="10"/>
+        <text x="680" y="458" text-anchor="middle" class="node-text">Committee thesis</text>
+        <text x="680" y="476" text-anchor="middle" class="node-sub">+ per-persona cards</text>
+        <text x="680" y="492" text-anchor="middle" class="node-sub">+ eval + usage</text>
+
+        <!-- Annotations -->
+        <text x="910" y="30" class="cluster-label" text-anchor="end">Observed ~24s for 4 personas (AAPL · llama3.2)</text>
+      </svg>
+      <div class="legend">
+        <span class="chip"><span class="sw blue"></span>AI node (Ollama)</span>
+        <span class="chip"><span class="sw green"></span>Data / output node</span>
+        <span class="chip"><span class="sw neutral"></span>External call</span>
+      </div>
+    </div>
+    <div class="notes">
+      Before parallelization, a 4-persona committee was 4 sequential LLM calls plus synthesis — roughly 60–80s on <code>llama3.2</code>. With
+      <code>asyncio.gather</code> fan-out the personas run concurrently: measured 24.3s wall-clock for AAPL with 4 successful persona analyses
+      and a successful PM synthesis. <code>GET /api/research/graph</code> returns this exact topology as JSON for UI rendering.
+    </div>
+  </section>
+
+  <!-- =============================================================== -->
+  <!-- 4. REQUEST LIFECYCLE -->
+  <!-- =============================================================== -->
+  <section id="lifecycle">
+    <h2>4 · Request lifecycle — "research a ticker with committee"</h2>
+    <p class="lede">Sequence diagram of a single research call, from browser click through to rendered committee cards and Signal Intelligence callouts.</p>
+    <div class="diagram">
+      <svg viewBox="0 0 1040 580" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow-seq" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#3b82f6"/>
+          </marker>
+        </defs>
+        <!-- Lifelines -->
+        <rect x="30" y="30" width="120" height="40" class="node-rect accent" rx="6"/>
+        <text x="90" y="54" text-anchor="middle" class="node-text sm">User / Browser</text>
+        <line x1="90" y1="70" x2="90" y2="550" class="edge dashed"/>
+
+        <rect x="200" y="30" width="140" height="40" class="node-rect" rx="6"/>
+        <text x="270" y="54" text-anchor="middle" class="node-text sm">ResearchReport.tsx</text>
+        <line x1="270" y1="70" x2="270" y2="550" class="edge dashed"/>
+
+        <rect x="390" y="30" width="140" height="40" class="node-rect" rx="6"/>
+        <text x="460" y="54" text-anchor="middle" class="node-text sm">FastAPI · /check</text>
+        <line x1="460" y1="70" x2="460" y2="550" class="edge dashed"/>
+
+        <rect x="580" y="30" width="140" height="40" class="node-rect" rx="6"/>
+        <text x="650" y="54" text-anchor="middle" class="node-text sm">DataService</text>
+        <line x1="650" y1="70" x2="650" y2="550" class="edge dashed"/>
+
+        <rect x="770" y="30" width="140" height="40" class="node-rect ai" rx="6"/>
+        <text x="840" y="54" text-anchor="middle" class="node-text sm">ResearchAgent</text>
+        <line x1="840" y1="70" x2="840" y2="550" class="edge dashed"/>
+
+        <rect x="920" y="30" width="90" height="40" class="node-rect" rx="6"/>
+        <text x="965" y="54" text-anchor="middle" class="node-text sm">Ollama</text>
+        <line x1="965" y1="70" x2="965" y2="550" class="edge dashed"/>
+
+        <!-- Messages -->
+        <line x1="90" y1="100" x2="270" y2="100" class="edge accent" marker-end="url(#arrow-seq)"/>
+        <text x="175" y="94" text-anchor="middle" class="edge-label">click "Run AI thesis" + Committee</text>
+
+        <line x1="270" y1="130" x2="460" y2="130" class="edge accent" marker-end="url(#arrow-seq)"/>
+        <text x="363" y="124" text-anchor="middle" class="edge-label">POST /api/research/check {includeAi:true, committee:true}</text>
+
+        <line x1="460" y1="160" x2="650" y2="160" class="edge" marker-end="url(#arrow-seq)"/>
+        <text x="553" y="154" text-anchor="middle" class="edge-label">assemble_research_snapshot(ticker)</text>
+
+        <line x1="650" y1="180" x2="650" y2="210" class="edge"/>
+        <rect x="620" y="185" width="60" height="22" class="node-rect" rx="3"/>
+        <text x="650" y="201" text-anchor="middle" class="node-sub">cached?</text>
+
+        <line x1="650" y1="240" x2="460" y2="240" class="edge" marker-end="url(#arrow-seq)"/>
+        <text x="553" y="234" text-anchor="middle" class="edge-label">snapshot</text>
+
+        <line x1="460" y1="270" x2="840" y2="270" class="edge accent" marker-end="url(#arrow-seq)"/>
+        <text x="650" y="264" text-anchor="middle" class="edge-label">await run_committee_analysis(tkr, snap, personas)</text>
+
+        <!-- Parallel zone -->
+        <rect x="830" y="290" width="180" height="130" fill="none" stroke="#3b82f6" stroke-dasharray="4 3" rx="6"/>
+        <text x="920" y="308" text-anchor="middle" class="cluster-label" fill="#3b82f6">parallel · asyncio.gather</text>
+
+        <line x1="840" y1="330" x2="965" y2="330" class="edge accent" marker-end="url(#arrow-seq)"/>
+        <text x="902" y="324" text-anchor="middle" class="edge-label">Buffett prompt</text>
+
+        <line x1="840" y1="355" x2="965" y2="355" class="edge accent" marker-end="url(#arrow-seq)"/>
+        <text x="902" y="349" text-anchor="middle" class="edge-label">Graham prompt</text>
+
+        <line x1="840" y1="380" x2="965" y2="380" class="edge accent" marker-end="url(#arrow-seq)"/>
+        <text x="902" y="374" text-anchor="middle" class="edge-label">Wood prompt</text>
+
+        <line x1="840" y1="405" x2="965" y2="405" class="edge accent" marker-end="url(#arrow-seq)"/>
+        <text x="902" y="399" text-anchor="middle" class="edge-label">Burry prompt</text>
+
+        <line x1="965" y1="432" x2="840" y2="432" class="edge accent" marker-end="url(#arrow-seq)"/>
+        <text x="902" y="426" text-anchor="middle" class="edge-label">4 × JSON analyses</text>
+
+        <line x1="840" y1="460" x2="965" y2="460" class="edge accent" marker-end="url(#arrow-seq)"/>
+        <text x="902" y="454" text-anchor="middle" class="edge-label">PM synthesis prompt</text>
+
+        <line x1="965" y1="485" x2="840" y2="485" class="edge accent" marker-end="url(#arrow-seq)"/>
+        <text x="902" y="479" text-anchor="middle" class="edge-label">thesis JSON</text>
+
+        <line x1="840" y1="510" x2="460" y2="510" class="edge accent" marker-end="url(#arrow-seq)"/>
+        <text x="650" y="504" text-anchor="middle" class="edge-label">ResearchCheckResponse</text>
+
+        <line x1="460" y1="535" x2="270" y2="535" class="edge accent" marker-end="url(#arrow-seq)"/>
+        <text x="365" y="529" text-anchor="middle" class="edge-label">200 OK (committee + synthesis + usage)</text>
+      </svg>
+      <div class="legend">
+        <span class="chip"><span class="sw blue"></span>AI / LLM path</span>
+        <span class="chip"><span class="sw neutral"></span>Standard call</span>
+      </div>
+    </div>
+    <div class="notes">
+      The UI also fires <code>GET /api/data/analyst/{t}</code> and <code>GET /api/data/sentiment/{t}</code> in parallel so the
+      <strong>Signal Intelligence</strong> panel can show non-consensus callouts (contrarian to analysts, buying pessimism, unusual buzz)
+      as soon as the AI thesis returns — it's purely frontend logic from the union of those responses.
+    </div>
+  </section>
+
+  <!-- =============================================================== -->
+  <!-- 5. MCP INTEGRATION -->
+  <!-- =============================================================== -->
+  <section id="mcp">
+    <h2>5 · MCP integration — Claude Desktop / Cursor</h2>
+    <p class="lede">The same core services are wrapped as MCP tools in <code>hedge_fund/mcp/server.py</code> and served via the <code>hedge-fund-mcp</code> script entrypoint. Claude Desktop spawns it over stdio.</p>
+    <div class="diagram">
+      <svg viewBox="0 0 1040 480" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow-m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#3b82f6"/>
+          </marker>
+        </defs>
+
+        <rect x="40" y="40" width="240" height="100" class="node-rect accent" rx="10"/>
+        <text x="160" y="70" text-anchor="middle" class="node-text">Claude Desktop</text>
+        <text x="160" y="90" text-anchor="middle" class="node-sub">claude_desktop_config.json</text>
+        <text x="160" y="108" text-anchor="middle" class="node-sub">"command": "uv"</text>
+        <text x="160" y="124" text-anchor="middle" class="node-sub">"args": ["run", "hedge-fund-mcp"]</text>
+
+        <line x1="280" y1="90" x2="390" y2="90" class="edge accent" marker-end="url(#arrow-m)"/>
+        <text x="335" y="80" text-anchor="middle" class="edge-label">spawn · stdio</text>
+
+        <rect x="390" y="40" width="240" height="100" class="node-rect ai" rx="10"/>
+        <text x="510" y="70" text-anchor="middle" class="node-text">FastMCP server</text>
+        <text x="510" y="90" text-anchor="middle" class="node-sub">mcp.server.fastmcp</text>
+        <text x="510" y="108" text-anchor="middle" class="node-sub">@mcp.tool() × 7</text>
+        <text x="510" y="124" text-anchor="middle" class="node-sub">initialize → list_tools → call_tool</text>
+
+        <line x1="630" y1="90" x2="740" y2="90" class="edge accent" marker-end="url(#arrow-m)"/>
+        <text x="685" y="80" text-anchor="middle" class="edge-label">in-process import</text>
+
+        <rect x="740" y="40" width="240" height="100" class="node-rect" rx="10"/>
+        <text x="860" y="70" text-anchor="middle" class="node-text">Core modules</text>
+        <text x="860" y="90" text-anchor="middle" class="node-sub">DataService · ResearchAgent</text>
+        <text x="860" y="108" text-anchor="middle" class="node-sub">quant/backtest · quant/portfolio</text>
+        <text x="860" y="124" text-anchor="middle" class="node-sub">orchestration.describe_graph</text>
+
+        <!-- Tools row -->
+        <text x="40" y="185" class="cluster-label">Exposed tools</text>
+        <rect x="40" y="195" width="960" height="250" class="node-rect cluster" rx="10"/>
+
+        <rect x="60" y="215" width="220" height="85" class="node-rect ai" rx="8"/>
+        <text x="170" y="238" text-anchor="middle" class="node-text">research_ticker</text>
+        <text x="170" y="256" text-anchor="middle" class="node-sub">mode: committee | persona</text>
+        <text x="170" y="272" text-anchor="middle" class="node-sub">→ parallel LLM committee</text>
+        <text x="170" y="288" text-anchor="middle" class="node-sub">→ PM synthesis</text>
+
+        <rect x="300" y="215" width="220" height="85" class="node-rect" rx="8"/>
+        <text x="410" y="238" text-anchor="middle" class="node-text">get_market_data</text>
+        <text x="410" y="256" text-anchor="middle" class="node-sub">price + fund + tech +</text>
+        <text x="410" y="272" text-anchor="middle" class="node-sub">news + sentiment</text>
+        <text x="410" y="288" text-anchor="middle" class="node-sub">days: 30..3650</text>
+
+        <rect x="540" y="215" width="220" height="85" class="node-rect" rx="8"/>
+        <text x="650" y="238" text-anchor="middle" class="node-text">get_sec_filings</text>
+        <text x="650" y="256" text-anchor="middle" class="node-sub">via EDGAR</text>
+        <text x="650" y="272" text-anchor="middle" class="node-sub">10-K · 10-Q · 8-K · 4 · 13F</text>
+        <text x="650" y="288" text-anchor="middle" class="node-sub">sec.gov URLs</text>
+
+        <rect x="780" y="215" width="200" height="85" class="node-rect" rx="8"/>
+        <text x="880" y="238" text-anchor="middle" class="node-text">get_peers</text>
+        <text x="880" y="256" text-anchor="middle" class="node-sub">SIC-classified</text>
+        <text x="880" y="272" text-anchor="middle" class="node-sub">+ yfinance metrics</text>
+        <text x="880" y="288" text-anchor="middle" class="node-sub">ranked by cap</text>
+
+        <rect x="60" y="320" width="220" height="85" class="node-rect" rx="8"/>
+        <text x="170" y="343" text-anchor="middle" class="node-text">run_backtest_tool</text>
+        <text x="170" y="361" text-anchor="middle" class="node-sub">6 strategies</text>
+        <text x="170" y="377" text-anchor="middle" class="node-sub">no look-ahead · fees</text>
+        <text x="170" y="393" text-anchor="middle" class="node-sub">metrics + trade log</text>
+
+        <rect x="300" y="320" width="220" height="85" class="node-rect" rx="8"/>
+        <text x="410" y="343" text-anchor="middle" class="node-text">optimize_portfolio</text>
+        <text x="410" y="361" text-anchor="middle" class="node-sub">HRP · MV · Conv · InvVol · 1/N</text>
+        <text x="410" y="377" text-anchor="middle" class="node-sub">convictions (optional)</text>
+        <text x="410" y="393" text-anchor="middle" class="node-sub">vs equal-weight</text>
+
+        <rect x="540" y="320" width="220" height="85" class="node-rect" rx="8"/>
+        <text x="650" y="343" text-anchor="middle" class="node-text">describe_research_graph</text>
+        <text x="650" y="361" text-anchor="middle" class="node-sub">nodes + edges JSON</text>
+        <text x="650" y="377" text-anchor="middle" class="node-sub">persona pool</text>
+        <text x="650" y="393" text-anchor="middle" class="node-sub">execution_model</text>
+
+        <rect x="780" y="320" width="200" height="85" class="node-rect" rx="8"/>
+        <text x="880" y="343" text-anchor="middle" class="node-text">(future)</text>
+        <text x="880" y="361" text-anchor="middle" class="node-sub">form-4 parser</text>
+        <text x="880" y="377" text-anchor="middle" class="node-sub">13F delta</text>
+        <text x="880" y="393" text-anchor="middle" class="node-sub">agent chains</text>
+      </svg>
+      <div class="legend">
+        <span class="chip"><span class="sw blue"></span>AI / MCP surface</span>
+        <span class="chip"><span class="sw neutral"></span>Data / quant tool</span>
+      </div>
+    </div>
+    <div class="notes">
+      Same core, two front doors. Anything the Web UI can do, Claude Desktop can do by calling these tools — and vice versa.
+      The MCP server uses FastMCP's <code>@mcp.tool()</code> decorator, so adding a new tool is literally one function.
+    </div>
+  </section>
+
+  <!-- =============================================================== -->
+  <!-- 6. DEPLOYMENT -->
+  <!-- =============================================================== -->
+  <section id="deploy">
+    <h2>6 · Deployment topology</h2>
+    <p class="lede">Dev and prod layouts. "Local-first" means the default path has zero cloud dependencies — the full stack runs on your laptop with Ollama for the LLM.</p>
+    <div class="diagram">
+      <svg viewBox="0 0 1040 420" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#52525b"/>
+          </marker>
+        </defs>
+
+        <!-- Local dev -->
+        <text x="60" y="30" class="cluster-label">A · Local dev (default)</text>
+        <rect x="40" y="40" width="460" height="170" class="node-rect cluster" rx="10"/>
+
+        <rect x="60" y="60" width="140" height="40" class="node-rect accent" rx="6"/>
+        <text x="130" y="85" text-anchor="middle" class="node-text sm">Browser</text>
+        <rect x="220" y="60" width="140" height="40" class="node-rect" rx="6"/>
+        <text x="290" y="85" text-anchor="middle" class="node-text sm">Vite dev :5173</text>
+        <rect x="380" y="60" width="100" height="40" class="node-rect" rx="6"/>
+        <text x="430" y="85" text-anchor="middle" class="node-text sm">Ollama</text>
+        <line x1="200" y1="80" x2="220" y2="80" class="edge" marker-end="url(#arrow-d)"/>
+
+        <rect x="60" y="130" width="140" height="40" class="node-rect" rx="6"/>
+        <text x="130" y="155" text-anchor="middle" class="node-text sm">FastAPI :8000</text>
+        <rect x="220" y="130" width="140" height="40" class="node-rect" rx="6"/>
+        <text x="290" y="155" text-anchor="middle" class="node-text sm">SQLite fund.db</text>
+        <rect x="380" y="130" width="100" height="40" class="node-rect" rx="6"/>
+        <text x="430" y="155" text-anchor="middle" class="node-text sm">:11434</text>
+
+        <line x1="290" y1="100" x2="200" y2="130" class="edge" marker-end="url(#arrow-d)"/>
+        <line x1="200" y1="150" x2="220" y2="150" class="edge" marker-end="url(#arrow-d)"/>
+        <line x1="360" y1="150" x2="380" y2="150" class="edge" marker-end="url(#arrow-d)"/>
+        <line x1="360" y1="80" x2="380" y2="80" class="edge dashed" marker-end="url(#arrow-d)"/>
+        <text x="370" y="112" class="edge-label">optional</text>
+
+        <!-- Optional API keys -->
+        <text x="60" y="196" class="node-sub">+ optional: FINNHUB_API_KEY · SEC_USER_AGENT · TWELVEDATA · ALPHA_VANTAGE</text>
+
+        <!-- Docker / Railway -->
+        <text x="560" y="30" class="cluster-label">B · Railway / Docker (one-image)</text>
+        <rect x="540" y="40" width="460" height="170" class="node-rect cluster" rx="10"/>
+
+        <rect x="560" y="60" width="140" height="40" class="node-rect accent" rx="6"/>
+        <text x="630" y="85" text-anchor="middle" class="node-text sm">Public URL</text>
+        <rect x="720" y="60" width="260" height="40" class="node-rect" rx="6"/>
+        <text x="850" y="85" text-anchor="middle" class="node-text sm">FastAPI + Vite dist (same port)</text>
+
+        <line x1="700" y1="80" x2="720" y2="80" class="edge" marker-end="url(#arrow-d)"/>
+
+        <rect x="560" y="130" width="140" height="40" class="node-rect" rx="6"/>
+        <text x="630" y="155" text-anchor="middle" class="node-text sm">STATIC_DIR</text>
+        <rect x="720" y="130" width="140" height="40" class="node-rect" rx="6"/>
+        <text x="790" y="155" text-anchor="middle" class="node-text sm">SQLite (volume)</text>
+        <rect x="880" y="130" width="100" height="40" class="node-rect external" rx="6"/>
+        <text x="930" y="155" text-anchor="middle" class="node-text sm">OpenAI</text>
+
+        <line x1="700" y1="150" x2="720" y2="150" class="edge" marker-end="url(#arrow-d)"/>
+        <line x1="860" y1="150" x2="880" y2="150" class="edge dashed" marker-end="url(#arrow-d)"/>
+
+        <text x="560" y="196" class="node-sub">Dockerfile · railway.toml · Sentry hooks · /api/health ping · FRONTEND_URL CORS</text>
+
+        <!-- MCP surface -->
+        <text x="40" y="240" class="cluster-label">C · MCP surface (separate process)</text>
+        <rect x="40" y="250" width="960" height="150" class="node-rect cluster" rx="10"/>
+
+        <rect x="60" y="275" width="180" height="50" class="node-rect accent" rx="6"/>
+        <text x="150" y="299" text-anchor="middle" class="node-text sm">Claude Desktop</text>
+        <text x="150" y="316" text-anchor="middle" class="node-sub">~/Library/.../claude_desktop_config.json</text>
+
+        <line x1="240" y1="300" x2="310" y2="300" class="edge accent" marker-end="url(#arrow-d)"/>
+
+        <rect x="310" y="275" width="200" height="50" class="node-rect ai" rx="6"/>
+        <text x="410" y="299" text-anchor="middle" class="node-text sm">uv run hedge-fund-mcp</text>
+        <text x="410" y="316" text-anchor="middle" class="node-sub">stdio · JSON-RPC</text>
+
+        <line x1="510" y1="300" x2="580" y2="300" class="edge" marker-end="url(#arrow-d)"/>
+
+        <rect x="580" y="275" width="200" height="50" class="node-rect" rx="6"/>
+        <text x="680" y="299" text-anchor="middle" class="node-text sm">in-process imports</text>
+        <text x="680" y="316" text-anchor="middle" class="node-sub">same core as FastAPI</text>
+
+        <line x1="780" y1="300" x2="850" y2="300" class="edge" marker-end="url(#arrow-d)"/>
+
+        <rect x="850" y="275" width="130" height="50" class="node-rect" rx="6"/>
+        <text x="915" y="299" text-anchor="middle" class="node-text sm">SQLite + APIs</text>
+        <text x="915" y="316" text-anchor="middle" class="node-sub">shared state</text>
+
+        <text x="60" y="360" class="node-sub">The MCP server doesn't need FastAPI — it imports the same modules directly. So Claude</text>
+        <text x="60" y="376" class="node-sub">Desktop can research a ticker even when the web server isn't running. Both write to the</text>
+        <text x="60" y="392" class="node-sub">same SQLite book, so running them simultaneously stays consistent.</text>
+      </svg>
+      <div class="legend">
+        <span class="chip"><span class="sw blue"></span>Entrypoint / user surface</span>
+        <span class="chip"><span class="sw neutral"></span>App service</span>
+        <span class="chip"><span class="sw ext"></span>External (optional)</span>
+      </div>
+    </div>
+    <div class="notes">
+      For the one-image Railway path, the Dockerfile builds the Vite client and serves it from FastAPI via <code>STATIC_DIR</code>
+      — same image, single port, health check on <code>/api/health</code>. See <code>README.md</code> for the full deploy recipe.
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

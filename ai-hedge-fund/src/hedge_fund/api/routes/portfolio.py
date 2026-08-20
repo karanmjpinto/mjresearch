@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from hedge_fund.db.models import Account, Holding, Transaction
+from hedge_fund.db.models import Account, Transaction
 from hedge_fund.db.session import get_db
 from hedge_fund.portfolio import service as ps
 from hedge_fund.portfolio.schemas import (
@@ -60,7 +59,9 @@ async def list_transactions(limit: int = 100, db: Session = Depends(get_db)):
                 "txn_type": t.txn_type,
                 "ticker": t.ticker,
                 "shares": float(t.shares) if t.shares is not None else None,
-                "price_per_share": float(t.price_per_share) if t.price_per_share is not None else None,
+                "price_per_share": float(t.price_per_share)
+                if t.price_per_share is not None
+                else None,
                 "fee": float(t.fee),
                 "cash_delta": float(t.cash_delta),
                 "note": t.note,

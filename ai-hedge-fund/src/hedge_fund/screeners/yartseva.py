@@ -122,12 +122,20 @@ def fetch_yartseva_snapshot(ticker: str) -> YartsevaSnapshot:
 
         teq = None
         if q_bs is not None and not q_bs.empty:
-            for row in ("Stockholders Equity", "Total Equity Gross Minority Interest", "Common Stock Equity"):
+            for row in (
+                "Stockholders Equity",
+                "Total Equity Gross Minority Interest",
+                "Common Stock Equity",
+            ):
                 if row in q_bs.index:
                     teq = _f(q_bs.loc[row].iloc[0])
                     break
             ta0 = _f(q_bs.loc["Total Assets"].iloc[0]) if "Total Assets" in q_bs.index else None
-            ta4 = _f(q_bs.loc["Total Assets"].iloc[4]) if "Total Assets" in q_bs.index and len(q_bs.columns) > 4 else None
+            ta4 = (
+                _f(q_bs.loc["Total Assets"].iloc[4])
+                if "Total Assets" in q_bs.index and len(q_bs.columns) > 4
+                else None
+            )
             snap.total_assets_mrq = ta0
             snap.total_equity_mrq = teq
             snap.total_assets_prior_yoy = ta4
@@ -409,7 +417,9 @@ def score_yartseva(snap: YartsevaSnapshot) -> YartsevaResult:
     penalty = _inv_penalty(inv_excess if inv_excess is not None else 0.0)
     r.investment_quality_score = max(0.0, iq_base - penalty)
 
-    size_basis = snap.enterprise_value if snap.enterprise_value and snap.enterprise_value > 0 else mc
+    size_basis = (
+        snap.enterprise_value if snap.enterprise_value and snap.enterprise_value > 0 else mc
+    )
     r.size_score = _size_score(size_basis)
 
     pc = snap.price_current
