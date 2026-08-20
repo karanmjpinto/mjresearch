@@ -198,3 +198,34 @@ async def test_unreachable_daemon_raises_llm_unavailable(monkeypatch):
 
     with pytest.raises(LLMUnavailable, match="Cannot reach Ollama"):
         await call_json("sys", "user")
+
+
+async def test_timeout_reports_a_useful_message(monkeypatch):
+    """httpx timeouts stringify to '', which would surface as a blank error."""
+    monkeypatch.setattr(settings, "llm_provider", "ollama")
+
+    class Slow:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *exc):
+            return False
+
+        async def post(self, url, json=None):
+            raise httpx.ReadTimeout("")
+
+    monkeypatch.setattr(llm.httpx, "AsyncClient", lambda **kw: Slow())
+
+    with pytest.raises(LLMUnavailable) as excinfo:
+        await call_json("sys", "user")
+    assert "timed out" in str(excinfo.value)
+    assert "OLLAMA_NUM_CTX" in str(excinfo.value)
+
+
+async def test_context_window_is_sent_and_recorded(ollama, monkeypatch):
+    monkeypatch.setattr(settings, "ollama_num_ctx", 16384)
+    client = ollama([_ok_response()])
+
+    result = await call_json("sys", "user")
+    assert client.requests[0]["options"]["num_ctx"] == 16384
+    assert result.params["num_ctx"] == 16384

@@ -71,8 +71,10 @@ def sampling_params() -> dict[str, Any]:
         "top_p": settings.llm_top_p,
         "max_output_tokens": settings.llm_max_output_tokens,
     }
-    if settings.llm_provider == "ollama" and settings.ollama_think is not None:
-        params["think"] = settings.ollama_think
+    if settings.llm_provider == "ollama":
+        params["num_ctx"] = settings.ollama_num_ctx
+        if settings.ollama_think is not None:
+            params["think"] = settings.ollama_think
     return params
 
 
@@ -91,6 +93,7 @@ async def _ollama_chat(system: str, user: str) -> tuple[str, dict[str, Any], str
             "seed": settings.llm_seed,
             "top_p": settings.llm_top_p,
             "num_predict": settings.llm_max_output_tokens,
+            "num_ctx": settings.ollama_num_ctx,
         },
     }
     if settings.ollama_think is not None:
@@ -109,6 +112,16 @@ async def _ollama_chat(system: str, user: str) -> tuple[str, dict[str, Any], str
             f"Cannot reach Ollama at {settings.ollama_base_url}. "
             "Start the daemon: `ollama serve` (or install from https://ollama.com). "
             f"Ensure the model exists: `ollama pull {settings.ollama_model}` then `ollama list`."
+        ) from e
+    except httpx.TimeoutException as e:
+        # str() on an httpx timeout is empty, which surfaces as a blank error.
+        # A timeout on a local model is nearly always memory pressure: if the KV
+        # cache does not fit, generation falls back to swap and crawls.
+        raise LLMUnavailable(
+            f"Ollama timed out after {settings.ollama_timeout_s:.0f}s running "
+            f"{settings.ollama_model} (context {settings.ollama_num_ctx}). "
+            "Check `ollama ps` — if SIZE is far larger than the model on disk, the "
+            "context window is oversized; lower OLLAMA_NUM_CTX or use a smaller model."
         ) from e
     if r.status_code >= 400:
         raise RuntimeError(f"Ollama HTTP {r.status_code}: {r.text[:500]}")

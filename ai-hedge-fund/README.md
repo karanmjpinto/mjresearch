@@ -25,6 +25,11 @@ Local **AI research** (default: **Ollama**) plus a **SQLite portfolio** with tra
 
 5. Defaults: `LLM_PROVIDER=ollama`, `OLLAMA_BASE_URL=http://127.0.0.1:11434`, `OLLAMA_MODEL=qwen3:30b`.
 
+   > **`.env` wins over the code default.** If you already have a `.env`, changing
+   > the default in `settings.py` does nothing — your existing `OLLAMA_MODEL` line
+   > still applies. Check what is actually in force with:
+   > `uv run python -c "from hedge_fund.settings import settings; print(settings.ollama_model)"`
+
    **Model choice matters for research quality.** `qwen3:30b` is a mixture-of-experts
    model — ~30B total parameters but only ~3B active per token, so it reasons far
    better than a small dense model at comparable speed. Smaller models tend to write
