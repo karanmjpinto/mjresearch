@@ -264,3 +264,20 @@ def test_check_endpoint_exposes_verification_and_run_id(isolated_db, monkeypatch
     assert body["verification"]["status"] == "clean"
     assert body["verification"]["verified"] == 1
     assert body["run_uid"]
+
+
+# ----------------------------------------------------------------------
+# Optional enrichments degrade rather than fail
+# ----------------------------------------------------------------------
+
+
+def test_provider_sentiment_reports_unavailable_instead_of_404():
+    """An unconfigured optional key is a state to report, not a failed request."""
+    r = client.get("/api/data/sentiment/AAPL")
+    assert r.status_code == 200
+    body = r.json()
+    if body.get("available") is False:
+        assert body["reason"] == "no_provider_configured"
+        assert "FinBERT" in body["detail"]
+    else:
+        assert body["available"] is True

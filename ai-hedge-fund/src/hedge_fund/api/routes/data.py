@@ -134,11 +134,28 @@ async def get_analyst(ticker: str):
 
 @router.get("/sentiment/{ticker}")
 async def get_sentiment(ticker: str):
-    """News sentiment scores (requires Finnhub API key)."""
+    """Provider news-sentiment scores (requires a Finnhub API key).
+
+    Returns an explicit `available: false` rather than a 404 when no provider is
+    configured. This is an optional enrichment — the research snapshot scores
+    headlines locally with FinBERT regardless — so an unconfigured key is a
+    normal state to report, not a request that failed.
+    """
     result = _ds.get_sentiment(ticker)
     if result is None:
-        raise HTTPException(404, f"No sentiment data for {ticker}")
-    return _serialize(result)
+        return {
+            "ticker": ticker.upper(),
+            "available": False,
+            "reason": "no_provider_configured",
+            "detail": (
+                "Provider sentiment needs a Finnhub API key. Headline sentiment "
+                "from FinBERT is unaffected and appears on the research snapshot."
+            ),
+        }
+    payload = _serialize(result)
+    if isinstance(payload, dict):
+        payload.setdefault("available", True)
+    return payload
 
 
 @router.get("/sector-performance")

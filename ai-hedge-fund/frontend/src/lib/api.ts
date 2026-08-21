@@ -189,6 +189,11 @@ export interface AnalystRating {
 
 export interface NewsSentiment {
   ticker: string;
+  /** False when no provider key is configured. FinBERT headline sentiment is
+   *  separate and unaffected — see the research snapshot. */
+  available?: boolean;
+  reason?: string;
+  detail?: string;
   buzz_score: number | null;
   articles_in_last_week: number | null;
   weekly_average: number | null;
@@ -374,8 +379,123 @@ export interface OptimizeResult {
 // API methods
 // ------------------------------------------------------------------
 
+
+// --- Plan pipeline ---
+
+export interface PlanNodeSpec {
+  id: string;
+  metric: string;
+  params: Record<string, unknown>;
+  depends_on: string[];
+  why: string;
+}
+
+export interface PlanClarification {
+  id: string;
+  question: string;
+  options: string[];
+  recommended: string;
+  affects: string[];
+  answer: string | null;
+  effective: string;
+  answered: boolean;
+}
+
+export interface ExecutedNode {
+  node_id: string;
+  metric: string;
+  status: "ok" | "error" | "skipped";
+  values: Record<string, unknown>;
+  cached: boolean;
+  error?: string;
+  why?: string;
+}
+
+export interface HarnessOverride {
+  field: string;
+  model_said: unknown;
+  harness_used: unknown;
+  source: string;
+}
+
+export interface VerifiedClaim {
+  metric: string;
+  stated: number;
+  actual?: number;
+  verdict: "verified" | "mismatch" | "unverifiable";
+  excerpt: string;
+  unit?: string;
+  delta_pct?: number;
+  note?: string;
+}
+
+export interface Verification {
+  status: "clean" | "mismatch" | "no_claims";
+  checked: number;
+  verified: number;
+  mismatched: number;
+  unverifiable: number;
+  claims: VerifiedClaim[];
+  messages: string[];
+}
+
+export interface PlanResult {
+  ticker: string;
+  conviction: number | null;
+  stance: string | null;
+  analysis: string | null;
+  ai_full?: Record<string, unknown>;
+  evaluation?: { notes?: string[]; narrative_grounded?: boolean };
+  verification?: Verification;
+  plan?: { question: string; nodes: PlanNodeSpec[]; clarifications: PlanClarification[] };
+  execution?: {
+    plan_hash: string;
+    snapshot_sha256: string;
+    nodes: ExecutedNode[];
+    facts: Record<string, unknown>;
+    ok_count: number;
+    error_count: number;
+    skipped_count: number;
+    cache_hits: number;
+    elapsed_ms: number;
+  };
+  clarifications_pending?: PlanClarification[];
+  harness_overrides?: HarnessOverride[];
+  ai_model?: string;
+  planner_model?: string;
+  run_uid?: string;
+  ai_error?: { error: string; message: string };
+  data_quality?: { providers_used: string[]; warning_count: number; warnings: string[] };
+}
+
+export interface MetricSignature {
+  metric: string;
+  label: string;
+  tier: string;
+  description: string;
+  params: { name: string; type: string; description: string; default?: unknown }[];
+  outputs: { name: string; type: string; description: string; unit?: string }[];
+  notes?: string;
+}
+
 export const api = {
   health: () => fetchJSON<{ status: string }>("/health"),
+
+  // --- Plan pipeline ---
+
+  getMetricCatalog: () =>
+    fetchJSON<{ count: number; tiers: string[]; metrics: MetricSignature[] }>(
+      "/research/metrics"
+    ),
+
+  runPlan: (body: {
+    ticker: string;
+    question?: string;
+    style?: string;
+    clarification_answers?: Record<string, string>;
+    plan_override?: unknown;
+  }) => postJSON<PlanResult>("/research/plan", body),
+
 
   // --- Original 5 data endpoints ---
 
