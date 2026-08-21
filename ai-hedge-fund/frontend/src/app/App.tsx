@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { AutoResearchView } from "@/components/AutoResearchView";
 import { BackendGate } from "@/components/BackendGate";
 import { Dashboard } from "@/components/Dashboard";
 import { Landing } from "@/components/Landing";
@@ -7,6 +8,7 @@ import { PlanView } from "@/components/PlanView";
 import PortfolioView from "@/components/PortfolioView";
 import { ResearchReport } from "@/components/ResearchReport";
 import { ScreenersView } from "@/components/ScreenersView";
+import { SetupView } from "@/components/SetupView";
 import { DEFAULT_SCREENER_ID } from "@/config/screeners";
 
 /**
@@ -46,6 +48,8 @@ function AppRoutes() {
       />
       <Route path="/screeners/:screenId" element={<ScreenersView />} />
       <Route path="/optimize" element={<OptimizeView />} />
+      <Route path="/autoresearch" element={<AutoResearchView />} />
+      <Route path="/setup" element={<SetupView />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );

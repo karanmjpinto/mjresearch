@@ -478,8 +478,131 @@ export interface MetricSignature {
   notes?: string;
 }
 
+
+// --- Setup ---
+
+export interface SetupKey {
+  env: string;
+  label: string;
+  unlocks: string;
+  signup: string;
+  free_tier: boolean;
+  secret: boolean;
+  /** Whether a value is present. The value itself is never sent to the client. */
+  configured: boolean;
+  provider: string | null;
+  provider_available: boolean | null;
+  categories: string[];
+}
+
+export interface SetupInfo {
+  keys: SetupKey[];
+  providers: { name: string; available: boolean; categories: string[]; priority: number }[];
+  summary: {
+    providers_working: number;
+    providers_total: number;
+    keys_configured: number;
+    keys_total: number;
+    usable_without_keys: boolean;
+  };
+  llm: {
+    provider: string;
+    model: string;
+    base_url: string;
+    num_ctx: number;
+    temperature: number;
+    seed: number;
+    thinking_disabled: boolean;
+  };
+  env_path: string;
+}
+
+// --- Autoresearch ---
+
+export interface ExperimentWindow {
+  label: string;
+  start: string;
+  end: string;
+  observations: number;
+  total_return_pct: number | null;
+  annualized_return_pct: number | null;
+  sharpe_ratio: number | null;
+  sortino_ratio: number | null;
+  max_drawdown_pct: number | null;
+  win_rate_pct: number | null;
+  trades: number | null;
+  time_in_market_pct: number | null;
+}
+
+export interface ExperimentRow {
+  id: number;
+  run_tag: string;
+  seq: number;
+  ticker: string;
+  strategy_id: string;
+  params: Record<string, unknown> | null;
+  hypothesis: string | null;
+  is_baseline: boolean;
+  kept: boolean;
+  verdict: string;
+  in_sample: ExperimentWindow | null;
+  out_of_sample: ExperimentWindow | null;
+  primary_metric: number | null;
+  edge_vs_baseline: number | null;
+  degradation: number | null;
+  hurdle: number | null;
+  overfit_flag: boolean;
+  notes: string[] | null;
+  reasoning: string | null;
+  error: string | null;
+  created_at: string | null;
+}
+
+export interface RunSummary {
+  run_tag: string;
+  experiments: number;
+  trials: number;
+  kept: number;
+  discarded: number;
+  errors: number;
+  overfit_flagged: number;
+  best: ExperimentRow | null;
+  running?: boolean;
+  harness?: Record<string, unknown>;
+}
+
 export const api = {
   health: () => fetchJSON<{ status: string }>("/health"),
+
+  // --- Setup ---
+
+  getSetup: () => fetchJSON<SetupInfo>("/setup"),
+
+  saveKeys: (updates: { env: string; value: string }[]) =>
+    postJSON<{ ok: boolean; written: string[]; restart_required: boolean }>("/setup/keys", {
+      updates,
+    }),
+
+  // --- Autoresearch ---
+
+  getHarness: () => fetchJSON<Record<string, unknown>>("/autoresearch/harness"),
+
+  getExperiments: (runTag?: string, limit = 100) =>
+    fetchJSON<{ count: number; experiments: ExperimentRow[] }>(
+      `/autoresearch/experiments?limit=${limit}${runTag ? `&run_tag=${encodeURIComponent(runTag)}` : ""}`
+    ),
+
+  getRunSummary: (runTag: string) =>
+    fetchJSON<RunSummary>(`/autoresearch/summary/${encodeURIComponent(runTag)}`),
+
+  getLoopStatus: () => fetchJSON<{ running: string[]; busy: boolean }>("/autoresearch/status"),
+
+  startLoop: (body: {
+    run_tag: string;
+    tickers: string[];
+    experiments?: number;
+    days?: number;
+  }) => postJSON<{ started: boolean; run_tag: string; poll: string }>("/autoresearch/run", body),
 
   // --- Plan pipeline ---
 

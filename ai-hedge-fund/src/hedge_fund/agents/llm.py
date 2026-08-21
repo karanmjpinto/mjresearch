@@ -102,12 +102,34 @@ def sampling_params() -> dict[str, Any]:
     return params
 
 
+def default_model() -> str:
+    """The model the active provider uses when a call names none."""
+    return settings.ollama_model if settings.llm_provider == "ollama" else settings.llm_model
+
+
+def model_for_role(role: str | None) -> str | None:
+    """Model override configured for a pipeline stage, or None to use the default.
+
+    Stages differ in what they are worth. Reading a data bundle into a structured
+    opinion is bulk work that a small model does acceptably; reconciling four of
+    those opinions is the single call a person reads, and is worth a larger one.
+    Returning None rather than the default keeps the override *absent* from the
+    request when unconfigured, so the unconfigured path stays byte-identical.
+    """
+    if role == "persona":
+        return settings.llm_persona_model or None
+    if role == "synthesis":
+        return settings.llm_synthesis_model or None
+    return None
+
+
 async def _ollama_chat(
-    system: str, user: str, schema: dict[str, Any] | None = None
+    system: str, user: str, schema: dict[str, Any] | None = None, *, model: str | None = None
 ) -> tuple[str, dict[str, Any], str, None]:
     url = f"{settings.ollama_base_url.rstrip('/')}/api/chat"
+    name = model or settings.ollama_model
     payload: dict[str, Any] = {
-        "model": settings.ollama_model,
+        "model": name,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
@@ -142,7 +164,7 @@ async def _ollama_chat(
         raise LLMUnavailable(
             f"Cannot reach Ollama at {settings.ollama_base_url}. "
             "Start the daemon: `ollama serve` (or install from https://ollama.com). "
-            f"Ensure the model exists: `ollama pull {settings.ollama_model}` then `ollama list`."
+            f"Ensure the model exists: `ollama pull {name}` then `ollama list`."
         ) from e
     except httpx.TimeoutException as e:
         # str() on an httpx timeout is empty, which surfaces as a blank error.
@@ -150,7 +172,7 @@ async def _ollama_chat(
         # cache does not fit, generation falls back to swap and crawls.
         raise LLMUnavailable(
             f"Ollama timed out after {settings.ollama_timeout_s:.0f}s running "
-            f"{settings.ollama_model} (context {settings.ollama_num_ctx}). "
+            f"{name} (context {settings.ollama_num_ctx}). "
             "Check `ollama ps` — if SIZE is far larger than the model on disk, the "
             "context window is oversized; lower OLLAMA_NUM_CTX or use a smaller model."
         ) from e
@@ -164,7 +186,7 @@ async def _ollama_chat(
     # surfaces as an opaque parse error. Name the actual cause instead.
     if data.get("done_reason") == "length":
         raise OutputTruncated(
-            f"{settings.ollama_model} hit the {settings.llm_max_output_tokens}-token "
+            f"{name} hit the {settings.llm_max_output_tokens}-token "
             "output limit and the JSON is incomplete. Raise LLM_MAX_OUTPUT_TOKENS, "
             "or reduce RESEARCH_MAX_CONTEXT_CHARS so the model writes less."
         )
@@ -174,11 +196,11 @@ async def _ollama_chat(
         "completion_tokens": data.get("eval_count"),
         "done_reason": data.get("done_reason"),
     }
-    return content, usage, f"ollama:{settings.ollama_model}", None
+    return content, usage, f"ollama:{name}", None
 
 
 async def _openai_chat(
-    system: str, user: str, schema: dict[str, Any] | None = None
+    system: str, user: str, schema: dict[str, Any] | None = None, *, model: str | None = None
 ) -> tuple[str, dict[str, Any], str, str | None]:
     try:
         from openai import AsyncOpenAI
@@ -191,8 +213,9 @@ async def _openai_chat(
         raise RuntimeError("OPENAI_API_KEY is not set")
 
     client = AsyncOpenAI(api_key=settings.openai_api_key)
+    name = model or settings.llm_model
     resp = await client.chat.completions.create(
-        model=settings.llm_model,
+        model=name,
         temperature=settings.llm_temperature,
         top_p=settings.llm_top_p,
         seed=settings.llm_seed,
@@ -208,7 +231,7 @@ async def _openai_chat(
         "prompt_tokens": resp.usage.prompt_tokens if resp.usage else None,
         "completion_tokens": resp.usage.completion_tokens if resp.usage else None,
     }
-    return content, usage, f"openai:{settings.llm_model}", getattr(resp, "system_fingerprint", None)
+    return content, usage, f"openai:{name}", getattr(resp, "system_fingerprint", None)
 
 
 async def call_json(system: str, user: str, schema: dict[str, Any] | None = None) -> LLMResult:

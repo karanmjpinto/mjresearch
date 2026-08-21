@@ -6,7 +6,9 @@ export type AppNavActive =
   | "research"
   | "screeners"
   | "optimize"
-  | "portfolio";
+  | "portfolio"
+  | "autoresearch"
+  | "setup";
 
 /**
  * Application chrome. Labels are set in the display face at small sizes with
@@ -23,6 +25,8 @@ const NAV: { to: string; key: AppNavActive; label: string }[] = [
   { to: "/screeners", key: "screeners", label: "Screeners" },
   { to: "/optimize", key: "optimize", label: "Optimize" },
   { to: "/portfolio", key: "portfolio", label: "Portfolio" },
+  { to: "/autoresearch", key: "autoresearch", label: "Autoresearch" },
+  { to: "/setup", key: "setup", label: "Setup" },
 ];
 
 type Props = {

@@ -52,6 +52,20 @@ class Settings(BaseSettings):
     # value is recorded on every run rather than inherited silently.
     ollama_repeat_penalty: float = 1.1
 
+    # Per-stage model selection. A persona analysis and the synthesis that
+    # reconciles four of them are different jobs: the first is bulk reading of a
+    # bundle, the second is the one call whose output a person actually acts on.
+    # Left unset, both use the active provider's model and behaviour is exactly
+    # as before. Set, they name a model for the active provider (an Ollama tag
+    # under LLM_PROVIDER=ollama, an OpenAI model id under openai).
+    llm_persona_model: str | None = None
+    llm_synthesis_model: str | None = None
+
+    # When the committee splits materially, put the analysts back in the room
+    # once before synthesizing. Costs a second round of calls on contested
+    # tickers only; see agents.research_agent.run_committee_analysis.
+    committee_refine_on_dissent: bool = True
+
     # Persist every research run (snapshot, prompts, params, output) for replay.
     research_run_persistence: bool = True
     research_run_retention: int = 2000

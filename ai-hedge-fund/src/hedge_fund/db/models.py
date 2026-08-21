@@ -213,3 +213,44 @@ class MethodologyNote(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class Experiment(Base):
+    """One autoresearch hypothesis and its verdict.
+
+    Discarded experiments are kept deliberately. The count of what was tried is
+    what makes the surviving result interpretable — a Sharpe of 1.4 means
+    something different as the first idea than as the best of two hundred.
+    """
+
+    __tablename__ = "experiments"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    run_tag: Mapped[str] = mapped_column(String(64), index=True)
+    seq: Mapped[int] = mapped_column(index=True)
+
+    ticker: Mapped[str] = mapped_column(String(32), index=True)
+    strategy_id: Mapped[str] = mapped_column(String(64), index=True)
+    params: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    hypothesis: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    is_baseline: Mapped[bool] = mapped_column(default=False)
+    kept: Mapped[bool] = mapped_column(default=False, index=True)
+    verdict: Mapped[str] = mapped_column(String(24), index=True)  # kept | discarded | error
+
+    in_sample: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    out_of_sample: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    baseline_out_of_sample: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    primary_metric: Mapped[float | None] = mapped_column(nullable=True, index=True)
+    edge_vs_baseline: Mapped[float | None] = mapped_column(nullable=True)
+    degradation: Mapped[float | None] = mapped_column(nullable=True)
+    hurdle: Mapped[float | None] = mapped_column(nullable=True)
+    overfit_flag: Mapped[bool] = mapped_column(default=False)
+
+    notes: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    reasoning: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    model: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

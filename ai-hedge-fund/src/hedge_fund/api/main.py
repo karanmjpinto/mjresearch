@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from hedge_fund.api.routes import (
+    autoresearch,
     backtest,
     data,
     methodology,
@@ -18,6 +19,7 @@ from hedge_fund.api.routes import (
     research,
     runs,
     screeners,
+    setup as setup_route,
     simulation,
 )
 from hedge_fund.db.session import init_db
@@ -68,6 +70,8 @@ app.include_router(backtest.router, prefix="/api/backtest", tags=["backtest"])
 app.include_router(optimize_route.router, prefix="/api/optimize", tags=["optimize"])
 app.include_router(runs.router, prefix="/api/runs", tags=["runs"])
 app.include_router(methodology.router, prefix="/api/methodology", tags=["methodology"])
+app.include_router(setup_route.router, prefix="/api/setup", tags=["setup"])
+app.include_router(autoresearch.router, prefix="/api/autoresearch", tags=["autoresearch"])
 
 
 @app.get("/api/health")
