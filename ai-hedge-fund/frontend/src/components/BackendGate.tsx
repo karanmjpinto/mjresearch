@@ -19,38 +19,40 @@ export function BackendGate({ children }: { children: React.ReactNode }) {
 
   if (health.isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
-        <p className="text-sm text-gray-600">Connecting…</p>
+      <div className="flex min-h-screen items-center justify-center bg-ink">
+        <p className="font-display text-[12px] uppercase tracking-[0.2em] text-on-ink-faint">
+          Connecting…
+        </p>
       </div>
     );
   }
 
   if (health.isError) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface px-6">
-        <div className="max-w-lg text-center">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-accent-yellow/80">
+      <div className="flex min-h-screen items-center justify-center bg-ink px-6">
+        <div className="max-w-lg">
+          <span className="inline-block bg-cadmium px-sm py-2xs font-display text-[11px] uppercase tracking-[0.18em] text-ink">
             Backend not reachable
-          </p>
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-white">
+          </span>
+          <h1 className="mt-lg font-display text-display-sm leading-tight tracking-tight text-bone">
             This part runs on your machine
           </h1>
-          <p className="mt-4 text-sm leading-relaxed text-gray-400">
+          <p className="mt-md text-[15px] leading-relaxed text-on-ink-soft">
             The app needs the local API, your SQLite portfolio and Ollama — none of which are
             hosted. Nothing about your book or your model leaves your computer, which is the
             point, but it does mean the published site can only show the overview.
           </p>
-          <div className="mt-6 overflow-x-auto rounded-lg border border-border bg-surface-card p-4 text-left">
-            <pre className="font-mono text-xs leading-relaxed text-gray-400">
+          <div className="mt-lg overflow-x-auto border border-ink-line bg-ink-raised p-md text-left">
+            <pre className="font-display text-[12px] leading-relaxed text-cadmium">
 {`cd ai-hedge-fund
 uv run uvicorn hedge_fund.api.main:app --reload
 cd frontend && npm run dev`}
             </pre>
           </div>
-          <div className="mt-6 flex items-center justify-center gap-3">
+          <div className="mt-lg flex flex-wrap items-center gap-sm font-display text-[11px] uppercase tracking-[0.14em]">
             <Link
               to="/"
-              className="rounded-lg border border-border-light px-4 py-2 text-sm text-gray-300 transition-colors hover:border-gray-600 hover:text-white"
+              className="border-2 border-ink-line px-5 py-3 text-on-ink transition-colors hover:border-bone hover:text-bone"
             >
               Back to overview
             </Link>
@@ -58,7 +60,7 @@ cd frontend && npm run dev`}
               href="https://github.com/karanmjpinto/ai-hedge-fund#quick-start"
               target="_blank"
               rel="noreferrer"
-              className="rounded-lg bg-accent-blue px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500"
+              className="bg-oxide px-5 py-3 text-bone transition-colors hover:bg-cadmium hover:text-ink"
             >
               Setup guide
             </a>

@@ -1,29 +1,94 @@
 import type { Config } from "tailwindcss";
 
+/**
+ * Palette and type read off Pollock's drip canvases — see src/index.css for
+ * where the values come from. Tailwind names map to the CSS custom properties
+ * so the two never drift apart.
+ */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      /**
+       * Literal OKLCH with the <alpha-value> placeholder, NOT `var(--token)`.
+       * Tailwind composes opacity modifiers (`bg-canvas/92`) by substituting
+       * that placeholder; given a bare `var()` it cannot, and silently emits an
+       * invalid colour — the utility then resolves to transparent with no error.
+       * The same values are mirrored as custom properties in src/index.css for
+       * inline styles and non-Tailwind rules.
+       */
       colors: {
+        canvas: {
+          DEFAULT: "oklch(92.5% 0.018 82 / <alpha-value>)",
+          deep: "oklch(88% 0.024 80 / <alpha-value>)",
+        },
+        ink: {
+          DEFAULT: "oklch(19% 0.012 60 / <alpha-value>)",
+          raised: "oklch(24% 0.014 62 / <alpha-value>)",
+          line: "oklch(32% 0.016 64 / <alpha-value>)",
+        },
+        oxide: "oklch(52% 0.166 32 / <alpha-value>)",
+        cadmium: "oklch(78% 0.158 78 / <alpha-value>)",
+        cobalt: "oklch(52% 0.174 258 / <alpha-value>)",
+        verdigris: "oklch(58% 0.088 178 / <alpha-value>)",
+        aluminium: "oklch(72% 0.012 80 / <alpha-value>)",
+        bone: "oklch(96% 0.012 84 / <alpha-value>)",
+        "on-canvas": {
+          DEFAULT: "oklch(26% 0.018 62 / <alpha-value>)",
+          soft: "oklch(46% 0.022 64 / <alpha-value>)",
+          faint: "oklch(62% 0.020 66 / <alpha-value>)",
+        },
+        "on-ink": {
+          DEFAULT: "oklch(92% 0.012 82 / <alpha-value>)",
+          soft: "oklch(72% 0.014 76 / <alpha-value>)",
+          faint: "oklch(54% 0.014 70 / <alpha-value>)",
+        },
+
+        /* Legacy names kept so views not yet reworked stay coherent
+         * rather than falling back to Tailwind defaults. */
         surface: {
-          DEFAULT: "#0B0E11",
-          card: "#141821",
-          elevated: "#1A1F2E",
+          DEFAULT: "oklch(19% 0.012 60 / <alpha-value>)",
+          card: "oklch(24% 0.014 62 / <alpha-value>)",
+          elevated: "oklch(32% 0.016 64 / <alpha-value>)",
         },
         border: {
-          DEFAULT: "#1E2736",
-          light: "#2A3441",
+          DEFAULT: "oklch(32% 0.016 64 / <alpha-value>)",
+          light: "oklch(54% 0.014 70 / <alpha-value>)",
         },
         accent: {
-          blue: "#3B82F6",
-          green: "#10B981",
-          red: "#EF4444",
-          yellow: "#F59E0B",
+          blue: "oklch(52% 0.174 258 / <alpha-value>)",
+          green: "oklch(58% 0.088 178 / <alpha-value>)",
+          red: "oklch(52% 0.166 32 / <alpha-value>)",
+          yellow: "oklch(78% 0.158 78 / <alpha-value>)",
         },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "Fira Code", "monospace"],
+        display: ['"Departure Mono"', "ui-monospace", "monospace"],
+        mono: ['"Departure Mono"', "ui-monospace", "monospace"],
+        sans: ['"Bricolage Grotesque"', "ui-sans-serif", "system-ui", "sans-serif"],
+      },
+      fontSize: {
+        /* Whole pixels: the display face is a bitmap and blurs off-grid. */
+        "display-xl": ["72px", { lineHeight: "1.02", letterSpacing: "-0.01em" }],
+        "display-lg": ["56px", { lineHeight: "1.05", letterSpacing: "-0.01em" }],
+        "display-md": ["36px", { lineHeight: "1.1" }],
+        "display-sm": ["24px", { lineHeight: "1.15" }],
+      },
+      spacing: {
+        "2xs": "var(--space-2xs)",
+        xs: "var(--space-xs)",
+        sm: "var(--space-sm)",
+        md: "var(--space-md)",
+        lg: "var(--space-lg)",
+        xl: "var(--space-xl)",
+        "2xl": "var(--space-2xl)",
+        "3xl": "var(--space-3xl)",
+        "4xl": "var(--space-4xl)",
+      },
+      transitionTimingFunction: {
+        /* Exponential deceleration — things stop the way real objects do. */
+        "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "out-quart": "cubic-bezier(0.25, 1, 0.5, 1)",
       },
     },
   },

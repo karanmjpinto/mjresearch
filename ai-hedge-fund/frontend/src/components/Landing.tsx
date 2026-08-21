@@ -1,251 +1,354 @@
 import { Link } from "react-router-dom";
 
 /**
- * Public landing page.
+ * Public landing page — raw canvas, thrown paint, pixel display type.
  *
- * Renders entirely from static content and makes no API calls, because it is
- * what GitHub Pages serves — where no backend exists. Everything below is
- * written to be honest about what the system does and does not do; the
- * Limitations section is deliberately as prominent as the Features section.
+ * Renders entirely from static content and makes no API calls, because this is
+ * what GitHub Pages serves and there is no backend behind it.
+ *
+ * The colour comes from Pollock's drip canvases: unbleached linen with oxide
+ * red, cadmium, cobalt and a lot of enamel black thrown at it. Each section is
+ * assigned one colour and holds it, so the page reads as one canvas rather than
+ * a rainbow — the energy is in the density and the collisions, not saturation.
+ *
+ * Limitations get the same weight as Features on purpose. A research tool that
+ * oversells its certainty is worse than one that states plainly what it cannot do.
  */
 
 const FEATURES = [
   {
+    n: "01",
+    hue: "var(--oxide)",
     label: "Deterministic numbers",
-    title: "The model picks metrics. It never computes them.",
-    body: "A question is compiled into a typed plan — a DAG of registered Python metrics. The planner chooses what to measure and never sees a value; the executor computes; a second pass writes prose over those results under a no-arithmetic rule.",
+    title: "The model picks the metrics. It never computes them.",
+    body: "A question compiles into a typed plan — a DAG of registered Python metrics. The planner chooses what to measure and never sees a value. The executor computes. A second pass writes prose over results it did not produce.",
+    span: "lg:col-span-7",
   },
   {
+    n: "02",
+    hue: "var(--cobalt)",
     label: "Verification",
-    title: "Every number in the prose is checked",
-    body: "A deterministic pass re-reads the finished thesis, extracts each numeric claim, and compares it against the snapshot. Claims it cannot map are reported as unverifiable — never as passing.",
+    title: "Every number in the prose is checked.",
+    body: "A deterministic pass re-reads the finished thesis, extracts each numeric claim and compares it against the snapshot. Claims it cannot map are reported unverifiable — never as passing.",
+    span: "lg:col-span-5",
   },
   {
+    n: "03",
+    hue: "var(--cadmium)",
     label: "Reproducibility",
-    title: "Runs are recorded and diffable",
-    body: "Each analysis persists its snapshot, prompts, model parameters and output. Two runs with identical inputs should agree; when they do not, that divergence is surfaced rather than averaged away.",
+    title: "Runs are recorded and diffable.",
+    body: "Each analysis persists its snapshot, prompts, model parameters and output. Two runs with identical inputs should agree; when they do not, the divergence is surfaced rather than averaged away.",
+    span: "lg:col-span-5",
   },
   {
+    n: "04",
+    hue: "var(--verdigris)",
     label: "Provenance",
-    title: "You can see which source answered",
+    title: "You can see which source answered.",
     body: "Providers disagree on split adjustment, fiscal alignment and currency. Every fetch records who answered, whether it came from cache, and how the payload verified — frequency, coverage, units.",
+    span: "lg:col-span-7",
   },
   {
+    n: "05",
+    hue: "var(--oxide)",
     label: "Methodology memory",
-    title: "Corrections of method, not of answers",
-    body: "Teach the system how to approach a problem and later runs apply it. Notes containing prices or scores are rejected: a stored number would be replayed onto runs where it is no longer true.",
+    title: "Corrections of method, not of answers.",
+    body: "Teach it how to approach a problem and later runs apply it. Notes containing prices or scores are rejected — a stored number would be replayed onto runs where it is no longer true.",
+    span: "lg:col-span-6",
   },
   {
+    n: "06",
+    hue: "var(--cobalt)",
     label: "Local first",
-    title: "Runs on your machine, no API keys",
-    body: "Ollama serves the model locally. Market data comes from keyless providers by default, and the portfolio lives in a SQLite file you own.",
+    title: "Runs on your machine. No API keys.",
+    body: "Ollama serves the model locally, market data comes from keyless providers by default, and the portfolio lives in a SQLite file you own.",
+    span: "lg:col-span-6",
   },
 ];
 
 const PIPELINE = [
-  { step: "Snapshot", detail: "Market data fetched once, frozen, content-addressed" },
-  { step: "Planner", detail: "Chooses metrics from a fixed catalog — sees no values" },
-  { step: "Executor", detail: "Plain Python computes every figure" },
-  { step: "Narrator", detail: "Writes prose over computed results only" },
-  { step: "Harness", detail: "Validates, verifies claims, overrides the conviction score" },
-  { step: "Run record", detail: "Persisted for replay and comparison" },
+  { step: "Snapshot", detail: "Market data fetched once, frozen, content-addressed", hue: "var(--aluminium)" },
+  { step: "Planner", detail: "Chooses metrics from a fixed catalog — sees no values", hue: "var(--cobalt)" },
+  { step: "Executor", detail: "Plain Python computes every figure", hue: "var(--cadmium)" },
+  { step: "Narrator", detail: "Writes prose over computed results only", hue: "var(--cobalt)" },
+  { step: "Harness", detail: "Validates, verifies claims, overrides the conviction score", hue: "var(--oxide)" },
+  { step: "Record", detail: "Persisted for replay and comparison", hue: "var(--aluminium)" },
 ];
 
 const LIMITATIONS = [
-  {
-    title: "This is not investment advice",
-    body: "It is a research tool. Output is generated by a language model over public data and can be wrong in ways that read perfectly plausibly. Nothing here is a recommendation to buy or sell anything.",
-  },
-  {
-    title: "Verification has real gaps",
-    body: "Numeric claims are only checked for metrics the verifier knows about. Anything outside that set counts as unverifiable, not verified. Qualitative claims are not checked at all.",
-  },
-  {
-    title: "Scoring bands are absolute",
-    body: "Valuation scoring uses fixed thresholds rather than sector-relative ones, so a utility and a software company are judged on the same scale. Treat the composite as a starting point, not a verdict.",
-  },
-  {
-    title: "Determinism is bounded",
-    body: "Sampling is greedy and seeded and every input is recorded, but model providers do not guarantee identical output. The plan pipeline narrows this by moving arithmetic out of the model — it does not eliminate it.",
-  },
-  {
-    title: "Data quality is inherited",
-    body: "Fundamentals come from third-party providers that disagree with each other and are sometimes stale or wrong. Provenance tells you which source answered; it cannot tell you that source was right.",
-  },
-  {
-    title: "Committee mode is not yet audited",
-    body: "Persona analyses run with full freedom rather than as weightings over computed dimensions, so their conviction scores are not reproducible the way the plan pipeline's are.",
-  },
+  ["This is not investment advice", "A research tool. Output is generated by a language model over public data and can be wrong in ways that read perfectly plausibly. Nothing here is a recommendation to buy or sell anything."],
+  ["Verification has real gaps", "Numeric claims are only checked for metrics the verifier knows about. Anything outside that set counts as unverifiable, not verified. Qualitative claims are not checked at all."],
+  ["Scoring bands are absolute", "Valuation scoring uses fixed thresholds rather than sector-relative ones, so a utility and a software company are judged on the same scale."],
+  ["Determinism is bounded", "Sampling is greedy and seeded and every input is recorded, but providers do not guarantee identical output. Moving arithmetic out of the model narrows this — it does not eliminate it."],
+  ["Data quality is inherited", "Fundamentals come from third-party providers that disagree with each other and are sometimes stale. Provenance tells you which source answered; it cannot tell you that source was right."],
+  ["Committee mode is not audited", "Persona analyses run with full freedom rather than as weightings over computed dimensions, so their conviction scores are not reproducible the way the plan pipeline's are."],
 ];
 
-function Section({
-  id,
-  eyebrow,
-  title,
-  children,
-}: {
-  id: string;
-  eyebrow: string;
-  title: string;
-  children: React.ReactNode;
-}) {
+function Marker({ children, hue }: { children: React.ReactNode; hue: string }) {
   return (
-    <section id={id} className="border-t border-border/60 py-16 sm:py-20">
-      <p className="text-xs font-medium uppercase tracking-[0.18em] text-accent-blue/80">
-        {eyebrow}
-      </p>
-      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-        {title}
-      </h2>
-      <div className="mt-8">{children}</div>
-    </section>
+    <span className="font-display text-[11px] uppercase tracking-[0.2em]" style={{ color: hue }}>
+      {children}
+    </span>
   );
 }
 
 export function Landing() {
   return (
-    <div className="min-h-screen bg-surface text-gray-300">
-      <header className="sticky top-0 z-20 border-b border-border/60 bg-surface/85 backdrop-blur">
-        <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <span className="text-lg font-bold tracking-tight text-white">MJ Research</span>
-          <div className="flex items-center gap-6 text-sm">
-            <a href="#features" className="hidden text-gray-500 transition-colors hover:text-gray-200 sm:block">
-              Features
-            </a>
-            <a href="#architecture" className="hidden text-gray-500 transition-colors hover:text-gray-200 sm:block">
-              Architecture
-            </a>
-            <a href="#limitations" className="hidden text-gray-500 transition-colors hover:text-gray-200 sm:block">
-              Limitations
-            </a>
-            <Link
-              to="/dashboard"
-              className="rounded-lg bg-accent-blue px-3.5 py-1.5 font-medium text-white transition-colors hover:bg-blue-500"
-            >
-              Open app
-            </Link>
-          </div>
-        </nav>
-      </header>
+    <div className="on-canvas relative min-h-screen overflow-hidden bg-canvas font-sans text-on-canvas">
+      {/* The paint. Heavy across the top where the display type has room to
+       * breathe, thinning down the page so it never fights body copy — the
+       * canvas is the loud part, the reading is not. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[190vh] bg-cover bg-top opacity-[0.62] mix-blend-multiply"
+        style={{
+          backgroundImage: "url(/splatter.svg)",
+          maskImage:
+            "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 32%, rgba(0,0,0,0.3) 62%, rgba(0,0,0,0) 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 32%, rgba(0,0,0,0.3) 62%, rgba(0,0,0,0) 100%)",
+        }}
+      />
+      {/* A second, sparser pass anchored to the foot so the page does not end
+       * on bare linen. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[80vh] rotate-180 bg-cover bg-top opacity-[0.34] mix-blend-multiply"
+        style={{
+          backgroundImage: "url(/splatter.svg)",
+          maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 85%)",
+          WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 85%)",
+        }}
+      />
+      {/* Linen tooth, so the ground doesn't read as flat digital paper. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 opacity-[0.5]"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(0deg, transparent 0 3px, rgba(31,27,23,0.02) 3px 4px), repeating-linear-gradient(90deg, transparent 0 3px, rgba(31,27,23,0.02) 3px 4px)",
+        }}
+      />
 
-      <main className="mx-auto max-w-5xl px-6">
-        {/* Hero */}
-        <div className="py-20 sm:py-28">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-accent-blue/80">
-            Local-first equity research
-          </p>
-          <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
-            Research where the numbers come from code, not from the model.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-400">
-            Most AI research tools hand a language model a pile of data and ask for a verdict,
-            which makes every figure in the answer a token prediction. This one compiles the
-            question into a typed program, computes the figures in Python, and lets the model
-            write only over results it did not produce.
-          </p>
-          <div className="mt-9 flex flex-wrap items-center gap-3">
-            <Link
-              to="/dashboard"
-              className="rounded-lg bg-accent-blue px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-500"
-            >
-              Open the app
-            </Link>
+      <div className="relative z-10">
+        <header className="sticky top-0 z-20 border-b border-on-canvas/15 bg-canvas/80 backdrop-blur-sm">
+          <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+            <span className="font-display text-sm uppercase tracking-[0.18em] text-on-canvas">
+              MJ&nbsp;Research
+            </span>
+            <div className="flex items-center gap-7 font-display text-[11px] uppercase tracking-[0.16em]">
+              <a href="#features" className="hidden text-on-canvas transition-colors hover:text-oxide sm:block">
+                Work
+              </a>
+              <a href="#architecture" className="hidden text-on-canvas transition-colors hover:text-oxide sm:block">
+                Method
+              </a>
+              <a href="#limitations" className="hidden text-on-canvas transition-colors hover:text-oxide sm:block">
+                Limits
+              </a>
+              <Link
+                to="/dashboard"
+                className="bg-ink px-4 py-2 text-bone transition-colors hover:bg-oxide"
+              >
+                Open&nbsp;→
+              </Link>
+            </div>
+          </nav>
+        </header>
+
+        <main className="mx-auto max-w-6xl px-6">
+          {/* Hero */}
+          <section className="grid grid-cols-1 gap-lg pb-3xl pt-4xl lg:grid-cols-12">
+            <div className="lg:col-span-9">
+              <Marker hue="var(--oxide)">Local-first equity research</Marker>
+              <h1 className="mt-lg font-display text-[clamp(38px,7vw,72px)] leading-[1.02] tracking-tight text-ink">
+                Numbers from code.
+                <br />
+                <span className="text-oxide">Not from the model.</span>
+              </h1>
+              <p className="mt-xl max-w-[62ch] bg-canvas/92 py-sm pr-md text-[17px] leading-[1.65] text-on-canvas-soft backdrop-blur-[2px]">
+                Most AI research tools hand a language model a pile of data and ask for a verdict,
+                which makes every figure in the answer a token prediction. This one compiles the
+                question into a typed program, computes the figures in Python, and lets the model
+                write only over results it did not produce.
+              </p>
+              <div className="mt-2xl flex flex-wrap items-center gap-sm font-display text-[12px] uppercase tracking-[0.14em]">
+                <Link
+                  to="/dashboard"
+                  className="bg-ink px-6 py-3.5 text-bone transition-all duration-300 ease-out-expo hover:bg-oxide"
+                >
+                  Open the app
+                </Link>
+                <a
+                  href="https://github.com/karanmjpinto/ai-hedge-fund"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="border-2 border-ink px-6 py-3.5 text-ink transition-colors hover:bg-ink hover:text-bone"
+                >
+                  Source
+                </a>
+              </div>
+            </div>
+
+            {/* Studio placard, deliberately off the main column. */}
+            <aside className="self-end bg-canvas/92 p-md backdrop-blur-[2px] lg:col-span-3">
+              <div className="mb-sm h-[2px] w-full bg-ink" />
+              <Marker hue="var(--on-canvas-faint)">Runs where you are</Marker>
+              <p className="mt-sm text-[14px] leading-[1.6] text-on-canvas-soft">
+                Requires a local backend and{" "}
+                <a
+                  href="https://ollama.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-oxide underline decoration-oxide/40 underline-offset-4 transition-colors hover:decoration-oxide"
+                >
+                  Ollama
+                </a>
+                . Nothing is hosted — your portfolio and your model stay on your machine.
+              </p>
+            </aside>
+          </section>
+
+          {/* About */}
+          <section id="about" className="border-t border-ink/15 py-3xl">
+            <div className="grid gap-xl lg:grid-cols-12">
+              <div className="lg:col-span-3">
+                <span className="inline-block bg-cobalt px-sm py-2xs font-display text-[11px] uppercase tracking-[0.2em] text-bone">
+                  About
+                </span>
+              </div>
+              <div className="grid gap-lg lg:col-span-9 lg:grid-cols-2">
+                <p className="bg-canvas/92 p-md text-[16px] leading-[1.7] text-on-canvas-soft backdrop-blur-[2px]">
+                  A research and portfolio workstation for a single investor. It pulls market data
+                  from several providers with fallback and caching, keeps a persistent book in
+                  SQLite, runs rule-based backtests and portfolio construction, and writes
+                  investment theses with a language model running locally.
+                </p>
+                <p className="bg-canvas/92 p-md text-[16px] leading-[1.7] text-on-canvas-soft backdrop-blur-[2px]">
+                  The goal is not a smarter model. It is a harness around the model good enough
+                  that its output can be checked, repeated and argued with — so when an answer is
+                  wrong you can tell, and fix the method rather than the number.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Features */}
+          <section id="features" className="border-t border-ink/15 py-3xl">
+            <div className="flex items-baseline justify-between gap-lg">
+              <h2 className="bg-canvas/95 pr-md font-display text-[clamp(26px,3.5vw,36px)] tracking-tight text-ink">
+                What it does
+              </h2>
+              <Marker hue="var(--oxide)">Six things</Marker>
+            </div>
+
+            <div className="mt-2xl grid grid-cols-1 gap-px bg-ink/15 lg:grid-cols-12">
+              {FEATURES.map((f) => (
+                <article
+                  key={f.n}
+                  className={`group bg-canvas/95 p-xl backdrop-blur-[1px] transition-colors duration-300 ease-out-quart hover:bg-canvas-deep ${f.span}`}
+                >
+                  <div className="flex items-baseline gap-sm">
+                    <span
+                      className="font-display text-[28px] leading-none transition-transform duration-300 ease-out-expo group-hover:-translate-y-0.5"
+                      style={{ color: f.hue }}
+                    >
+                      {f.n}
+                    </span>
+                    <Marker hue="var(--on-canvas-faint)">{f.label}</Marker>
+                  </div>
+                  <h3 className="mt-md text-[19px] font-semibold leading-[1.3] text-ink">
+                    {f.title}
+                  </h3>
+                  <p className="mt-sm max-w-[52ch] text-[15px] leading-[1.65] text-on-canvas-soft">
+                    {f.body}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          {/* Architecture */}
+          <section id="architecture" className="border-t border-ink/15 py-3xl">
+            <div className="grid gap-xl lg:grid-cols-12">
+              <div className="lg:col-span-4">
+                <Marker hue="var(--cadmium)">Method</Marker>
+                <h2 className="mt-lg font-display text-[clamp(26px,3.5vw,36px)] leading-[1.1] tracking-tight text-ink">
+                  How a question
+                  <br />
+                  becomes an answer
+                </h2>
+                <p className="mt-lg max-w-[38ch] text-[15px] leading-[1.65] text-on-canvas-soft">
+                  The model appears twice, in two narrow roles, and is never the source of a
+                  figure. When the plan computes a conviction score it replaces whatever the
+                  narrator wrote — and says so.
+                </p>
+              </div>
+
+              <ol className="lg:col-span-8">
+                {PIPELINE.map((p, i) => (
+                  <li
+                    key={p.step}
+                    className="grid grid-cols-[auto_1fr] items-baseline gap-x-md gap-y-2xs border-b border-ink/12 py-md first:border-t first:border-ink/12 sm:grid-cols-[auto_140px_1fr]"
+                  >
+                    <span className="font-display text-[12px] tabular" style={{ color: p.hue }}>
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="font-display text-[14px] uppercase tracking-[0.1em] text-ink">
+                      {p.step}
+                    </span>
+                    {/* Below sm the detail drops to its own row under the label
+                     * rather than being squeezed into a one-word column. */}
+                    <span className="col-start-2 text-[15px] leading-[1.6] text-on-canvas-soft sm:col-start-3">
+                      {p.detail}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </section>
+
+          {/* Limitations */}
+          <section id="limitations" className="border-t border-ink/15 py-3xl">
+            <div className="flex flex-wrap items-baseline justify-between gap-md">
+              <h2 className="bg-canvas/95 pr-md font-display text-[clamp(26px,3.5vw,36px)] tracking-tight text-ink">
+                What it does not do
+              </h2>
+              <Marker hue="var(--oxide)">Read this part</Marker>
+            </div>
+
+            <div className="mt-2xl grid gap-x-2xl gap-y-xl md:grid-cols-2">
+              {LIMITATIONS.map(([title, body], i) => (
+                <div key={title} className="grid grid-cols-[auto_1fr] gap-md">
+                  <span className="font-display text-[12px] tabular text-oxide">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <h3 className="text-[17px] font-semibold leading-snug text-ink">{title}</h3>
+                    <p className="mt-2xs max-w-[52ch] text-[15px] leading-[1.65] text-on-canvas-soft">
+                      {body}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </main>
+
+        <footer className="border-t border-ink/20 py-xl">
+          <div className="mx-auto flex max-w-6xl flex-col gap-sm px-6 font-display text-[11px] uppercase tracking-[0.14em] text-on-canvas-faint sm:flex-row sm:items-center sm:justify-between">
+            <span>A personal research tool — not investment advice</span>
             <a
               href="https://github.com/karanmjpinto/ai-hedge-fund"
               target="_blank"
               rel="noreferrer"
-              className="rounded-lg border border-border-light px-5 py-2.5 text-sm font-medium text-gray-300 transition-colors hover:border-gray-600 hover:text-white"
+              className="transition-colors hover:text-oxide"
             >
-              View source
+              github.com/karanmjpinto
             </a>
           </div>
-          <p className="mt-6 text-sm text-gray-600">
-            Requires a local backend and{" "}
-            <a href="https://ollama.com" target="_blank" rel="noreferrer" className="text-gray-500 underline underline-offset-4 hover:text-gray-300">
-              Ollama
-            </a>
-            . Nothing is hosted — your portfolio and your model stay on your machine.
-          </p>
-        </div>
-
-        {/* About */}
-        <Section id="about" eyebrow="About" title="What this is">
-          <div className="grid gap-8 sm:grid-cols-2">
-            <p className="leading-relaxed text-gray-400">
-              A research and portfolio workstation for a single investor. It pulls market data
-              from several providers with fallback and caching, keeps a persistent book in
-              SQLite, runs rule-based backtests and portfolio construction, and produces written
-              investment theses using a language model running locally.
-            </p>
-            <p className="leading-relaxed text-gray-400">
-              The design goal is not a smarter model. It is a harness around the model good
-              enough that its output can be checked, repeated, and argued with — so that when
-              an answer is wrong, you can tell, and fix the method rather than the number.
-            </p>
-          </div>
-        </Section>
-
-        {/* Features */}
-        <Section id="features" eyebrow="Features" title="What it does">
-          <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
-            {FEATURES.map((f) => (
-              <article key={f.label} className="bg-surface-card p-6">
-                <p className="text-xs font-medium uppercase tracking-wider text-gray-600">
-                  {f.label}
-                </p>
-                <h3 className="mt-2.5 text-base font-semibold text-white">{f.title}</h3>
-                <p className="mt-2.5 text-sm leading-relaxed text-gray-400">{f.body}</p>
-              </article>
-            ))}
-          </div>
-        </Section>
-
-        {/* Architecture */}
-        <Section id="architecture" eyebrow="Architecture" title="How a question becomes an answer">
-          <ol className="space-y-px overflow-hidden rounded-xl border border-border bg-border">
-            {PIPELINE.map((p, i) => (
-              <li key={p.step} className="flex items-baseline gap-4 bg-surface-card px-6 py-4">
-                <span className="font-mono text-xs text-gray-600">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="w-28 shrink-0 text-sm font-medium text-white">{p.step}</span>
-                <span className="text-sm leading-relaxed text-gray-400">{p.detail}</span>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-6 max-w-3xl text-sm leading-relaxed text-gray-500">
-            The model appears twice, in two narrow roles, and is never the source of a figure.
-            When the plan computes a conviction score it replaces whatever the narrator wrote,
-            and the substitution is reported rather than hidden.
-          </p>
-        </Section>
-
-        {/* Limitations */}
-        <Section id="limitations" eyebrow="Limitations" title="What it does not do">
-          <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
-            {LIMITATIONS.map((l) => (
-              <article key={l.title} className="bg-surface-card p-6">
-                <h3 className="text-base font-semibold text-white">{l.title}</h3>
-                <p className="mt-2.5 text-sm leading-relaxed text-gray-400">{l.body}</p>
-              </article>
-            ))}
-          </div>
-        </Section>
-      </main>
-
-      <footer className="border-t border-border/60 py-10">
-        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-6 text-sm text-gray-600 sm:flex-row sm:items-center sm:justify-between">
-          <span>A personal research tool. Not investment advice.</span>
-          <a
-            href="https://github.com/karanmjpinto/ai-hedge-fund"
-            target="_blank"
-            rel="noreferrer"
-            className="transition-colors hover:text-gray-400"
-          >
-            github.com/karanmjpinto/ai-hedge-fund
-          </a>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }

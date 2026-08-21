@@ -13,17 +13,19 @@ import { api, type ExecutedNode, type PlanResult, type VerifiedClaim } from "@/l
  * primary content rather than tucked behind a disclosure.
  */
 
+/* Stance is a decision, so it gets a solid painted block rather than a tinted
+ * outline — it should be the first thing the eye lands on. */
 const STANCE_STYLE: Record<string, string> = {
-  BUY: "text-accent-green border-accent-green/30 bg-accent-green/10",
-  HOLD: "text-accent-yellow border-accent-yellow/30 bg-accent-yellow/10",
-  WATCH: "text-accent-blue border-accent-blue/30 bg-accent-blue/10",
-  SELL: "text-accent-red border-accent-red/30 bg-accent-red/10",
+  BUY: "bg-verdigris text-ink",
+  HOLD: "bg-cadmium text-ink",
+  WATCH: "bg-cobalt text-bone",
+  SELL: "bg-oxide text-bone",
 };
 
 const STATUS_DOT: Record<ExecutedNode["status"], string> = {
-  ok: "bg-accent-green",
-  error: "bg-accent-red",
-  skipped: "bg-gray-600",
+  ok: "bg-verdigris",
+  error: "bg-oxide",
+  skipped: "bg-on-ink-faint",
 };
 
 function formatValue(v: unknown): string {
@@ -40,15 +42,17 @@ function formatValue(v: unknown): string {
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-xl border border-border bg-surface-card ${className}`}>{children}</div>
+    <div className={`border border-ink-line bg-ink-raised ${className}`}>{children}</div>
   );
 }
 
 function SectionHeading({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
     <div className="mb-3 flex items-baseline justify-between gap-4">
-      <h2 className="text-xs font-medium uppercase tracking-[0.14em] text-gray-500">{children}</h2>
-      {hint && <span className="font-mono text-xs text-gray-600">{hint}</span>}
+      <h2 className="font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+        {children}
+      </h2>
+      {hint && <span className="font-display text-[11px] tabular text-on-ink-faint">{hint}</span>}
     </div>
   );
 }
@@ -56,10 +60,10 @@ function SectionHeading({ children, hint }: { children: React.ReactNode; hint?: 
 function VerificationBadge({ v }: { v: NonNullable<PlanResult["verification"]> }) {
   const tone =
     v.status === "clean"
-      ? "text-accent-green border-accent-green/30 bg-accent-green/10"
+      ? "bg-verdigris/15 text-verdigris"
       : v.status === "mismatch"
-        ? "text-accent-red border-accent-red/30 bg-accent-red/10"
-        : "text-gray-400 border-border-light bg-surface-elevated";
+        ? "bg-oxide/20 text-oxide"
+        : "bg-ink-line text-on-ink-soft";
   const label =
     v.status === "clean"
       ? `${v.verified}/${v.checked} claims verified`
@@ -67,7 +71,7 @@ function VerificationBadge({ v }: { v: NonNullable<PlanResult["verification"]> }
         ? `${v.mismatched} claim${v.mismatched === 1 ? " contradicts" : "s contradict"} the data`
         : "no numeric claims made";
   return (
-    <span className={`rounded-md border px-2.5 py-1 text-xs font-medium ${tone}`}>{label}</span>
+    <span className={`px-2.5 py-1.5 font-display text-[11px] uppercase tracking-[0.12em] ${tone}`}>{label}</span>
   );
 }
 
@@ -101,8 +105,8 @@ function NodeRow({ n }: { n: ExecutedNode }) {
         <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_DOT[n.status]}`} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-            <span className="font-mono text-sm text-white">{n.node_id}</span>
-            <span className="font-mono text-xs text-gray-600">{n.metric}</span>
+            <span className="font-display text-[14px] text-bone">{n.node_id}</span>
+            <span className="font-display text-[11px] uppercase tracking-[0.1em] text-on-ink-faint">{n.metric}</span>
             {n.cached && (
               <span className="rounded bg-surface-elevated px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-gray-500">
                 cached
@@ -115,8 +119,8 @@ function NodeRow({ n }: { n: ExecutedNode }) {
             <dl className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1.5">
               {entries.map(([k, v]) => (
                 <div key={k} className="flex items-baseline gap-1.5">
-                  <dt className="text-xs text-gray-500">{k}</dt>
-                  <dd className="font-mono text-xs text-gray-200">{formatValue(v)}</dd>
+                  <dt className="text-[12px] text-on-ink-faint">{k}</dt>
+                  <dd className="font-display text-[12px] tabular text-cadmium">{formatValue(v)}</dd>
                 </div>
               ))}
             </dl>
@@ -168,7 +172,7 @@ export function PlanView() {
 
       <main className="mx-auto max-w-5xl px-6 py-10">
         <header className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">Plan analysis</h1>
+          <h1 className="font-display text-display-sm tracking-tight text-bone">Plan analysis</h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-500">
             The model chooses which metrics to compute and writes the conclusion. It does not
             produce any number — those come from Python, and every claim in the prose is checked
@@ -264,16 +268,16 @@ export function PlanView() {
               <Card className="p-6">
                 <div className="flex flex-wrap items-center gap-4">
                   <div>
-                    <div className="font-mono text-4xl font-semibold tracking-tight text-white">
+                    <div className="font-display text-[64px] leading-none tabular text-bone">
                       {result.conviction ?? "—"}
-                      <span className="ml-1 text-base font-normal text-gray-600">/100</span>
+                      <span className="ml-1 text-[20px] text-on-ink-faint">/100</span>
                     </div>
                     <p className="mt-1 text-xs text-gray-500">conviction, computed by the plan</p>
                   </div>
                   {result.stance && (
                     <span
-                      className={`rounded-md border px-3 py-1.5 text-sm font-medium ${
-                        STANCE_STYLE[result.stance] ?? "border-border-light text-gray-300"
+                      className={`px-4 py-2 font-display text-[13px] uppercase tracking-[0.16em] ${
+                        STANCE_STYLE[result.stance] ?? "bg-ink-line text-on-ink"
                       }`}
                     >
                       {result.stance}
