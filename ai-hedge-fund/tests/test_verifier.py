@@ -243,3 +243,67 @@ def test_explicit_sign_overrides_a_misleading_verb():
 
 def test_negative_currency_amount_parses():
     assert _claim("The current price of -5.0 is nonsense.", "price").stated == -5.0
+
+
+# ----------------------------------------------------------------------
+# Alias boundaries
+# ----------------------------------------------------------------------
+
+
+def test_pe_alias_does_not_match_inside_sharpe():
+    """'sharpe ratio' contains 'pe ratio'. A Sharpe value is not a P/E."""
+    snap = {"fundamentals": {"pe_ratio": 26.92}, "computed": {"sharpe_ratio": -0.094}}
+    claims = extract_claims("The stock has a negative Sharpe ratio (-0.094).", snap)
+    assert all(c.metric != "pe_ratio" for c in claims), "Sharpe value read as a P/E"
+
+
+def test_sharpe_claim_verifies_against_computed_facts():
+    snap = {"computed": {"sharpe_ratio": -0.094}}
+    assert _verdicts("A negative Sharpe ratio (-0.094) is unattractive.", snap) == {
+        "sharpe_ratio": "verified"
+    }
+
+
+def test_sortino_claim_verifies():
+    snap = {"computed": {"sortino_ratio": -0.146}}
+    assert _verdicts("Sortino ratio of -0.146.", snap)["sortino_ratio"] == "verified"
+
+
+def test_wrong_sharpe_is_caught():
+    snap = {"computed": {"sharpe_ratio": -0.094}}
+    assert _verdicts("A Sharpe ratio of 1.8 is excellent.", snap)["sharpe_ratio"] == "mismatch"
+
+
+@pytest.mark.parametrize(
+    "text,absent",
+    [
+        # "unive*rsi*ty" contains rsi; "*peg*ged" contains peg;
+        # "shar*pe ratio*" contains "pe ratio".
+        ("A university study covering 42 companies.", "rsi_14"),
+        ("The currency is pegged at 42 to the dollar.", "peg_ratio"),
+        ("Sharpe ratio of 42 across the book.", "pe_ratio"),
+    ],
+)
+def test_aliases_do_not_match_mid_word(text, absent):
+    snap = {
+        "technicals": {"rsi_14": 47.3},
+        "fundamentals": {"peg_ratio": 2.0, "pe_ratio": 26.9},
+        "computed": {"sharpe_ratio": 42.0},
+    }
+    assert all(c.metric != absent for c in extract_claims(text, snap))
+
+
+def test_real_bear_case_verifies_cleanly():
+    """The live run that exposed the boundary bug, as a regression."""
+    snap = {
+        "fundamentals": {"pe_ratio": 26.92479, "peg_ratio": 1.5728, "price_to_book": 8.113825},
+        "computed": {"sharpe_ratio": -0.094, "sortino_ratio": -0.146},
+    }
+    text = (
+        "The company's fundamentals show a reasonable valuation multiple (PE ratio of 26.9), "
+        "price-to-book at 8.1, and peg ratio of 1.57. Momentum has declined, with a negative "
+        "Sharpe ratio (-0.094) and Sortino ratio (-0.146)."
+    )
+    claims = extract_claims(text, snap)
+    assert claims, "expected claims to be found"
+    assert [c for c in claims if c.verdict == "mismatch"] == []

@@ -171,6 +171,19 @@ Restart Claude Desktop. You can now ask "use the ai-hedge-fund server to researc
 
 ```bash
 cd ai-hedge-fund
+./start.sh
+```
+
+Starts the API on :8000 and the UI on :5173, waits for the API to come up before
+opening the UI, and stops both on Ctrl-C. It warns rather than fails if Ollama is
+down or the model is not pulled — everything except AI research still works.
+
+Then open **http://localhost:5173**.
+
+### Manual start
+
+```bash
+cd ai-hedge-fund
 cp .env.example .env
 # Edit OLLAMA_MODEL to match `ollama list`
 

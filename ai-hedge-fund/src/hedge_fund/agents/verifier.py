@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import math
 import re
+from functools import lru_cache
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -87,7 +88,7 @@ METRIC_SPECS: tuple[MetricSpec, ...] = (
             "earnings multiple",
             "trailing p/e",
         ),
-        ("fundamentals.pe_ratio",),
+        ("fundamentals.pe_ratio", "computed.pe_ratio"),
         tolerance_pct=3.0,
         unit="x",
     ),
@@ -122,7 +123,7 @@ METRIC_SPECS: tuple[MetricSpec, ...] = (
     MetricSpec(
         "rsi_14",
         ("rsi", "relative strength index"),
-        ("technicals.rsi_14",),
+        ("technicals.rsi_14", "computed.rsi_14"),
         tolerance_abs=1.5,
         unit="index",
     ),
@@ -184,6 +185,52 @@ METRIC_SPECS: tuple[MetricSpec, ...] = (
         unit="currency",
     ),
     MetricSpec(
+        "sharpe_ratio",
+        ("sharpe ratio", "sharpe"),
+        ("computed.sharpe_ratio",),
+        tolerance_abs=0.05,
+    ),
+    MetricSpec(
+        "sortino_ratio",
+        ("sortino ratio", "sortino"),
+        ("computed.sortino_ratio",),
+        tolerance_abs=0.05,
+    ),
+    MetricSpec(
+        "annualized_volatility_pct",
+        (
+            "annualised volatility",
+            "annualized volatility",
+            "realised volatility",
+            "realized volatility",
+        ),
+        ("computed.annualized_volatility_pct",),
+        tolerance_abs=0.6,
+        unit="%",
+    ),
+    MetricSpec(
+        "momentum_pct",
+        ("momentum",),
+        ("computed.momentum_pct",),
+        tolerance_abs=0.6,
+        directional=True,
+        unit="%",
+    ),
+    MetricSpec(
+        "max_drawdown_pct",
+        ("max drawdown", "maximum drawdown", "peak-to-trough"),
+        ("computed.max_drawdown_pct",),
+        tolerance_abs=0.6,
+        directional=True,
+        unit="%",
+    ),
+    MetricSpec(
+        "valuation_score",
+        ("valuation score", "composite score"),
+        ("computed.valuation_score",),
+        tolerance_abs=1.0,
+    ),
+    MetricSpec(
         "sma_200",
         ("200-day moving average", "200 day moving average", "200-day sma", "sma 200"),
         ("technicals.sma_200",),
@@ -225,6 +272,16 @@ class VerificationReport:
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+@lru_cache(maxsize=512)
+def _alias_pattern(alias: str) -> re.Pattern[str]:
+    """Match an alias as a whole term, not as a substring.
+
+    Without boundaries "pe ratio" matches inside "sharpe ratio", and a Sharpe
+    value of -0.094 gets reported as a contradicted P/E. Observed in a live run.
+    """
+    return re.compile(rf"(?<![a-z0-9]){re.escape(alias)}(?![a-z0-9])")
 
 
 def _resolve(snapshot: dict[str, Any], path: str) -> Any:
@@ -406,7 +463,7 @@ def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
     occurrences: list[tuple[int, int, int, MetricSpec]] = []
     for spec in METRIC_SPECS:
         for alias in spec.aliases:
-            for m in re.finditer(re.escape(alias), lowered):
+            for m in re.finditer(_alias_pattern(alias), lowered):
                 occurrences.append((len(alias), m.start(), m.end(), spec))
     # Longest alias wins; ties resolve left to right for stable output.
     occurrences.sort(key=lambda o: (-o[0], o[1]))
