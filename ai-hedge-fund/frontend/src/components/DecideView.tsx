@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppNav } from "@/components/AppNav";
 import { api, type DecisionRow, type SizingAssessment } from "@/lib/api";
+import { useTicker } from "@/lib/ticker-context";
 
 /**
  * Decide — the step between having a view and having a position.
@@ -174,12 +175,25 @@ function DecisionCard({ d }: { d: DecisionRow }) {
   );
 }
 
+/** Research context handed over from a plan run, if the user came that way. */
+type CarriedResearch = {
+  conviction?: number | null;
+  stance?: string | null;
+  thesis?: string | null;
+  run_uid?: string | null;
+};
+
 export function DecideView() {
   const { ticker: routeTicker } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const qc = useQueryClient();
+  const { ticker: activeTicker, setTicker: setActiveTicker } = useTicker();
 
-  const [ticker, setTicker] = useState((routeTicker ?? "").toUpperCase());
+  const carried = (location.state ?? {}) as CarriedResearch;
+  const [ticker, setTicker] = useState(
+    (routeTicker ?? activeTicker ?? "").toUpperCase()
+  );
   const [amount, setAmount] = useState<string>("");
   const [action, setAction] = useState<string>("buy");
   const [rationale, setRationale] = useState("");
@@ -189,6 +203,10 @@ export function DecideView() {
     queryKey: ["decisions", ticker],
     queryFn: () => api.getDecisions(ticker || undefined, 50),
   });
+
+  useEffect(() => {
+    if (ticker && ticker !== activeTicker) setActiveTicker(ticker);
+  }, [ticker, activeTicker, setActiveTicker]);
 
   const size = useMutation({
     mutationFn: () =>
@@ -207,6 +225,9 @@ export function DecideView() {
         action,
         rationale: rationale.trim(),
         amount: amount.trim() ? Number(amount) : undefined,
+        conviction: carried.conviction ?? undefined,
+        stance: carried.stance ?? undefined,
+        research_run_uid: carried.run_uid ?? undefined,
       }),
     onSuccess: () => {
       setRationale("");
@@ -227,6 +248,23 @@ export function DecideView() {
             and records the call with that context attached.
           </p>
         </header>
+
+        {carried.run_uid && (
+          <div className="mb-lg border border-cobalt/40 bg-cobalt/10 px-lg py-md">
+            <p className="font-display text-[11px] uppercase tracking-[0.14em] text-cobalt">
+              Carried from research
+            </p>
+            <p className="mt-2xs text-[13px] leading-relaxed text-on-ink-soft">
+              {carried.stance ?? "—"} at conviction{" "}
+              <span className="font-display tabular text-bone">{carried.conviction ?? "—"}</span>.
+              This decision will be filed against run{" "}
+              <span className="font-display text-on-ink-faint">
+                {carried.run_uid.slice(0, 8)}
+              </span>
+              , so the reasoning stays attached to the call.
+            </p>
+          </div>
+        )}
 
         <section className="border border-ink-line bg-ink-raised p-lg">
           <div className="grid gap-md sm:grid-cols-[150px_180px_auto] sm:items-end">

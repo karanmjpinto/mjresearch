@@ -1,6 +1,7 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
+import { useTicker } from "@/lib/ticker-context";
 import {
   api,
   type EarningsInfo,
@@ -63,6 +64,7 @@ export function ResearchReport() {
   /** default = generic analyst; committee = multi persona + PM synthesis; persona = one named style */
   const [investorMode, setInvestorMode] = useState<"default" | "committee" | "persona">("committee");
   const [personaId, setPersonaId] = useState("warren_buffett");
+  const { ticker: activeTicker, recents } = useTicker();
   const ticker = paramTicker?.toUpperCase() ?? "";
 
   const personasQuery = useQuery({
@@ -199,13 +201,50 @@ export function ResearchReport() {
   };
 
   if (!ticker) {
+    // Landing here with a name already in flight is common — arriving from the
+    // portfolio, or back-navigating. Offer it rather than asking again.
+    const resume = activeTicker && activeTicker !== ticker ? activeTicker : null;
+    const others: string[] = recents.filter((r: string) => r !== resume).slice(0, 5);
     return (
-      <div className="flex flex-col h-screen">
+      <div className="flex h-screen flex-col">
         <AppNav active="research" />
-        <div className="grow flex items-center justify-center">
+        <div className="flex grow items-center justify-center px-lg">
           <div className="w-full max-w-lg">
-            <h1 className="text-2xl font-bold text-white mb-4 text-center">Research a Ticker</h1>
+            <h1 className="mb-md text-center font-display text-display-sm tracking-tight text-bone">
+              Research a ticker
+            </h1>
             <ChatInput onSubmit={handleSearch} placeholder="Enter a ticker symbol (e.g. AAPL, THYAO.IS)" />
+
+            {resume && (
+              <button
+                type="button"
+                onClick={() => navigate(`/research/${resume}`)}
+                className="mt-md w-full bg-ink-raised px-lg py-md text-left transition-colors hover:bg-ink-line"
+              >
+                <span className="font-display text-[10px] uppercase tracking-[0.16em] text-on-ink-faint">
+                  Pick up where you left off
+                </span>
+                <span className="mt-2xs block font-display text-[18px] text-cadmium">{resume}</span>
+              </button>
+            )}
+
+            {others.length > 0 && (
+              <div className="mt-md flex flex-wrap items-center gap-2xs">
+                <span className="font-display text-[10px] uppercase tracking-[0.16em] text-on-ink-faint">
+                  Recent
+                </span>
+                {others.map((r: string) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => navigate(`/research/${r}`)}
+                    className="px-2 py-1 font-display text-[12px] text-on-ink-faint transition-colors hover:text-cadmium"
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

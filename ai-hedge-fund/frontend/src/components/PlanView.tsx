@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { AppNav } from "@/components/AppNav";
 import { api, type ExecutedNode, type PlanResult, type VerifiedClaim } from "@/lib/api";
@@ -139,7 +140,9 @@ function NodeRow({ n }: { n: ExecutedNode }) {
 }
 
 export function PlanView() {
-  const [ticker, setTicker] = useState("");
+  const navigate = useNavigate();
+  const { ticker: routeTicker } = useParams();
+  const [ticker, setTicker] = useState((routeTicker ?? "").toUpperCase());
   const [question, setQuestion] = useState("");
   const [style, setStyle] = useState("");
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -307,6 +310,31 @@ export function PlanView() {
                     ))}
                   </ul>
                 )}
+
+                {/* A view is not the end of the work — it is the input to a
+                 * decision, so the next step is offered here rather than left
+                 * for the reader to go and find. */}
+                <div className="mt-5 flex flex-wrap items-center gap-sm border-t border-ink-line pt-5">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(`/decide/${encodeURIComponent(ticker.trim().toUpperCase())}`, {
+                        state: {
+                          conviction: result.conviction,
+                          stance: result.stance,
+                          thesis: result.analysis,
+                          run_uid: result.run_uid,
+                        },
+                      })
+                    }
+                    className="bg-verdigris px-5 py-2.5 font-display text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-cadmium"
+                  >
+                    Size this against my book →
+                  </button>
+                  <span className="text-xs text-on-ink-faint">
+                    Carries this conviction and thesis into the decision record.
+                  </span>
+                </div>
               </Card>
             </section>
 

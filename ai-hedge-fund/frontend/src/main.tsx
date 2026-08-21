@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import App from "./app/App";
+import { TickerProvider } from "./lib/ticker-context";
 import "./index.css";
 
 if (import.meta.env.VITE_SENTRY_DSN) {
@@ -37,7 +38,9 @@ const root = (
     >
       <QueryClientProvider client={queryClient}>
         <BrowserRouter basename={import.meta.env.BASE_URL}>
-          <App />
+          <TickerProvider>
+            <App />
+          </TickerProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </Sentry.ErrorBoundary>

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { TickerBar } from "@/components/TickerBar";
 
 export type AppNavActive =
   | "home"
@@ -39,41 +40,44 @@ type Props = {
 
 export function AppNav({ active, end }: Props) {
   return (
-    <nav className="sticky top-0 z-30 border-b border-ink-line bg-ink/95 backdrop-blur-sm">
-      <div className="flex items-center justify-between gap-md px-lg py-sm">
-        <div className="flex min-w-0 items-center gap-lg">
-          <Link
-            to="/"
-            className="font-display text-[15px] tracking-[0.14em] text-bone transition-colors hover:text-oxide"
-            title="Back to overview"
-          >
-            MJ
-          </Link>
-          <div className="scrollbar-none flex min-w-0 items-center gap-md overflow-x-auto">
-            {NAV.map((item) => {
-              const on = active === item.key;
-              return (
-                <Link
-                  key={item.key}
-                  to={item.to}
-                  className={`relative shrink-0 py-1 font-display text-[11px] uppercase tracking-[0.14em] transition-colors ${
-                    on ? "text-bone" : "text-on-ink-faint hover:text-on-ink"
-                  }`}
-                >
-                  {item.label}
-                  {on && (
-                    <span
-                      aria-hidden
-                      className="absolute -bottom-[9px] left-0 h-[2px] w-full bg-oxide"
-                    />
-                  )}
-                </Link>
-              );
-            })}
+    <div className="sticky top-0 z-30 bg-ink/95 backdrop-blur-sm">
+      <nav className="border-b border-ink-line">
+        <div className="flex items-center justify-between gap-md px-lg py-sm">
+          <div className="flex min-w-0 items-center gap-lg">
+            <Link
+              to="/"
+              className="font-display text-[15px] tracking-[0.14em] text-bone transition-colors hover:text-oxide"
+              title="Back to overview"
+            >
+              MJ
+            </Link>
+            <div className="scrollbar-none flex min-w-0 items-center gap-md overflow-x-auto">
+              {NAV.map((item) => {
+                const on = active === item.key;
+                return (
+                  <Link
+                    key={item.key}
+                    to={item.to}
+                    className={`relative shrink-0 py-1 font-display text-[11px] uppercase tracking-[0.14em] transition-colors ${
+                      on ? "text-bone" : "text-on-ink-faint hover:text-on-ink"
+                    }`}
+                  >
+                    {item.label}
+                    {on && (
+                      <span
+                        aria-hidden
+                        className="absolute -bottom-[9px] left-0 h-[2px] w-full bg-oxide"
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
+          {end != null && <div className="hidden shrink-0 sm:flex">{end}</div>}
         </div>
-        {end != null && <div className="hidden shrink-0 sm:flex">{end}</div>}
-      </div>
-    </nav>
+      </nav>
+      <TickerBar />
+    </div>
   );
 }
