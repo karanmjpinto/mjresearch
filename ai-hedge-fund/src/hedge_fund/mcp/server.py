@@ -7,7 +7,7 @@ Or install as a Claude Desktop MCP server — see README for config snippet.
 
 Tools exposed
 -------------
-- research_ticker        : Run AI committee analysis (parallel personas + PM synthesis)
+- research_ticker        : Run AI committee analysis (parallel personas, rebuttal round on dissent, PM synthesis)
 - get_market_data        : Price, fundamentals, technicals bundle for a ticker
 - get_sec_filings        : Recent SEC filings (10-K, 10-Q, 8-K, Form 4, 13F, ...) via EDGAR
 - get_peers              : SIC-classified peer group + side-by-side metrics
@@ -116,9 +116,11 @@ async def research_ticker(
 
     mode="committee" (default) runs a parallel committee of 4 named investors
     (Warren Buffett, Ben Graham, Cathie Wood, Michael Burry) and a Portfolio
-    Manager synthesis node. mode="persona" runs a single named investor (set
-    `persona` to one of the ids returned by describe_research_graph).
-    mode="default" runs a generic analyst.
+    Manager synthesis node. If the committee splits materially, each analyst is
+    first shown the others' anonymized conclusions against the same snapshot and
+    either revises or holds; the `refinement` block records what moved.
+    mode="persona" runs a single named investor (set `persona` to one of the ids
+    returned by describe_research_graph). mode="default" runs a generic analyst.
     """
     ticker = ticker.upper().strip()
     flat, llm_snapshot = await assemble_research_snapshot(ticker, _ds(), price_days=30)

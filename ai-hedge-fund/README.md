@@ -46,7 +46,7 @@ If you prefer a hosted API: `uv sync --extra openai`, set `LLM_PROVIDER=openai`,
 
 - **News sentiment (FinBERT)**: Headlines from the research bundle are scored with [ProsusAI/finbert](https://huggingface.co/ProsusAI/finbert) when optional deps are installed (`uv sync --extra sentiment`). Without them, the API still works and reports `news_sentiment.enabled: false`.
 - **Data**: Multi-provider market data (existing `DataService` / registry).
-- **Research**: `POST /api/research/check` with `include_ai: true` runs the LLM (Ollama or OpenAI) for conviction (0–100), stance, thesis, bull/bear, risks, plus heuristic **evaluation** and **guardrail** warnings. Optional **investor personas** (`persona`) or **committee** mode (multiple personas + portfolio-manager synthesis). See `GET /api/research/personas`.
+- **Research**: `POST /api/research/check` with `include_ai: true` runs the LLM (Ollama or OpenAI) for conviction (0–100), stance, thesis, bull/bear, risks, plus heuristic **evaluation** and **guardrail** warnings. Optional **investor personas** (`persona`) or **committee** mode (multiple personas + portfolio-manager synthesis). A committee that splits materially is sent back for a **rebuttal round** before synthesis — see `refinement` in the response. See `GET /api/research/personas`.
 - **Simulation**: `POST /api/simulation/backtest` builds the same snapshot with **price history ending on `as_of_date`** (fundamentals/news may still be latest from providers — see response `simulation_note`). Optional AI with the same `persona` / `committee` fields as research.
 - **Third-party ideas**: Persona/committee flow is inspired by [virattt/ai-hedge-fund](https://github.com/virattt/ai-hedge-fund) (MIT); see [third_party/ATTRIBUTION.md](third_party/ATTRIBUTION.md).
 - **Portfolio**: Persistent book in `./data/fund.db` — buy/sell, cash, splits, dividends, manual edits. Can **seed** from `config/portfolio.json` when the DB has no positions.
@@ -55,6 +55,12 @@ If you prefer a hosted API: `uv sync --extra openai`, set `LLM_PROVIDER=openai`,
 - **Portfolio construction**: `POST /api/optimize` — five allocation methods: equal weight, AI conviction weighted, inverse volatility, Markowitz max-Sharpe, and **Hierarchical Risk Parity** (Lopez de Prado 2016). Takes a basket + optional `convictions` map; returns weights, per-asset stats, and simulated daily-rebalance performance vs 1/N.
 - **Alt data (EDGAR)**: SIC-classified peer groups and real SEC filings (10-K / 10-Q / 8-K / Form 4 / 13F-HR / DEF 14A / SC 13G-D) — no API key, just a descriptive `SEC_USER_AGENT`.
 - **Parallel committee**: Committee mode runs personas concurrently via `asyncio.gather` (3-4× speedup vs sequential). `GET /api/research/graph` returns a JSON description of the fan-out/reduce workflow for visualization.
+- **Rebuttal round on dissent**: when the committee splits materially — conviction spread ≥ 30, or more than two distinct stances — each analyst is shown the others' conclusions and either revises or holds, against the *same unchanged snapshot*, before the portfolio manager synthesizes. Otherwise the synthesis averages away a disagreement nobody examined.
+
+  Peers are anonymized ("Analyst A/B/C") and the prompt states that holding is the expected outcome and that peer confidence is not grounds to move — only data already in the bundle is. Both rounds are kept (`committee_round1`, `dissent_round1`), a failed rebuttal keeps the first-round view, and revised output is re-verified against the snapshot exactly as the first round was.
+
+  The failure mode being managed is agreement, not disagreement: a committee that converges by deference is one opinion wearing four hats. Total convergence in a single round therefore sets `refinement.suspect_convergence` rather than reading as confirmation. Disable with `COMMITTEE_REFINE_ON_DISSENT=false`.
+- **Per-stage models**: `LLM_PERSONA_MODEL` and `LLM_SYNTHESIS_MODEL` point individual stages at their own model; unset, every stage uses `OLLAMA_MODEL`/`LLM_MODEL` and behaviour is unchanged. The resolved model is recorded per call, so a run mixing models stays attributable stage by stage.
 
 ## Deployment
 

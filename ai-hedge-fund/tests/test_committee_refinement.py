@@ -12,8 +12,11 @@ import json
 
 import pytest
 
+from fastapi.testclient import TestClient
+
 from hedge_fund.agents import research_agent as agent
 from hedge_fund.agents.llm import LLMResult, model_for_role
+from hedge_fund.api.main import app
 from hedge_fund.settings import settings
 
 
@@ -249,3 +252,84 @@ async def test_personas_and_synthesis_receive_their_own_models(monkeypatch, no_p
 
     assert ("persona", "small-model") in used
     assert ("synthesis", "big-model") in used
+
+
+# ----------------------------------------------------------------------
+# The API surface — a refinement nobody can see is not a feature
+
+
+def test_research_route_surfaces_the_refinement(monkeypatch, no_persistence):
+    """A split committee must reach the client as a split that was argued out."""
+    import hedge_fund.api.routes.research as research_route
+
+    monkeypatch.setattr(settings, "committee_refine_on_dissent", True)
+
+    async def fake_snapshot(ticker, ds, **kw):
+        return dict(SNAPSHOT), dict(SNAPSHOT)
+
+    seen = {"n": 0}
+
+    async def fake_call_json(system, user, schema=None, **kwargs):
+        if "already given your view" in system:
+            return _result(_analysis(70, "BUY", "Moved on the margin data."))
+        if "portfolio manager" in system.lower():
+            return _result(_analysis(71, "BUY"))
+        seen["n"] += 1
+        return _result(_analysis(88, "BUY") if seen["n"] == 1 else _analysis(30, "SELL"))
+
+    monkeypatch.setattr(research_route, "assemble_research_snapshot", fake_snapshot)
+    monkeypatch.setattr(agent, "call_json", fake_call_json)
+
+    body = (
+        TestClient(app)
+        .post(
+            "/api/research/check",
+            json={
+                "ticker": "AAPL",
+                "include_ai": True,
+                "committee": True,
+                "committee_personas": ["warren_buffett", "michael_burry"],
+            },
+        )
+        .json()
+    )
+
+    assert body["ai_error"] is None
+    assert body["refinement"]["triggered"] is True
+    assert body["refinement"]["conviction_spread_before"] == 58
+    assert body["dissent_round1"]["material_disagreement"] is True
+    # The client can still see what the committee thought before it was argued out.
+    assert {c["round"] for c in body["committee_round1"]} == {1}
+
+
+def test_agreeing_committee_reports_no_refinement_over_the_api(monkeypatch, no_persistence):
+    import hedge_fund.api.routes.research as research_route
+
+    monkeypatch.setattr(settings, "committee_refine_on_dissent", True)
+
+    async def fake_snapshot(ticker, ds, **kw):
+        return dict(SNAPSHOT), dict(SNAPSHOT)
+
+    async def fake_call_json(system, user, schema=None, **kwargs):
+        return _result(_analysis(64, "BUY"))
+
+    monkeypatch.setattr(research_route, "assemble_research_snapshot", fake_snapshot)
+    monkeypatch.setattr(agent, "call_json", fake_call_json)
+
+    body = (
+        TestClient(app)
+        .post(
+            "/api/research/check",
+            json={
+                "ticker": "AAPL",
+                "include_ai": True,
+                "committee": True,
+                "committee_personas": ["warren_buffett", "ben_graham"],
+            },
+        )
+        .json()
+    )
+
+    assert body["refinement"]["triggered"] is False
+    assert body["committee_round1"] is None
+    assert body["dissent_round1"] is None

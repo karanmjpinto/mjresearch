@@ -990,4 +990,41 @@ export interface ResearchCheckResponse {
   persona_id?: string | null;
   committee?: CommitteeEntry[] | null;
   synthesis?: Record<string, unknown> | null;
+  /**
+   * Present only when the committee split materially and was sent back for a
+   * rebuttal round before synthesis. `committee` above is the *post*-rebuttal
+   * view — the one the PM actually reconciled — so anything reporting spread
+   * has to say whether it was reached first time or after a second look.
+   */
+  refinement?: CommitteeRefinement | null;
+  committee_round1?: CommitteeEntry[] | null;
+  dissent_round1?: Dissent | null;
+  dissent?: Dissent | null;
+}
+
+export interface Dissent {
+  responded: number;
+  conviction_min?: number;
+  conviction_max?: number;
+  conviction_mean?: number;
+  conviction_spread?: number;
+  stances?: Record<string, number>;
+  unanimous_stance?: boolean;
+  material_disagreement?: boolean;
+}
+
+export interface CommitteeRefinement {
+  triggered: boolean;
+  enabled: boolean;
+  /** One line naming what the committee split over. */
+  reason: string | null;
+  revised_personas?: string[];
+  held_personas?: string[];
+  failed_personas?: string[];
+  conviction_spread_before?: number;
+  conviction_spread_after?: number;
+  resolved?: boolean;
+  /** Everyone folding at once reads as deference, not consensus. */
+  suspect_convergence?: boolean;
+  note?: string;
 }

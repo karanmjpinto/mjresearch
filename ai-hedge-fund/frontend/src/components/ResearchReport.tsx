@@ -16,6 +16,7 @@ import {
   type CongressionalTrade,
   type PeerComparison,
   type CommitteeEntry,
+  type CommitteeRefinement,
   type AiAnalysisBlock,
 } from "@/lib/api";
 import { ChatInput } from "./ChatInput";
@@ -456,6 +457,7 @@ export function ResearchReport() {
             <SignalIntelligence
               ai={ai}
               committee={d?.committee ?? null}
+              refinement={d?.refinement ?? null}
               analyst={analystSig.data ?? null}
               sentiment={sentimentSig.data ?? null}
               newsSentimentMean={d?.news_sentiment?.enabled ? d.news_sentiment.aggregate.mean_signed : null}
@@ -1319,12 +1321,14 @@ function committeeSpread(committee: CommitteeEntry[] | null | undefined) {
 function SignalIntelligence({
   ai,
   committee,
+  refinement,
   analyst,
   sentiment,
   newsSentimentMean,
 }: {
   ai: AiAnalysisBlock;
   committee: CommitteeEntry[] | null;
+  refinement: CommitteeRefinement | null;
   analyst: AnalystRating | null;
   sentiment: NewsSentiment | null;
   newsSentimentMean: number | null | undefined;
@@ -1410,12 +1414,53 @@ function SignalIntelligence({
                 </span>
               </div>
               <div className="mt-1 pt-2 border-t border-border/40 text-[10px] text-gray-500 leading-relaxed">
-                {spread.divergence >= 3
-                  ? "Strong disagreement — high information content in the thesis; verify assumptions."
-                  : spread.divergence === 2
-                    ? "Split committee — look for the dissenting view's thesis before sizing."
-                    : "Consensus across lenses — thesis is robust to style."}
+                {/* The spread above is the post-rebuttal one. Calling a talked-down
+                    split "robust to style" would be a straightforward lie, so
+                    agreement reached after a second round is labelled as such. */}
+                {refinement?.triggered
+                  ? spread.divergence >= 2
+                    ? "Still split after a rebuttal round — the disagreement survived being argued out. Read both theses before sizing."
+                    : "Agreement reached only after a rebuttal round, not first time. Weaker evidence than an unprompted consensus."
+                  : spread.divergence >= 3
+                    ? "Strong disagreement — high information content in the thesis; verify assumptions."
+                    : spread.divergence === 2
+                      ? "Split committee — look for the dissenting view's thesis before sizing."
+                      : "Consensus across lenses — thesis is robust to style."}
               </div>
+
+              {refinement?.triggered && (
+                <div className="mt-2 pt-2 border-t border-border/40 space-y-1">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-gray-400">Rebuttal round</span>
+                    <span className="font-mono text-white">
+                      {refinement.conviction_spread_before ?? "—"} →{" "}
+                      {refinement.conviction_spread_after ?? "—"}
+                    </span>
+                  </div>
+                  {(refinement.held_personas?.length ?? 0) > 0 && (
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-gray-400">Held</span>
+                      <span className="font-mono text-emerald-300">
+                        {refinement.held_personas!.length}
+                      </span>
+                    </div>
+                  )}
+                  {(refinement.revised_personas?.length ?? 0) > 0 && (
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-gray-400">Revised</span>
+                      <span className="font-mono text-amber-300">
+                        {refinement.revised_personas!.length}
+                      </span>
+                    </div>
+                  )}
+                  {refinement.suspect_convergence && (
+                    <p className="text-[10px] text-red-300 leading-relaxed">
+                      Every dissenting analyst moved to the same view in one round — treat as
+                      deference to the group, not independent agreement.
+                    </p>
+                  )}
+                </div>
+              )}
             </>
           ) : (
             <p className="text-gray-500 italic">Run committee mode to see spread.</p>

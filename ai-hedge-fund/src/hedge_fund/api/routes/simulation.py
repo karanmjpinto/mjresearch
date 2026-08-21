@@ -72,6 +72,9 @@ async def simulation_backtest(req: BacktestRequest):
         "persona_id": None,
         "committee": None,
         "synthesis": None,
+        # Set only when a committee run split and was sent back for a second
+        # look; null otherwise. See agents.research_agent.
+        "refinement": None,
     }
 
     if not req.include_ai:
@@ -117,6 +120,7 @@ async def simulation_backtest(req: BacktestRequest):
         out["ai_full"] = analysis
         out["evaluation"] = synth.get("evaluation")
         out["ai_model"] = synth.get("model")
+        out["refinement"] = ai.get("refinement")
         out["ai_usage"] = {"per_call": ai.get("usage_total"), "synthesis": synth.get("usage")}
         out["synthesis"] = synth
         return out
