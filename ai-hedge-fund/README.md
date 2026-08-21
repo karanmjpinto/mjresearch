@@ -180,6 +180,16 @@ down or the model is not pulled — everything except AI research still works.
 
 Then open **http://localhost:5173**.
 
+Both ports are overridable, which is how you run a second instance beside one
+that is already bound. The UI proxy follows the API port automatically:
+
+```bash
+./start.sh --api-port 8010 --ui-port 5174
+```
+
+Note that instances share `./data/fund.db`, so two backends running at once are
+writing to the same book.
+
 ### Manual start
 
 ```bash
