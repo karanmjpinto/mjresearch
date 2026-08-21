@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
 import { ChatInput } from "./ChatInput";
 import { AppNav } from "./AppNav";
+import { useTicker } from "@/lib/ticker-context";
 
 export function Dashboard() {
   const navigate = useNavigate();
+  const { recents } = useTicker();
   const [watchGroup, setWatchGroup] = useState<string>("default");
 
   const watchlists = useQuery({ queryKey: ["watchlists"], queryFn: api.getWatchlists });
@@ -19,6 +21,17 @@ export function Dashboard() {
   const providers = useQuery({
     queryKey: ["providers"],
     queryFn: api.getProviderStatus,
+    retry: false,
+  });
+  // What the dashboard is actually for: picking up work, not reading a brochure.
+  const recentRuns = useQuery({
+    queryKey: ["recent-runs"],
+    queryFn: () => api.getRuns(undefined, 6),
+    retry: false,
+  });
+  const recentDecisions = useQuery({
+    queryKey: ["recent-decisions"],
+    queryFn: () => api.getDecisions(undefined, 6),
     retry: false,
   });
 
@@ -62,19 +75,36 @@ export function Dashboard() {
 
       <div className="grow overflow-y-auto">
         <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col gap-8">
-          {/* Hero */}
-          <section className="flex flex-col gap-3">
-            <h1 className="text-3xl font-bold text-white">MJ Research</h1>
-            <p className="text-gray-400 text-sm leading-relaxed max-w-2xl">
-              A local-first research and portfolio workstation. Multi-provider data,
-              AI committee analysis with named-investor lenses, rule-based backtesting,
-              portfolio construction (HRP / Markowitz / conviction-weighted), SEC-native
-              alt data, and an MCP server so you can drive it all from Claude Desktop.
-              No API keys required — Ollama runs the LLM locally.
+          {/* Hero — start work, do not describe the product */}
+          <section className="flex flex-col gap-sm">
+            <h1 className="font-display text-display-sm tracking-tight text-bone">
+              What are you looking at?
+            </h1>
+            <p className="max-w-2xl text-[15px] leading-relaxed text-on-ink-soft">
+              Research a name, form a view over numbers the model did not produce, size it
+              against the book you already hold, and record the call. Everything runs on this
+              machine.
             </p>
-            <div className="max-w-xl mt-1">
+            <div className="mt-2xs max-w-xl">
               <ChatInput onSubmit={handleSearch} placeholder="Research a ticker (e.g. AAPL, NVDA, 7203.T)" />
             </div>
+            {recents.length > 0 && (
+              <div className="mt-2xs flex flex-wrap items-center gap-2xs">
+                <span className="font-display text-[10px] uppercase tracking-[0.16em] text-on-ink-faint">
+                  Recent
+                </span>
+                {recents.slice(0, 6).map((r: string) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => navigate(`/research/${r}`)}
+                    className="px-2 py-1 font-display text-[12px] text-on-ink-faint transition-colors hover:text-cadmium"
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Snapshot strip — portfolio + providers + sector drift */}
@@ -112,71 +142,96 @@ export function Dashboard() {
             />
           </section>
 
-          {/* Feature grid */}
-          <section>
-            <div className="flex items-baseline justify-between mb-4">
-              <h2 className="text-xl font-bold text-white">What's here</h2>
-              <p className="text-xs text-gray-500">Every surface is a click away</p>
+          {/* Work in progress — the two things worth resuming */}
+          <section className="grid grid-cols-1 gap-lg lg:grid-cols-2">
+            <div className="border border-ink-line bg-ink-raised">
+              <div className="flex items-baseline justify-between border-b border-ink-line px-lg py-sm">
+                <h2 className="font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+                  Recent research
+                </h2>
+                <span className="font-display text-[10px] uppercase tracking-[0.14em] text-on-ink-faint">
+                  {recentRuns.data?.count ?? 0} runs
+                </span>
+              </div>
+              {(recentRuns.data?.runs ?? []).length === 0 ? (
+                <p className="px-lg py-lg text-[13px] leading-relaxed text-on-ink-faint">
+                  Nothing yet. Research a name and the run is recorded here, so you can come
+                  back and see what you concluded and why.
+                </p>
+              ) : (
+                recentRuns.data?.runs.map((r) => (
+                  <button
+                    key={r.run_uid}
+                    type="button"
+                    onClick={() => navigate(`/plan/${r.ticker}`)}
+                    className="flex w-full items-baseline gap-sm border-t border-ink-line px-lg py-sm text-left transition-colors first:border-t-0 hover:bg-ink"
+                  >
+                    <span className="font-display text-[13px] text-bone">{r.ticker}</span>
+                    <span className="font-display text-[10px] uppercase tracking-[0.12em] text-on-ink-faint">
+                      {r.mode}
+                    </span>
+                    {r.output?.stance && (
+                      <span className="font-display text-[11px] text-cadmium">
+                        {r.output.stance} {r.output.conviction_score ?? ""}
+                      </span>
+                    )}
+                    <span className="ml-auto font-display text-[10px] text-on-ink-faint">
+                      {r.created_at?.slice(0, 10)}
+                    </span>
+                  </button>
+                ))
+              )}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FeatureCard
-                badge="Phase 1"
-                title="Multi-provider market data"
-                body="Nine providers orchestrated by priority with fallback, caching, and rate limiting: openbb, yfinance, pandas-datareader, finnhub, Alpha Vantage, Twelve Data, EDGAR, FMP, financial-datasets. Price, fundamentals, technicals, options, earnings, analyst targets, FinBERT news sentiment, ESG, Fama-French 5-factor, FRED macro."
-                cta="Open research"
-                onClick={() => navigate("/research")}
-              />
-              <FeatureCard
-                badge="Phase 2"
-                title="AI research committee"
-                body="13 investor personas (Buffett, Graham, Ackman, Cathie Wood, Munger, Burry, Pabrai, Lynch, Fisher, Jhunjhunwala, Druckenmiller, Damodaran, + generic analyst). Run as Committee mode: four personas in parallel via asyncio, then a Portfolio Manager synthesis — 3–4× faster than sequential. Output: conviction (0–100), stance, thesis, bull/bear, named risks."
-                cta="Run committee"
-                onClick={() => navigate("/research")}
-              />
-              <FeatureCard
-                badge="Phase 2+"
-                title="Signal Intelligence"
-                body="Post-thesis contrarian callouts: where your AI stance disagrees with sell-side analysts, where it buys pessimism or sells euphoria, unusual news buzz, sector sentiment gaps. Plus committee spread — unanimity vs 3-stance divergence, with guidance on when to verify assumptions."
-                cta="See it live"
-                onClick={() => navigate("/research/AAPL")}
-              />
-              <FeatureCard
-                badge="Phase 2.5"
-                title="Fundamental screeners"
-                body="Yartseva Multibagger (hard filters + weighted 6-factor composite, tiered 35–100) and Acquisition Compounder (9-factor score /45, growth + ROIC + FCF conversion + leverage + goodwill heuristic). Watchlist picker, custom universes, live yfinance data."
-                cta="Open screeners"
-                onClick={() => navigate("/screeners")}
-              />
-              <FeatureCard
-                badge="Phase 3"
-                title="Rule-based backtesting"
-                body="Six vectorized strategies: Buy & Hold, Golden Cross, RSI Mean Reversion, Bollinger Breakout, Buy-the-Dip in Uptrend, 6-month Momentum. No look-ahead bias (one-bar signal lag), 5 bps per-side fees, full metrics (Sharpe, Sortino, Calmar, max DD, win rate) plus round-trip trade log."
-                cta="Open research → Backtest tab"
-                onClick={() => navigate("/research/AAPL")}
-              />
-              <FeatureCard
-                badge="Phase 4"
-                title="Portfolio construction"
-                body="Five allocation methods: Equal Weight, AI Conviction Weighted (< 40 filtered out), Inverse Vol, Markowitz Max-Sharpe (blends conviction with history), and Hierarchical Risk Parity (Lopez de Prado 2016 — robust to estimation error). Per-ticker conviction sliders, donut chart, equity curve vs 1/N benchmark."
-                cta="Optimize a basket"
-                onClick={() => navigate("/optimize")}
-              />
-              <FeatureCard
-                badge="Phase 5"
-                title="EDGAR alt data"
-                body="Real SEC filings via EDGAR — 10-K / 10-Q / 8-K / Form 4 / 13F-HR / DEF 14A / SC 13G/D with direct sec.gov links. SIC-classified peer groups (not yfinance sector slop) ranked by market cap. No API key — just set SEC_USER_AGENT."
-                cta="Research → Alt data tab"
-                onClick={() => navigate("/research/MSFT")}
-              />
-              <FeatureCard
-                badge="Phase 7"
-                title="MCP server for Claude Desktop"
-                body="The whole stack — research_ticker, get_market_data, get_sec_filings, get_peers, run_backtest, optimize_portfolio, describe_research_graph — exposed as MCP tools. Drop one JSON block into Claude Desktop's config and research any ticker by asking. Also: GET /api/research/graph for the workflow topology."
-                cta="See Claude Desktop config"
-                onClick={() => window.open("https://github.com/karanmjpinto/ai-hedge-fund#mcp-server-claude-desktop-cursor-etc", "_blank")}
-              />
+
+            <div className="border border-ink-line bg-ink-raised">
+              <div className="flex items-baseline justify-between border-b border-ink-line px-lg py-sm">
+                <h2 className="font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+                  Recent decisions
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => navigate("/decide")}
+                  className="font-display text-[10px] uppercase tracking-[0.14em] text-cobalt transition-colors hover:text-cadmium"
+                >
+                  Decide →
+                </button>
+              </div>
+              {(recentDecisions.data?.decisions ?? []).length === 0 ? (
+                <p className="px-lg py-lg text-[13px] leading-relaxed text-on-ink-faint">
+                  No calls recorded. Once you record one it appears here with the move since —
+                  the point being to check whether the reasoning held, not just the price.
+                </p>
+              ) : (
+                recentDecisions.data?.decisions.map((d) => (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => navigate(`/decide/${d.ticker}`)}
+                    className="flex w-full items-baseline gap-sm border-t border-ink-line px-lg py-sm text-left transition-colors first:border-t-0 hover:bg-ink"
+                  >
+                    <span className="font-display text-[10px] uppercase tracking-[0.12em] text-on-ink">
+                      {d.action}
+                    </span>
+                    <span className="font-display text-[13px] text-bone">{d.ticker}</span>
+                    {d.outcome?.scored && (
+                      <span
+                        className={`font-display text-[11px] tabular ${
+                          (d.outcome.in_your_favour_pct ?? 0) >= 0 ? "text-verdigris" : "text-oxide"
+                        }`}
+                      >
+                        {(d.outcome.in_your_favour_pct ?? 0) >= 0 ? "+" : ""}
+                        {(d.outcome.in_your_favour_pct ?? 0).toFixed(1)}%
+                      </span>
+                    )}
+                    <span className="ml-auto font-display text-[10px] text-on-ink-faint">
+                      {d.created_at?.slice(0, 10)}
+                    </span>
+                  </button>
+                ))
+              )}
             </div>
           </section>
+
 
           {/* Watchlist + sector + providers — the working widgets, compact */}
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -273,37 +328,37 @@ export function Dashboard() {
             </div>
           </section>
 
-          {/* How to run section */}
-          <section className="bg-surface-card rounded-xl p-5 border border-border/60">
-            <h3 className="text-xs text-gray-500 uppercase tracking-wider mb-3">
+          {/* Run it locally */}
+          <section className="border border-ink-line bg-ink-raised p-lg">
+            <h3 className="mb-sm font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
               Run it locally
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              <StepCard
-                n="1"
-                title="Backend"
-                code={`cd ai-hedge-fund
-uv run uvicorn hedge_fund.api.main:app --reload`}
-              />
-              <StepCard
-                n="2"
-                title="Frontend"
-                code={`cd ai-hedge-fund/frontend
-npm run dev`}
-              />
-              <StepCard
-                n="3"
-                title="Ollama (for AI)"
-                code={`ollama pull llama3.2
-ollama serve`}
-              />
-            </div>
-            <p className="text-[11px] text-gray-500 mt-3">
-              Optional: <span className="font-mono text-gray-400">uv sync --extra sentiment</span>{" "}
-              for FinBERT headlines,{" "}
-              <span className="font-mono text-gray-400">uv sync --extra openai</span> for hosted LLM,{" "}
-              or <span className="font-mono text-gray-400">uv run hedge-fund-mcp</span> to start the
-              MCP server for Claude Desktop.
+            <pre className="overflow-x-auto border border-ink-line bg-ink p-md font-display text-[12px] leading-relaxed text-cadmium">
+{`cd ai-hedge-fund
+./start.sh                       # API on :8000, UI on :5173
+./start.sh --api-port 8010 --ui-port 5174   # if those ports are taken`}
+            </pre>
+            <p className="mt-sm text-[12px] leading-relaxed text-on-ink-faint">
+              For the AI thesis you also need{" "}
+              <a
+                href="https://ollama.com"
+                target="_blank"
+                rel="noreferrer"
+                className="text-cobalt hover:text-cadmium"
+              >
+                Ollama
+              </a>{" "}
+              running with a model pulled —{" "}
+              <span className="font-display text-on-ink-soft">ollama pull qwen3:30b</span>.
+              Optional extras and API keys live on the{" "}
+              <button
+                type="button"
+                onClick={() => navigate("/setup")}
+                className="text-cobalt underline-offset-4 hover:text-cadmium hover:underline"
+              >
+                setup screen
+              </button>
+              .
             </p>
           </section>
         </div>
@@ -346,51 +401,3 @@ function SnapshotCard({
   );
 }
 
-function FeatureCard({
-  badge,
-  title,
-  body,
-  cta,
-  onClick,
-}: {
-  badge: string;
-  title: string;
-  body: string;
-  cta: string;
-  onClick: () => void;
-}) {
-  return (
-    <div className="bg-surface-card rounded-xl p-5 border border-border/60 flex flex-col gap-3 hover:border-blue-500/40 transition-colors">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-mono uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-500/30 rounded px-1.5 py-0.5">
-          {badge}
-        </span>
-      </div>
-      <h3 className="text-base font-semibold text-white leading-snug">{title}</h3>
-      <p className="text-xs text-gray-400 leading-relaxed flex-1">{body}</p>
-      <button
-        type="button"
-        onClick={onClick}
-        className="text-xs text-blue-400 hover:text-blue-300 self-start font-medium transition-colors"
-      >
-        {cta} →
-      </button>
-    </div>
-  );
-}
-
-function StepCard({ n, title, code }: { n: string; title: string; code: string }) {
-  return (
-    <div className="bg-black/30 rounded-lg p-3 border border-border/40">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-[10px] font-mono font-bold text-blue-400 bg-blue-500/10 border border-blue-500/30 rounded-full w-5 h-5 flex items-center justify-center">
-          {n}
-        </span>
-        <p className="text-xs font-semibold text-gray-300">{title}</p>
-      </div>
-      <pre className="text-[11px] font-mono text-gray-400 whitespace-pre-wrap leading-snug">
-        {code}
-      </pre>
-    </div>
-  );
-}

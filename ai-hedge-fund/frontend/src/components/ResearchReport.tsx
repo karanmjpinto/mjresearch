@@ -289,18 +289,29 @@ export function ResearchReport() {
             )}
           </div>
 
-          <label
-            className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer select-none"
-            title="Runs locally via Ollama — no API key needed."
-          >
-            <input
-              type="checkbox"
-              checked={includeAi}
-              onChange={(e) => setIncludeAi(e.target.checked)}
-              className="rounded border-border"
-            />
-            Run AI thesis &amp; conviction
-          </label>
+          {/* A button, not a checkbox. This starts a job that takes tens of
+           * seconds and costs real compute — a tickbox reads as a passive
+           * preference, which is the wrong signal for an action. */}
+          <div className="flex flex-wrap items-center gap-sm">
+            <button
+              type="button"
+              onClick={() => setIncludeAi((v) => !v)}
+              aria-pressed={includeAi}
+              title="Runs locally via Ollama — no API key needed."
+              className={`px-5 py-2.5 font-display text-[11px] uppercase tracking-[0.14em] transition-colors ${
+                includeAi
+                  ? "bg-cadmium text-ink hover:bg-oxide hover:text-bone"
+                  : "bg-cobalt text-bone hover:bg-cadmium hover:text-ink"
+              }`}
+            >
+              {includeAi ? "AI thesis on — turn off" : "Run AI thesis"}
+            </button>
+            <span className="text-xs text-on-ink-faint">
+              {includeAi
+                ? "Runs on every ticker you open until you turn it off."
+                : "Local model, no API key. Takes 10–30 seconds."}
+            </span>
+          </div>
 
           {includeAi && (
             <div className="flex flex-col gap-2 p-4 rounded-xl bg-surface-card/50 border border-border/60">
@@ -482,9 +493,10 @@ export function ResearchReport() {
               {!includeAi && (
                 <div className="bg-surface-card rounded-xl p-8 text-center border border-dashed border-border">
                   <p className="text-gray-400 text-sm">
-                    Turn on <strong className="text-gray-300">Run AI thesis</strong> above, then choose{" "}
-                    <strong className="text-gray-300">Committee</strong> or <strong className="text-gray-300">Single investor</strong>{" "}
-                    to see named investor takes on this symbol.
+                    Press <strong className="text-bone">Run AI thesis</strong> above, then choose{" "}
+                    <strong className="text-bone">Committee</strong> or{" "}
+                    <strong className="text-bone">Single investor</strong> to see named investor
+                    takes on this symbol.
                   </p>
                 </div>
               )}

@@ -626,6 +626,13 @@ export interface DecisionRow {
 export const api = {
   health: () => fetchJSON<{ status: string }>("/health"),
 
+  // --- Runs ---
+
+  getRuns: (ticker?: string, limit = 20) =>
+    fetchJSON<{ count: number; runs: { run_uid: string; ticker: string; mode: string; output?: { conviction_score?: number; stance?: string }; created_at: string }[] }>(
+      `/runs?limit=${limit}${ticker ? `&ticker=${encodeURIComponent(ticker)}` : ""}`
+    ),
+
   // --- Decisions ---
 
   sizePosition: (body: { ticker: string; amount?: number; weight_pct?: number }) =>

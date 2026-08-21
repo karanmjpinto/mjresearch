@@ -51,18 +51,42 @@ const FEATURES = [
   {
     n: "05",
     hue: "var(--oxide)",
-    label: "Methodology memory",
-    title: "Corrections of method, not of answers.",
-    body: "Teach it how to approach a problem and later runs apply it. Notes containing prices or scores are rejected — a stored number would be replayed onto runs where it is no longer true.",
-    span: "lg:col-span-6",
+    label: "Sized against your book",
+    title: "Whether to own it depends on what you already hold.",
+    body: "A candidate is sized against the existing portfolio, not in isolation: resulting weight, correlation to what you hold, concentration, and the effect on portfolio volatility. A volatile name can lower total risk if it moves differently — sizing it alone would call that a risk increase.",
+    span: "lg:col-span-7",
   },
   {
     n: "06",
+    hue: "var(--cadmium)",
+    label: "Decisions on the record",
+    title: "The call is kept with the book it was made against.",
+    body: "Weights and correlations move, so a decision reviewed a year later is judged against the portfolio as it stood — not against today's, which would mark every past call using information nobody had.",
+    span: "lg:col-span-5",
+  },
+  {
+    n: "07",
+    hue: "var(--verdigris)",
+    label: "Autoresearch",
+    title: "Overnight experiments that are hard on themselves.",
+    body: "Proposes one strategy at a time and judges it on a window it never saw, with the bar rising as more things are tried — because searching enough variants against one price history will always turn something up. Discarded runs stay on the log; how many were tried is part of what the survivor means.",
+    span: "lg:col-span-7",
+  },
+  {
+    n: "08",
+    hue: "var(--oxide)",
+    label: "Methodology memory",
+    title: "Corrections of method, not of answers.",
+    body: "Teach it how to approach a problem and later runs apply it. Notes containing prices or scores are rejected — a stored number would be replayed onto runs where it is no longer true.",
+    span: "lg:col-span-5",
+  },
+  {
+    n: "09",
     hue: "var(--cobalt)",
     label: "Local first",
     title: "Runs on your machine. No API keys.",
-    body: "Ollama serves the model locally, market data comes from keyless providers by default, and the portfolio lives in a SQLite file you own.",
-    span: "lg:col-span-6",
+    body: "Ollama serves the model locally, market data comes from keyless providers by default, and the portfolio lives in a SQLite file you own. Optional keys add coverage; none are required.",
+    span: "lg:col-span-12",
   },
 ];
 
@@ -73,6 +97,8 @@ const PIPELINE = [
   { step: "Narrator", detail: "Writes prose over computed results only", hue: "var(--cobalt)" },
   { step: "Harness", detail: "Validates, verifies claims, overrides the conviction score", hue: "var(--oxide)" },
   { step: "Record", detail: "Persisted for replay and comparison", hue: "var(--aluminium)" },
+  { step: "Size", detail: "Weighted against the book you already hold", hue: "var(--oxide)" },
+  { step: "Decide", detail: "The call kept with the portfolio context behind it", hue: "var(--cadmium)" },
 ];
 
 const LIMITATIONS = [
@@ -239,7 +265,7 @@ export function Landing() {
               <h2 className="bg-canvas/95 pr-md font-display text-[clamp(26px,3.5vw,36px)] tracking-tight text-ink">
                 What it does
               </h2>
-              <Marker hue="var(--oxide)">Six things</Marker>
+              <Marker hue="var(--oxide)">Nine things</Marker>
             </div>
 
             <div className="mt-2xl grid grid-cols-1 gap-px bg-ink/15 lg:grid-cols-12">
