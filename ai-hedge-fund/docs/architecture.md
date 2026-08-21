@@ -167,6 +167,16 @@ curl -s -X POST localhost:8000/api/research/plan \
   -d '{"ticker":"AAPL","replay_snapshot":"<hash>"}'
 ```
 
+## Deployment posture
+
+The backend is not deployed. It has no authentication and exposes write
+endpoints (`buy`, `sell`, `cash/withdraw`, holdings edits) against a real book,
+so a public instance would be an unauthenticated financial API. GitHub Pages
+serves the landing page; `BackendGate` explains the missing API on app routes
+rather than letting each panel fail on its own.
+
+If that changes, auth comes first, not after.
+
 ## Known limits
 
 - Verification tolerances are absolute, not sector-relative. `valuation_score`
@@ -177,3 +187,6 @@ curl -s -X POST localhost:8000/api/research/plan \
   profiles over the plan's dimension scores would make committee conviction as
   auditable as the plan's, and is not done.
 - `research_run_retention` trimming exists (`prune_runs`) but is not scheduled.
+- The frontend covers the plan pipeline and the older committee path, but there
+  is no UI for run history, run comparison, or methodology notes — those are API
+  and MCP only.

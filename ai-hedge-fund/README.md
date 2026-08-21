@@ -56,6 +56,20 @@ If you prefer a hosted API: `uv sync --extra openai`, set `LLM_PROVIDER=openai`,
 - **Alt data (EDGAR)**: SIC-classified peer groups and real SEC filings (10-K / 10-Q / 8-K / Form 4 / 13F-HR / DEF 14A / SC 13G-D) — no API key, just a descriptive `SEC_USER_AGENT`.
 - **Parallel committee**: Committee mode runs personas concurrently via `asyncio.gather` (3-4× speedup vs sequential). `GET /api/research/graph` returns a JSON description of the fan-out/reduce workflow for visualization.
 
+## Deployment
+
+The published site at
+[karanmjpinto.github.io/ai-hedge-fund](https://karanmjpinto.github.io/ai-hedge-fund/)
+is **the landing page only**. The backend is deliberately not hosted: the API has
+no authentication and full write access to the portfolio, so putting it on the
+public internet would expose the book and its trade endpoints to anyone with the
+URL. The model is local too, so there would be no AI research on a hosted
+instance regardless.
+
+App routes on the published site therefore show a short explanation and the
+commands to run it locally. Everything real — portfolio, data, model — stays on
+your machine.
+
 ## Plan-based research (deterministic numbers)
 
 `POST /api/research/plan` compiles a question into a **typed plan** — a DAG of
