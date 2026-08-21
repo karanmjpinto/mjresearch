@@ -234,7 +234,13 @@ async def _openai_chat(
     return content, usage, f"openai:{name}", getattr(resp, "system_fingerprint", None)
 
 
-async def call_json(system: str, user: str, schema: dict[str, Any] | None = None) -> LLMResult:
+async def call_json(
+    system: str,
+    user: str,
+    schema: dict[str, Any] | None = None,
+    *,
+    model: str | None = None,
+) -> LLMResult:
     """Run one JSON completion, recording everything needed to replay it.
 
     Pass ``schema`` (a JSON Schema, e.g. from ``Model.model_json_schema()``) to
@@ -242,20 +248,28 @@ async def call_json(system: str, user: str, schema: dict[str, Any] | None = None
     it removes a whole class of failure where the model returns well-formed JSON
     that is not the object you asked for.
 
+    ``model`` overrides the active provider's configured model for this one call
+    — see :func:`model_for_role`. The resolved name is recorded on the result, so
+    a run mixing models stays attributable stage by stage.
+
     Raises :class:`LLMUnavailable` when the provider is unreachable,
     :class:`OutputTruncated` when generation hit the token ceiling, and
     ``RuntimeError`` for provider-side errors.
     """
     started = time.perf_counter()
     if settings.llm_provider == "ollama":
-        content, usage, model, fingerprint = await _ollama_chat(system, user, schema)
+        content, usage, resolved, fingerprint = await _ollama_chat(
+            system, user, schema, model=model
+        )
     else:
-        content, usage, model, fingerprint = await _openai_chat(system, user, schema)
+        content, usage, resolved, fingerprint = await _openai_chat(
+            system, user, schema, model=model
+        )
     elapsed_ms = int((time.perf_counter() - started) * 1000)
 
     return LLMResult(
         content=content,
-        model=model,
+        model=resolved,
         params=sampling_params(),
         usage=usage,
         prompt_sha256=prompt_hash(system, user),

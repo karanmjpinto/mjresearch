@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from hedge_fund.api.routes import (
     autoresearch,
     backtest,
+    decisions,
     data,
     methodology,
     optimize as optimize_route,
@@ -72,6 +73,7 @@ app.include_router(runs.router, prefix="/api/runs", tags=["runs"])
 app.include_router(methodology.router, prefix="/api/methodology", tags=["methodology"])
 app.include_router(setup_route.router, prefix="/api/setup", tags=["setup"])
 app.include_router(autoresearch.router, prefix="/api/autoresearch", tags=["autoresearch"])
+app.include_router(decisions.router, prefix="/api/decisions", tags=["decisions"])
 
 
 @app.get("/api/health")

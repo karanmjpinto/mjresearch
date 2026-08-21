@@ -7,6 +7,7 @@ export type AppNavActive =
   | "screeners"
   | "optimize"
   | "portfolio"
+  | "decide"
   | "autoresearch"
   | "setup";
 
@@ -24,6 +25,7 @@ const NAV: { to: string; key: AppNavActive; label: string }[] = [
   { to: "/research", key: "research", label: "Research" },
   { to: "/screeners", key: "screeners", label: "Screeners" },
   { to: "/optimize", key: "optimize", label: "Optimize" },
+  { to: "/decide", key: "decide", label: "Decide" },
   { to: "/portfolio", key: "portfolio", label: "Portfolio" },
   { to: "/autoresearch", key: "autoresearch", label: "Autoresearch" },
   { to: "/setup", key: "setup", label: "Setup" },

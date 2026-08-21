@@ -38,6 +38,26 @@ GRAPH_NODES: list[dict[str, Any]] = [
         ),
     },
     {
+        "id": "dissent_check",
+        "kind": "decision",
+        "label": "Dissent check",
+        "description": (
+            "Measures the conviction spread and stance split across the committee. "
+            "A material split (spread >= 30, or more than two distinct stances) "
+            "routes to a rebuttal round instead of straight to synthesis."
+        ),
+    },
+    {
+        "id": "committee_rebuttal",
+        "kind": "fanout",
+        "label": "Rebuttal round (conditional)",
+        "description": (
+            "Each analyst is shown the others' conclusions, anonymized, against the "
+            "same unchanged snapshot, and either revises or holds. Runs only when "
+            "the committee split materially; skipped otherwise."
+        ),
+    },
+    {
         "id": "pm_synthesis",
         "kind": "reduce",
         "label": "Portfolio Manager synthesis",
@@ -56,7 +76,15 @@ GRAPH_NODES: list[dict[str, Any]] = [
 
 GRAPH_EDGES: list[dict[str, str]] = [
     {"source": "data_snapshot", "target": "personas_fanout"},
-    {"source": "personas_fanout", "target": "pm_synthesis"},
+    {"source": "personas_fanout", "target": "dissent_check"},
+    {
+        "source": "dissent_check",
+        "target": "committee_rebuttal",
+        "condition": "material_disagreement",
+    },
+    {"source": "dissent_check", "target": "pm_synthesis", "condition": "committee_agrees"},
+    {"source": "data_snapshot", "target": "committee_rebuttal"},
+    {"source": "committee_rebuttal", "target": "pm_synthesis"},
     {"source": "pm_synthesis", "target": "final_thesis"},
 ]
 
@@ -90,7 +118,7 @@ def describe_research_graph(persona_ids: list[str] | None = None) -> dict[str, A
             }
         )
         persona_edges.append({"source": "data_snapshot", "target": node_id})
-        persona_edges.append({"source": node_id, "target": "pm_synthesis"})
+        persona_edges.append({"source": node_id, "target": "dissent_check"})
 
     # When expanded we drop the collapsed "personas_fanout" node
     nodes = [n for n in GRAPH_NODES if n["id"] != "personas_fanout"] + persona_nodes
@@ -105,7 +133,7 @@ def describe_research_graph(persona_ids: list[str] | None = None) -> dict[str, A
         "edges": edges,
         "persona_pool": [{"id": pid, "display_name": _humanize(pid)} for pid in list_persona_ids()],
         "default_committee": list(DEFAULT_COMMITTEE_PERSONAS),
-        "execution_model": "parallel_fanout_then_reduce",
+        "execution_model": "parallel_fanout_then_conditional_rebuttal_then_reduce",
     }
 
 

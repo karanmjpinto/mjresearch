@@ -254,3 +254,43 @@ class Experiment(Base):
     model: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Decision(Base):
+    """A recorded investment decision, with the reasoning and the book behind it.
+
+    The portfolio context is stored inline rather than referenced. Weights,
+    correlation and concentration all move, so a decision reviewed a year later
+    has to be judged against the book as it was when the call was made — not
+    against today's, which would make every past decision look like it was taken
+    with information nobody had.
+    """
+
+    __tablename__ = "decisions"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    ticker: Mapped[str] = mapped_column(String(32), index=True)
+    action: Mapped[str] = mapped_column(String(16), index=True)  # buy | sell | hold | watch | pass
+    status: Mapped[str] = mapped_column(String(16), default="open", index=True)  # open | closed
+
+    conviction: Mapped[int | None] = mapped_column(nullable=True)
+    stance: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    thesis: Mapped[str | None] = mapped_column(Text, nullable=True)
+    rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    proposed_value: Mapped[Decimal | None] = mapped_column(Numeric(24, 8), nullable=True)
+    proposed_weight_pct: Mapped[float | None] = mapped_column(nullable=True)
+    price_at_decision: Mapped[Decimal | None] = mapped_column(Numeric(24, 8), nullable=True)
+
+    # The book as it stood, and what this would have done to it.
+    sizing: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    portfolio_context: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    research_run_uid: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    executed: Mapped[bool] = mapped_column(default=False)
+    transaction_id: Mapped[int | None] = mapped_column(nullable=True)
+
+    review_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

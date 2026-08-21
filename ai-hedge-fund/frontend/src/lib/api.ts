@@ -571,8 +571,83 @@ export interface RunSummary {
   harness?: Record<string, unknown>;
 }
 
+
+// --- Decisions ---
+
+export interface SizingAssessment {
+  ticker: string;
+  proposed_value: number;
+  currency: string;
+  portfolio_value_before: number;
+  cash_before: number;
+  cash_after: number;
+  funded_by_cash: boolean;
+  existing_weight_pct: number | null;
+  proposed_weight_pct: number | null;
+  rank_after: number | null;
+  holdings_after: number | null;
+  concentration_top3_before_pct: number | null;
+  concentration_top3_after_pct: number | null;
+  correlation_to_book: number | null;
+  overlap_observations: number | null;
+  candidate_volatility_pct: number | null;
+  portfolio_volatility_before_pct: number | null;
+  portfolio_volatility_after_pct: number | null;
+  volatility_change_pct: number | null;
+  diversifying: boolean | null;
+  flags: string[];
+  notes: string[];
+}
+
+export interface DecisionRow {
+  id: number;
+  ticker: string;
+  action: string;
+  status: string;
+  conviction: number | null;
+  stance: string | null;
+  rationale: string | null;
+  proposed_value: number | null;
+  proposed_weight_pct: number | null;
+  price_at_decision: number | null;
+  sizing: SizingAssessment | null;
+  portfolio_context: { total_value?: number; holdings?: { ticker: string; weight_pct: number }[] } | null;
+  research_run_uid: string | null;
+  review_note: string | null;
+  created_at: string | null;
+  outcome?: {
+    scored: boolean;
+    move_pct?: number;
+    in_your_favour_pct?: number;
+    current_price?: number;
+  };
+}
+
 export const api = {
   health: () => fetchJSON<{ status: string }>("/health"),
+
+  // --- Decisions ---
+
+  sizePosition: (body: { ticker: string; amount?: number; weight_pct?: number }) =>
+    postJSON<{ assessment: SizingAssessment; portfolio: Record<string, unknown> }>(
+      "/decisions/size",
+      body
+    ),
+
+  recordDecision: (body: {
+    ticker: string;
+    action: string;
+    rationale?: string;
+    conviction?: number;
+    stance?: string;
+    amount?: number;
+    research_run_uid?: string;
+  }) => postJSON<DecisionRow>("/decisions", body),
+
+  getDecisions: (ticker?: string, limit = 100) =>
+    fetchJSON<{ count: number; decisions: DecisionRow[] }>(
+      `/decisions?limit=${limit}${ticker ? `&ticker=${encodeURIComponent(ticker)}` : ""}`
+    ),
 
   // --- Setup ---
 

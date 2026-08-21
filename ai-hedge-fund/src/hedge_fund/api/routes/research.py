@@ -100,6 +100,11 @@ async def check_ticker(req: CheckRequest):
         "dissent": None,
         "committee": None,
         "synthesis": None,
+        # Present only on a committee run that split and was sent back for a
+        # second look; null otherwise. See agents.research_agent.
+        "refinement": None,
+        "committee_round1": None,
+        "dissent_round1": None,
     }
 
     if not req.include_ai:
@@ -146,6 +151,9 @@ async def check_ticker(req: CheckRequest):
         payload["evaluation"] = synth.get("evaluation")
         payload["verification"] = synth.get("verification")
         payload["dissent"] = ai.get("dissent")
+        payload["refinement"] = ai.get("refinement")
+        payload["committee_round1"] = ai.get("committee_round1")
+        payload["dissent_round1"] = ai.get("dissent_round1")
         payload["ai_model"] = synth.get("model")
         payload["ai_usage"] = {"per_call": ai.get("usage_total"), "synthesis": synth.get("usage")}
         payload["synthesis"] = synth

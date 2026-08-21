@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { AutoResearchView } from "@/components/AutoResearchView";
 import { BackendGate } from "@/components/BackendGate";
 import { Dashboard } from "@/components/Dashboard";
+import { DecideView } from "@/components/DecideView";
 import { Landing } from "@/components/Landing";
 import { OptimizeView } from "@/components/OptimizeView";
 import { PlanView } from "@/components/PlanView";
@@ -48,6 +49,7 @@ function AppRoutes() {
       />
       <Route path="/screeners/:screenId" element={<ScreenersView />} />
       <Route path="/optimize" element={<OptimizeView />} />
+      <Route path="/decide/:ticker?" element={<DecideView />} />
       <Route path="/autoresearch" element={<AutoResearchView />} />
       <Route path="/setup" element={<SetupView />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

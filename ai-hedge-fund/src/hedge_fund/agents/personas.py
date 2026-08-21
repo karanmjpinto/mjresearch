@@ -131,3 +131,68 @@ key_risks (array of strings),
 time_horizon (string),
 confidence_in_data (int 1-5)
 """
+
+
+# Rules appended to a persona's own system prompt for the rebuttal round. The
+# risk being managed here is not disagreement, it is agreement: a model shown
+# that four peers disagree with it will very often fold, and a committee that
+# converges by deference produces a confident synthesis resting on one opinion
+# wearing four hats. Hence the explicit instruction that holding is a valid
+# outcome, and that only the bundle — never a peer's confidence — is grounds to
+# move.
+REBUTTAL_RULES = """
+You have already given your view. You are now shown what the other analysts
+concluded, because the committee disagreed materially.
+
+Rules for this round:
+- Peer views are arguments, not evidence. The only grounds for changing your
+  view are data in the bundle you overlooked, misread, or weighted wrongly.
+- If the others are simply more confident, or more numerous, that is not a
+  reason. Holding your original view is a perfectly good outcome and you should
+  expect to hold it more often than not.
+- If you do move, say in `investment_thesis` which specific piece of the bundle
+  moved you.
+- Do not split the difference to be agreeable. A committee that converges by
+  politeness is worse than one that stays split honestly.
+- Output the same JSON schema as before, revised or unchanged.
+"""
+
+
+def get_rebuttal_system_prompt(persona_id: str) -> str:
+    """Persona style + JSON rules + the rebuttal round's additional rules."""
+    return f"{get_persona_system_prompt(persona_id)}\n{REBUTTAL_RULES.strip()}"
+
+
+def build_rebuttal_user_prompt(
+    ticker: str, bundle: str, own_view: str, peer_views: str, contention: str
+) -> str:
+    """Second-round prompt: same bundle, plus anonymized peer conclusions.
+
+    Peers are labelled "Analyst A/B/C" rather than named. Attribution would
+    invite deference to the reputation attached to a persona rather than to its
+    argument, which is the precise failure this round exists to avoid.
+    """
+    return f"""Ticker: {ticker}
+
+The committee split: {contention}
+
+Your own first-round view:
+{own_view}
+
+The other analysts' first-round views (anonymized):
+{peer_views}
+
+The same market data bundle you analysed before (unchanged — no new data was
+fetched, so anything you cite must already be here):
+{bundle}
+
+Reconsider and output one JSON object with these keys (exact names):
+conviction_score (int 0-100),
+stance (string: BUY|HOLD|SELL|WATCH),
+investment_thesis (string),
+bull_case (string),
+bear_case (string),
+key_risks (array of strings),
+time_horizon (string),
+confidence_in_data (int 1-5)
+"""
