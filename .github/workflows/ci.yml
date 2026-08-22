@@ -53,7 +53,14 @@ jobs:
       - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
 
+      # rams-action@v1 reads inputs as INPUT_API_KEY, but GitHub only converts
+      # spaces to underscores, so `with: api-key` lands in INPUT_API-KEY and the
+      # action never sees it. Pass the underscore names it looks for via env
+      # until upstream fixes it; `with:` stays so this is already correct then.
       - uses: rams-design/rams-action@v1
+        env:
+          INPUT_API_KEY: ${{ secrets.RAMS_API_KEY }}
+          INPUT_FAIL_ON: critical
         with:
           api-key: ${{ secrets.RAMS_API_KEY }}
           fail-on: critical
