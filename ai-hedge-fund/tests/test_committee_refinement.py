@@ -109,6 +109,13 @@ async def test_split_committee_triggers_rebuttal_and_records_both_rounds(
     # Round 1 is preserved, not overwritten by the revision.
     assert out["committee_round1"] is not None
     assert {c["round"] for c in out["committee_round1"]} == {1}
+    # The card UI looks the opening view up by persona_id, so every revised
+    # analyst must have a round-1 counterpart carrying a readable analysis.
+    prior = {c["persona_id"]: c for c in out["committee_round1"]}
+    for entry in out["committee"]:
+        if entry.get("revised"):
+            assert entry["persona_id"] in prior
+            assert prior[entry["persona_id"]]["analysis"]["investment_thesis"]
     assert out["dissent_round1"]["material_disagreement"] is True
     # The synthesis saw the revised committee.
     assert out["dissent"]["conviction_spread"] == 0

@@ -512,6 +512,7 @@ export function ResearchReport() {
               {includeAi && !d?.ai_error && investorMode === "committee" && d?.committee && d.committee.length > 0 && (
                 <PersonaOpinionGrid
                   committee={d.committee}
+                  committeeRound1={d.committee_round1 ?? null}
                   synthesisAnalysis={ai ?? undefined}
                   showSynthesisFirst={false}
                 />

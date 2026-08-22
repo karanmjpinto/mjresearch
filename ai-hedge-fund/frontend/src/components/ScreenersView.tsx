@@ -105,6 +105,7 @@ function PlayRow({
                 </div>
                 <PersonaOpinionGrid
                   committee={views.data.committee}
+                  committeeRound1={views.data.committee_round1 ?? null}
                   synthesisAnalysis={views.data.ai_full ?? undefined}
                   showSynthesisFirst
                   compact
