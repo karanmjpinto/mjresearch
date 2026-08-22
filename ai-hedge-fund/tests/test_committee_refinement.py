@@ -235,6 +235,17 @@ def test_configured_roles_resolve_independently(monkeypatch):
     assert agent._model_kwargs("single") == {}
 
 
+def test_proposer_role_is_independent_of_the_research_stages(monkeypatch):
+    """The autoresearch searcher is its own stage, not a persona."""
+    monkeypatch.setattr(settings, "llm_persona_model", "qwen3:8b")
+    monkeypatch.setattr(settings, "llm_proposer_model", None)
+    assert model_for_role("proposer") is None
+
+    monkeypatch.setattr(settings, "llm_proposer_model", "qwen3:4b")
+    assert model_for_role("proposer") == "qwen3:4b"
+    assert model_for_role("persona") == "qwen3:8b"
+
+
 @pytest.mark.asyncio
 async def test_personas_and_synthesis_receive_their_own_models(monkeypatch, no_persistence):
     monkeypatch.setattr(settings, "committee_refine_on_dissent", False)

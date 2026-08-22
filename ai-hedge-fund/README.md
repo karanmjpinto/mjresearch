@@ -60,7 +60,7 @@ If you prefer a hosted API: `uv sync --extra openai`, set `LLM_PROVIDER=openai`,
   Peers are anonymized ("Analyst A/B/C") and the prompt states that holding is the expected outcome and that peer confidence is not grounds to move — only data already in the bundle is. Both rounds are kept (`committee_round1`, `dissent_round1`), a failed rebuttal keeps the first-round view, and revised output is re-verified against the snapshot exactly as the first round was.
 
   The failure mode being managed is agreement, not disagreement: a committee that converges by deference is one opinion wearing four hats. Total convergence in a single round therefore sets `refinement.suspect_convergence` rather than reading as confirmation. Disable with `COMMITTEE_REFINE_ON_DISSENT=false`.
-- **Per-stage models**: `LLM_PERSONA_MODEL` and `LLM_SYNTHESIS_MODEL` point individual stages at their own model; unset, every stage uses `OLLAMA_MODEL`/`LLM_MODEL` and behaviour is unchanged. The resolved model is recorded per call, so a run mixing models stays attributable stage by stage.
+- **Per-stage models**: `LLM_PERSONA_MODEL`, `LLM_SYNTHESIS_MODEL`, and `LLM_PROPOSER_MODEL` (the autoresearch searcher) point individual stages at their own model; unset, every stage uses `OLLAMA_MODEL`/`LLM_MODEL` and behaviour is unchanged. The resolved model is recorded per call, so a run mixing models stays attributable stage by stage.
 
 ## Deployment
 

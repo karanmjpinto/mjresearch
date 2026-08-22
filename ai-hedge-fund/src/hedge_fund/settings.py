@@ -60,6 +60,11 @@ class Settings(BaseSettings):
     # under LLM_PROVIDER=ollama, an OpenAI model id under openai).
     llm_persona_model: str | None = None
     llm_synthesis_model: str | None = None
+    # The autoresearch proposer picks a strategy and parameters from a fixed
+    # catalog; the harness, not the model, decides whether the idea was any
+    # good. A cheaper model there buys more experiments per hour, and the
+    # trials-adjusted hurdle is what protects the result either way.
+    llm_proposer_model: str | None = None
 
     # When the committee splits materially, put the analysts back in the room
     # once before synthesizing. Costs a second round of calls on contested

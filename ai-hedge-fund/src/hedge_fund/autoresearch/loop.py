@@ -20,7 +20,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from hedge_fund.agents.llm import call_json
+from hedge_fund.agents.llm import call_json, model_for_role
 from hedge_fund.autoresearch import store
 from hedge_fund.autoresearch.harness import (
     HarnessError,
@@ -159,8 +159,13 @@ Previous experiments (in-sample only — the out-of-sample window is withheld):
 Propose the next single experiment as JSON:
 {{"ticker": "...", "strategy_id": "...", "params": {{}}, "hypothesis": "one line", "reasoning": "why this next"}}
 """
+    # Omitted entirely when unconfigured, so the default path is unchanged.
+    override = model_for_role("proposer")
+    model_kwargs = {"model": override} if override else {}
     try:
-        result = await call_json(PROPOSER_SYSTEM + nudge, user, Hypothesis.model_json_schema())
+        result = await call_json(
+            PROPOSER_SYSTEM + nudge, user, Hypothesis.model_json_schema(), **model_kwargs
+        )
     except Exception as e:
         logger.exception("Proposer failed for run %s", run_tag)
         return None, {"error": str(e)}
