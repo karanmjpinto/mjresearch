@@ -5,13 +5,22 @@
 
 .cursor/
 
-# .claude holds both personal state and shared project config. Ignore the
-# directory, then re-admit the two files the team is meant to share: the
-# Rams design-review loop hook and the settings that wire it up.
-# settings.local.json (personal permissions) stays ignored.
-.claude/*
-!.claude/settings.json
-!.claude/hooks/
+# .claude holds both personal state and shared project config. Ignore it at
+# every depth, then re-admit exactly two files at the repo root: the Rams
+# design-review hook and the settings that wire it up. settings.local.json
+# (personal permissions) and any nested .claude stay ignored.
+#
+# The leading slashes matter. A pattern containing a slash is anchored to this
+# file's directory, so bare `.claude/*` would only ever match the root one and
+# would quietly un-ignore ai-hedge-fund/.claude. `**/.claude/` catches all
+# depths; the `!/` lines then carve out the root exceptions. Re-including a
+# file also requires re-including its directory first, which is what `!/.claude/`
+# is doing before `/.claude/*` re-excludes the contents.
+**/.claude/
+!/.claude/
+/.claude/*
+!/.claude/settings.json
+!/.claude/hooks/
 **/.pytest_cache/
 **/.ruff_cache/
 **/.vite/
