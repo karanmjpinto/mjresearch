@@ -98,11 +98,30 @@ export function PersonaCard({
         <div>
           <p className="text-sm font-semibold text-white">{name}</p>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border font-semibold ${stanceStyles(a.stance)}`}>
+            <span className={`text-label uppercase tracking-wider px-2 py-0.5 rounded border font-semibold ${stanceStyles(a.stance)}`}>
               {a.stance ?? "—"}
             </span>
+            {/* An opinion formed after seeing the others is weaker evidence than
+                one formed independently, and one held under disagreement is
+                stronger. Neither is visible from the final number alone. */}
+            {entry.round === 2 && entry.revised && (
+              <span
+                className="text-label uppercase tracking-wider px-2 py-0.5 rounded border border-amber-500/40 bg-amber-500/10 text-amber-300"
+                title={`Revised after the rebuttal round — opened at ${entry.stance_before ?? "—"} ${entry.conviction_before ?? "—"}`}
+              >
+                revised from {entry.stance_before ?? "—"} {entry.conviction_before ?? "—"}
+              </span>
+            )}
+            {entry.round === 2 && !entry.revised && (
+              <span
+                className="text-label uppercase tracking-wider px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                title="Saw the other analysts' conclusions and did not move"
+              >
+                held
+              </span>
+            )}
             {!compact && (
-              <span className="text-[10px] text-gray-500">data conf. {a.confidence_in_data ?? "—"}/5</span>
+              <span className="text-label text-gray-500">data conf. {a.confidence_in_data ?? "—"}/5</span>
             )}
           </div>
         </div>
@@ -114,7 +133,7 @@ export function PersonaCard({
         {a.investment_thesis}
       </p>
       {(compact ? open : true) && a.bull_case && (
-        <div className="text-[11px] text-gray-500 border-t border-white/5 pt-2 space-y-1">
+        <div className="text-label text-gray-500 border-t border-white/5 pt-2 space-y-1">
           <p>
             <span className="text-emerald-500/90">Bull:</span> {a.bull_case}
           </p>
@@ -129,7 +148,8 @@ export function PersonaCard({
         <button
           type="button"
           onClick={() => setOpen(!open)}
-          className="text-[10px] text-blue-400 hover:text-blue-300 self-start"
+          aria-expanded={open}
+          className="text-label text-blue-400 hover:text-blue-300 self-start"
         >
           {open ? "Show less" : "Read full view"}
         </button>
@@ -144,7 +164,7 @@ export function SynthesisCard({ analysis }: { analysis: AiAnalysisBlock }) {
     <div className="rounded-xl border border-blue-500/40 bg-gradient-to-br from-blue-500/15 to-slate-900/80 p-5 shadow-lg shadow-blue-900/20">
       <div className="flex items-center gap-2 mb-3">
         <span className="text-xs font-bold uppercase tracking-widest text-blue-400">Committee synthesis</span>
-        <span className={`text-[10px] px-2 py-0.5 rounded border font-semibold ${stanceStyles(analysis.stance)}`}>
+        <span className={`text-label px-2 py-0.5 rounded border font-semibold ${stanceStyles(analysis.stance)}`}>
           {analysis.stance}
         </span>
         <MiniConviction score={analysis.conviction_score} />

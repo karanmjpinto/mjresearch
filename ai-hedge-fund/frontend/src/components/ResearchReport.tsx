@@ -17,6 +17,7 @@ import {
   type PeerComparison,
   type CommitteeEntry,
   type CommitteeRefinement,
+  type Dissent,
   type AiAnalysisBlock,
 } from "@/lib/api";
 import { ChatInput } from "./ChatInput";
@@ -222,7 +223,7 @@ export function ResearchReport() {
                 onClick={() => navigate(`/research/${resume}`)}
                 className="mt-md w-full bg-ink-raised px-lg py-md text-left transition-colors hover:bg-ink-line"
               >
-                <span className="font-display text-[10px] uppercase tracking-[0.16em] text-on-ink-faint">
+                <span className="font-display text-label uppercase tracking-[0.16em] text-on-ink-faint">
                   Pick up where you left off
                 </span>
                 <span className="mt-2xs block font-display text-[18px] text-cadmium">{resume}</span>
@@ -231,7 +232,7 @@ export function ResearchReport() {
 
             {others.length > 0 && (
               <div className="mt-md flex flex-wrap items-center gap-2xs">
-                <span className="font-display text-[10px] uppercase tracking-[0.16em] text-on-ink-faint">
+                <span className="font-display text-label uppercase tracking-[0.16em] text-on-ink-faint">
                   Recent
                 </span>
                 {others.map((r: string) => (
@@ -299,7 +300,7 @@ export function ResearchReport() {
               onClick={() => setIncludeAi((v) => !v)}
               aria-pressed={includeAi}
               title="Runs locally via Ollama — no API key needed."
-              className={`px-5 py-2.5 font-display text-[11px] uppercase tracking-[0.14em] transition-colors ${
+              className={`px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] transition-colors ${
                 includeAi
                   ? "bg-cadmium text-ink hover:bg-oxide hover:text-bone"
                   : "bg-cobalt text-bone hover:bg-cadmium hover:text-ink"
@@ -385,7 +386,7 @@ export function ResearchReport() {
                 return (
                   <span
                     key={`${c.persona_id}-${i}`}
-                    className={`text-[11px] px-2 py-1 rounded-md border bg-black/20 ${col}`}
+                    className={`text-label px-2 py-1 rounded-md border bg-black/20 ${col}`}
                   >
                     {humanizePersonaId(c.persona_id)}: {st}
                   </span>
@@ -458,6 +459,7 @@ export function ResearchReport() {
               ai={ai}
               committee={d?.committee ?? null}
               refinement={d?.refinement ?? null}
+              dissent={d?.dissent ?? null}
               analyst={analystSig.data ?? null}
               sentiment={sentimentSig.data ?? null}
               newsSentimentMean={d?.news_sentiment?.enabled ? d.news_sentiment.aggregate.mean_signed : null}
@@ -764,7 +766,7 @@ export function ResearchReport() {
                   <p className="text-xs text-gray-500 mt-1">
                     mean signed · {d.news_sentiment.aggregate.article_count} headlines
                   </p>
-                  <p className="text-[10px] text-gray-600 mt-2 truncate" title={d.news_sentiment.model ?? ""}>
+                  <p className="text-label text-gray-600 mt-2 truncate" title={d.news_sentiment.model ?? ""}>
                     {d.news_sentiment.model ?? "model"}
                   </p>
                 </>
@@ -1114,7 +1116,7 @@ function MacroTab() {
             </ResponsiveContainer>
           </div>
         )}
-        <p className="text-[11px] text-gray-600 mt-2">
+        <p className="text-label text-gray-600 mt-2">
           Data: FRED via pandas-datareader · 5y window · change series from the dropdown to explore rates, inflation,
           growth, and liquidity.
         </p>
@@ -1142,23 +1144,23 @@ function MacroTab() {
             </div>
             <div className="text-xs text-gray-400 space-y-2">
               <p>
-                <span className="text-gray-500 uppercase tracking-wider text-[10px]">Mkt-RF</span> — Excess market return.
+                <span className="text-gray-500 uppercase tracking-wider text-label">Mkt-RF</span> — Excess market return.
                 Positive = risk-on backdrop.
               </p>
               <p>
-                <span className="text-gray-500 uppercase tracking-wider text-[10px]">SMB</span> — Small-minus-big. Positive
+                <span className="text-gray-500 uppercase tracking-wider text-label">SMB</span> — Small-minus-big. Positive
                 = small caps outperforming.
               </p>
               <p>
-                <span className="text-gray-500 uppercase tracking-wider text-[10px]">HML</span> — High-minus-low book/mkt.
+                <span className="text-gray-500 uppercase tracking-wider text-label">HML</span> — High-minus-low book/mkt.
                 Positive = value regime.
               </p>
               <p>
-                <span className="text-gray-500 uppercase tracking-wider text-[10px]">RMW</span> — Robust-minus-weak profits.
+                <span className="text-gray-500 uppercase tracking-wider text-label">RMW</span> — Robust-minus-weak profits.
                 Positive = quality bid.
               </p>
               <p>
-                <span className="text-gray-500 uppercase tracking-wider text-[10px]">CMA</span> — Conservative-minus-aggressive
+                <span className="text-gray-500 uppercase tracking-wider text-label">CMA</span> — Conservative-minus-aggressive
                 investment. Positive = capital-discipline bid.
               </p>
             </div>
@@ -1304,7 +1306,36 @@ function buildCallouts({
   return out;
 }
 
-function committeeSpread(committee: CommitteeEntry[] | null | undefined) {
+/**
+ * Committee spread, preferring the server's own figures.
+ *
+ * The backend already computes exactly these numbers in `summarize_dissent`, and
+ * acts on them — they are what decides whether a rebuttal round runs. Computing
+ * them a second time here means two definitions of the same statistic that can
+ * drift apart, and the copy underneath would then be describing a split the
+ * server did not agree was one. The local path is kept only as a fallback for
+ * responses without a `dissent` block.
+ */
+function committeeSpread(
+  committee: CommitteeEntry[] | null | undefined,
+  dissent?: Dissent | null,
+) {
+  if (
+    dissent &&
+    typeof dissent.conviction_min === "number" &&
+    typeof dissent.conviction_max === "number"
+  ) {
+    return {
+      min: dissent.conviction_min,
+      max: dissent.conviction_max,
+      spread: dissent.conviction_spread ?? dissent.conviction_max - dissent.conviction_min,
+      mean: dissent.conviction_mean ?? (dissent.conviction_min + dissent.conviction_max) / 2,
+      stances: Object.keys(dissent.stances ?? {}),
+      divergence: Object.keys(dissent.stances ?? {}).length,
+      material: dissent.material_disagreement ?? false,
+    };
+  }
+
   if (!committee?.length) return null;
   const scores = committee
     .map((c) => c.analysis?.conviction_score)
@@ -1315,13 +1346,14 @@ function committeeSpread(committee: CommitteeEntry[] | null | undefined) {
   const mean = scores.reduce((a, b) => a + b, 0) / scores.length;
   const stances = committee.map((c) => c.analysis?.stance ?? "—");
   const unique = new Set(stances.filter((s) => s !== "—"));
-  return { min, max, spread: max - min, mean, stances, divergence: unique.size };
+  return { min, max, spread: max - min, mean, stances, divergence: unique.size, material: false };
 }
 
 function SignalIntelligence({
   ai,
   committee,
   refinement,
+  dissent,
   analyst,
   sentiment,
   newsSentimentMean,
@@ -1329,12 +1361,13 @@ function SignalIntelligence({
   ai: AiAnalysisBlock;
   committee: CommitteeEntry[] | null;
   refinement: CommitteeRefinement | null;
+  dissent: Dissent | null;
   analyst: AnalystRating | null;
   sentiment: NewsSentiment | null;
   newsSentimentMean: number | null | undefined;
 }) {
   const callouts = buildCallouts({ ai, analyst, sentiment, newsSentimentMean });
-  const spread = committeeSpread(committee);
+  const spread = committeeSpread(committee, dissent);
 
   return (
     <div className="rounded-xl border border-blue-500/25 bg-surface-card p-4">
@@ -1342,7 +1375,7 @@ function SignalIntelligence({
         <h3 className="text-xs font-semibold uppercase tracking-wider text-blue-400">
           Signal intelligence
         </h3>
-        <span className="text-[10px] text-gray-600">where data disagrees, where edge lives</span>
+        <span className="text-label text-gray-600">where data disagrees, where edge lives</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1366,7 +1399,7 @@ function SignalIntelligence({
               >
                 <div className="flex items-center gap-2 mb-1">
                   <span
-                    className={`text-[10px] uppercase tracking-wider font-semibold ${
+                    className={`text-label uppercase tracking-wider font-semibold ${
                       c.kind === "edge"
                         ? "text-amber-300"
                         : c.kind === "conflict"
@@ -1386,7 +1419,7 @@ function SignalIntelligence({
 
         {/* Committee spread */}
         <div className="rounded-lg border border-border/60 bg-black/30 p-3 text-xs flex flex-col gap-2">
-          <p className="text-[10px] uppercase tracking-wider text-gray-500">Committee spread</p>
+          <p className="text-label uppercase tracking-wider text-gray-500">Committee spread</p>
           {spread ? (
             <>
               <div className="flex items-baseline justify-between">
@@ -1413,26 +1446,28 @@ function SignalIntelligence({
                   {spread.divergence === 1 ? "Unanimous" : `${spread.divergence} stances`}
                 </span>
               </div>
-              <div className="mt-1 pt-2 border-t border-border/40 text-[10px] text-gray-500 leading-relaxed">
+              <div className="mt-1 pt-2 border-t border-border/40 text-label text-gray-500 leading-relaxed">
                 {/* The spread above is the post-rebuttal one. Calling a talked-down
                     split "robust to style" would be a straightforward lie, so
                     agreement reached after a second round is labelled as such. */}
                 {refinement?.triggered
-                  ? spread.divergence >= 2
+                  ? spread.material
                     ? "Still split after a rebuttal round — the disagreement survived being argued out. Read both theses before sizing."
                     : "Agreement reached only after a rebuttal round, not first time. Weaker evidence than an unprompted consensus."
-                  : spread.divergence >= 3
-                    ? "Strong disagreement — high information content in the thesis; verify assumptions."
-                    : spread.divergence === 2
-                      ? "Split committee — look for the dissenting view's thesis before sizing."
-                      : "Consensus across lenses — thesis is robust to style."}
+                  : spread.material
+                    ? "Materially split, and no rebuttal round ran — the synthesis reconciled this without the analysts ever answering each other."
+                    : spread.divergence >= 3
+                      ? "Strong disagreement — high information content in the thesis; verify assumptions."
+                      : spread.divergence === 2
+                        ? "Split committee — look for the dissenting view's thesis before sizing."
+                        : "Consensus across lenses — thesis is robust to style."}
               </div>
 
               {refinement?.triggered && (
                 <div className="mt-2 pt-2 border-t border-border/40 space-y-1">
                   <div className="flex items-baseline justify-between">
                     <span className="text-gray-400">Rebuttal round</span>
-                    <span className="font-mono text-white">
+                    <span className="font-mono tabular text-white">
                       {refinement.conviction_spread_before ?? "—"} →{" "}
                       {refinement.conviction_spread_after ?? "—"}
                     </span>
@@ -1440,7 +1475,7 @@ function SignalIntelligence({
                   {(refinement.held_personas?.length ?? 0) > 0 && (
                     <div className="flex items-baseline justify-between">
                       <span className="text-gray-400">Held</span>
-                      <span className="font-mono text-emerald-300">
+                      <span className="font-mono tabular text-emerald-300">
                         {refinement.held_personas!.length}
                       </span>
                     </div>
@@ -1448,13 +1483,13 @@ function SignalIntelligence({
                   {(refinement.revised_personas?.length ?? 0) > 0 && (
                     <div className="flex items-baseline justify-between">
                       <span className="text-gray-400">Revised</span>
-                      <span className="font-mono text-amber-300">
+                      <span className="font-mono tabular text-amber-300">
                         {refinement.revised_personas!.length}
                       </span>
                     </div>
                   )}
                   {refinement.suspect_convergence && (
-                    <p className="text-[10px] text-red-300 leading-relaxed">
+                    <p className="text-label text-red-300 leading-relaxed">
                       Every dissenting analyst moved to the same view in one round — treat as
                       deference to the group, not independent agreement.
                     </p>
@@ -1532,9 +1567,9 @@ function InsiderFlowCard({ data, loading }: { data: InsiderTransaction[]; loadin
             </div>
           </div>
           <div className="mt-3 pt-3 border-t border-border/50">
-            <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-1">Recent</p>
+            <p className="text-label text-gray-600 uppercase tracking-wider mb-1">Recent</p>
             {data.slice(0, 4).map((t, i) => (
-              <div key={i} className="flex justify-between py-0.5 text-[11px]">
+              <div key={i} className="flex justify-between py-0.5 text-label">
                 <span className="text-gray-400 truncate mr-2">{t.name}</span>
                 <span
                   className={`font-mono ${
@@ -1579,7 +1614,7 @@ function CongressionalCard({
             <div key={i} className="flex justify-between items-start text-xs">
               <div className="min-w-0 flex-1">
                 <p className="text-gray-300 truncate">{t.representative}</p>
-                <p className="text-[10px] text-gray-600">
+                <p className="text-label text-gray-600">
                   {t.chamber ?? ""}{t.chamber ? " · " : ""}
                   {t.transaction_date ?? t.disclosure_date ?? ""}
                 </p>
@@ -1594,7 +1629,7 @@ function CongressionalCard({
                 >
                   {t.transaction_type}
                 </p>
-                <p className="text-[10px] text-gray-500 truncate max-w-[8rem]">{t.amount_range ?? "—"}</p>
+                <p className="text-label text-gray-500 truncate max-w-[8rem]">{t.amount_range ?? "—"}</p>
               </div>
             </div>
           ))}
@@ -1620,26 +1655,26 @@ function ESGCard({ data, loading }: { data: ESGScores | null; loading: boolean }
           </div>
           <div className="grid grid-cols-3 gap-2 mt-3 text-xs">
             <div>
-              <p className="text-[10px] text-gray-600 uppercase">Env</p>
+              <p className="text-label text-gray-600 uppercase">Env</p>
               <p className="text-gray-200 font-mono">
                 {data.environment_score != null ? data.environment_score.toFixed(0) : "—"}
               </p>
             </div>
             <div>
-              <p className="text-[10px] text-gray-600 uppercase">Social</p>
+              <p className="text-label text-gray-600 uppercase">Social</p>
               <p className="text-gray-200 font-mono">
                 {data.social_score != null ? data.social_score.toFixed(0) : "—"}
               </p>
             </div>
             <div>
-              <p className="text-[10px] text-gray-600 uppercase">Gov</p>
+              <p className="text-label text-gray-600 uppercase">Gov</p>
               <p className="text-gray-200 font-mono">
                 {data.governance_score != null ? data.governance_score.toFixed(0) : "—"}
               </p>
             </div>
           </div>
           {data.controversy_level != null && (
-            <p className="text-[10px] text-gray-500 mt-3">
+            <p className="text-label text-gray-500 mt-3">
               Controversy level: <span className="text-amber-300 font-mono">{data.controversy_level}</span>
               {data.peer_group ? ` · peer group ${data.peer_group}` : ""}
             </p>
@@ -1688,7 +1723,7 @@ function FilingsCard({ data, loading }: { data: SECFiling[]; loading: boolean })
               <tr key={i} className="border-b border-border/50">
                 <td className="py-1">
                   <span
-                    className={`px-1.5 py-0.5 rounded font-mono text-[10px] ${
+                    className={`px-1.5 py-0.5 rounded font-mono text-label ${
                       f.form_type?.startsWith("4")
                         ? "bg-emerald-500/20 text-emerald-300"
                         : f.form_type === "13F" || f.form_type?.startsWith("13")
@@ -1722,7 +1757,7 @@ function FilingsCard({ data, loading }: { data: SECFiling[]; loading: boolean })
           </tbody>
         </table>
       </div>
-      <p className="text-[10px] text-gray-600 mt-2">
+      <p className="text-label text-gray-600 mt-2">
         Form 4 = insider · 13F = institutional · 8-K = material events · 10-K/Q = financials.
       </p>
     </div>
@@ -1822,7 +1857,7 @@ function PeersTab({ data, currentTicker }: { data: PeerComparison; currentTicker
                       >
                         {r.ticker}
                       </span>
-                      {isSelf && <span className="text-[10px] text-blue-400/80 ml-2">(this)</span>}
+                      {isSelf && <span className="text-label text-blue-400/80 ml-2">(this)</span>}
                     </td>
                     {PEER_METRIC_KEYS.map((m) => {
                       const v = r.metrics[m.key];
@@ -1874,7 +1909,7 @@ function PeersTab({ data, currentTicker }: { data: PeerComparison; currentTicker
               </RadarChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-[10px] text-gray-600 mt-2">
+          <p className="text-label text-gray-600 mt-2">
             Each axis is normalized against the peer maximum — larger polygon = stronger relative profile. Compare
             shape differences to spot where this name leads or lags peers.
           </p>
@@ -1897,7 +1932,7 @@ function PeersTab({ data, currentTicker }: { data: PeerComparison; currentTicker
             if (!chartRows.length) return null;
             return (
               <div key={key} className="h-40">
-                <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">{label}</p>
+                <p className="text-label text-gray-500 uppercase tracking-wider mb-1">{label}</p>
                 <ResponsiveContainer width="100%" height="85%">
                   <BarChart data={chartRows} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
@@ -1998,7 +2033,7 @@ function BacktestTab({ ticker }: { ticker: string }) {
       <div className="bg-surface-card rounded-xl p-4">
         <div className="flex flex-wrap gap-3 items-end">
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] uppercase tracking-wider text-gray-500">
+            <label className="text-label uppercase tracking-wider text-gray-500">
               Strategy
             </label>
             <select
@@ -2014,7 +2049,7 @@ function BacktestTab({ ticker }: { ticker: string }) {
             </select>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-[10px] uppercase tracking-wider text-gray-500">
+            <label className="text-label uppercase tracking-wider text-gray-500">
               Window
             </label>
             <select
@@ -2029,7 +2064,7 @@ function BacktestTab({ ticker }: { ticker: string }) {
               <option value={3650}>10y</option>
             </select>
           </div>
-          <p className="text-[11px] text-gray-500 ml-auto max-w-sm">
+          <p className="text-label text-gray-500 ml-auto max-w-sm">
             No look-ahead · 5 bps fee per side · signals computed on close, executed next bar.
           </p>
         </div>
@@ -2085,7 +2120,7 @@ function BacktestTab({ ticker }: { ticker: string }) {
               <h3 className="text-xs text-gray-500 uppercase tracking-wider">
                 Cumulative return — strategy vs buy &amp; hold
               </h3>
-              <span className="text-[10px] text-gray-600 font-mono">
+              <span className="text-label text-gray-600 font-mono">
                 {d.start_date} → {d.end_date}
               </span>
             </div>
@@ -2250,14 +2285,14 @@ function MetricCard({
 
   return (
     <div className="bg-surface-card rounded-xl p-3 border border-border/60">
-      <p className="text-[10px] text-gray-500 uppercase tracking-wider">{label}</p>
+      <p className="text-label text-gray-500 uppercase tracking-wider">{label}</p>
       <p className={`text-xl font-bold font-mono mt-1 ${valueClass}`}>{fmtVal(strategy)}</p>
-      <div className="flex items-center justify-between text-[10px] mt-1">
+      <div className="flex items-center justify-between text-label mt-1">
         <span className="text-gray-600">vs buy-hold</span>
         <span className="font-mono text-gray-500">{fmtVal(benchmark)}</span>
       </div>
       <div
-        className={`mt-2 text-[10px] font-semibold uppercase tracking-wider ${
+        className={`mt-2 text-label font-semibold uppercase tracking-wider ${
           beats ? "text-accent-green" : "text-accent-red"
         }`}
       >
@@ -2270,7 +2305,7 @@ function MetricCard({
 function SmallStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-surface-card rounded-lg p-2.5 border border-border/40">
-      <p className="text-[10px] text-gray-500 uppercase tracking-wider">{label}</p>
+      <p className="text-label text-gray-500 uppercase tracking-wider">{label}</p>
       <p className="text-sm text-white font-mono mt-0.5">{value}</p>
     </div>
   );

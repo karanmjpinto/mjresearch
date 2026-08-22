@@ -965,6 +965,17 @@ export type CommitteeEntry = {
   persona_id: string;
   analysis?: AiAnalysisBlock;
   error?: { error: string; message?: string };
+  /**
+   * Which round this view came from. Entries in `committee` are post-rebuttal
+   * where one ran, so a card showing an opinion has to be able to say whether
+   * the analyst arrived at it independently or after seeing the others.
+   */
+  round?: number;
+  revised?: boolean;
+  conviction_before?: number | null;
+  conviction_after?: number | null;
+  stance_before?: string | null;
+  stance_after?: string | null;
 };
 
 export interface ResearchCheckResponse {
