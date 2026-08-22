@@ -16,3 +16,8 @@ Key routing rules:
 - Ship/deploy/PR → invoke /ship or /land-and-deploy
 - Save progress → invoke /context-save
 - Resume context → invoke /context-restore
+
+## Design review (Rams)
+
+After editing UI files, run a Rams `quick_review` on them and fix what it flags.
+Before committing, run `review_files` for a score.
