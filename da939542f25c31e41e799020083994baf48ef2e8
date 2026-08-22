@@ -1,0 +1,19 @@
+Provenance correction (added later; this commit is on origin and was not rewritten).
+
+This commit's subject describes the position-sizing work only. It also contains
+an unrelated, complete feature that was in another session's working tree when
+'git add' ran here: the committee rebuttal round and per-stage model selection.
+
+Belonging to 'feat(decisions)':
+  frontend/src/components/DecideView.tsx, src/hedge_fund/decisions/*,
+  api/routes/decisions.py, db/models.py, tests/test_sizing.py,
+  frontend/src/app/App.tsx, components/AppNav.tsx
+
+Belonging to the committee rebuttal round / per-stage models:
+  agents/research_agent.py, agents/personas.py, agents/llm.py,
+  api/routes/research.py, orchestration/graph.py,
+  tests/test_committee_refinement.py
+
+Note bf694c5 also carries an incomplete slice of the same per-stage model work
+(model_for_role committed, call_json not yet forwarding it); it was completed in
+9bf29ea. Follow-ups: 9bf29ea, 502749e, 999a269.
