@@ -34,10 +34,11 @@
         }
       })();
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   </head>
-  <body class="bg-surface text-gray-200 antialiased">
+  <!-- Ground and text colour come from body in src/index.css. Setting them as
+       classes here overrides the palette: `text-gray-200` beat `var(--on-ink)`
+       on specificity and quietly made every default string cool grey. -->
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
