@@ -131,7 +131,7 @@ export function OptimizeView() {
           <div className="bg-surface-card rounded-xl p-5 flex flex-col gap-4 border border-border/60">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2 flex flex-col gap-1.5">
-                <label className="text-[10px] uppercase tracking-wider text-gray-500">
+                <label className="text-label uppercase tracking-wider text-gray-500">
                   Tickers (comma or space separated)
                 </label>
                 <textarea
@@ -142,11 +142,11 @@ export function OptimizeView() {
                   placeholder="AAPL, MSFT, NVDA, ..."
                 />
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[11px] text-gray-600">Load watchlist:</span>
+                  <span className="text-label text-gray-600">Load watchlist:</span>
                   <select
                     value={watchlistGroup}
                     onChange={(e) => applyWatchlist(e.target.value)}
-                    className="bg-surface-elevated border border-border rounded px-2 py-1 text-[11px] text-white"
+                    className="bg-surface-elevated border border-border rounded px-2 py-1 text-label text-white"
                   >
                     <option value="">—</option>
                     {watchlists.data &&
@@ -156,7 +156,7 @@ export function OptimizeView() {
                         </option>
                       ))}
                   </select>
-                  <span className="text-[11px] text-gray-500 ml-auto">
+                  <span className="text-label text-gray-500 ml-auto">
                     {tickers.length} tickers queued
                   </span>
                 </div>
@@ -164,7 +164,7 @@ export function OptimizeView() {
 
               <div className="flex flex-col gap-3">
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider text-gray-500">
+                  <label className="text-label uppercase tracking-wider text-gray-500">
                     Method
                   </label>
                   <select
@@ -180,7 +180,7 @@ export function OptimizeView() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider text-gray-500">
+                  <label className="text-label uppercase tracking-wider text-gray-500">
                     Window
                   </label>
                   <select
@@ -202,7 +202,7 @@ export function OptimizeView() {
                 <div className="flex-1">
                   <p className="text-xs font-semibold text-blue-400">
                     {selectedMethod.name}{" "}
-                    <span className="text-[10px] text-gray-600 font-normal ml-2 uppercase tracking-wider">
+                    <span className="text-label text-gray-600 font-normal ml-2 uppercase tracking-wider">
                       {selectedMethod.category}
                     </span>
                   </p>
@@ -226,7 +226,7 @@ export function OptimizeView() {
             {/* Conviction sliders */}
             {useConviction && convictionSupported && tickers.length > 0 && (
               <div className="bg-black/20 rounded p-3 border border-border/40">
-                <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-2">
+                <p className="text-label uppercase tracking-wider text-gray-500 mb-2">
                   AI conviction scores (0–100)
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
@@ -335,7 +335,7 @@ export function OptimizeView() {
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                  <p className="text-[10px] text-gray-600 mt-1 text-center">
+                  <p className="text-label text-gray-600 mt-1 text-center">
                     {pieData.length} of {data.assets.length} assets have non-zero weight
                   </p>
                 </div>
@@ -400,7 +400,7 @@ export function OptimizeView() {
                     </table>
                   </div>
                   {data.excluded_tickers.length > 0 && (
-                    <p className="text-[11px] text-amber-300 mt-2">
+                    <p className="text-label text-amber-300 mt-2">
                       Excluded (no price history): {data.excluded_tickers.join(", ")}
                     </p>
                   )}
@@ -413,7 +413,7 @@ export function OptimizeView() {
                   <h3 className="text-xs text-gray-500 uppercase tracking-wider">
                     Simulated performance (daily rebalance)
                   </h3>
-                  <span className="text-[10px] text-gray-600 font-mono">
+                  <span className="text-label text-gray-600 font-mono">
                     {data.start_date} → {data.end_date} · {data.n_bars} bars
                   </span>
                 </div>
@@ -560,14 +560,14 @@ function MetricCard({
   const beats = higherIsBetter ? strategy > benchmark : strategy < benchmark;
   return (
     <div className="bg-surface-card rounded-xl p-3 border border-border/60">
-      <p className="text-[10px] text-gray-500 uppercase tracking-wider">{label}</p>
+      <p className="text-label text-gray-500 uppercase tracking-wider">{label}</p>
       <p className="text-lg font-bold font-mono mt-1 text-white">{fmtVal(strategy)}</p>
-      <div className="flex items-center justify-between text-[10px] mt-1">
+      <div className="flex items-center justify-between text-label mt-1">
         <span className="text-gray-600">vs 1/N</span>
         <span className="font-mono text-gray-500">{fmtVal(benchmark)}</span>
       </div>
       <div
-        className={`mt-2 text-[10px] font-semibold uppercase tracking-wider ${
+        className={`mt-2 text-label font-semibold uppercase tracking-wider ${
           beats ? "text-accent-green" : "text-accent-red"
         }`}
       >
@@ -580,7 +580,7 @@ function MetricCard({
 function SmallStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-surface-card rounded-lg p-2.5 border border-border/40">
-      <p className="text-[10px] text-gray-500 uppercase tracking-wider">{label}</p>
+      <p className="text-label text-gray-500 uppercase tracking-wider">{label}</p>
       <p className="text-sm text-white font-mono mt-0.5">{value}</p>
     </div>
   );

@@ -22,7 +22,7 @@ function Metric({ label, value, tone }: { label: string; value: string; tone?: s
   return (
     <div>
       <div className={`font-display text-[16px] tabular ${tone ?? "text-on-ink"}`}>{value}</div>
-      <div className="font-display text-[10px] uppercase tracking-[0.12em] text-on-ink-faint">
+      <div className="font-display text-label uppercase tracking-[0.12em] text-on-ink-faint">
         {label}
       </div>
     </div>
@@ -43,10 +43,10 @@ function ExperimentCard({ e }: { e: ExperimentRow }) {
   return (
     <article className="border-t border-ink-line px-lg py-md first:border-t-0">
       <div className="flex flex-wrap items-baseline gap-sm">
-        <span className="font-display text-[11px] tabular text-on-ink-faint">
+        <span className="font-display text-label tabular text-on-ink-faint">
           #{String(e.seq).padStart(2, "0")}
         </span>
-        <span className={`px-2 py-0.5 font-display text-[10px] uppercase tracking-[0.12em] ${verdictTone}`}>
+        <span className={`px-2 py-0.5 font-display text-label uppercase tracking-[0.12em] ${verdictTone}`}>
           {e.is_baseline ? "baseline" : e.verdict}
         </span>
         <span className="font-display text-[14px] text-bone">{e.ticker}</span>
@@ -54,12 +54,12 @@ function ExperimentCard({ e }: { e: ExperimentRow }) {
           {e.strategy_id}
         </span>
         {e.params && Object.keys(e.params).length > 0 && (
-          <span className="font-display text-[11px] text-cadmium">
+          <span className="font-display text-label text-cadmium">
             {Object.entries(e.params).map(([k, v]) => `${k}=${v}`).join(" ")}
           </span>
         )}
         {e.overfit_flag && (
-          <span className="bg-oxide/20 px-2 py-0.5 font-display text-[10px] uppercase tracking-[0.12em] text-oxide">
+          <span className="bg-oxide/20 px-2 py-0.5 font-display text-label uppercase tracking-[0.12em] text-oxide">
             fitted the past
           </span>
         )}
@@ -159,7 +159,7 @@ export function AutoResearchView() {
         <section className="border border-ink-line bg-ink-raised p-lg">
           <div className="grid gap-md sm:grid-cols-[160px_1fr_120px_auto] sm:items-end">
             <label className="block">
-              <span className="mb-1 block font-display text-[10px] uppercase tracking-[0.14em] text-on-ink-faint">
+              <span className="mb-1 block font-display text-label uppercase tracking-[0.14em] text-on-ink-faint">
                 Run tag
               </span>
               <input
@@ -170,7 +170,7 @@ export function AutoResearchView() {
               />
             </label>
             <label className="block">
-              <span className="mb-1 block font-display text-[10px] uppercase tracking-[0.14em] text-on-ink-faint">
+              <span className="mb-1 block font-display text-label uppercase tracking-[0.14em] text-on-ink-faint">
                 Tickers
               </span>
               <input
@@ -181,7 +181,7 @@ export function AutoResearchView() {
               />
             </label>
             <label className="block">
-              <span className="mb-1 block font-display text-[10px] uppercase tracking-[0.14em] text-on-ink-faint">
+              <span className="mb-1 block font-display text-label uppercase tracking-[0.14em] text-on-ink-faint">
                 Experiments
               </span>
               <input
@@ -197,7 +197,7 @@ export function AutoResearchView() {
               type="button"
               onClick={() => start.mutate()}
               disabled={busy || !runTag.trim() || !tickers.trim() || start.isPending}
-              className="bg-cobalt px-5 py-2.5 font-display text-[11px] uppercase tracking-[0.14em] text-bone transition-colors hover:bg-cadmium hover:text-ink disabled:bg-ink-line disabled:text-on-ink-faint"
+              className="bg-cobalt px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-bone transition-colors hover:bg-cadmium hover:text-ink disabled:bg-ink-line disabled:text-on-ink-faint"
             >
               {busy ? "Running…" : "Start"}
             </button>
@@ -206,7 +206,7 @@ export function AutoResearchView() {
             <p className="mt-sm text-[12px] text-oxide">{(start.error as Error).message}</p>
           )}
           {busy && (
-            <p className="mt-sm font-display text-[11px] uppercase tracking-[0.12em] text-cadmium">
+            <p className="mt-sm font-display text-label uppercase tracking-[0.12em] text-cadmium">
               Loop running — results appear below as each finishes
             </p>
           )}
@@ -227,7 +227,7 @@ export function AutoResearchView() {
             ].map((s) => (
               <div key={s.l} className="bg-ink-raised px-lg py-md">
                 <div className={`font-display text-[24px] tabular ${s.tone}`}>{s.n}</div>
-                <div className="mt-2xs font-display text-[10px] uppercase tracking-[0.14em] text-on-ink-faint">
+                <div className="mt-2xs font-display text-label uppercase tracking-[0.14em] text-on-ink-faint">
                   {s.l}
                 </div>
               </div>
@@ -238,11 +238,11 @@ export function AutoResearchView() {
         {/* Log */}
         <section className="mt-lg border border-ink-line bg-ink-raised">
           <div className="flex items-baseline justify-between border-b border-ink-line px-lg py-sm">
-            <h2 className="font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+            <h2 className="font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
               Experiment log
             </h2>
             {activeTag && (
-              <span className="font-display text-[11px] text-on-ink-faint">run {activeTag}</span>
+              <span className="font-display text-label text-on-ink-faint">run {activeTag}</span>
             )}
           </div>
           {rows.length === 0 ? (

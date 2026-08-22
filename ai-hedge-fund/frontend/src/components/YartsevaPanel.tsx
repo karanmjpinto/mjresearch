@@ -173,7 +173,7 @@ export function YartsevaPanel() {
               className="w-28 bg-surface-elevated border border-border rounded-lg px-3 py-2 text-sm text-white font-mono"
               aria-label="Maximum symbols to screen from index"
             />
-            <p className="text-[11px] text-gray-600 mt-1 max-w-[14rem]">
+            <p className="text-label text-gray-600 mt-1 max-w-[14rem]">
               Large runs are slow (one API call per ticker). Raise to cover full S&amp;P 500 or Russell.
             </p>
           </div>

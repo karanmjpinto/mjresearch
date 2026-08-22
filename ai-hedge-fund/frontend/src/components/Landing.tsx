@@ -112,7 +112,7 @@ const LIMITATIONS = [
 
 function Marker({ children, hue }: { children: React.ReactNode; hue: string }) {
   return (
-    <span className="font-display text-[11px] uppercase tracking-[0.2em]" style={{ color: hue }}>
+    <span className="font-display text-label uppercase tracking-[0.2em]" style={{ color: hue }}>
       {children}
     </span>
   );
@@ -162,7 +162,7 @@ export function Landing() {
             <span className="font-display text-sm uppercase tracking-[0.18em] text-on-canvas">
               MJ&nbsp;Research
             </span>
-            <div className="flex items-center gap-7 font-display text-[11px] uppercase tracking-[0.16em]">
+            <div className="flex items-center gap-7 font-display text-label uppercase tracking-[0.16em]">
               <a href="#features" className="hidden text-on-canvas transition-colors hover:text-oxide sm:block">
                 Work
               </a>
@@ -239,7 +239,7 @@ export function Landing() {
           <section id="about" className="border-t border-ink/15 py-3xl">
             <div className="grid gap-xl lg:grid-cols-12">
               <div className="lg:col-span-3">
-                <span className="inline-block bg-cobalt px-sm py-2xs font-display text-[11px] uppercase tracking-[0.2em] text-bone">
+                <span className="inline-block bg-cobalt px-sm py-2xs font-display text-label uppercase tracking-[0.2em] text-bone">
                   About
                 </span>
               </div>
@@ -362,7 +362,7 @@ export function Landing() {
         </main>
 
         <footer className="border-t border-ink/20 py-xl">
-          <div className="mx-auto flex max-w-6xl flex-col gap-sm px-6 font-display text-[11px] uppercase tracking-[0.14em] text-on-canvas-faint sm:flex-row sm:items-center sm:justify-between">
+          <div className="mx-auto flex max-w-6xl flex-col gap-sm px-6 font-display text-label uppercase tracking-[0.14em] text-on-canvas-faint sm:flex-row sm:items-center sm:justify-between">
             <span>A personal research tool — not investment advice</span>
             <a
               href="https://github.com/karanmjpinto/ai-hedge-fund"

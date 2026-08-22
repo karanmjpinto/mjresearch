@@ -4,7 +4,14 @@
 !.env.example
 
 .cursor/
-.claude/
+
+# .claude holds both personal state and shared project config. Ignore the
+# directory, then re-admit the two files the team is meant to share: the
+# Rams design-review loop hook and the settings that wire it up.
+# settings.local.json (personal permissions) stays ignored.
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
 **/.pytest_cache/
 **/.ruff_cache/
 **/.vite/

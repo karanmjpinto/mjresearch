@@ -73,6 +73,14 @@ export default {
         "display-lg": ["56px", { lineHeight: "1.05", letterSpacing: "-0.01em" }],
         "display-md": ["36px", { lineHeight: "1.1" }],
         "display-sm": ["24px", { lineHeight: "1.15" }],
+
+        /* The legibility floor for micro-labels. Below 12px uppercase
+         * tracked type stops being reliably readable, and the bitmap face
+         * has no hinting to fall back on. Named here so the floor is one
+         * decision instead of seventy-five inline `text-[10px]` literals.
+         * Size only, no lineHeight: these sit inside badges and flex rows
+         * whose vertical rhythm is already set by their container. */
+        label: "12px",
       },
       spacing: {
         "2xs": "var(--space-2xs)",

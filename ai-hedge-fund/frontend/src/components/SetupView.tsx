@@ -19,7 +19,7 @@ function StatusPip({ on, label }: { on: boolean; label: string }) {
   return (
     <span className="inline-flex items-center gap-2xs">
       <span className={`h-1.5 w-1.5 rounded-full ${on ? "bg-verdigris" : "bg-on-ink-faint"}`} />
-      <span className="font-display text-[11px] uppercase tracking-[0.12em] text-on-ink-faint">
+      <span className="font-display text-label uppercase tracking-[0.12em] text-on-ink-faint">
         {label}
       </span>
     </span>
@@ -40,11 +40,11 @@ function KeyRow({
       <div className="flex flex-wrap items-baseline justify-between gap-sm">
         <div className="flex items-baseline gap-sm">
           <span className="font-display text-[14px] text-bone">{spec.label}</span>
-          <span className="font-display text-[10px] uppercase tracking-[0.12em] text-on-ink-faint">
+          <span className="font-display text-label uppercase tracking-[0.12em] text-on-ink-faint">
             {spec.env}
           </span>
           {spec.free_tier && (
-            <span className="bg-verdigris/15 px-1.5 py-0.5 font-display text-[10px] uppercase tracking-[0.1em] text-verdigris">
+            <span className="bg-verdigris/15 px-1.5 py-0.5 font-display text-label uppercase tracking-[0.1em] text-verdigris">
               free tier
             </span>
           )}
@@ -70,7 +70,7 @@ function KeyRow({
           href={spec.signup}
           target="_blank"
           rel="noreferrer"
-          className="font-display text-[11px] uppercase tracking-[0.12em] text-cobalt transition-colors hover:text-cadmium"
+          className="font-display text-label uppercase tracking-[0.12em] text-cobalt transition-colors hover:text-cadmium"
         >
           Get key →
         </a>
@@ -138,7 +138,7 @@ export function SetupView() {
               ].map((s) => (
                 <div key={s.l} className="bg-ink-raised px-lg py-md">
                   <div className="font-display text-[22px] tabular text-cadmium">{s.n}</div>
-                  <div className="mt-2xs font-display text-[10px] uppercase tracking-[0.14em] text-on-ink-faint">
+                  <div className="mt-2xs font-display text-label uppercase tracking-[0.14em] text-on-ink-faint">
                     {s.l}
                   </div>
                 </div>
@@ -147,7 +147,7 @@ export function SetupView() {
 
             <section className="border border-ink-line bg-ink-raised">
               <div className="border-b border-ink-line px-lg py-sm">
-                <h2 className="font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+                <h2 className="font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
                   Optional keys
                 </h2>
               </div>
@@ -165,7 +165,7 @@ export function SetupView() {
                   type="button"
                   onClick={() => save.mutate()}
                   disabled={!pending || save.isPending}
-                  className="bg-cobalt px-5 py-2.5 font-display text-[11px] uppercase tracking-[0.14em] text-bone transition-colors hover:bg-cadmium hover:text-ink disabled:bg-ink-line disabled:text-on-ink-faint"
+                  className="bg-cobalt px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-bone transition-colors hover:bg-cadmium hover:text-ink disabled:bg-ink-line disabled:text-on-ink-faint"
                 >
                   {save.isPending ? "Saving…" : `Save ${pending || ""} key${pending === 1 ? "" : "s"}`}
                 </button>
@@ -177,7 +177,7 @@ export function SetupView() {
 
             {saved && (
               <div className="mt-md border border-cadmium/40 bg-cadmium/10 px-lg py-md">
-                <p className="font-display text-[11px] uppercase tracking-[0.14em] text-cadmium">
+                <p className="font-display text-label uppercase tracking-[0.14em] text-cadmium">
                   Saved — restart required
                 </p>
                 <p className="mt-2xs text-[13px] leading-relaxed text-on-ink-soft">
@@ -192,7 +192,7 @@ export function SetupView() {
             )}
 
             <section className="mt-xl">
-              <h2 className="mb-sm font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+              <h2 className="mb-sm font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
                 Providers
               </h2>
               <div className="grid gap-px bg-ink-line sm:grid-cols-2">

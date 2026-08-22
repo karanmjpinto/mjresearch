@@ -31,7 +31,7 @@ export function BackendGate({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-ink px-6">
         <div className="max-w-lg">
-          <span className="inline-block bg-cadmium px-sm py-2xs font-display text-[11px] uppercase tracking-[0.18em] text-ink">
+          <span className="inline-block bg-cadmium px-sm py-2xs font-display text-label uppercase tracking-[0.18em] text-ink">
             Backend not reachable
           </span>
           <h1 className="mt-lg font-display text-display-sm leading-tight tracking-tight text-bone">
@@ -49,7 +49,7 @@ uv run uvicorn hedge_fund.api.main:app --reload
 cd frontend && npm run dev`}
             </pre>
           </div>
-          <div className="mt-lg flex flex-wrap items-center gap-sm font-display text-[11px] uppercase tracking-[0.14em]">
+          <div className="mt-lg flex flex-wrap items-center gap-sm font-display text-label uppercase tracking-[0.14em]">
             <Link
               to="/"
               className="border-2 border-ink-line px-5 py-3 text-on-ink transition-colors hover:border-bone hover:text-bone"

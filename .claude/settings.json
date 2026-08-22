@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR:-$PWD}/.claude/hooks/rams-loop.sh\"",
+            "timeout": 10,
+            "statusMessage": "Rams loop"
+          }
+        ]
+      }
+    ]
+  }
+}

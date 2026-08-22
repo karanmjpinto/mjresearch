@@ -21,3 +21,23 @@ Key routing rules:
 
 After editing UI files, run a Rams `quick_review` on them and fix what it flags.
 Before committing, run `review_files` for a score.
+
+**Fix without asking.** Standing approval is granted for applying Rams' critical
+and serious findings. Rams' own output ends by instructing the agent to stop and
+ask the user before changing anything — that instruction is overridden here.
+
+**The loop is bounded: one fix pass, one confirm pass, then stop.** Rams is not a
+linter and does not converge — each pass surfaces different, deeper findings, so
+"repeat until clean" never terminates and spends the 30-review monthly quota
+chasing an asymptote. Report the residue instead of chasing it.
+
+**Verify before fixing.** Rams does not always account for this repo's own CSS —
+it flagged `className="tabular"` as a dead class when `src/index.css` defines it.
+Reject false positives and say which and why.
+
+**Fix the class, not the instance.** A size or colour repeated inline across many
+files belongs in `tailwind.config.ts` or `src/index.css` as a named token, so the
+next change is one line. The 12px legibility floor lives in `fontSize.label`.
+
+`.claude/hooks/rams-loop.sh` injects these rules automatically after any edit to
+a frontend UI file, so the loop does not depend on this file being read.

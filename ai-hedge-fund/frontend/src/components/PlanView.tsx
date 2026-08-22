@@ -50,10 +50,10 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
 function SectionHeading({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
     <div className="mb-3 flex items-baseline justify-between gap-4">
-      <h2 className="font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+      <h2 className="font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
         {children}
       </h2>
-      {hint && <span className="font-display text-[11px] tabular text-on-ink-faint">{hint}</span>}
+      {hint && <span className="font-display text-label tabular text-on-ink-faint">{hint}</span>}
     </div>
   );
 }
@@ -72,7 +72,7 @@ function VerificationBadge({ v }: { v: NonNullable<PlanResult["verification"]> }
         ? `${v.mismatched} claim${v.mismatched === 1 ? " contradicts" : "s contradict"} the data`
         : "no numeric claims made";
   return (
-    <span className={`px-2.5 py-1.5 font-display text-[11px] uppercase tracking-[0.12em] ${tone}`}>{label}</span>
+    <span className={`px-2.5 py-1.5 font-display text-label uppercase tracking-[0.12em] ${tone}`}>{label}</span>
   );
 }
 
@@ -85,7 +85,7 @@ function ClaimRow({ c }: { c: VerifiedClaim }) {
         : "text-gray-500";
   return (
     <li className="flex items-baseline gap-3 border-t border-border/60 px-5 py-3 first:border-t-0">
-      <span className={`font-mono text-[11px] uppercase ${tone} w-24 shrink-0`}>{c.verdict}</span>
+      <span className={`font-mono text-label uppercase ${tone} w-24 shrink-0`}>{c.verdict}</span>
       <span className="w-36 shrink-0 truncate font-mono text-xs text-gray-400">{c.metric}</span>
       <span className="font-mono text-xs text-gray-300">
         {formatValue(c.stated)}
@@ -107,9 +107,9 @@ function NodeRow({ n }: { n: ExecutedNode }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
             <span className="font-display text-[14px] text-bone">{n.node_id}</span>
-            <span className="font-display text-[11px] uppercase tracking-[0.1em] text-on-ink-faint">{n.metric}</span>
+            <span className="font-display text-label uppercase tracking-[0.1em] text-on-ink-faint">{n.metric}</span>
             {n.cached && (
-              <span className="rounded bg-surface-elevated px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-gray-500">
+              <span className="rounded bg-surface-elevated px-1.5 py-0.5 text-label uppercase tracking-wide text-gray-500">
                 cached
               </span>
             )}
@@ -327,7 +327,7 @@ export function PlanView() {
                         },
                       })
                     }
-                    className="bg-verdigris px-5 py-2.5 font-display text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-cadmium"
+                    className="bg-verdigris px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-ink transition-colors hover:bg-cadmium"
                   >
                     Size this against my book →
                   </button>
@@ -396,7 +396,7 @@ export function PlanView() {
                               >
                                 {opt}
                                 {opt === c.recommended && (
-                                  <span className="ml-1.5 text-[10px] uppercase tracking-wide text-gray-600">
+                                  <span className="ml-1.5 text-label uppercase tracking-wide text-gray-600">
                                     recommended
                                   </span>
                                 )}
@@ -426,7 +426,7 @@ export function PlanView() {
                     ))}
                   </ul>
                 </Card>
-                <p className="mt-2.5 font-mono text-[11px] text-gray-700">
+                <p className="mt-2.5 font-mono text-label text-gray-700">
                   plan {exec.plan_hash.slice(0, 12)} · snapshot {exec.snapshot_sha256.slice(0, 12)}
                 </p>
               </section>

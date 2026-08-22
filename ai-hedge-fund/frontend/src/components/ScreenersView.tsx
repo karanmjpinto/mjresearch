@@ -95,7 +95,7 @@ function PlayRow({
             )}
             {canFetch && views.data?.committee && views.data.committee.length > 0 && (
               <div className="flex flex-col gap-3">
-                <div className="flex flex-wrap gap-1.5 text-[10px]">
+                <div className="flex flex-wrap gap-1.5 text-label">
                   {views.data.committee.map((c, i) => (
                     <span key={i} className="text-gray-500">
                       {humanizePersonaId(c.persona_id)}:{" "}

@@ -44,10 +44,10 @@ function Stat({
   return (
     <div className="bg-ink-raised px-lg py-md">
       <div className={`font-display text-[20px] tabular ${tone ?? "text-bone"}`}>{value}</div>
-      <div className="mt-2xs font-display text-[10px] uppercase tracking-[0.13em] text-on-ink-faint">
+      <div className="mt-2xs font-display text-label uppercase tracking-[0.13em] text-on-ink-faint">
         {label}
       </div>
-      {sub && <div className="mt-1 text-[11px] text-on-ink-faint">{sub}</div>}
+      {sub && <div className="mt-1 text-label text-on-ink-faint">{sub}</div>}
     </div>
   );
 }
@@ -135,7 +135,7 @@ function DecisionCard({ d }: { d: DecisionRow }) {
   return (
     <article className="border-t border-ink-line px-lg py-md first:border-t-0">
       <div className="flex flex-wrap items-baseline gap-sm">
-        <span className={`px-2 py-0.5 font-display text-[10px] uppercase tracking-[0.12em] ${ACTION_TONE[d.action] ?? "bg-ink-line text-on-ink"}`}>
+        <span className={`px-2 py-0.5 font-display text-label uppercase tracking-[0.12em] ${ACTION_TONE[d.action] ?? "bg-ink-line text-on-ink"}`}>
           {d.action}
         </span>
         <span className="font-display text-[14px] text-bone">{d.ticker}</span>
@@ -149,7 +149,7 @@ function DecisionCard({ d }: { d: DecisionRow }) {
             {d.proposed_weight_pct.toFixed(1)}% of book
           </span>
         )}
-        <span className="ml-auto font-display text-[11px] text-on-ink-faint">
+        <span className="ml-auto font-display text-label text-on-ink-faint">
           {d.created_at?.slice(0, 10)}
         </span>
       </div>
@@ -251,7 +251,7 @@ export function DecideView() {
 
         {carried.run_uid && (
           <div className="mb-lg border border-cobalt/40 bg-cobalt/10 px-lg py-md">
-            <p className="font-display text-[11px] uppercase tracking-[0.14em] text-cobalt">
+            <p className="font-display text-label uppercase tracking-[0.14em] text-cobalt">
               Carried from research
             </p>
             <p className="mt-2xs text-[13px] leading-relaxed text-on-ink-soft">
@@ -269,7 +269,7 @@ export function DecideView() {
         <section className="border border-ink-line bg-ink-raised p-lg">
           <div className="grid gap-md sm:grid-cols-[150px_180px_auto] sm:items-end">
             <label className="block">
-              <span className="mb-1 block font-display text-[10px] uppercase tracking-[0.14em] text-on-ink-faint">
+              <span className="mb-1 block font-display text-label uppercase tracking-[0.14em] text-on-ink-faint">
                 Ticker
               </span>
               <input
@@ -280,7 +280,7 @@ export function DecideView() {
               />
             </label>
             <label className="block">
-              <span className="mb-1 block font-display text-[10px] uppercase tracking-[0.14em] text-on-ink-faint">
+              <span className="mb-1 block font-display text-label uppercase tracking-[0.14em] text-on-ink-faint">
                 Amount
               </span>
               <input
@@ -296,7 +296,7 @@ export function DecideView() {
                 type="button"
                 onClick={() => size.mutate()}
                 disabled={!ticker.trim() || size.isPending}
-                className="bg-cobalt px-5 py-2.5 font-display text-[11px] uppercase tracking-[0.14em] text-bone transition-colors hover:bg-cadmium hover:text-ink disabled:bg-ink-line disabled:text-on-ink-faint"
+                className="bg-cobalt px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-bone transition-colors hover:bg-cadmium hover:text-ink disabled:bg-ink-line disabled:text-on-ink-faint"
               >
                 {size.isPending ? "Sizing…" : "Size against book"}
               </button>
@@ -304,7 +304,7 @@ export function DecideView() {
                 <button
                   type="button"
                   onClick={() => navigate(`/plan/${ticker}`)}
-                  className="border border-ink-line px-4 py-2.5 font-display text-[11px] uppercase tracking-[0.14em] text-on-ink transition-colors hover:border-bone hover:text-bone"
+                  className="border border-ink-line px-4 py-2.5 font-display text-label uppercase tracking-[0.14em] text-on-ink transition-colors hover:border-bone hover:text-bone"
                 >
                   Research first
                 </button>
@@ -318,13 +318,13 @@ export function DecideView() {
 
         {assessment && (
           <section className="mt-lg">
-            <h2 className="mb-sm font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+            <h2 className="mb-sm font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
               Against your book
             </h2>
             <SizingPanel a={assessment} />
 
             <div className="mt-lg border border-ink-line bg-ink-raised p-lg">
-              <h3 className="font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+              <h3 className="font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
                 Record the call
               </h3>
               <div className="mt-sm flex flex-wrap gap-2xs">
@@ -333,7 +333,7 @@ export function DecideView() {
                     key={a}
                     type="button"
                     onClick={() => setAction(a)}
-                    className={`px-4 py-2 font-display text-[11px] uppercase tracking-[0.12em] transition-colors ${
+                    className={`px-4 py-2 font-display text-label uppercase tracking-[0.12em] transition-colors ${
                       action === a ? ACTION_TONE[a] : "bg-ink text-on-ink-faint hover:text-on-ink"
                     }`}
                   >
@@ -345,6 +345,7 @@ export function DecideView() {
                 value={rationale}
                 onChange={(e) => setRationale(e.target.value)}
                 rows={3}
+                aria-label="Decision rationale"
                 placeholder="Why this, why now, and what would change your mind."
                 className="mt-sm w-full resize-y border border-ink-line bg-ink px-3 py-2 text-[14px] leading-relaxed text-bone outline-none placeholder:text-on-ink-faint focus:border-cobalt"
               />
@@ -353,7 +354,7 @@ export function DecideView() {
                   type="button"
                   onClick={() => decide.mutate()}
                   disabled={!rationale.trim() || decide.isPending}
-                  className="bg-verdigris px-5 py-2.5 font-display text-[11px] uppercase tracking-[0.14em] text-ink transition-colors hover:bg-cadmium disabled:bg-ink-line disabled:text-on-ink-faint"
+                  className="bg-verdigris px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-ink transition-colors hover:bg-cadmium disabled:bg-ink-line disabled:text-on-ink-faint"
                 >
                   {decide.isPending ? "Recording…" : "Record decision"}
                 </button>
@@ -370,10 +371,10 @@ export function DecideView() {
 
         <section className="mt-xl border border-ink-line bg-ink-raised">
           <div className="flex items-baseline justify-between border-b border-ink-line px-lg py-sm">
-            <h2 className="font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+            <h2 className="font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
               Decision log
             </h2>
-            {ticker && <span className="font-display text-[11px] text-on-ink-faint">{ticker}</span>}
+            {ticker && <span className="font-display text-label text-on-ink-faint">{ticker}</span>}
           </div>
           {(history.data?.decisions ?? []).length === 0 ? (
             <p className="px-lg py-xl text-[13px] leading-relaxed text-on-ink-faint">

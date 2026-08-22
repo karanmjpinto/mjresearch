@@ -67,7 +67,7 @@ export function Dashboard() {
   const tickers = watchlists.data?.[watchGroup] ?? [];
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-dvh">
       <AppNav
         active="home"
         end={<span className="text-xs text-gray-600 font-mono">Ollama · yfinance · EDGAR · MCP</span>}
@@ -90,7 +90,7 @@ export function Dashboard() {
             </div>
             {recents.length > 0 && (
               <div className="mt-2xs flex flex-wrap items-center gap-2xs">
-                <span className="font-display text-[10px] uppercase tracking-[0.16em] text-on-ink-faint">
+                <span className="font-display text-label uppercase tracking-[0.16em] text-on-ink-faint">
                   Recent
                 </span>
                 {recents.slice(0, 6).map((r: string) => (
@@ -146,10 +146,10 @@ export function Dashboard() {
           <section className="grid grid-cols-1 gap-lg lg:grid-cols-2">
             <div className="border border-ink-line bg-ink-raised">
               <div className="flex items-baseline justify-between border-b border-ink-line px-lg py-sm">
-                <h2 className="font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+                <h2 className="font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
                   Recent research
                 </h2>
-                <span className="font-display text-[10px] uppercase tracking-[0.14em] text-on-ink-faint">
+                <span className="font-display text-label uppercase tracking-[0.14em] text-on-ink-faint">
                   {recentRuns.data?.count ?? 0} runs
                 </span>
               </div>
@@ -167,15 +167,15 @@ export function Dashboard() {
                     className="flex w-full items-baseline gap-sm border-t border-ink-line px-lg py-sm text-left transition-colors first:border-t-0 hover:bg-ink"
                   >
                     <span className="font-display text-[13px] text-bone">{r.ticker}</span>
-                    <span className="font-display text-[10px] uppercase tracking-[0.12em] text-on-ink-faint">
+                    <span className="font-display text-label uppercase tracking-[0.12em] text-on-ink-faint">
                       {r.mode}
                     </span>
                     {r.output?.stance && (
-                      <span className="font-display text-[11px] text-cadmium">
+                      <span className="font-display text-label text-cadmium">
                         {r.output.stance} {r.output.conviction_score ?? ""}
                       </span>
                     )}
-                    <span className="ml-auto font-display text-[10px] text-on-ink-faint">
+                    <span className="ml-auto font-display text-label text-on-ink-faint">
                       {r.created_at?.slice(0, 10)}
                     </span>
                   </button>
@@ -185,13 +185,13 @@ export function Dashboard() {
 
             <div className="border border-ink-line bg-ink-raised">
               <div className="flex items-baseline justify-between border-b border-ink-line px-lg py-sm">
-                <h2 className="font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+                <h2 className="font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
                   Recent decisions
                 </h2>
                 <button
                   type="button"
                   onClick={() => navigate("/decide")}
-                  className="font-display text-[10px] uppercase tracking-[0.14em] text-cobalt transition-colors hover:text-cadmium"
+                  className="font-display text-label uppercase tracking-[0.14em] text-cobalt transition-colors hover:text-cadmium"
                 >
                   Decide →
                 </button>
@@ -209,13 +209,13 @@ export function Dashboard() {
                     onClick={() => navigate(`/decide/${d.ticker}`)}
                     className="flex w-full items-baseline gap-sm border-t border-ink-line px-lg py-sm text-left transition-colors first:border-t-0 hover:bg-ink"
                   >
-                    <span className="font-display text-[10px] uppercase tracking-[0.12em] text-on-ink">
+                    <span className="font-display text-label uppercase tracking-[0.12em] text-on-ink">
                       {d.action}
                     </span>
                     <span className="font-display text-[13px] text-bone">{d.ticker}</span>
                     {d.outcome?.scored && (
                       <span
-                        className={`font-display text-[11px] tabular ${
+                        className={`font-display text-label tabular ${
                           (d.outcome.in_your_favour_pct ?? 0) >= 0 ? "text-verdigris" : "text-oxide"
                         }`}
                       >
@@ -223,7 +223,7 @@ export function Dashboard() {
                         {(d.outcome.in_your_favour_pct ?? 0).toFixed(1)}%
                       </span>
                     )}
-                    <span className="ml-auto font-display text-[10px] text-on-ink-faint">
+                    <span className="ml-auto font-display text-label text-on-ink-faint">
                       {d.created_at?.slice(0, 10)}
                     </span>
                   </button>
@@ -237,7 +237,7 @@ export function Dashboard() {
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="bg-surface-card rounded-xl p-4 border border-border/60">
               <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Watchlists</p>
-              <p className="text-[11px] text-gray-600 mb-3">
+              <p className="text-label text-gray-600 mb-3">
                 Edit <span className="font-mono text-gray-500">config/watchlists.json</span>
               </p>
               {groupKeys.length > 0 ? (
@@ -261,7 +261,7 @@ export function Dashboard() {
                     key={t}
                     type="button"
                     onClick={() => navigate(`/research/${t}`)}
-                    className="text-[11px] py-0.5 px-1.5 rounded hover:bg-surface-elevated text-gray-300 font-mono border border-border/40"
+                    className="text-label py-0.5 px-1.5 rounded hover:bg-surface-elevated text-gray-300 font-mono border border-border/40"
                   >
                     {t}
                   </button>
@@ -272,14 +272,14 @@ export function Dashboard() {
             <div id="sectors" className="bg-surface-card rounded-xl p-4 border border-border/60">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs text-gray-500 uppercase tracking-wider">Sector drift</p>
-                <span className="text-[10px] text-gray-600">{sectorLabel}</span>
+                <span className="text-label text-gray-600">{sectorLabel}</span>
               </div>
               {sectorData.length > 0 ? (
                 sectorData
                   .sort((a, b) => b.change_pct - a.change_pct)
                   .slice(0, 8)
                   .map((s) => (
-                    <div key={s.sector} className="flex justify-between py-0.5 text-[11px]">
+                    <div key={s.sector} className="flex justify-between py-0.5 text-label">
                       <span className="text-gray-400 truncate mr-2">{s.sector}</span>
                       <span
                         className={`font-mono ${
@@ -299,7 +299,7 @@ export function Dashboard() {
                 <p className="text-sm text-gray-500">Loading…</p>
               )}
               {sectors.data?.source && (
-                <p className="text-[10px] text-gray-600 mt-2">{sectors.data.source}</p>
+                <p className="text-label text-gray-600 mt-2">{sectors.data.source}</p>
               )}
             </div>
 
@@ -307,7 +307,7 @@ export function Dashboard() {
               <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Data providers</p>
               {providers.data ? (
                 providers.data.providers.map((p) => (
-                  <div key={p.name} className="flex items-center justify-between py-0.5 text-[11px]">
+                  <div key={p.name} className="flex items-center justify-between py-0.5 text-label">
                     <span className="text-gray-400 capitalize truncate mr-2">
                       {p.name}
                     </span>
@@ -330,7 +330,7 @@ export function Dashboard() {
 
           {/* Run it locally */}
           <section className="border border-ink-line bg-ink-raised p-lg">
-            <h3 className="mb-sm font-display text-[11px] uppercase tracking-[0.18em] text-on-ink-faint">
+            <h3 className="mb-sm font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
               Run it locally
             </h3>
             <pre className="overflow-x-auto border border-ink-line bg-ink p-md font-display text-[12px] leading-relaxed text-cadmium">
@@ -386,13 +386,13 @@ function SnapshotCard({
 }) {
   return (
     <div className="bg-surface-card rounded-xl p-4 border border-border/60">
-      <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-label text-gray-500 uppercase tracking-wider mb-1">{label}</p>
       <p className="text-xl font-bold font-mono text-white">{value}</p>
-      <p className="text-[11px] text-gray-500 mt-1">{sub}</p>
+      <p className="text-label text-gray-500 mt-1">{sub}</p>
       {cta && (
         <a
           href={href}
-          className="text-[11px] text-blue-400 hover:underline mt-2 inline-block"
+          className="text-label text-blue-400 hover:underline mt-2 inline-block"
         >
           {cta}
         </a>

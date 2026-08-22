@@ -24,7 +24,7 @@ export function TickerBar() {
     <div className="border-b border-ink-line bg-ink-raised">
       <div className="flex flex-wrap items-center gap-md px-lg py-2xs">
         <div className="flex items-baseline gap-sm">
-          <span className="font-display text-[10px] uppercase tracking-[0.16em] text-on-ink-faint">
+          <span className="font-display text-label uppercase tracking-[0.16em] text-on-ink-faint">
             Working on
           </span>
           <span className="font-display text-[16px] text-cadmium">{ticker}</span>
@@ -39,7 +39,7 @@ export function TickerBar() {
                 type="button"
                 onClick={() => goTo(ticker, r.key)}
                 aria-current={on ? "page" : undefined}
-                className={`px-3 py-1.5 font-display text-[11px] uppercase tracking-[0.12em] transition-colors ${
+                className={`px-3 py-1.5 font-display text-label uppercase tracking-[0.12em] transition-colors ${
                   on ? "bg-cobalt text-bone" : "text-on-ink-faint hover:bg-ink hover:text-on-ink"
                 }`}
               >
@@ -61,7 +61,7 @@ export function TickerBar() {
         >
           {recents.filter((r) => r !== ticker).length > 0 && (
             <div className="hidden items-center gap-2xs lg:flex">
-              <span className="font-display text-[10px] uppercase tracking-[0.14em] text-on-ink-faint">
+              <span className="font-display text-label uppercase tracking-[0.14em] text-on-ink-faint">
                 Recent
               </span>
               {recents
@@ -72,7 +72,7 @@ export function TickerBar() {
                     key={r}
                     type="button"
                     onClick={() => goTo(r, stage ?? "research")}
-                    className="px-2 py-1 font-display text-[11px] text-on-ink-faint transition-colors hover:text-cadmium"
+                    className="px-2 py-1 font-display text-label text-on-ink-faint transition-colors hover:text-cadmium"
                   >
                     {r}
                   </button>
@@ -84,12 +84,12 @@ export function TickerBar() {
             onChange={(e) => setDraft(e.target.value.toUpperCase())}
             placeholder="Switch…"
             aria-label="Switch to another ticker"
-            className="w-[110px] border border-ink-line bg-ink px-2 py-1 font-display text-[11px] text-bone outline-none transition-colors placeholder:text-on-ink-faint focus:border-cobalt"
+            className="w-[110px] border border-ink-line bg-ink px-2 py-1 font-display text-label text-bone outline-none transition-colors placeholder:text-on-ink-faint focus:border-cobalt"
           />
           <button
             type="button"
             onClick={clear}
-            className="font-display text-[11px] uppercase tracking-[0.12em] text-on-ink-faint transition-colors hover:text-oxide"
+            className="font-display text-label uppercase tracking-[0.12em] text-on-ink-faint transition-colors hover:text-oxide"
             title="Stop tracking this name"
           >
             Clear

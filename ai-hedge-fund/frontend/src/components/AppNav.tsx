@@ -58,7 +58,7 @@ export function AppNav({ active, end }: Props) {
                   <Link
                     key={item.key}
                     to={item.to}
-                    className={`relative shrink-0 py-1 font-display text-[11px] uppercase tracking-[0.14em] transition-colors ${
+                    className={`relative shrink-0 py-1 font-display text-label uppercase tracking-[0.14em] transition-colors ${
                       on ? "text-bone" : "text-on-ink-faint hover:text-on-ink"
                     }`}
                   >
