@@ -102,11 +102,6 @@ def sampling_params() -> dict[str, Any]:
     return params
 
 
-def default_model() -> str:
-    """The model the active provider uses when a call names none."""
-    return settings.ollama_model if settings.llm_provider == "ollama" else settings.llm_model
-
-
 def model_for_role(role: str | None) -> str | None:
     """Model override configured for a pipeline stage, or None to use the default.
 
