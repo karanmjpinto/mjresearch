@@ -417,7 +417,7 @@ export function Landing() {
                       Open the app
                     </Link>
                     <a
-                      href="https://github.com/karanmjpinto/ai-hedge-fund"
+                      href="https://github.com/karanmjpinto/mjresearch"
                       target="_blank"
                       rel="noreferrer"
                       className="border-2 border-ink px-6 py-3.5 text-ink transition-colors hover:bg-ink hover:text-bone"
@@ -620,7 +620,7 @@ export function Landing() {
                     Open the app
                   </Link>
                   <a
-                    href="https://github.com/karanmjpinto/ai-hedge-fund"
+                    href="https://github.com/karanmjpinto/mjresearch"
                     target="_blank"
                     rel="noreferrer"
                     className="border-2 border-ink px-6 py-3.5 text-ink transition-colors hover:bg-ink hover:text-bone"
@@ -655,7 +655,7 @@ export function Landing() {
           <div className="mx-auto flex max-w-6xl flex-col gap-sm px-6 font-display text-label uppercase tracking-marker text-on-canvas-faint sm:flex-row sm:items-center sm:justify-between">
             <span>A personal research tool — not investment advice</span>
             <a
-              href="https://github.com/karanmjpinto/ai-hedge-fund"
+              href="https://github.com/karanmjpinto/mjresearch"
               target="_blank"
               rel="noreferrer"
               className="transition-colors hover:text-oxide"

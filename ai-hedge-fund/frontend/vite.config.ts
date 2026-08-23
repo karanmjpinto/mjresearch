@@ -13,9 +13,17 @@ import path from "path";
 const BACKEND_PORT = Number(process.env.BACKEND_PORT ?? 8000);
 const FRONTEND_PORT = Number(process.env.FRONTEND_PORT ?? 5173);
 
+/**
+ * GitHub Pages serves a project site from /<repo>/, so the built asset URLs have
+ * to carry that prefix. The repo name arrives from the workflow rather than being
+ * written here: hardcoding it means renaming the repository silently ships a build
+ * whose every asset 404s, and nothing in the build output says why. Locally, and
+ * for any non-Pages build, the app is served from the root.
+ */
+const PAGES_REPO = process.env.GITHUB_PAGES_REPO?.trim();
+
 export default defineConfig(({ command }) => ({
-  // On GitHub Pages the app lives at /ai-hedge-fund/; locally it's /
-  base: command === "build" && process.env.GITHUB_PAGES ? "/ai-hedge-fund/" : "/",
+  base: command === "build" && PAGES_REPO ? `/${PAGES_REPO}/` : "/",
   plugins: [react()],
   resolve: {
     alias: {

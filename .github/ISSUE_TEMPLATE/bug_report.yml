@@ -1,0 +1,43 @@
+name: Bug report
+description: Something behaves differently from how it is documented.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Incorrect *research output* is a correctness bug and belongs here — but please
+        include the run id, since `GET /api/runs/{uid}` returns the exact data the model
+        saw and that is usually where the answer is.
+
+        Security vulnerabilities do **not** belong here — see [SECURITY.md](../blob/main/SECURITY.md).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The exact command or HTTP request, and the full response or traceback.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: run_id
+    attributes:
+      label: Run id
+      description: For anything involving research output. Leave blank otherwise.
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      value: |
+        - OS:
+        - Python (`uv run python -V`):
+        - LLM provider and model (`LLM_PROVIDER`, `OLLAMA_MODEL`):
+        - Commit or version:
+    validations:
+      required: true

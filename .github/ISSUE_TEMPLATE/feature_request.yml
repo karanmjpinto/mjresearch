@@ -1,0 +1,34 @@
+name: Feature request
+description: Propose a capability the project does not have.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Some things are deliberately out of scope — API authentication, a hosted shared
+        portfolio, and live trading or broker integration. See the scope note in
+        [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) before writing this up.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to find out or decide that you cannot today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you have in mind
+    validations:
+      required: true
+  - type: dropdown
+    id: numbers
+    attributes:
+      label: Does this involve producing a new number?
+      description: If yes, it needs to be a deterministic metric — the model never computes figures.
+      options:
+        - "No"
+        - "Yes — and I think it can be a deterministic metric"
+        - "Yes — and I am not sure how it would be computed"
+    validations:
+      required: true

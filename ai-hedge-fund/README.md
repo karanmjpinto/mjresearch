@@ -65,7 +65,7 @@ If you prefer a hosted API: `uv sync --extra openai`, set `LLM_PROVIDER=openai`,
 ## Deployment
 
 The published site at
-[karanmjpinto.github.io/ai-hedge-fund](https://karanmjpinto.github.io/ai-hedge-fund/)
+[karanmjpinto.github.io/mjresearch](https://karanmjpinto.github.io/mjresearch/)
 is **the landing page only**. The backend is deliberately not hosted: the API has
 no authentication and full write access to the portfolio, so putting it on the
 public internet would expose the book and its trade endpoints to anyone with the

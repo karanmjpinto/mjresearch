@@ -37,7 +37,9 @@ jobs:
       - name: Build (GitHub Pages base path)
         working-directory: ai-hedge-fund/frontend
         env:
-          GITHUB_PAGES: "true"
+          # The repo name drives the Pages base path, so a rename cannot leave the
+          # built asset URLs pointing at the old one.
+          GITHUB_PAGES_REPO: ${{ github.event.repository.name }}
           # Pages serves static files only, so the app needs an absolute API
           # origin. Set the repository variable API_BASE_URL (Settings →
           # Secrets and variables → Actions → Variables) to the deployed

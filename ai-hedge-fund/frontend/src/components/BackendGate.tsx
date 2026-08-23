@@ -57,7 +57,7 @@ cd frontend && npm run dev`}
               Back to overview
             </Link>
             <a
-              href="https://github.com/karanmjpinto/ai-hedge-fund#quick-start"
+              href="https://github.com/karanmjpinto/mjresearch#quick-start"
               target="_blank"
               rel="noreferrer"
               className="bg-oxide px-5 py-3 text-bone transition-colors hover:bg-cadmium hover:text-ink"
