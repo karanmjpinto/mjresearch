@@ -81,6 +81,39 @@ export default {
          * Size only, no lineHeight: these sit inside badges and flex rows
          * whose vertical rhythm is already set by their container. */
         label: "12px",
+
+        /* Prose and card titles. These were spelled inline as
+         * `text-[15px] leading-[1.65]` and friends at three dozen call sites on
+         * the landing page alone, which is how a type scale quietly stops being
+         * one. Size and leading travel together because changing one without
+         * the other is always a mistake. */
+        "body-lg": ["17px", { lineHeight: "1.65" }],
+        body: ["16px", { lineHeight: "1.7" }],
+        "body-sm": ["15px", { lineHeight: "1.65" }],
+        "body-xs": ["14px", { lineHeight: "1.6" }],
+        "title-sm": ["19px", { lineHeight: "1.3" }],
+        "title-xs": ["17px", { lineHeight: "1.35" }],
+
+        /* The chapter headings on the landing page. Fluid rather than a whole
+         * pixel, which the note above warns against — at intermediate widths it
+         * lands off-grid and the bitmap softens. That trade was already being
+         * made at four call sites; naming it does not make it worse, and makes
+         * the day someone wants it fixed a one-line day. */
+        chapter: ["clamp(26px, 3vw, 38px)", { lineHeight: "1.1" }],
+      },
+      letterSpacing: {
+        /* Tracking for the micro-labels that `fontSize.label` sets the size of.
+         * The pair travels together — uppercase 12px needs the extra track to
+         * stay readable — so it is named here rather than respelled as
+         * `tracking-[0.1em]` at every call site. */
+        label: "0.1em",
+
+        /* The wider track for standalone uppercase markers — section eyebrows,
+         * the wordmark, button labels. The landing page had reached four
+         * near-identical values (0.14em, 0.16em, 0.18em, 0.2em) that nobody had
+         * chosen between; they are one value now, because the differences were
+         * invisible and the drift was not. */
+        marker: "0.18em",
       },
       spacing: {
         "2xs": "var(--space-2xs)",
