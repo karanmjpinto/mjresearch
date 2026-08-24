@@ -146,6 +146,10 @@ async def run_plan_analysis(
     started = time.perf_counter()
 
     # --- 1. plan -------------------------------------------------------
+    # Widened so the early return below is what narrows it: a planner failure
+    # returns metadata in place of a plan, and executing `None` would be the
+    # one way this pipeline could emit numbers nothing chose.
+    plan: AnalysisPlan | None
     if plan_override is not None:
         try:
             plan = validate_plan(AnalysisPlan.model_validate(plan_override))

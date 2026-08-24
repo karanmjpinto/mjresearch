@@ -12,3 +12,10 @@ frontend/dist/
 frontend/.vite/
 .DS_Store
 data/*.db
+
+# Coverage artifacts
+.coverage
+coverage.xml
+htmlcov/
+frontend/coverage/
+.hypothesis/

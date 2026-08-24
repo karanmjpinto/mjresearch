@@ -27,8 +27,16 @@ jobs:
           uv run ruff check src tests
           uv run ruff format --check src tests
 
+      # Scoped by `files` in pyproject; the list is a ratchet, widened one
+      # package at a time. See [tool.mypy].
+      - name: Mypy
+        run: uv run mypy
+
+      # The floor only ever moves up. It is deliberately set just under the
+      # current number: the point is to stop a regression landing unnoticed, not
+      # to bless the modules that are still thin.
       - name: Pytest
-        run: uv run pytest
+        run: uv run pytest --cov=src/hedge_fund --cov-report=term-missing --cov-fail-under=57
 
   frontend:
     runs-on: ubuntu-latest
@@ -41,10 +49,11 @@ jobs:
           cache: npm
           cache-dependency-path: ai-hedge-fund/frontend/package-lock.json
 
-      - name: npm ci & build
+      - name: npm ci, test & build
         working-directory: ai-hedge-fund/frontend
         run: |
           npm ci
+          npm run test
           npm run build
 
   design:

@@ -66,3 +66,21 @@ line-length = 100
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.12"
+# Third-party stubs are patchy across this dependency set (pandas, openbb,
+# yfinance); missing imports are not a signal about this code.
+ignore_missing_imports = true
+
+# Type checking is opt-in by package, not repo-wide. Everything listed here
+# passes under the strict flags below, and the list is the ratchet: widen it one
+# package at a time rather than weakening the flags to admit the next one.
+files = ["src/hedge_fund/plan", "src/hedge_fund/agents"]
+
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_ignores = true

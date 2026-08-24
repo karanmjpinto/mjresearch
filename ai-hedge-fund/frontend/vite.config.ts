@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
@@ -28,6 +28,18 @@ export default defineConfig(({ command }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  test: {
+    // These suites cover pure formatting and scaling logic, so no DOM is needed;
+    // a component test that wants one can opt in with a `// @vitest-environment
+    // jsdom` docblock rather than making every file pay for it.
+    environment: "node",
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    coverage: {
+      provider: "v8",
+      include: ["src/lib/**/*.ts"],
+      exclude: ["src/lib/api.ts"],
     },
   },
   server: {

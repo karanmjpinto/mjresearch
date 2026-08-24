@@ -22,7 +22,10 @@ def _df_to_records(df: pd.DataFrame) -> list[dict[str, Any]]:
     for col in out.columns:
         if hasattr(out[col], "dt"):
             out[col] = out[col].astype(str)
-    return out.to_dict(orient="records")
+    # pandas types `to_dict` as Any, so the shape is asserted here rather than
+    # let an untyped value escape into callers that do trust the annotation.
+    records: list[dict[str, Any]] = out.to_dict(orient="records")
+    return records
 
 
 def tool_price_history(ticker: str, days: int = 365) -> dict[str, Any]:

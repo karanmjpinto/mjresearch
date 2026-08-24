@@ -134,16 +134,18 @@ def execute_plan(
         try:
             params = metric.coerce_params(node.params)
             # Metrics that read prior facts are not addressable by their own
-            # parameters alone, so they are always recomputed.
-            addressable = not metric.consumes
-            key = _node_cache_key(digest, metric.id, params) if addressable else None
-            cached = cache.get(key) if addressable else None
+            # parameters alone, so they are always recomputed. Absence of a key
+            # *is* that condition rather than a second flag tracking it: the two
+            # could otherwise disagree, and the one that decides whether to write
+            # the cache is not the one that decides what to write it under.
+            key = None if metric.consumes else _node_cache_key(digest, metric.id, params)
+            cached = cache.get(key) if key is not None else None
 
             if cached is not None:
                 values, was_cached = cached, True
             else:
                 values = metric.validate_output(metric.fn(ctx, **params))
-                if addressable:
+                if key is not None:
                     cache[key] = values
                 was_cached = False
 
