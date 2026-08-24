@@ -14,12 +14,15 @@ Output: np.ndarray of weights summing to 1.0, length N.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 from scipy.cluster.hierarchy import linkage
 from scipy.spatial.distance import squareform
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -150,9 +153,35 @@ def _hrp(returns: pd.DataFrame, convictions: dict[str, float] | None = None) -> 
     if n < 2:
         return _equal_weight(returns)
 
+    # Canonicalise the basket before clustering.
+    #
+    # scipy's `linkage` may emit an equivalent dendrogram with a subtree's
+    # children in the opposite order when the same assets arrive in a different
+    # column order. The bisection below splits the leaf order at its midpoint,
+    # so a mirrored subtree splits a different set of names and allocates
+    # differently — measured at up to four percentage points of weight on a
+    # five-name basket. The weights still summed to one, so nothing downstream
+    # could see it: the same portfolio optimised differently depending on the
+    # order a caller happened to list it in.
+    canonical = sorted(cols, key=str)
+    if cols != canonical:
+        reordered = _hrp(returns[canonical], convictions)
+        return pd.Series(reordered, index=canonical).reindex(cols).to_numpy()
+
     cov = returns.cov().values
     corr = returns.corr().values
     corr = np.nan_to_num(corr, nan=0.0)
+
+    # A constant return series — a halted name, or a gap filled with zeros — has
+    # no variance to allocate against and no correlation to cluster on. The
+    # allocation below still sums to 1, so nothing downstream looks wrong; say
+    # so here rather than let it pass as a considered weight.
+    flat = [cols[i] for i, v in enumerate(np.diag(cov)) if not v > 0]
+    if flat:
+        logger.warning(
+            "HRP: %s have zero return variance; their weights are not risk-derived",
+            ", ".join(map(str, flat)),
+        )
 
     # Distance matrix (proper distance metric: d = sqrt(0.5 * (1 - corr)))
     dist = np.sqrt(np.clip(0.5 * (1 - corr), 0, 1))
@@ -213,9 +242,21 @@ def _leaf_order(link: np.ndarray, n: int) -> list[int]:
 
 
 def _cluster_var(cov: np.ndarray, cluster: list[int]) -> float:
-    """Variance of an inverse-variance-weighted sub-portfolio."""
+    """Variance of an inverse-variance-weighted sub-portfolio.
+
+    The floor is load-bearing. A zero-variance leg makes `1 / var` infinite, and
+    `inf / inf` is nan; nan then fails the `(var_left + var_right) > 0` test in
+    the caller, which falls through to alpha = 0.5. The result is that a single
+    constant series silently turns the whole bisection into a naive half-split
+    that still sums to 1 and looks like a considered allocation. Flooring
+    relative to the cluster's own scale keeps the arithmetic finite, so a
+    near-riskless leg dominates its cluster — which is what inverse variance
+    means — instead of erasing the risk model.
+    """
     sub = cov[np.ix_(cluster, cluster)]
-    ivp = 1.0 / np.diag(sub)
+    var = np.diag(sub).astype(float)
+    scale = float(np.max(var)) if var.size and float(np.max(var)) > 0 else 1.0
+    ivp = 1.0 / np.maximum(var, scale * 1e-12)
     ivp = ivp / ivp.sum()
     return float(ivp @ sub @ ivp)
 

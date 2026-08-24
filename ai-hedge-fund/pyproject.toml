@@ -32,6 +32,9 @@ dependencies = [
 dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.25",
+    "pytest-cov>=6.0",
+    "hypothesis>=6.120",
+    "mypy>=1.14",
     "ruff>=0.9",
 ]
 openai = [
