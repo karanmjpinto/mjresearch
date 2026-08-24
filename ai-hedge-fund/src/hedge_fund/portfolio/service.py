@@ -103,6 +103,29 @@ def get_holding(db: Session, account_id: int, ticker: str) -> Holding | None:
     return _get_holding(db, account_id, ticker)
 
 
+#: Hard ceiling on a ledger page, whatever the caller asks for.
+TRANSACTIONS_MAX = 500
+
+
+def list_transactions(db: Session, account_id: int, *, limit: int = 100) -> list[Transaction]:
+    """Most recent ledger entries first.
+
+    Rows come back as ORM objects rather than dicts: the wire shape belongs to
+    `schemas.TransactionOut`, and returning it from here would give the ledger
+    two definitions that have to be kept in agreement by hand.
+    """
+    return list(
+        db.execute(
+            select(Transaction)
+            .where(Transaction.account_id == account_id)
+            .order_by(Transaction.executed_at.desc())
+            .limit(min(limit, TRANSACTIONS_MAX))
+        )
+        .scalars()
+        .all()
+    )
+
+
 def record_buy(
     db: Session,
     account_id: int,

@@ -15,6 +15,36 @@
 
 ---
 
+## Mission
+
+**To make AI-generated investment research checkable.**
+
+The goal is not a smarter model. It is a harness around the model good enough that its
+output can be checked, repeated and argued with — so when an answer is wrong you can see
+*which part* was wrong, and fix the method rather than the number.
+
+Four commitments follow from that. They are enforced in code, not asserted in a
+document, and they are what to hold this project to:
+
+1. **A language model never produces a figure.** Numbers come from registered Python
+   metrics, or they do not appear. A model that is allowed to compute is a model whose
+   arithmetic you cannot audit.
+2. **Unverified is never reported as verified.** Every numeric claim in the prose is
+   re-checked against the frozen snapshot. Claims the verifier cannot map are labelled
+   `unverifiable` — the one thing worse than an unchecked number is an unchecked number
+   wearing a tick.
+3. **Every run is reproducible, or it says so.** Inputs, prompts, model parameters and
+   output are recorded. When two identical runs disagree, that divergence is surfaced
+   rather than averaged away, because an eval built on it would be measuring noise.
+4. **Limitations carry the same weight as features.** They sit in this README at the
+   same size as the capabilities, and they always will. A research tool that oversells
+   its certainty is more dangerous than one that admits what it cannot do.
+
+The intended user is one person doing their own research who wants to disagree with a
+machine on the evidence — not a system that decides for them.
+
+---
+
 ## The problem
 
 Most AI research tools hand a language model a pile of financial data and ask for a

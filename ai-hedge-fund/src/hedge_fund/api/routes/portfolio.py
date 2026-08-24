@@ -4,10 +4,9 @@ from __future__ import annotations
 
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from hedge_fund.db.models import Account, Transaction
+from hedge_fund.db.models import Account
 from hedge_fund.db.session import get_db
 from hedge_fund.portfolio import service as ps
 from hedge_fund.portfolio.schemas import (
@@ -17,6 +16,7 @@ from hedge_fund.portfolio.schemas import (
     HoldingPatch,
     SellRequest,
     SplitRequest,
+    TransactionOut,
 )
 
 router = APIRouter()
@@ -42,35 +42,8 @@ async def get_risk(db: Session = Depends(get_db)):
 @router.get("/transactions")
 async def list_transactions(limit: int = 100, db: Session = Depends(get_db)):
     acc = _account(db)
-    rows = (
-        db.execute(
-            select(Transaction)
-            .where(Transaction.account_id == acc.id)
-            .order_by(Transaction.executed_at.desc())
-            .limit(min(limit, 500))
-        )
-        .scalars()
-        .all()
-    )
-    return {
-        "transactions": [
-            {
-                "id": t.id,
-                "txn_type": t.txn_type,
-                "ticker": t.ticker,
-                "shares": float(t.shares) if t.shares is not None else None,
-                "price_per_share": float(t.price_per_share)
-                if t.price_per_share is not None
-                else None,
-                "fee": float(t.fee),
-                "cash_delta": float(t.cash_delta),
-                "note": t.note,
-                "executed_at": t.executed_at.isoformat(),
-                "meta": t.meta,
-            }
-            for t in rows
-        ]
-    }
+    rows = ps.list_transactions(db, acc.id, limit=limit)
+    return {"transactions": [TransactionOut.model_validate(t) for t in rows]}
 
 
 @router.post("/buy")
