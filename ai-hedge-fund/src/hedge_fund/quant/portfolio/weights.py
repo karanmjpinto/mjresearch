@@ -133,9 +133,16 @@ def _mean_variance(
             w = np.where(w < 1e-4, 0.0, w)  # zero out noise
             if w.sum() > 0:
                 return w / w.sum()
-    except Exception:
-        pass
+        logger.warning(
+            "mean_variance: SLSQP did not converge (%s); falling back to equal weight",
+            getattr(res, "message", "no message"),
+        )
+    except Exception as exc:
+        logger.warning("mean_variance: solve failed (%s); falling back to equal weight", exc)
 
+    # The caller asked for a max-Sharpe allocation and is about to receive 1/N.
+    # Returning it silently means an optimisation that never happened is
+    # indistinguishable from one that did.
     return _equal_weight(returns)
 
 

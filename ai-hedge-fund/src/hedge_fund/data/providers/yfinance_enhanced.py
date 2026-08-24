@@ -100,8 +100,8 @@ class YFinanceEnhancedProvider(BaseProvider):
                 _52w_low = (
                     _52w_low if _52w_low is not None else getattr(fi, "fifty_two_week_low", None)
                 )
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("yfinance fast_info unavailable: %s", exc)
 
         result = {
             "ticker": ticker,
@@ -154,8 +154,8 @@ class YFinanceEnhancedProvider(BaseProvider):
                 latest = cf.iloc[:, 0]
                 result["free_cash_flow"] = _safe_float(latest.get("Free Cash Flow"))
                 result["operating_cash_flow"] = _safe_float(latest.get("Operating Cash Flow"))
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug("yfinance cash-flow fields unavailable: %s", exc)
 
         return result
 

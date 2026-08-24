@@ -270,6 +270,42 @@ def test_portfolio_view_of_an_empty_book_is_all_cash(db, account, monkeypatch):
     assert view["cash_pct"] == pytest.approx(100.0)
 
 
+class _PartialDataService(_StubDataService):
+    """Prices one ticker and refuses the other, as a delisted name would."""
+
+    def get_price_history(self, ticker, days=5, **kwargs):
+        if ticker == "DEAD":
+            raise RuntimeError("no data for DEAD")
+        return super().get_price_history(ticker, days=days, **kwargs)
+
+
+def test_risk_reports_the_positions_it_could_not_price(db, account, monkeypatch):
+    """Weights are renormalised over what is left, so the omission must be stated.
+
+    Otherwise the risk of the priced subset is presented as the risk of the
+    book, and the fewer positions it manages to price the tidier the answer
+    looks — which is exactly backwards.
+    """
+    monkeypatch.setattr(ps, "_ds", _PartialDataService(75.0))
+    _hold(db, account.id, ticker="LIVE", shares="100", price="50")
+    _hold(db, account.id, ticker="DEAD", shares="100", price="50")
+
+    risk = ps.risk_weighted(db, account.id)
+
+    assert risk["positions_total"] == 2
+    assert risk["positions_priced"] == 1
+    assert [e["ticker"] for e in risk["excluded"]] == ["DEAD"]
+
+
+def test_risk_on_a_fully_priced_book_excludes_nothing(db, account, monkeypatch):
+    monkeypatch.setattr(ps, "_ds", _StubDataService(75.0))
+    _hold(db, account.id, shares="100", price="50")
+
+    risk = ps.risk_weighted(db, account.id)
+    assert risk["excluded"] == []
+    assert risk["positions_priced"] == risk["positions_total"] == 1
+
+
 def test_risk_on_a_flat_series_reports_no_volatility(db, account, monkeypatch):
     """A constant price has zero return variance; risk must be finite, not NaN."""
     import math

@@ -64,6 +64,7 @@ def _sorted_annual_values(df: pd.DataFrame | None, row: str) -> list[float]:
         try:
             ts = pd.Timestamp(c)
         except Exception:
+            # A non-date column in a statement frame; skipping it is intended.
             continue
         v = s[c]
         if pd.notna(v):

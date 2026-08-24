@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 import math
 
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 TRADING_DAYS = 252
@@ -88,13 +91,22 @@ def portfolio_metrics(
 
 
 def _safe(x: float) -> float:
+    """Sanitise a computed statistic for the wire.
+
+    NaN and infinity are legitimate outcomes of the formulae above — an
+    undefined Sharpe on a flat series, say — and collapse to 0.0 by design. A
+    value that will not convert at all is different: it means a caller handed
+    this a type the arithmetic never produced, and swallowing that turns a bug
+    into a plausible zero sitting in a results table.
+    """
     try:
         f = float(x)
-        if math.isnan(f) or math.isinf(f):
-            return 0.0
-        return round(f, 6)
-    except Exception:
+    except Exception as exc:
+        logger.warning("metric value %r is not numeric (%s); reporting 0.0", x, exc)
         return 0.0
+    if math.isnan(f) or math.isinf(f):
+        return 0.0
+    return round(f, 6)
 
 
 def _empty() -> dict:

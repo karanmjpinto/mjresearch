@@ -148,8 +148,11 @@ def fetch_yartseva_snapshot(ticker: str) -> YartsevaSnapshot:
         hist = pd.DataFrame()
         try:
             hist = t.history(period="400d", interval="1d")
-        except Exception:
-            pass
+        except Exception as exc:
+            # The candidate is still scored, on fundamentals alone. Say so:
+            # a screen result computed without price history is not the same
+            # result, and nothing downstream can tell the difference.
+            logger.warning("%s: no price history (%s); scoring without it", snap.ticker, exc)
         # 6m return from daily history
         if not hist.empty and "Close" in hist.columns and snap.price_current:
             close = hist["Close"].dropna()

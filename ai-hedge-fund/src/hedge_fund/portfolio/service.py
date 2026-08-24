@@ -435,21 +435,31 @@ def risk_weighted(db: Session, account_id: int, *, days: int = 252) -> dict[str,
     prices: list[np.ndarray] = []
     live_mv: list[float] = []
 
+    # A holding with no usable price history cannot enter the calculation, and
+    # the weights below are renormalised over whatever is left. That silently
+    # reports the risk of a subset as the risk of the book — a portfolio with
+    # half its positions unpriced would read as a complete, and much tidier,
+    # answer. Keep the exclusions and return them.
+    excluded: list[dict[str, str]] = []
+
     for h in rows:
         try:
             df = _ds.get_price_history(h.ticker, days=days)
             if df.empty or len(df) < 10:
+                excluded.append({"ticker": h.ticker, "reason": "insufficient price history"})
                 continue
             ret = df["close"].pct_change().dropna().values
             prices.append(ret)
             cur = float(df["close"].iloc[-1])
             mv = cur * float(h.shares)
             live_mv.append(mv)
-        except Exception:
+        except Exception as exc:
+            logger.warning("risk: excluding %s — %s", h.ticker, exc)
+            excluded.append({"ticker": h.ticker, "reason": str(exc)[:200]})
             continue
 
     if not prices or not live_mv:
-        return {"error": "insufficient price history"}
+        return {"error": "insufficient price history", "excluded": excluded}
 
     w = np.array(live_mv, dtype=float)
     w = w / w.sum()
@@ -481,4 +491,10 @@ def risk_weighted(db: Session, account_id: int, *, days: int = 252) -> dict[str,
         "observations": min_len,
         "method": "value_weighted_returns",
         "limits": limits,
+        # What the figures above do *not* cover. `positions_priced` against the
+        # book's own count is the reader's check that this is whole-portfolio
+        # risk rather than the risk of the part that happened to have data.
+        "positions_priced": len(prices),
+        "positions_total": len(rows),
+        "excluded": excluded,
     }

@@ -15,6 +15,8 @@ units and adjustment basis.
 
 from __future__ import annotations
 
+import logging
+
 import math
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -24,6 +26,8 @@ from datetime import UTC, datetime
 from typing import Any
 
 from hedge_fund.data.cache import DataCategory
+
+logger = logging.getLogger(__name__)
 
 # Series whose values are ratios/multiples rather than currency amounts. Used to
 # skip currency inference on fields where a bare number is expected.
@@ -206,7 +210,10 @@ def _infer_frequency(index: Any) -> tuple[str | None, int | None]:
 
     try:
         idx = pd.DatetimeIndex(pd.to_datetime(index))
-    except Exception:
+    except Exception as exc:
+        # Not a failure: a payload may legitimately carry a non-temporal index.
+        # The caller reports the range as unknown, which is the honest answer.
+        logger.debug("provenance: index is not date-like (%s)", exc)
         return None, None
     if len(idx) < 3:
         return None, None
