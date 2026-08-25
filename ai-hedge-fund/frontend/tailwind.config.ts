@@ -82,17 +82,22 @@ export default {
          * whose vertical rhythm is already set by their container. */
         label: "12px",
 
-        /* Prose and card titles. These were spelled inline as
+        /* Prose and card titles, in rem so a reader who has raised their
+         * browser's base size gets larger text. The whole-pixel rule above
+         * binds the bitmap face, not Bricolage: these never render in Departure
+         * Mono, so there is no grid for them to fall off.
+         *
+         * These were spelled inline as
          * `text-[15px] leading-[1.65]` and friends at three dozen call sites on
          * the landing page alone, which is how a type scale quietly stops being
          * one. Size and leading travel together because changing one without
          * the other is always a mistake. */
-        "body-lg": ["17px", { lineHeight: "1.65" }],
-        body: ["16px", { lineHeight: "1.7" }],
-        "body-sm": ["15px", { lineHeight: "1.65" }],
-        "body-xs": ["14px", { lineHeight: "1.6" }],
-        "title-sm": ["19px", { lineHeight: "1.3" }],
-        "title-xs": ["17px", { lineHeight: "1.35" }],
+        "body-lg": ["1.0625rem", { lineHeight: "1.65" }],
+        body: ["1rem", { lineHeight: "1.7" }],
+        "body-sm": ["0.9375rem", { lineHeight: "1.65" }],
+        "body-xs": ["0.875rem", { lineHeight: "1.6" }],
+        "title-sm": ["1.1875rem", { lineHeight: "1.3" }],
+        "title-xs": ["1.0625rem", { lineHeight: "1.35" }],
 
         /* The chapter headings on the landing page. Fluid rather than a whole
          * pixel, which the note above warns against — at intermediate widths it
@@ -100,6 +105,10 @@ export default {
          * made at four call sites; naming it does not make it worse, and makes
          * the day someone wants it fixed a one-line day. */
         chapter: ["clamp(26px, 3vw, 38px)", { lineHeight: "1.1" }],
+
+        /* Display type large enough that the bitmap grid is the point — the
+         * glyph specimen. Whole pixels, like every other size in the face. */
+        specimen: ["34px", { lineHeight: "1.15" }],
       },
       letterSpacing: {
         /* Tracking for the micro-labels that `fontSize.label` sets the size of.

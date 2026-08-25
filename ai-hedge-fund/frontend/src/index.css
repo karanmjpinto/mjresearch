@@ -142,3 +142,100 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────
+ * 1-BIT TEXTURES
+ *
+ * The display face is a bitmap, so the ornament around it should be one too:
+ * dot screens on a whole-pixel grid rather than smooth gradients, which is how
+ * a 1-bit machine drew a tone it did not have. Every pattern paints in
+ * `currentColor`, so density and hue are set separately — `text-oxide
+ * dither-25` is a quarter-tone in rust, and the same class is a quarter-tone in
+ * cobalt one element over.
+ *
+ * Sizes are whole pixels for the same reason the type scale is: a 3px grid at
+ * a fractional offset stops being a screen and starts being a blur.
+ * ───────────────────────────────────────────────────────────── */
+.dither-12,
+.dither-25,
+.dither-50 {
+  background-repeat: repeat;
+}
+
+.dither-12 {
+  background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 1.2px);
+  background-size: 6px 6px;
+}
+
+.dither-25 {
+  background-image: radial-gradient(circle at 1px 1px, currentColor 1px, transparent 1.2px);
+  background-size: 4px 4px;
+}
+
+/* True checkerboard: the only honest 50% a 1-bit screen has. */
+.dither-50 {
+  background-image:
+    linear-gradient(45deg, currentColor 25%, transparent 25% 75%, currentColor 75%),
+    linear-gradient(45deg, currentColor 25%, transparent 25% 75%, currentColor 75%);
+  background-size: 4px 4px;
+  background-position: 0 0, 2px 2px;
+}
+
+/* Scanlines, for the one place a screen is being depicted rather than printed. */
+.scanlines {
+  background-image: repeating-linear-gradient(
+    0deg,
+    currentColor 0 1px,
+    transparent 1px 3px
+  );
+}
+
+/* Fades a texture out rather than stopping it dead at an edge. */
+.fade-r {
+  -webkit-mask-image: linear-gradient(to right, #000 40%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 40%, transparent 100%);
+}
+.fade-b {
+  -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+}
+
+/* ─────────────────────────────────────────────────────────────
+ * MARKS ON PAPER
+ * ───────────────────────────────────────────────────────────── */
+
+/* A highlighter stroke: laid behind the words, ragged at the ends, and stopping
+ * short of the cap height the way a real one does. */
+.marker {
+  background-image: linear-gradient(
+    to bottom,
+    transparent 12%,
+    color-mix(in oklch, var(--cadmium) 62%, transparent) 12%,
+    color-mix(in oklch, var(--cadmium) 62%, transparent) 88%,
+    transparent 88%
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  padding-inline: 0.15em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* The block behind a run of type that reads as a text selection. */
+.selected {
+  background: color-mix(in oklch, var(--on-canvas) 14%, transparent);
+  padding-inline: 0.35em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* Punched filing holes down an edge. */
+.punched {
+  background-image: radial-gradient(
+    circle at 11px 50%,
+    color-mix(in oklch, var(--on-canvas) 22%, transparent) 0 5px,
+    transparent 5.5px
+  );
+  background-size: 100% 34px;
+  background-repeat: repeat-y;
+}

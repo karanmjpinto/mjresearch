@@ -2,6 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { Link } from "react-router-dom";
 import clsx from "clsx";
 
+import { DensityPlate, GlyphPlate, RegistrationMark, RunTape } from "./PixelArtifacts";
+
 /**
  * Public landing page — raw canvas, thrown paint, pixel display type, read
  * left to right like a story rather than top to bottom like a document.
@@ -349,8 +351,11 @@ export function Landing() {
           )}
         >
           <nav className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-4">
-            <span className="font-display text-sm uppercase tracking-marker text-on-canvas">
-              MJ&nbsp;Research
+            <span className="flex items-start gap-2xs font-display text-sm uppercase tracking-marker text-on-canvas">
+              <span className="selected">MJ&nbsp;Research</span>
+              {/* Set as a superscript beside the mark, the way a spec sheet
+                * stamps the revision it describes. */}
+              <span className="text-label tabular text-on-canvas-faint">v0.1</span>
             </span>
             <div className="flex items-center gap-7 font-display text-label uppercase tracking-marker">
               {CHAPTERS.slice(1, -1).map((c) => (
@@ -392,7 +397,13 @@ export function Landing() {
                 id="opening"
                 className={clsx(
                   horizontal
-                    ? "flex h-full w-screen shrink-0 items-center gap-2xl px-[5vw]"
+                    // The header and the progress rail are both out of flow, so
+                    // `items-center` would centre against the full viewport as
+                    // though neither existed. On anything shorter than about 750px
+                    // — a laptop with browser chrome — the eyebrow slid under the
+                    // header and the buttons collided with the rail. Padding both
+                    // edges centres against the space that is actually free.
+                    ? "flex h-full w-screen shrink-0 items-center gap-2xl px-[5vw] pb-[64px] pt-[72px]"
                     : "flex flex-col gap-xl px-6 pb-3xl pt-4xl",
                 )}
               >
@@ -406,8 +417,9 @@ export function Landing() {
                   <p className="mt-xl max-w-[58ch] text-body-lg text-on-canvas-soft">
                     Most AI research tools hand a language model a pile of data and ask for a verdict,
                     which makes every figure in the answer a token prediction. This one compiles the
-                    question into a typed program, computes the figures in Python, and lets the model
-                    write only over results it did not produce.
+                    question into a typed program,{" "}
+                    <span className="marker">computes the figures in Python</span>, and lets the
+                    model write only over results it did not produce.
                   </p>
                   <div className="mt-2xl flex flex-wrap items-center gap-sm font-display text-label uppercase tracking-marker">
                     <Link
@@ -426,6 +438,11 @@ export function Landing() {
                     </a>
                   </div>
                 </div>
+
+                {/* The argument above, as something you can read off a slip of
+                  * paper. Hidden below lg with the rest of the studio furniture:
+                  * on a phone the page is a document, not a desk. */}
+                <RunTape className="hidden -rotate-2 lg:block" />
 
                 {/* Studio placard, deliberately off the main column. */}
                 <aside className={clsx("shrink-0", horizontal ? "w-[280px] self-end pb-[12vh]" : "max-w-[320px]")}>
@@ -468,6 +485,7 @@ export function Landing() {
                     wrong you can tell, and fix the method rather than the number.
                   </p>
                 </div>
+                <GlyphPlate className="hidden rotate-1 self-start lg:block" />
               </section>
 
               {/* Features */}
@@ -565,6 +583,7 @@ export function Landing() {
                     </li>
                   ))}
                 </ol>
+                <DensityPlate className="hidden -rotate-1 self-start lg:block" />
               </section>
 
               {/* Limitations */}
@@ -604,10 +623,12 @@ export function Landing() {
                 id="close"
                 className={clsx(
                   horizontal
-                    ? "flex h-full w-screen shrink-0 flex-col justify-center px-[5vw]"
-                    : "flex flex-col gap-xl border-t border-ink/15 px-6 py-3xl",
+                    ? "relative flex h-full w-screen shrink-0 flex-col justify-center px-[5vw]"
+                    : "relative flex flex-col gap-xl border-t border-ink/15 px-6 py-3xl",
                 )}
               >
+                <RegistrationMark className="absolute left-[5vw] top-[12vh] text-on-canvas-faint/50" />
+                <RegistrationMark className="absolute right-[5vw] top-[12vh] text-on-canvas-faint/50" />
                 <Marker hue="var(--oxide)">End of the read</Marker>
                 <h2 className="mt-lg max-w-[18ch] font-display text-[clamp(30px,4.5vw,56px)] leading-[1.05] tracking-tight text-ink">
                   Now go and argue with it.
