@@ -264,8 +264,11 @@ async def _openai_chat(
         "prompt_tokens": resp.usage.prompt_tokens if resp.usage else None,
         "completion_tokens": resp.usage.completion_tokens if resp.usage else None,
     }
-    return content, usage, f"{_openai_endpoint_tag()}:{name}", getattr(
-        resp, "system_fingerprint", None
+    return (
+        content,
+        usage,
+        f"{_openai_endpoint_tag()}:{name}",
+        getattr(resp, "system_fingerprint", None),
     )
 
 
