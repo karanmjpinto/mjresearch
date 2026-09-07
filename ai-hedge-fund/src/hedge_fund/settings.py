@@ -22,6 +22,18 @@ class Settings(BaseSettings):
     ollama_timeout_s: float = 600.0
 
     openai_api_key: str | None = None
+    # Any OpenAI-compatible endpoint: OpenRouter, Together, a self-hosted vLLM.
+    # Left unset the SDK talks to api.openai.com. Set it and the same client
+    # drives the gateway instead — the wire format is identical, so the only
+    # things that change are the key, the base URL, and the model id, which
+    # becomes the gateway's namespaced form (e.g. "anthropic/claude-sonnet-4.5"
+    # on OpenRouter rather than a bare "gpt-4o-mini").
+    openai_base_url: str | None = None
+    # Attribution headers OpenRouter reads for its public model rankings. Purely
+    # optional, ignored by every other endpoint, and only sent when a base URL is
+    # set — an unset gateway is OpenAI itself, which has no use for them.
+    openrouter_site_url: str | None = None
+    openrouter_site_name: str | None = None
     llm_model: str = "gpt-4o-mini"  # used when llm_provider=openai
     llm_max_output_tokens: int = 2500
     research_max_context_chars: int = 24_000
