@@ -20,6 +20,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 
@@ -196,6 +197,37 @@ async def _ollama_chat(
     return content, usage, f"ollama:{name}", None
 
 
+def _gateway_headers() -> dict[str, str]:
+    """Optional attribution headers for gateways that read them.
+
+    OpenRouter uses these for its public rankings; every other endpoint ignores
+    them. Sent only alongside a configured base URL, so a plain OpenAI account
+    never carries the site identity of a deployment it has nothing to do with.
+    """
+    if not settings.openai_base_url:
+        return {}
+    headers = {}
+    if settings.openrouter_site_url:
+        headers["HTTP-Referer"] = settings.openrouter_site_url
+    if settings.openrouter_site_name:
+        headers["X-OpenRouter-Title"] = settings.openrouter_site_name
+    return headers
+
+
+def _openai_endpoint_tag() -> str:
+    """Name the endpoint a call actually reached, not the SDK used to reach it.
+
+    Every OpenAI-compatible gateway — OpenRouter, Together, a self-hosted vLLM —
+    is driven through the same client, so tagging all of them ``openai:`` would
+    put a provider on the run record that never saw the request. Runs get
+    compared across weeks and a model id alone does not disambiguate: the same
+    weights served by two gateways are two different things to reproduce.
+    """
+    if not settings.openai_base_url:
+        return "openai"
+    return urlparse(settings.openai_base_url).hostname or "openai"
+
+
 async def _openai_chat(
     system: str, user: str, schema: dict[str, Any] | None = None, *, model: str | None = None
 ) -> tuple[str, dict[str, Any], str, str | None]:
@@ -209,7 +241,11 @@ async def _openai_chat(
     if not settings.openai_api_key:
         raise RuntimeError("OPENAI_API_KEY is not set")
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    client = AsyncOpenAI(
+        api_key=settings.openai_api_key,
+        base_url=settings.openai_base_url,
+        default_headers=_gateway_headers() or None,
+    )
     name = model or settings.llm_model
     resp = await client.chat.completions.create(
         model=name,
@@ -228,7 +264,12 @@ async def _openai_chat(
         "prompt_tokens": resp.usage.prompt_tokens if resp.usage else None,
         "completion_tokens": resp.usage.completion_tokens if resp.usage else None,
     }
-    return content, usage, f"openai:{name}", getattr(resp, "system_fingerprint", None)
+    return (
+        content,
+        usage,
+        f"{_openai_endpoint_tag()}:{name}",
+        getattr(resp, "system_fingerprint", None),
+    )
 
 
 async def call_json(

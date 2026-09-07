@@ -21,7 +21,11 @@ RUN pip install --no-cache-dir uv
 COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
 COPY config ./config
-RUN mkdir -p data && uv sync --frozen --no-dev
+# The openai extra ships the client for every OpenAI-compatible endpoint, not
+# just OpenAI's own — a hosted deployment has no local Ollama to fall back to,
+# so leaving it out makes LLM_PROVIDER=openai a runtime ImportError that only
+# surfaces on the first research call, long after the healthcheck went green.
+RUN mkdir -p data && uv sync --frozen --no-dev --extra openai
 
 COPY --from=frontend-build /build/dist ./frontend/dist
 

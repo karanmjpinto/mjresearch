@@ -317,3 +317,54 @@ async def test_absent_schema_falls_back_to_json_mode(ollama):
     client = ollama([_ok_response()])
     await call_json("sys", "user")
     assert client.requests[0]["format"] == "json"
+
+
+# ----------------------------------------------------------------------
+# OpenAI-compatible gateways
+# ----------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("base_url", "expected"),
+    [
+        (None, "openai"),
+        ("https://openrouter.ai/api/v1", "openrouter.ai"),
+        ("https://api.together.xyz/v1", "api.together.xyz"),
+        ("http://localhost:8001/v1", "localhost"),
+    ],
+)
+def test_endpoint_tag_names_the_gateway_not_the_sdk(monkeypatch, base_url, expected):
+    """A run record has to say where the tokens came from.
+
+    The same model id served by two gateways is two different things to
+    reproduce, so 'openai:' on an OpenRouter call would name a provider that
+    never saw the request.
+    """
+    monkeypatch.setattr(settings, "openai_base_url", base_url)
+    assert llm._openai_endpoint_tag() == expected
+
+
+@pytest.mark.parametrize(
+    ("base_url", "site_url", "site_name", "expected"),
+    [
+        (None, "https://x.test", "X", {}),
+        ("https://openrouter.ai/api/v1", None, None, {}),
+        (
+            "https://openrouter.ai/api/v1",
+            "https://investing.themariojude.com",
+            "MJ Research",
+            {
+                "HTTP-Referer": "https://investing.themariojude.com",
+                "X-OpenRouter-Title": "MJ Research",
+            },
+        ),
+    ],
+)
+def test_attribution_headers_only_travel_to_a_configured_gateway(
+    monkeypatch, base_url, site_url, site_name, expected
+):
+    """A plain OpenAI account should not carry a deployment's site identity."""
+    monkeypatch.setattr(settings, "openai_base_url", base_url)
+    monkeypatch.setattr(settings, "openrouter_site_url", site_url)
+    monkeypatch.setattr(settings, "openrouter_site_name", site_name)
+    assert llm._gateway_headers() == expected
