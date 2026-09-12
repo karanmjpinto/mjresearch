@@ -177,3 +177,13 @@ def test_an_impossible_cell_records_why_instead_of_failing_the_table():
     cells = [c for row in g for c in row["values"]]
     assert any("refused" in c for c in cells)
     assert any("value_per_share" in c for c in cells)
+
+
+def test_the_distribution_carries_its_shape_not_just_percentiles():
+    # Seven numbers cannot show a long left tail, and the tail is the
+    # difference between a cheap share and a lottery ticket.
+    h = simulate(_d(), runs=800)["histogram"]
+    assert len(h) == 24
+    assert sum(b["count"] for b in h) == 800
+    assert all(b["from"] < b["to"] for b in h)
+    assert h[0]["from"] <= h[-1]["to"]

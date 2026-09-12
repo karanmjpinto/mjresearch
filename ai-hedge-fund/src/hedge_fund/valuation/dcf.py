@@ -246,11 +246,25 @@ def simulate(
 
     arr = np.array(values)
     pcts = {f"p{p}": round(float(np.percentile(arr, p)), 2) for p in (5, 10, 25, 50, 75, 90, 95)}
+
+    # Bin counts travel with the percentiles so a caller can draw the shape
+    # rather than infer it from seven numbers. The tails matter here: a wide
+    # left tail is the difference between a cheap share and a lottery ticket.
+    counts, edges = np.histogram(arr, bins=24)
+    histogram = [
+        {
+            "from": round(float(edges[i]), 2),
+            "to": round(float(edges[i + 1]), 2),
+            "count": int(counts[i]),
+        }
+        for i in range(len(counts))
+    ]
     out: dict[str, Any] = {
         "runs": len(values),
         "rejected": rejected,
         "seed": seed,
         "percentiles": pcts,
+        "histogram": histogram,
         "mean": round(float(arr.mean()), 2),
         "base_case": round(value(base, riskfree=riskfree).value_per_share, 2),
         "spreads": {

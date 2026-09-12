@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { AppNav } from "@/components/AppNav";
 import { CompsField } from "@/components/CompsField";
+import { IntrinsicValue } from "@/components/IntrinsicValue";
 import { STAGES, type StageKey } from "@/lib/flow";
 
 /**
@@ -55,8 +56,9 @@ export function StageComingSoon({ stage }: { stage: Extract<StageKey, "lens" | "
             range is a valuation method, so it lands here rather than waiting
             for the rest of the engine. */}
         {stage === "value" && ticker && (
-          <div className="mt-xl border-t border-ink-line pt-lg">
+          <div className="mt-xl flex flex-col gap-2xl border-t border-ink-line pt-lg">
             <CompsField ticker={ticker.toUpperCase()} />
+            <IntrinsicValue ticker={ticker.toUpperCase()} />
           </div>
         )}
 

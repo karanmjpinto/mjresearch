@@ -665,6 +665,52 @@ export type CompsRange = {
   };
 };
 
+export type CostOfCapital = {
+  cost_of_equity_pct: number | null;
+  cost_of_debt_after_tax_pct: number | null;
+  wacc_pct: number | null;
+  steps: string[];
+  missing: string[];
+  inputs: Record<string, unknown>;
+};
+
+export type Intrinsic =
+  | {
+      ticker: string;
+      available: false;
+      reason: string;
+      /** Drivers that could not be derived and must be supplied. */
+      missing: string[];
+      cost_of_capital: CostOfCapital;
+      notes?: string[];
+    }
+  | {
+      ticker: string;
+      name?: string | null;
+      available: true;
+      price: number | null;
+      base_case: {
+        value_per_share: number;
+        terminal_share_of_value: number;
+        inputs: Record<string, number | null>;
+        years: Record<string, number>[];
+      };
+      distribution: {
+        runs: number;
+        rejected: number;
+        seed: number;
+        percentiles: Record<string, number>;
+        histogram: { from: number; to: number; count: number }[];
+        price?: number;
+        probability_value_above_price?: number;
+        median_upside_pct?: number;
+        independence_note: string;
+      };
+      cost_of_capital: CostOfCapital;
+      cost_of_capital_note: string;
+      driver_notes: string[];
+    };
+
 export const api = {
   health: () => fetchJSON<{ status: string }>("/health"),
 
@@ -758,6 +804,16 @@ export const api = {
 
   getCompsRange: (ticker: string) =>
     fetchJSON<CompsRange>(`/valuation/comps/${encodeURIComponent(ticker)}`),
+
+  getIntrinsic: (ticker: string, params: Record<string, string | number | undefined> = {}) => {
+    const q = Object.entries(params)
+      .filter(([, v]) => v !== undefined && v !== "")
+      .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`)
+      .join("&");
+    return fetchJSON<Intrinsic>(
+      `/valuation/intrinsic/${encodeURIComponent(ticker)}${q ? `?${q}` : ""}`
+    );
+  },
 
   getTechnicals: (ticker: string) =>
     fetchJSON<Record<string, unknown>>(`/data/technicals/${ticker}`),
