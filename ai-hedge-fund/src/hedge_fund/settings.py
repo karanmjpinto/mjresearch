@@ -91,6 +91,12 @@ class Settings(BaseSettings):
     news_sentiment_enabled: bool = True
     finbert_model_id: str = "ProsusAI/finbert"
 
+    # Your own notes (stage 04). Left unset the stage reports that no vault is
+    # connected and the rest of the flow is unaffected. Never given a default:
+    # this repository is public, and a personal directory path is not something
+    # to publish for the convenience of one.
+    vault_path: str | None = None
+
     # Sentry (optional — set SENTRY_DSN in production)
     sentry_dsn: str | None = None
     sentry_environment: str = "development"

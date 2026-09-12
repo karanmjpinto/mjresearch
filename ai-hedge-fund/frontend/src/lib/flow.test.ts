@@ -19,9 +19,11 @@ describe("stage sequence", () => {
     expect(DESTINATIONS).toHaveLength(5);
   });
 
-  it("marks the two unbuilt stages as planned rather than shipping blank screens", () => {
+  it("marks an unbuilt stage as planned rather than shipping a blank screen", () => {
+    // Stage 04 became live when the vault reader landed; 05 is still partial,
+    // so the rail keeps saying so rather than promising a finished screen.
     const planned = STAGES.filter((s) => s.status === "planned").map((s) => s.key);
-    expect(planned).toEqual(["lens", "value"]);
+    expect(planned).toEqual(["value"]);
   });
 
   it("gives every stage a question, since that is what the rail promises", () => {

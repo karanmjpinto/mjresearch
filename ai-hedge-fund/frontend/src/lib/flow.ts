@@ -66,7 +66,7 @@ export const STAGES: readonly Stage[] = [
     label: "Your lens",
     question: "What do I already know here?",
     segment: "lens",
-    status: "planned",
+    status: "live",
   },
   {
     key: "value",

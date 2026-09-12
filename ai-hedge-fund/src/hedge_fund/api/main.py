@@ -13,6 +13,7 @@ from hedge_fund.api.routes import (
     autoresearch,
     backtest,
     decisions,
+    knowledge,
     data,
     methodology,
     optimize as optimize_route,
@@ -76,6 +77,7 @@ app.include_router(methodology.router, prefix="/api/methodology", tags=["methodo
 app.include_router(setup_route.router, prefix="/api/setup", tags=["setup"])
 app.include_router(autoresearch.router, prefix="/api/autoresearch", tags=["autoresearch"])
 app.include_router(decisions.router, prefix="/api/decisions", tags=["decisions"])
+app.include_router(knowledge.router, prefix="/api/knowledge", tags=["knowledge"])
 
 
 @app.get("/api/health")
