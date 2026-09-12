@@ -775,6 +775,9 @@ export type ConstraintSummary = {
   name: string;
   source: "curated" | "your notes";
   why: string;
+  /** "rejected" means checked and answered in the negative — kept on purpose. */
+  verdict?: "open" | "rejected";
+  rejected_because?: string;
   validation: ValidationView;
   /** Curated entries only. */
   scarce_object?: string;
@@ -796,6 +799,12 @@ export type ConstraintMap = {
   filtered_to: string | null;
   curated: { constraints: ConstraintSummary[]; note: string | null };
   from_your_notes: { constraints: ConstraintSummary[]; note: string | null };
+  /** Negative results. Knowing a chokepoint was checked and did not hold is
+   *  what stops the same idea being re-researched from scratch each quarter. */
+  checked_and_rejected: {
+    constraints: ConstraintSummary[];
+    note: string | null;
+  };
 };
 
 export type ConstraintCandidates = {

@@ -407,6 +407,40 @@ export function ConstraintsView() {
             </section>
           </div>
         )}
+
+        {d && d.checked_and_rejected.constraints.length > 0 && (
+          <section
+            className="mt-2xl border-t border-ink-line pt-lg"
+            aria-label="Checked and rejected"
+          >
+            {/* Collapsed by default. A negative result is worth keeping and not
+                worth leading with — its job is to stop you re-researching the
+                same idea, which it does from behind one click. */}
+            <details>
+              <summary className="cursor-pointer font-display text-label uppercase tracking-label text-on-ink-soft transition-colors hover:text-bone">
+                Checked and rejected
+                <span className="ml-xs text-on-ink-faint">
+                  {d.checked_and_rejected.constraints.length}
+                </span>
+              </summary>
+              <p className="mt-xs max-w-[72ch] text-body-xs text-on-ink-faint">
+                {d.checked_and_rejected.note}
+              </p>
+              <ul className="mt-sm flex flex-col gap-sm">
+                {d.checked_and_rejected.constraints.map((c) => (
+                  <li key={c.id} className="border-l-2 border-ink-line pl-md">
+                    <h3 className="font-display text-body-sm text-on-ink">
+                      {c.name}
+                    </h3>
+                    <p className="mt-2xs max-w-[72ch] text-body-xs text-on-ink-soft">
+                      {c.rejected_because}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </section>
+        )}
       </main>
     </div>
   );

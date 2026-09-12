@@ -35,6 +35,11 @@ logger = logging.getLogger(__name__)
 
 CATALOGUE_PATH = Path(__file__).resolve().parents[3] / "config" / "constraints.json"
 
+#: Whether a constraint is still a live candidate or has been answered in the
+#: negative. Rejections stay in the file: deleting one loses the work and the
+#: same idea comes back next quarter wearing the same story.
+VERDICTS = ("open", "rejected")
+
 #: The three systems, in the order they are shown. Named here so a typo in the
 #: data file is a load error rather than a fourth column nobody notices.
 SYSTEMS = ("intelligence", "power", "motion")
@@ -90,6 +95,13 @@ class Constraint:
     routes: list[Route] = field(default_factory=list)
     capture: dict[str, Any] = field(default_factory=dict)
     names: list[Name] = field(default_factory=list)
+    #: "open" while it is still a live candidate, "rejected" once the evidence
+    #: has answered it in the negative. Rejections are kept rather than deleted:
+    #: a checked-and-dismissed constraint is one of the more valuable things a
+    #: research tool can remember, because otherwise the same idea arrives again
+    #: next quarter wearing the same story and gets re-researched from scratch.
+    verdict: str = "open"
+    rejected_because: str = ""
 
     def legs(self) -> list[Leg]:
         return [
@@ -99,6 +111,7 @@ class Constraint:
                 share_pct=self.capture.get("share_pct"),
                 pricing_power=self.capture.get("pricing_power"),
                 pricing_evidence=self.capture.get("pricing_evidence", ""),
+                rent_mechanism=self.capture.get("rent_mechanism", "concentration"),
             ),
         ]
 
@@ -123,6 +136,8 @@ class Constraint:
             "scarce_object": self.scarce_object,
             "why": self.why,
             "source": "curated",
+            "verdict": self.verdict,
+            "rejected_because": self.rejected_because,
             "validation": validate(self.legs()),
             "measurements": [m.as_dict() for m in self.measurements],
             "routes": [r.as_dict() for r in self.routes],
@@ -168,8 +183,20 @@ def _parse_constraint(raw: dict[str, Any]) -> Constraint:
         if not str(raw.get(required, "")).strip():
             raise CatalogueError(f"{where}: missing {required!r}")
 
+    verdict = str(raw.get("verdict", "open")).strip().lower()
+    if verdict not in VERDICTS:
+        raise CatalogueError(f"{where}: verdict {verdict!r}; expected one of {', '.join(VERDICTS)}")
+    rejected_because = str(raw.get("rejected_because", "")).strip()
+    if verdict == "rejected" and not rejected_because:
+        # A rejection with no reason is worse than no rejection: it tells the
+        # next reader the idea was dismissed without telling them why, so they
+        # cannot tell a real finding from someone's hunch.
+        raise CatalogueError(f"{where}: verdict 'rejected' needs rejected_because")
+
     return Constraint(
         id=cid,
+        verdict=verdict,
+        rejected_because=rejected_because,
         system=system,
         name=str(raw["name"]).strip(),
         scarce_object=str(raw["scarce_object"]).strip(),
@@ -232,3 +259,13 @@ def load_catalogue(path: Path | None = None) -> tuple[Constraint, ...]:
 def by_id(cid: str, path: Path | None = None) -> Constraint | None:
     key = cid.strip().lower()
     return next((c for c in load_catalogue(path) if c.id.lower() == key), None)
+
+
+def live(path: Path | None = None) -> tuple[Constraint, ...]:
+    """Constraints still worth checking."""
+    return tuple(c for c in load_catalogue(path) if c.verdict == "open")
+
+
+def rejected(path: Path | None = None) -> tuple[Constraint, ...]:
+    """Constraints already answered in the negative, kept as the negative result."""
+    return tuple(c for c in load_catalogue(path) if c.verdict == "rejected")

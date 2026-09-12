@@ -15,7 +15,13 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Query
 from starlette.concurrency import run_in_threadpool
 
-from hedge_fund.constraints.catalogue import SYSTEMS, CatalogueError, by_id, load_catalogue
+from hedge_fund.constraints.catalogue import (
+    SYSTEMS,
+    CatalogueError,
+    by_id,
+    live,
+    rejected,
+)
 from hedge_fund.constraints.derive import derive_candidates
 from hedge_fund.knowledge.vault import build_index, vault_root
 
@@ -60,7 +66,8 @@ async def list_constraints(
         raise HTTPException(400, f"unknown system {system!r}; expected one of {', '.join(SYSTEMS)}")
 
     try:
-        curated = list(load_catalogue())
+        curated = list(live())
+        dismissed = list(rejected())
     except CatalogueError as exc:
         # A broken map is worth surfacing rather than silently showing nothing:
         # the curated file is hand-edited, so a typo is a likely cause.
@@ -70,6 +77,7 @@ async def list_constraints(
     if system:
         wanted = system.strip().lower()
         curated = [c for c in curated if c.system == wanted]
+        dismissed = [c for c in dismissed if c.system == wanted]
 
     derived, derived_note = await _derived()
 
@@ -83,6 +91,13 @@ async def list_constraints(
             else "The curated constraint map is not installed (config/constraints.json).",
         },
         "from_your_notes": {"constraints": derived, "note": derived_note},
+        # Negative results, kept deliberately. Knowing a chokepoint was checked
+        # and did not hold is what stops the same idea being re-researched from
+        # scratch every quarter.
+        "checked_and_rejected": {
+            "constraints": [c.as_dict(with_names=False) for c in dismissed],
+            "note": "Looked at, and the evidence said no. Kept so the idea does not come back unexamined.",
+        },
     }
 
 

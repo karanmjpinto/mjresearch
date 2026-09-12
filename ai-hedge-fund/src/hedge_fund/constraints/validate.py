@@ -27,6 +27,20 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Any
 
+#: How the chokepoint holder gets paid, which decides how "who keeps the rent"
+#: can be answered at all.
+#:
+#: "concentration" is the normal case: a few firms hold the scarce thing and
+#: their share gates whether they can price it.
+#:
+#: "market_price" is the case where concentration is the wrong question. When a
+#: capacity auction sets one clearing price for every owner of an interconnected
+#: megawatt, there is no holder whose share you could measure — the rent reaches
+#: a diffuse set of owners through a published price. Asking for share there
+#: would either block the leg forever or invite a made-up number, and the price
+#: itself is better evidence than any share would be.
+RENT_MECHANISMS = ("concentration", "market_price")
+
 #: How a workaround stands. Ordered from "the constraint is safe" to
 #: "the constraint is already dissolving".
 ROUTE_STATUS = ("blocked", "unproven", "building", "open")
@@ -315,6 +329,7 @@ def capture_leg(
     share_pct: Any = None,
     pricing_power: str | None = None,
     pricing_evidence: str = "",
+    rent_mechanism: str = "concentration",
 ) -> Leg:
     """Requisite 3 — the holder of the chokepoint keeps the money.
 
@@ -323,16 +338,26 @@ def capture_leg(
     customers are four times its size, or because a long-term contract fixed
     the number before anyone knew it was scarce. So pricing power is a stated,
     evidenced judgment and it gates the leg rather than nudging it.
-    """
-    open_q: list[str] = []
-    detail: dict[str, Any] = {"share_pct": _num(share_pct), "pricing_power": pricing_power}
 
-    share = _num(share_pct)
-    if share is None:
-        open_q.append("What share of this chokepoint does the holder actually control?")
-        return Leg(
-            "capture", "The holder keeps the rent", "pricing power, evidenced", None, detail, open_q
+    Under ``rent_mechanism="market_price"`` the concentration gate is dropped,
+    because there is no holder to concentrate: a capacity auction pays every
+    owner of a megawatt the same clearing price. The evidence requirement gets
+    *stricter* rather than looser to compensate — without a stated receipt the
+    leg stays unanswered, since price is the only thing carrying it.
+    """
+    if rent_mechanism not in RENT_MECHANISMS:
+        raise ConstraintError(
+            f"unknown rent_mechanism {rent_mechanism!r}; "
+            f"expected one of {', '.join(RENT_MECHANISMS)}"
         )
+
+    open_q: list[str] = []
+    detail: dict[str, Any] = {
+        "share_pct": _num(share_pct),
+        "pricing_power": pricing_power,
+        "rent_mechanism": rent_mechanism,
+    }
+    weights = {"demonstrated": 1.0, "contested": 0.5, "absent": 0.1}
 
     if pricing_power is None:
         open_q.append(
@@ -342,12 +367,45 @@ def capture_leg(
         return Leg(
             "capture", "The holder keeps the rent", "pricing power, evidenced", None, detail, open_q
         )
-
-    weights = {"demonstrated": 1.0, "contested": 0.5, "absent": 0.1}
     if pricing_power not in weights:
         raise ConstraintError(
             f"unknown pricing_power {pricing_power!r}; expected one of {', '.join(weights)}"
         )
+
+    if rent_mechanism == "market_price":
+        if not pricing_evidence.strip():
+            open_q.append(
+                "What price proves it? With no holder to concentrate, the clearing price "
+                "is the only evidence this leg has — name it, with its date and source."
+            )
+            return Leg(
+                "capture",
+                "The holder keeps the rent",
+                "the market price is the receipt",
+                None,
+                detail,
+                open_q,
+            )
+        detail |= {
+            "pricing_component": weights[pricing_power],
+            "pricing_evidence": pricing_evidence,
+        }
+        return Leg(
+            "capture",
+            "The holder keeps the rent",
+            "the market price is the receipt",
+            _clamp(weights[pricing_power]),
+            detail,
+            open_q,
+        )
+
+    share = _num(share_pct)
+    if share is None:
+        open_q.append("What share of this chokepoint does the holder actually control?")
+        return Leg(
+            "capture", "The holder keeps the rent", "pricing power, evidenced", None, detail, open_q
+        )
+
     if pricing_power == "demonstrated" and not pricing_evidence.strip():
         open_q.append(
             "'Demonstrated' needs the evidence: which price rise, which quarter, which source?"

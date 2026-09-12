@@ -461,3 +461,45 @@ def test_a_derived_candidate_quotes_your_own_words() -> None:
 
 def test_an_empty_vault_proposes_nothing() -> None:
     assert derive_candidates(index_of()) == []
+
+
+# --- capture under a market price rather than a concentrated holder ----------
+
+
+def test_a_market_price_carries_capture_without_a_share() -> None:
+    """A capacity auction pays every owner the same price; share is meaningless."""
+    leg = capture_leg(
+        pricing_power="demonstrated",
+        pricing_evidence="cleared at the $325 cap, 14 Jul 2026",
+        rent_mechanism="market_price",
+    )
+    assert leg.score == 1.0
+    assert leg.detail["rent_mechanism"] == "market_price"
+
+
+def test_a_market_price_with_no_receipt_stays_unanswered() -> None:
+    """The evidence bar rises when price is the only thing carrying the leg."""
+    leg = capture_leg(pricing_power="demonstrated", rent_mechanism="market_price")
+    assert leg.score is None
+    assert any("clearing price" in q for q in leg.open_questions)
+
+
+def test_a_market_price_still_respects_weak_pricing_power() -> None:
+    leg = capture_leg(
+        pricing_power="absent",
+        pricing_evidence="cleared at the floor",
+        rent_mechanism="market_price",
+    )
+    assert leg.score is not None and leg.score <= 0.1
+
+
+def test_concentration_remains_the_default() -> None:
+    """The normal case is unchanged: no share, no answer."""
+    leg = capture_leg(pricing_power="demonstrated", pricing_evidence="x")
+    assert leg.score is None
+    assert any("share of this chokepoint" in q for q in leg.open_questions)
+
+
+def test_an_unknown_rent_mechanism_is_refused() -> None:
+    with pytest.raises(ConstraintError, match="unknown rent_mechanism"):
+        capture_leg(pricing_power="demonstrated", rent_mechanism="vibes")
