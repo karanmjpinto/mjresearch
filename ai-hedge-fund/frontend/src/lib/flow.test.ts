@@ -91,8 +91,12 @@ describe("TICKER_PATH_RE", () => {
 });
 
 describe("other destinations", () => {
-  it("holds the six screens moved off the flow", () => {
+  it("holds the screens off the flow, with the no-ticker way in first", () => {
+    // "constraints" leads because it is the only entry point here: everything
+    // below it is a destination you go to, and that one is where you start
+    // when you have no symbol yet.
     expect(OTHER_DESTINATIONS.map((d) => d.key)).toEqual([
+      "constraints",
       "home",
       "screeners",
       "portfolio",

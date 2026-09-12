@@ -734,6 +734,77 @@ export type Intrinsic =
       driver_notes: string[];
     };
 
+export type LegView = {
+  key: string;
+  label: string;
+  claim: string;
+  /** null means unanswered. A blank is not a zero and not a pass. */
+  score: number | null;
+  detail: Record<string, unknown>;
+  open_questions: string[];
+};
+
+export type ValidationView = {
+  available: boolean;
+  reason?: string;
+  /** Absent when `available` is false — an unvalidated constraint has no score
+   *  at all rather than a zero, so the field is not sent. */
+  score?: number;
+  label?: "strong" | "partial" | "weak";
+  weakest_leg?: string;
+  structure?: { allowed: string; because: string };
+  legs?: LegView[];
+  unanswered?: string[];
+  open_questions?: string[];
+};
+
+export type ConstraintName = {
+  ticker: string;
+  name: string;
+  exposure: string;
+  band: "pure" | "major" | "minor";
+  band_means: string;
+  revenue_share_pct: number | null;
+  source: string;
+};
+
+export type ConstraintSummary = {
+  id: string;
+  /** null for a vault-derived candidate: your notes do not sort themselves. */
+  system: string | null;
+  name: string;
+  source: "curated" | "your notes";
+  why: string;
+  validation: ValidationView;
+  /** Curated entries only. */
+  scarce_object?: string;
+  name_count?: number;
+  /** Vault-derived entries only. */
+  note_count?: number;
+  flagged_count?: number;
+  notes?: { title: string; path: string }[];
+  evidence_in_your_words?: {
+    title: string;
+    path: string;
+    term: string;
+    quote: string;
+  }[];
+};
+
+export type ConstraintMap = {
+  systems: string[];
+  filtered_to: string | null;
+  curated: { constraints: ConstraintSummary[]; note: string | null };
+  from_your_notes: { constraints: ConstraintSummary[]; note: string | null };
+};
+
+export type ConstraintCandidates = {
+  constraint: { id: string; name: string; system: string };
+  validation: ValidationView;
+  ranked_by: string;
+  names: ConstraintName[];
+};
+
 export type LensMatch = {
   kind: "company" | "theme" | "framework";
   title: string;
@@ -922,6 +993,18 @@ export const api = {
 
   getFundamentals: (ticker: string) =>
     fetchJSON<Record<string, unknown>>(`/data/fundamentals/${ticker}`),
+
+  // --- Constraints: the way in with no ticker ---
+
+  getConstraints: (system?: string | null) =>
+    fetchJSON<ConstraintMap>(
+      `/constraints${system ? `?system=${encodeURIComponent(system)}` : ""}`,
+    ),
+
+  getConstraintCandidates: (id: string) =>
+    fetchJSON<ConstraintCandidates>(
+      `/constraints/${encodeURIComponent(id)}/candidates`,
+    ),
 
   // --- Your own notes (stage 04) ---
 

@@ -1,0 +1,447 @@
+{
+  "_comment": "The curated constraint map. Every measurement carries a source URL and the date it refers to; an entry with no measurements is deliberately kept and renders as unvalidated, because the gaps are the research queue rather than something to hide. Lead-time figures widely circulated for transformers, turbines and switchgear in 2026 (128 weeks, 144 weeks, 60+ months, 8 years) trace only to SEO trade blogs and are NOT recorded here. Do not add a number without a primary or specialist source.",
+  "_schema": {
+    "measurements": "value/unit measured at as_of, against `normal` = the same metric in an unconstrained market. Without `normal` a number cannot carry the binding leg.",
+    "routes": "status: blocked | unproven | building | open. `building` needs eta_months or it cannot be sized.",
+    "capture": "share_pct of the chokepoint, pricing_power: demonstrated | contested | absent, with pricing_evidence naming the quarter and source.",
+    "names": "band: pure | major | minor — a stated judgment about the business, never a computed score."
+  },
+  "constraints": [
+    {
+      "id": "hbm-memory",
+      "system": "intelligence",
+      "name": "Memory (HBM and conventional DRAM)",
+      "scarce_object": "Stacked DRAM with through-silicon vias, and the DRAM wafer capacity behind it",
+      "why": "The buyer publishes the size of the squeeze: Nvidia's supply commitments more than doubled in a quarter and its filing names memory as the reason, while its own gross margin guide falls. But read the second measurement before acting — price growth has decelerated three quarters running, and within memory it is conventional DDR5, not HBM, that now earns the better margin.",
+      "measurements": [
+        {
+          "metric": "Nvidia supply and capacity commitments",
+          "value": 279,
+          "unit": "$bn",
+          "normal": 119,
+          "as_of": "2026-07-26",
+          "source": "https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000075/nvda-20260726.htm",
+          "note": "10-Q for the quarter ended 26 Jul 2026, against $119bn the prior quarter. The filing states these commitments are for data centre infrastructure, 'primarily memory' and manufacturing facilities. Baseline is the prior quarter, not a long-run normal."
+        },
+        {
+          "metric": "Conventional DRAM contract price, indexed to prior quarter",
+          "value": 115.5,
+          "unit": "index, prior quarter = 100",
+          "normal": 100,
+          "as_of": "2026-09-07",
+          "source": "https://www.trendforce.com/presscenter/news/20260907-13219.html",
+          "note": "3Q26 guided +13-18% q/q. Still rising, but this is the THIRD straight deceleration: +93-98% in 1Q26, +58-63% in 2Q26, +13-18% in 3Q26. TrendForce attributes the slowdown to demand shifting to lower-capacity parts and customers hitting price-absorption limits — demand destruction, not supply relief. Treat a rising number on a falling second derivative as a constraint being paid for, not one getting tighter."
+        },
+        {
+          "metric": "SK hynix fabrication facility utilisation",
+          "value": 100,
+          "unit": "%",
+          "normal": 100,
+          "as_of": "2026-06-30",
+          "source": "https://www.sec.gov/Archives/edgar/data/0002120882/000119312526354777/d147827d6k.htm",
+          "note": "100% through H1 2026, per the company's own 6-K. Recorded with normal = 100 so it contributes nothing to the score: full utilisation is the ceiling, not an excess over it. Kept because it is the cleanest primary confirmation there is no idle capacity. Industry inventories reported below 10 days by KB Securities, 7 Sep 2026: https://www.businesskorea.co.kr/news/articleView.html?idxno=276296"
+        }
+      ],
+      "routes": [
+        {
+          "path": "Memory suppliers add DRAM and HBM capacity",
+          "status": "building",
+          "eta_months": 24,
+          "source": "https://www.fool.com/earnings/call-transcripts/2026/08/31/nvidia-nvda-q2-2027-earnings-call-transcript/",
+          "note": "Nvidia CFO on the 26 Aug 2026 call: supply expected 'to remain a bottleneck, at least through the end of fiscal year 28'. Taken as the buyer's own estimate of when relief arrives, which is roughly 24 months out — not an independent capacity schedule."
+        },
+        {
+          "path": "Design around it — fewer HBM stacks per accelerator",
+          "status": "unproven",
+          "source": "",
+          "note": "NO SOURCED FIGURE FOUND. Stack counts per accelerator have been rising rather than falling, but no primary source was verified for this, so it is recorded as unproven rather than blocked."
+        },
+        {
+          "path": "CXMT and other new entrants take share",
+          "status": "building",
+          "eta_months": 18,
+          "source": "https://www.businesskorea.co.kr/news/articleView.html?idxno=276741",
+          "note": "CXMT reached roughly 7-10% of global DRAM with an 82% operating margin in 2Q26 and has begun small-scale HBM3E production, with expansion planned for 2027 and qualification underway at Cambricon and Alibaba T-Head. The most credible route around this constraint, and the one least discussed."
+        },
+        {
+          "path": "Suppliers shift wafers from HBM to conventional DDR5",
+          "status": "open",
+          "source": "https://www.trendforce.com/presscenter/news/20260602-13074.html",
+          "note": "Already happening, and it is why the HBM-specific version of this thesis is weaker than it looks: HBM profitability fell below DDR5 64GB RDIMM in 1Q26 and trails it by roughly 40 percentage points as of 25 Aug 2026. HBM wafer revenue was overtaken by DDR5. The incentive points away from HBM, so 'HBM is sold out' and 'HBM is where the money is' are no longer the same claim. Source also: https://www.trendforce.com/news/2026/08/25/news-nvidias-reported-15-server-hike-boosts-samsung-sk-hynix-with-hbm-prices-potentially-up-50-in-2027/"
+        }
+      ],
+      "capture": {
+        "holder": "The three incumbent DRAM makers (SK Hynix, Samsung, Micron)",
+        "share_pct": 90,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "Margins, not assertions. Micron non-GAAP gross margin 84.9% in the quarter ended 28 May 2026, up from 74.9% the prior quarter and 39.0% a year earlier, guiding ~86%; SK hynix operating margin 76% in 2Q26, up 4pp q/q; Samsung's device solutions division at a ~70% operating margin. And the buyer is passing the cost on rather than compressing them: Nvidia is reported to be raising server prices more than 15% for 2027 while holding its own gross margin at 75-80%. Sources: https://www.sec.gov/Archives/edgar/data/723125/000072312526000013/a2026q3ex991-pressrelease.htm , https://www.trendforce.com/news/2026/08/25/news-nvidias-reported-15-server-hike-boosts-samsung-sk-hynix-with-hbm-prices-potentially-up-50-in-2027/",
+        "_share_basis": "HBM share 2Q26 per Counterpoint: SK hynix 50%, Samsung 33%, Micron 18% — the three are effectively the whole HBM market. 90% is used rather than 100% because CXMT now holds roughly 7-10% of conventional DRAM and has started small-scale HBM3E. Source: https://counterpointresearch.com/en/insights/global-dram-and-hbm-market-share",
+        "_warning": "Their pricing power is real but it is strongest in conventional DDR5, not HBM. If the thesis is specifically HBM scarcity, this leg is weaker than the score implies — see the open workaround above."
+      },
+      "names": [
+        {
+          "ticker": "MU",
+          "name": "Micron Technology",
+          "exposure": "Makes DRAM and HBM directly; one of three suppliers of the scarce part.",
+          "band": "pure",
+          "source": ""
+        },
+        {
+          "ticker": "000660.KS",
+          "name": "SK Hynix",
+          "exposure": "The largest HBM supplier to accelerator makers; memory is substantially the whole business.",
+          "band": "pure",
+          "source": ""
+        },
+        {
+          "ticker": "BESI.AS",
+          "name": "BE Semiconductor Industries",
+          "exposure": "Hybrid bonding equipment used to stack HBM dies; sells the tool the constraint runs through.",
+          "band": "major",
+          "source": ""
+        },
+        {
+          "ticker": "KLIC",
+          "name": "Kulicke & Soffa",
+          "exposure": "Thermocompression and advanced bonding equipment for stacked memory packaging.",
+          "band": "major",
+          "source": ""
+        },
+        {
+          "ticker": "005930.KS",
+          "name": "Samsung Electronics",
+          "exposure": "A major DRAM and HBM supplier, inside a group spanning handsets, displays and foundry.",
+          "band": "minor",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "gas-turbine-slots",
+      "system": "power",
+      "name": "Gas turbine delivery slots",
+      "scarce_object": "Heavy-duty gas turbine production slots, and the generator step-up and switchgear that energise them",
+      "why": "Announced data centre capacity means nothing until a megawatt can be delivered. The order book is now several years of production, and the manufacturer's own margin expansion is attributed partly to price — a constraint whose holder is visibly able to charge for it.",
+      "measurements": [
+        {
+          "metric": "GE Vernova gas power backlog and slot reservations, against annual production",
+          "value": 116,
+          "unit": "GW of orders vs 20 GW/yr output",
+          "normal": 20,
+          "as_of": "2026-06-30",
+          "source": "https://www.sec.gov/Archives/edgar/data/0001996810/000199681026000147/gev2q2026form8-k.pdf",
+          "note": "116 GW of equipment backlog (53 GW) plus slot reservation agreements (63 GW) against production of 20 GW annualised in Q3 2026 — close to six years of output already committed. Baseline is current production capacity, which is what makes a backlog a constraint rather than a sales figure."
+        },
+        {
+          "metric": "GE Vernova gas power backlog and slot reservations",
+          "value": 116,
+          "unit": "GW",
+          "normal": 100,
+          "as_of": "2026-06-30",
+          "source": "https://www.sec.gov/Archives/edgar/data/0001996810/000199681026000147/gev2q2026form8-k.pdf",
+          "note": "Grew from 100 GW to 116 GW in one quarter, with the company guiding to at least 125 GW by year-end 2026. Baseline is the prior quarter."
+        }
+      ],
+      "routes": [
+        {
+          "path": "The manufacturer raises turbine output",
+          "status": "building",
+          "eta_months": 24,
+          "source": "https://www.sec.gov/Archives/edgar/data/0001996810/000199681026000147/gev2q2026form8-k.pdf",
+          "note": "GE Vernova's stated path is 20 GW annualised in Q3 2026, 24 GW in 2028 and 30 GW in 2030. A 50% increase over four years against a backlog growing 16 GW in a quarter — the fix is real but slower than the queue."
+        },
+        {
+          "path": "Behind-the-meter and alternative generation bypasses the queue",
+          "status": "unproven",
+          "source": "",
+          "note": "NO SOURCED FIGURE FOUND for how much load has actually been served this way. Plausible and widely discussed, which is exactly why it is recorded as unproven rather than assumed away."
+        }
+      ],
+      "capture": {
+        "holder": "GE Vernova, Siemens Energy and Mitsubishi Heavy Industries",
+        "share_pct": null,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "GE Vernova Power segment EBITDA margin 18.8% in Q2 2026 (quarter ended 30 Jun 2026), up 240bp reported and 320bp organic, which the company attributes to 'higher volume and favorable price'. Electrification segment margin 18.4%, up 390bp, with equipment backlog $40.6bn, +69% y/y. Source: the 22 Jul 2026 8-K above.",
+        "_gap": "share_pct is deliberately null: no primary source for each maker's share of heavy-duty gas turbine capacity was verified. A three-way split is commonly asserted but was not confirmed, so it is not recorded."
+      },
+      "names": [
+        {
+          "ticker": "GEV",
+          "name": "GE Vernova",
+          "exposure": "Sells the turbines and the electrification equipment; Power and Electrification are the bulk of the company.",
+          "band": "major",
+          "source": "https://www.sec.gov/Archives/edgar/data/0001996810/000199681026000147/gev2q2026form8-k.pdf"
+        },
+        {
+          "ticker": "ENR.DE",
+          "name": "Siemens Energy",
+          "exposure": "Gas turbines plus grid transmission equipment; both sit on this chokepoint.",
+          "band": "major",
+          "source": ""
+        },
+        {
+          "ticker": "7011.T",
+          "name": "Mitsubishi Heavy Industries",
+          "exposure": "Heavy-duty gas turbines, inside a group also spanning aerospace, shipbuilding and defence.",
+          "band": "minor",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "euv-lithography",
+      "system": "intelligence",
+      "name": "EUV lithography",
+      "scarce_object": "Extreme-ultraviolet scanners, and the light sources and optics inside them",
+      "why": "A single supplier for the tool every leading-edge logic and DRAM node depends on, with 2027 output already close to fully sold. The contradiction is left standing on purpose: TSMC said on 16 Jul 2026 that it foresees no capacity bottleneck and that packaging is what limits its customers — so the tool maker's book and its largest customer disagree about what binds.",
+      "measurements": [
+        {
+          "metric": "Low-NA EUV systems ASML plans to ship in FY2026",
+          "value": 65,
+          "unit": "systems",
+          "normal": 48,
+          "as_of": "2026-07-15",
+          "source": "https://ourbrand.asml.com/asset/1fd3908a-0381-47b5-9b69-a3094f656651/2026_07_15-ASML-Transcript-investor-call-Q2-2026.pdf",
+          "note": "CFO on the Q2 2026 call: 'around 65 Low NA EUV systems this year', against 48 EUV systems recognised in FY2025 (44 NXE + 4 EXE) per the annual report. Baseline is last year's actual output. Source for the 48: https://ourbrand.asml.com/m/419103cb23dfeaa4/original/asml-2025-annual-report-financial-performance-section.pdf"
+        },
+        {
+          "metric": "ASML FY2026 revenue guidance, against its own January guide",
+          "value": 44,
+          "unit": "€bn (midpoint)",
+          "normal": 36.5,
+          "as_of": "2026-07-15",
+          "source": "https://www.asml.com/en/news/press-releases/2026/q2-2026-financial-results",
+          "note": "Guided €43-45bn on 15 Jul 2026, raised twice from €34-39bn in January and €36-40bn in April. Three consecutive raises and no cuts. January guide: https://www.asml.com/en/news/press-releases/2026/q4-2025-financial-results"
+        }
+      ],
+      "routes": [
+        {
+          "path": "Use DUV multi-patterning instead of EUV",
+          "status": "blocked",
+          "source": "https://ourbrand.asml.com/asset/1fd3908a-0381-47b5-9b69-a3094f656651/2026_07_15-ASML-Transcript-investor-call-Q2-2026.pdf",
+          "note": "The substitution is running in reverse. ASML's CEO on 15 Jul 2026: Low-NA EUV growth is 'driven by the increasing replacement of multi-patterning with more cost-effective single-exposure EUV'. Customers are moving towards the constraint, not away from it. No primary-sourced figure for the multi-patterning cost penalty was found; the numbers circulating in blogs cite nothing."
+        },
+        {
+          "path": "ASML raises Low-NA output ~30% in 2027, investigating another ~30% for 2028",
+          "status": "building",
+          "eta_months": 12,
+          "source": "https://ourbrand.asml.com/asset/1fd3908a-0381-47b5-9b69-a3094f656651/2026_07_15-ASML-Transcript-investor-call-Q2-2026.pdf",
+          "note": "The main thing that actually relieves this, and it is the monopolist's own decision. Note 2027 is already 'close to being fully covered with orders'."
+        },
+        {
+          "path": "High-NA EUV as a volume route",
+          "status": "blocked",
+          "source": "https://ourbrand.asml.com/m/419103cb23dfeaa4/original/asml-2025-annual-report-financial-performance-section.pdf",
+          "note": "A capability route, not a volume one: 4 EXE systems recognised in FY2025 and 2 in FY2024, and the annual report records them as dilutive to gross margin. Intel has qualified High-NA on select 18A layers, but ASML itself says maturity is improving only 'towards' the level required for high-volume manufacturing."
+        },
+        {
+          "path": "Domestic Chinese lithography (SMEE SSA800 and the SiCarrier EUV programme)",
+          "status": "blocked",
+          "source": "https://asiatimes.com/2026/07/chinas-duv-lithography-still-lags-asml-by-four-generations/",
+          "note": "SSA800 is immersion DUV targeting 28nm, reported at roughly 5 units in 2026, and still imports Zeiss lenses and ArF sources. Not a route around leading-edge EUV on any horizon that matters here."
+        },
+        {
+          "path": "Canon nanoimprint lithography",
+          "status": "blocked",
+          "source": "https://global.canon/en/news/2024/20240926.html",
+          "note": "Commercialised in 2023 and first shipped in Sep 2024 for R&D and prototype production. No high-volume logic or DRAM insertion found, and no disclosed NIL revenue."
+        }
+      ],
+      "capture": {
+        "holder": "ASML",
+        "share_pct": 100,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "Sole supplier of EUV scanners for high-volume manufacturing, and the margin follows: gross margin 51.3% FY2024, 52.8% FY2025, 54.0% in Q2 2026, guided 55-57% for Q3 2026, with the FY2026 range raised from 51-53% to 54-56%. The CFO on the 15 Jul 2026 call: the current environment 'provides more flexibility for pricing than what you would have had'. Sources: https://www.asml.com/en/news/press-releases/2026/q2-2026-financial-results and https://ourbrand.asml.com/asset/1fd3908a-0381-47b5-9b69-a3094f656651/2026_07_15-ASML-Transcript-investor-call-Q2-2026.pdf",
+        "_note": "share_pct 100 is for EUV specifically, where ASML is the only supplier. Across all lithography its share is reported at ~94%, but that figure rests on 2024 data. No 2026-dated independent share figure was verified."
+      },
+      "names": [
+        {
+          "ticker": "ASML",
+          "name": "ASML Holding",
+          "band": "pure",
+          "revenue_share_pct": 57,
+          "exposure": "The only maker of EUV scanners for high-volume manufacturing, and it captures the rent directly.",
+          "source": "https://ourbrand.asml.com/asset/1fd3908a-0381-47b5-9b69-a3094f656651/2026_07_15-ASML-Transcript-investor-call-Q2-2026.pdf"
+        },
+        {
+          "ticker": "6920.T",
+          "name": "Lasertec",
+          "band": "major",
+          "exposure": "Actinic EUV photomask inspection — the step that qualifies an EUV mask before it can be used.",
+          "source": ""
+        },
+        {
+          "ticker": "7751.T",
+          "name": "Canon",
+          "band": "minor",
+          "exposure": "Part of the residual non-EUV lithography share, and the only nanoimprint vendor.",
+          "source": ""
+        },
+        {
+          "ticker": "7731.T",
+          "name": "Nikon",
+          "band": "minor",
+          "exposure": "The other part of the residual lithography share. No EUV product.",
+          "source": ""
+        }
+      ],
+      "_unlisted_chokepoints": "The two tightest monopolies inside the scanner are not investable: Carl Zeiss SMT, sole supplier of EUV projection optics, is wholly owned by the Carl Zeiss Foundation, and TRUMPF, which makes the CO2 drive lasers, is family-held. Carl Zeiss Meditec (AFX) is a medical-device company and is NOT the optics entity — a tempting and wrong substitute. Cymer, the light-source maker, is an ASML subsidiary, so that exposure already sits inside ASML."
+    },
+    {
+      "id": "advanced-packaging",
+      "system": "intelligence",
+      "name": "Advanced packaging (CoWoS-class)",
+      "scarce_object": "2.5D and 3D packaging capacity joining logic dies to stacked memory on an interposer",
+      "why": "The buyer names this one, not lithography. TSMC's CEO on 16 Jul 2026: 'our packaging capacity is so tight that now it's limiting my customers' growth' — while in the same call saying he foresees no bottleneck to capacity expansion generally. Worth holding against the memory entry, where Nvidia's filing points somewhere else again.",
+      "measurements": [
+        {
+          "metric": "TSMC FY2026 capital expenditure guidance, against its prior guide",
+          "value": 62,
+          "unit": "$bn (midpoint)",
+          "normal": 54,
+          "as_of": "2026-07-16",
+          "source": "https://www.trendforce.com/news/2026/07/16/news-tsmc-lifts-2026-capex-15-to-60-64b-hikes-sales-outlook-to-over-40-despite-q3-margin-dip/",
+          "note": "Raised to $60-64bn from $52-56bn on the Q2 2026 call, with 10-20% earmarked for advanced packaging, test and mask. A capex raise is a response to a constraint, not a measure of it — which is why this scores modestly."
+        }
+      ],
+      "routes": [
+        {
+          "path": "TSMC and the outsourced assemblers add 2.5D capacity",
+          "status": "unproven",
+          "source": "",
+          "note": "NO SOURCED FIGURE FOUND for committed incremental capacity or its timing. Capacity is clearly being added; without a dated figure it cannot be sized, so it is recorded as unproven rather than assumed."
+        }
+      ],
+      "capture": {},
+      "names": [
+        {
+          "ticker": "AMKR",
+          "name": "Amkor Technology",
+          "exposure": "Outsourced assembly and test; advanced packaging is a core line.",
+          "band": "major",
+          "source": ""
+        },
+        {
+          "ticker": "ASX",
+          "name": "ASE Technology Holding",
+          "exposure": "The largest outsourced packaging and test provider.",
+          "band": "major",
+          "source": ""
+        },
+        {
+          "ticker": "TSM",
+          "name": "Taiwan Semiconductor Manufacturing",
+          "exposure": "Holds the dominant 2.5D packaging capacity, but it is a small slice of a very large foundry.",
+          "band": "minor",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "large-power-transformers",
+      "system": "power",
+      "name": "Large power transformers",
+      "scarce_object": "High-voltage transformers and generator step-up units, and the grain-oriented electrical steel in them",
+      "why": "Nothing connects to the grid without one. Widely described as the binding constraint on interconnection — and the reason this entry carries no numbers is that the figures in circulation could not be traced to a primary source.",
+      "measurements": [],
+      "routes": [],
+      "capture": {},
+      "names": [
+        {
+          "ticker": "ENR.DE",
+          "name": "Siemens Energy",
+          "exposure": "Grid Technologies builds high-voltage transformers and substations.",
+          "band": "major",
+          "source": ""
+        },
+        {
+          "ticker": "6501.T",
+          "name": "Hitachi",
+          "exposure": "Hitachi Energy is a leading transformer maker, inside a very diversified group.",
+          "band": "minor",
+          "source": ""
+        },
+        {
+          "ticker": "ETN",
+          "name": "Eaton",
+          "exposure": "Electrical distribution and switchgear for data centre power trains.",
+          "band": "minor",
+          "source": ""
+        },
+        {
+          "ticker": "HUBB",
+          "name": "Hubbell",
+          "exposure": "Utility grid components including transformers and enclosures.",
+          "band": "minor",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "rare-earth-magnets",
+      "system": "motion",
+      "name": "Rare earth permanent magnets",
+      "scarce_object": "Sintered NdFeB magnets, and the separated heavy rare earths in them",
+      "why": "Every actuator and traction motor needs them, and both the separation and the sintering are geographically concentrated enough to be a policy instrument as well as a supply chain.",
+      "measurements": [],
+      "routes": [],
+      "capture": {},
+      "names": [
+        {
+          "ticker": "MP",
+          "name": "MP Materials",
+          "exposure": "Mines and is building separation and magnet making outside China.",
+          "band": "pure",
+          "source": ""
+        },
+        {
+          "ticker": "LYC.AX",
+          "name": "Lynas Rare Earths",
+          "exposure": "The largest rare earth separator outside China.",
+          "band": "pure",
+          "source": ""
+        },
+        {
+          "ticker": "4063.T",
+          "name": "Shin-Etsu Chemical",
+          "exposure": "Makes high-grade sintered magnets, inside a large diversified chemicals group.",
+          "band": "minor",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "precision-reducers",
+      "system": "motion",
+      "name": "Precision reducers",
+      "scarce_object": "Strain-wave and cycloidal gearboxes for robot joints",
+      "why": "A humanoid needs dozens of them and they cannot be made loosely — the tolerance is the product. The usual constraint on robot unit economics before anything about the model.",
+      "measurements": [],
+      "routes": [],
+      "capture": {},
+      "names": [
+        {
+          "ticker": "6324.T",
+          "name": "Harmonic Drive Systems",
+          "exposure": "Strain-wave gearing is essentially the entire business.",
+          "band": "pure",
+          "source": ""
+        },
+        {
+          "ticker": "6268.T",
+          "name": "Nabtesco",
+          "exposure": "Cycloidal precision reducers for industrial robot joints.",
+          "band": "major",
+          "source": ""
+        },
+        {
+          "ticker": "6506.T",
+          "name": "Yaskawa Electric",
+          "exposure": "Servo motors and drives; a buyer of reducers as much as a seller into the chokepoint.",
+          "band": "minor",
+          "source": ""
+        }
+      ]
+    }
+  ]
+}
