@@ -189,6 +189,14 @@ class PeerComparison(BaseModel):
     industry: str | None = None
     metrics: dict = Field(default_factory=dict)  # {peer: {pe, market_cap, ...}}
     source: str = "unknown"
+    # How the set was chosen. A comparison set is a judgment, so the response
+    # says whose: "curated" for a hand-picked set, "sic" for the EDGAR
+    # classification fallback, "none" when there are no peers at all. `vetted`
+    # is what a screen should read before drawing a football field off it.
+    basis: str = "unknown"
+    vetted: bool = False
+    peer_reasons: dict[str, str] = Field(default_factory=dict)
+    as_of: str | None = None
 
 
 # ------------------------------------------------------------------

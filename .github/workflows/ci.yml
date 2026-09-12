@@ -67,6 +67,14 @@ jobs:
       # action never sees it. Pass the underscore names it looks for via env
       # until upstream fixes it; `with:` stays so this is already correct then.
       - uses: rams-design/rams-action@v1
+        # Advisory, not blocking. On the current plan the action exits with
+        # "Review failed: The CI Action is part of the Team plan" *before*
+        # reviewing anything, so the red check reported a billing state rather
+        # than a design finding and blocked every PR. Nothing is masked by
+        # this: on this plan no review runs at all, and the in-editor Rams
+        # loop plus the PostToolUse hook still review every UI edit. Drop this
+        # line to restore the gate when the plan is back.
+        continue-on-error: true
         env:
           INPUT_API_KEY: ${{ secrets.RAMS_API_KEY }}
           INPUT_FAIL_ON: critical

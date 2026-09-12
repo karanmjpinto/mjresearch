@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+import { TICKER_PATH_RE, stagePath, type DestinationKey } from "./flow";
+
 /**
  * The active ticker, carried across the app.
  *
@@ -19,20 +21,19 @@ const STORAGE_KEY = "mj.ticker";
 const RECENTS_KEY = "mj.ticker.recents";
 const MAX_RECENTS = 8;
 
-/** Routes that operate on a single name, in the order the work tends to flow. */
-export const TICKER_ROUTES = [
-  { key: "research", label: "Research", path: (t: string) => `/research/${t}` },
-  { key: "plan", label: "Plan", path: (t: string) => `/plan/${t}` },
-  { key: "decide", label: "Decide", path: (t: string) => `/decide/${t}` },
-] as const;
+/**
+ * The stages themselves live in `lib/flow`, which is the single list the rail,
+ * the router and this provider all read. Keeping a second copy here is what let
+ * the nav and the ticker bar disagree about what the flow was.
+ */
 
 type TickerContextValue = {
   ticker: string | null;
   recents: string[];
   /** Set the active ticker without navigating. */
   setTicker: (t: string | null) => void;
-  /** Set it and move to the equivalent screen for that name. */
-  goTo: (t: string, route?: (typeof TICKER_ROUTES)[number]["key"]) => void;
+  /** Set it and move to the equivalent stage for that name. */
+  goTo: (t: string, stage?: DestinationKey) => void;
   clear: () => void;
 };
 
@@ -47,9 +48,9 @@ function readRecents(): string[] {
   }
 }
 
-/** Pull a symbol out of the path for routes shaped `/thing/:ticker`. */
+/** Pull a symbol out of the path for any stage route carrying one. */
 function tickerFromPath(pathname: string): string | null {
-  const m = pathname.match(/^\/(research|plan|decide)\/([^/?#]+)/i);
+  const m = pathname.match(TICKER_PATH_RE);
   return m ? decodeURIComponent(m[2]).toUpperCase() : null;
 }
 
@@ -109,12 +110,11 @@ export function TickerProvider({ children }: { children: React.ReactNode }) {
   );
 
   const goTo = useCallback(
-    (t: string, route: (typeof TICKER_ROUTES)[number]["key"] = "research") => {
+    (t: string, stage: DestinationKey = "story") => {
       const clean = t.trim().toUpperCase();
       if (!clean) return;
       setTicker(clean);
-      const spec = TICKER_ROUTES.find((r) => r.key === route) ?? TICKER_ROUTES[0];
-      navigate(spec.path(encodeURIComponent(clean)));
+      navigate(stagePath(stage, clean));
     },
     [navigate, setTicker]
   );

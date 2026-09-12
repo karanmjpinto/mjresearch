@@ -55,6 +55,13 @@ of punching a dark hole in the linen.
 | `display-md` | 36px | 1.1 |
 | `display-sm` | 24px | 1.15 |
 | `label` | **12px** | — (inherits) |
+| `mark` | **16px** | — (inherits) |
+
+`mark` is the chrome scale: the wordmark and the active ticker, the two places
+the bitmap face appears at reading size rather than as a micro-label. It exists
+because the scale had nothing between `label` and `display-sm`, so both sat as
+inline literals and had drifted a pixel apart (15px and 16px) without anyone
+choosing that.
 
 **12px is the legibility floor.** Below it, uppercase tracked type stops being
 reliably readable and the bitmap face has no hinting to fall back on. The floor
@@ -155,4 +162,5 @@ stock Tailwind and reports false positives.
 | 2026-08-22 | Two grounds, not one dark mode | The landing is linen and the desk is ink. Text is always a shade of its own ground, which is what keeps the drip artwork and the data density in the same world. |
 | 2026-08-22 | OKLCH, not hex | Perceptually even lightness steps, and the `<alpha-value>` placeholder makes opacity modifiers work in Tailwind. |
 | 2026-08-22 | 12px legibility floor as `fontSize.label` | 139 inline `text-[10px]`/`[11px]` literals across 14 components were below the floor. Naming it makes the floor one decision rather than 139. |
+| 2026-09-12 | Added `fontSize.mark` (16px) | The wordmark and the ticker mark were `text-[15px]` and `text-[16px]` inline — two one-off sizes for the same job, a pixel apart. Naming one value collapses them and keeps the whole-pixel rule enforceable. |
 | 2026-08-22 | Removed Inter + JetBrains Mono | Both were still loading from the old system on every page; JetBrains Mono was referenced nowhere, Inter only by the chart. `body` also carried `text-gray-200`, which beat `var(--on-ink)` on specificity and made the app's default text cool grey rather than warm bone. |

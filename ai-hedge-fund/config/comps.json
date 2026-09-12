@@ -1,0 +1,41 @@
+{
+  "_comment": [
+    "Hand-picked comparable companies, one stated reason per name.",
+    "Peers are otherwise derived from EDGAR's SIC code, a 1970s taxonomy that puts",
+    "Socket Mobile in Apple's bucket and leaves Microsoft out of it. A set listed",
+    "here replaces the automatic one outright and is marked vetted; anything not",
+    "listed falls back to SIC and is marked unvetted in the response.",
+    "Edit freely — the file is read per request, so changes need no restart."
+  ],
+  "comps": {
+    "AAPL": {
+      "as_of": "2026-09-12",
+      "peers": [
+        { "ticker": "MSFT", "reason": "Platform-scale software and services, competing for the same consumer and enterprise wallet" },
+        { "ticker": "GOOGL", "reason": "Mobile OS competitor and the largest single payer into Apple's services line" },
+        { "ticker": "SONY", "reason": "Premium consumer-hardware franchise with an attached content and services business" },
+        { "ticker": "DELL", "reason": "Personal-computing hardware at scale — the closest listed peer inside Apple's own SIC bucket" },
+        { "ticker": "HPQ", "reason": "PC and peripherals volume, useful as the low-margin end of the hardware comparison" },
+        { "ticker": "QCOM", "reason": "Supplies the modem and sits in Apple's silicon supply chain" }
+      ]
+    },
+    "MSFT": {
+      "as_of": "2026-09-12",
+      "peers": [
+        { "ticker": "GOOGL", "reason": "Hyperscale cloud and the directly competing productivity suite" },
+        { "ticker": "AMZN", "reason": "AWS is the cloud share leader Azure is measured against" },
+        { "ticker": "ORCL", "reason": "Enterprise software and database, now also selling AI capacity" },
+        { "ticker": "CRM", "reason": "Enterprise SaaS margin and growth benchmark" }
+      ]
+    },
+    "NVDA": {
+      "as_of": "2026-09-12",
+      "peers": [
+        { "ticker": "AMD", "reason": "The only other merchant vendor of datacentre training and inference GPUs" },
+        { "ticker": "AVGO", "reason": "Custom accelerators and networking silicon — the substitution path for large buyers" },
+        { "ticker": "INTC", "reason": "Incumbent datacentre compute, and the counterfactual for share loss" },
+        { "ticker": "TSM", "reason": "Fabricates the parts; its utilisation is the supply ceiling on the whole set" }
+      ]
+    }
+  }
+}

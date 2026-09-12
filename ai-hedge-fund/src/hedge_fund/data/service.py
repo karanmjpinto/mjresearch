@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
 from hedge_fund.data.cache import DataCategory  # noqa: E402
+from hedge_fund.data.comps import apply_curated  # noqa: E402
 from hedge_fund.data.registry import ProviderRegistry  # noqa: E402
 
 logger = logging.getLogger(__name__)
@@ -150,8 +151,14 @@ class DataService:
         return self.registry.get(DataCategory.CONGRESSIONAL, ticker)
 
     def get_peers(self, ticker: str) -> Any:
-        """Peer comparison data (yfinance → Finnhub)."""
-        return self.registry.get(DataCategory.PEERS, ticker)
+        """Peer comparison: the curated set where one exists, SIC fallback otherwise.
+
+        The overlay lives here rather than inside a provider because it is not a
+        data source. It is a judgment about which companies are comparable, and
+        it has to win over whatever any provider returned.
+        """
+        auto = self.registry.get(DataCategory.PEERS, ticker)
+        return apply_curated(ticker, auto, fundamentals=self.get_fundamentals)
 
     def get_provider_status(self) -> list[dict]:
         """Return status of all registered providers."""

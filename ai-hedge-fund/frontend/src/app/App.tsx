@@ -9,6 +9,7 @@ import { PlanView } from "@/components/PlanView";
 import PortfolioView from "@/components/PortfolioView";
 import { ResearchReport } from "@/components/ResearchReport";
 import { ScreenersView } from "@/components/ScreenersView";
+import { StageComingSoon } from "@/components/StageComingSoon";
 import { SetupView } from "@/components/SetupView";
 import { DEFAULT_SCREENER_ID } from "@/config/screeners";
 
@@ -49,6 +50,8 @@ function AppRoutes() {
       />
       <Route path="/screeners/:screenId" element={<ScreenersView />} />
       <Route path="/optimize" element={<OptimizeView />} />
+      <Route path="/lens/:ticker?" element={<StageComingSoon stage="lens" />} />
+      <Route path="/value/:ticker?" element={<StageComingSoon stage="value" />} />
       <Route path="/decide/:ticker?" element={<DecideView />} />
       <Route path="/autoresearch" element={<AutoResearchView />} />
       <Route path="/setup" element={<SetupView />} />
