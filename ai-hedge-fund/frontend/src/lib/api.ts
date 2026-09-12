@@ -623,6 +623,48 @@ export interface DecisionRow {
   };
 }
 
+/** One multiple's implied value range for the subject. */
+export type CompsBand = {
+  metric: string;
+  label: string;
+  low: number;
+  mid: number;
+  high: number;
+  peer_count: number;
+  subject_multiple: number;
+  /** The per-share quantity recovered from the subject's own multiple. */
+  per_share: number;
+  peer_multiple: { low: number; mid: number; high: number };
+  /** False when the subject's multiple is too far from the peer set to compare. */
+  applicable: boolean;
+  note: string | null;
+};
+
+export type CompsRange = {
+  ticker: string;
+  price: number | null;
+  /** "curated" when the peer set was hand-picked, "sic" when inherited. */
+  basis: string;
+  vetted: boolean;
+  as_of: string | null;
+  peers: string[];
+  bands: CompsBand[];
+  dropped: { metric: string; reason: string; usable_peers: number }[];
+  summary: {
+    available: boolean;
+    reason?: string;
+    low?: number;
+    mid?: number;
+    high?: number;
+    price?: number;
+    position?: string;
+    upside_to_mid_pct?: number;
+    methods?: number;
+    excluded?: string[];
+    inapplicable?: string[];
+  };
+};
+
 export const api = {
   health: () => fetchJSON<{ status: string }>("/health"),
 
@@ -711,6 +753,11 @@ export const api = {
 
   getFundamentals: (ticker: string) =>
     fetchJSON<Record<string, unknown>>(`/data/fundamentals/${ticker}`),
+
+  // --- Valuation ---
+
+  getCompsRange: (ticker: string) =>
+    fetchJSON<CompsRange>(`/valuation/comps/${encodeURIComponent(ticker)}`),
 
   getTechnicals: (ticker: string) =>
     fetchJSON<Record<string, unknown>>(`/data/technicals/${ticker}`),

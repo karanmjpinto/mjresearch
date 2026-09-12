@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
 import { AppNav } from "@/components/AppNav";
+import { CompsField } from "@/components/CompsField";
 import { STAGES, type StageKey } from "@/lib/flow";
 
 /**
@@ -43,16 +44,25 @@ export function StageComingSoon({ stage }: { stage: Extract<StageKey, "lens" | "
     <div className="flex min-h-dvh flex-col bg-ink">
       <AppNav active={stage === "lens" ? "research" : "plan"} />
 
-      <main className="mx-auto w-full max-w-3xl px-lg py-2xl">
+      <main className="mx-auto w-full max-w-4xl px-lg py-2xl">
         <p className="font-display text-label uppercase tracking-marker text-on-ink-faint">
           Stage {spec?.num} {ticker ? `· ${ticker.toUpperCase()}` : ""}
         </p>
         <h1 className="mt-xs font-display text-display-sm text-bone">{spec?.label}</h1>
         <p className="mt-sm max-w-[60ch] text-body-lg text-on-ink-soft">{spec?.question}</p>
 
+        {/* The first piece of this stage that is real. A comparable-company
+            range is a valuation method, so it lands here rather than waiting
+            for the rest of the engine. */}
+        {stage === "value" && ticker && (
+          <div className="mt-xl border-t border-ink-line pt-lg">
+            <CompsField ticker={ticker.toUpperCase()} />
+          </div>
+        )}
+
         <div className="mt-xl border-l-2 border-cadmium pl-md">
           <p className="font-display text-label uppercase tracking-label text-cadmium">
-            {planned.phase} — not built yet
+            {planned.phase} — still to come
           </p>
           <ul className="mt-sm flex flex-col gap-sm">
             {planned.bullets.map((b) => (

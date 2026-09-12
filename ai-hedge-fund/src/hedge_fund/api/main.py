@@ -22,6 +22,7 @@ from hedge_fund.api.routes import (
     screeners,
     setup as setup_route,
     simulation,
+    valuation,
 )
 from hedge_fund.db.session import init_db
 from hedge_fund.settings import settings
@@ -64,6 +65,7 @@ app.add_middleware(
 
 app.include_router(data.router, prefix="/api/data", tags=["data"])
 app.include_router(research.router, prefix="/api/research", tags=["research"])
+app.include_router(valuation.router, prefix="/api/valuation", tags=["valuation"])
 app.include_router(simulation.router, prefix="/api/simulation", tags=["simulation"])
 app.include_router(portfolio.router, prefix="/api/portfolio", tags=["portfolio"])
 app.include_router(screeners.router, prefix="/api/screeners", tags=["screeners"])
