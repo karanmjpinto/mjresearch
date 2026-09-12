@@ -61,8 +61,15 @@ class DataService:
         return result
 
     def get_fundamentals(self, ticker: str) -> dict:
-        """Key fundamental metrics for a ticker."""
-        result = self.registry.get(DataCategory.FUNDAMENTALS, ticker)
+        """Key fundamental metrics, merged across providers field by field.
+
+        Providers are complementary here rather than interchangeable: one knows
+        the market data, another the income statement. Taking the first
+        provider that answers at all returned a payload that looked populated
+        while revenue, debt and cash flow were empty — enough to stall a
+        valuation without looking broken.
+        """
+        result = self.registry.get_merged(DataCategory.FUNDAMENTALS, ticker)
         if result is None:
             return {"ticker": ticker, "error": "no data"}
         return result

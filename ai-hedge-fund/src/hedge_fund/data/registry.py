@@ -214,6 +214,58 @@ class ProviderRegistry:
         record(meta)
         return None, meta
 
+    def get_merged(self, category: DataCategory, key: str, **kwargs: Any) -> Any:
+        """Ask every provider in the chain and merge their answers field by field.
+
+        Use this where providers are complementary rather than interchangeable.
+        The walk stops as soon as a pass adds nothing new, so a complete first
+        answer costs one call as before.
+        """
+        cache_key = self._cache_key("merged:" + key, kwargs)
+        cached = self.cache.get(category, cache_key)
+        if cached is not None:
+            return cached.value if isinstance(cached, CachedValue) else cached
+
+        chain = self._chains.get(category, [])
+        collected: list[tuple[str, dict[str, Any]]] = []
+        for provider in chain:
+            if not self.limiter.acquire(provider.name):
+                continue
+            try:
+                result = provider.fetch(category, key, **kwargs)
+            except Exception as e:
+                logger.debug("Provider %s failed during merge: %s", provider.name, e)
+                continue
+            if isinstance(result, dict):
+                collected.append((provider.name, result))
+                merged_so_far, _ = merge_fields(collected)
+                # Nothing left blank: no reason to spend another provider call.
+                if merged_so_far and all(v is not None for v in merged_so_far.values()):
+                    if len(collected) > 1 or not any(v is None for v in result.values()):
+                        break
+
+        if not collected:
+            return None
+
+        merged, sources = merge_fields(collected)
+        merged["field_sources"] = sources
+        merged["source"] = "+".join(name for name, _ in collected)
+
+        meta = new_meta(category, key, provider=merged["source"], from_cache=False, params=kwargs)
+        meta.attempted = [name for name, _ in collected]
+        record(meta)
+        self.cache.set(
+            category,
+            cache_key,
+            CachedValue(
+                value=merged,
+                provider=merged["source"],
+                fetched_at=meta.fetched_at,
+                checks={},
+            ),
+        )
+        return merged
+
     def get_provider_status(self) -> list[dict]:
         """Return status of all providers."""
         statuses = []
@@ -230,3 +282,34 @@ class ProviderRegistry:
     def rebuild_chains(self) -> None:
         """Rebuild fallback chains (call after config changes)."""
         self._build_chains()
+
+
+def merge_fields(
+    results: list[tuple[str, dict[str, Any]]],
+) -> tuple[dict[str, Any], dict[str, str]]:
+    """Combine several providers' answers field by field, first non-null winning.
+
+    First-past-the-post is the wrong rule for a category where each provider
+    knows a different part of the picture. openbb answers for fundamentals with
+    market data and a null for every income-statement line, so revenue, debt and
+    cash flow arrive empty even though yfinance would have supplied all three —
+    and a discounted cash flow cannot be computed from a payload that looks
+    populated and is not.
+
+    Chain order still decides: an earlier provider's value is never overwritten
+    by a later one. Only the gaps are filled, and every filled field records who
+    filled it, so a number on screen can be traced to the provider that produced
+    it rather than to "the data layer".
+    """
+    merged: dict[str, Any] = {}
+    sources: dict[str, str] = {}
+    for name, payload in results:
+        if not isinstance(payload, dict):
+            continue
+        for field, value in payload.items():
+            if value is None:
+                continue
+            if merged.get(field) is None:
+                merged[field] = value
+                sources[field] = name
+    return merged, sources

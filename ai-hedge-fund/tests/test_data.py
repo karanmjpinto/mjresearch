@@ -95,3 +95,54 @@ class TestDataServiceIntegration:
         assert "macd" in result
         # Provider-dependent: top-level trend vs SMA flags vs MACD subdict
         assert "trend" in result or "above_sma50" in result or isinstance(result.get("macd"), dict)
+
+
+# ------------------------------------------------------------------
+# Merging complementary providers
+# ------------------------------------------------------------------
+
+
+def test_merge_fields_fills_gaps_without_overwriting_earlier_providers():
+    """Chain order still decides; only the blanks get filled.
+
+    This is the bug it exists for: the first provider answered for fundamentals
+    with market data and a null for every income-statement line, so a valuation
+    could not be computed from a payload that looked populated.
+    """
+    from hedge_fund.data.registry import merge_fields
+
+    merged, sources = merge_fields(
+        [
+            ("openbb", {"market_cap": 100, "revenue": None, "beta": 1.1}),
+            ("yfinance", {"market_cap": 999, "revenue": 416, "ebitda": 130}),
+        ]
+    )
+    assert merged["market_cap"] == 100  # the earlier provider is not overwritten
+    assert merged["revenue"] == 416  # the blank is filled
+    assert merged["ebitda"] == 130  # and a field the first one never had
+    assert sources == {
+        "market_cap": "openbb",
+        "beta": "openbb",
+        "revenue": "yfinance",
+        "ebitda": "yfinance",
+    }
+
+
+def test_merge_fields_records_who_supplied_each_number():
+    from hedge_fund.data.registry import merge_fields
+
+    _, sources = merge_fields([("a", {"x": 1}), ("b", {"y": 2})])
+    assert sources["x"] == "a" and sources["y"] == "b"
+
+
+def test_merge_fields_ignores_nulls_and_non_dicts():
+    from hedge_fund.data.registry import merge_fields
+
+    merged, _ = merge_fields([("a", {"x": None}), ("b", None), ("c", {"x": 5})])  # type: ignore[list-item]
+    assert merged == {"x": 5}
+
+
+def test_merge_fields_on_nothing_is_empty_not_an_error():
+    from hedge_fund.data.registry import merge_fields
+
+    assert merge_fields([]) == ({}, {})
