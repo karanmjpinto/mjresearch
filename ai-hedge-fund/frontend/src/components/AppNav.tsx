@@ -1,5 +1,8 @@
+import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { TickerBar } from "@/components/TickerBar";
+import { OTHER_DESTINATIONS } from "@/lib/flow";
+import { useTicker } from "@/lib/ticker-context";
 
 export type AppNavActive =
   | "home"
@@ -13,68 +16,109 @@ export type AppNavActive =
   | "setup";
 
 /**
- * Application chrome. Labels are set in the display face at small sizes with
- * wide tracking — the pixel face is legible as a label and unreadable as prose,
- * so it is used only where it works.
+ * Application chrome: a way in, and a way to everything else.
  *
- * The active item is marked with a painted underline rather than a colour
- * swap, so position is readable at a glance without hunting for a hue.
+ * This used to be nine equal links, which made a screener and the middle of a
+ * research flow look like the same kind of thing. They are not. The work is
+ * one company at a time, so the bar now carries only the entry to that — a
+ * search field — and the stage rail below it. The six screens that are not
+ * about a single name live behind one disclosure, reachable in two clicks
+ * instead of permanently occupying the top of the window.
+ *
+ * `active` is still accepted, and still names the caller's own screen, so all
+ * nine views compile unchanged. It is used to label the menu with where you
+ * already are rather than to paint an underline.
  */
-const NAV: { to: string; key: AppNavActive; label: string }[] = [
-  { to: "/dashboard", key: "home", label: "Dashboard" },
-  { to: "/plan", key: "plan", label: "Plan" },
-  { to: "/research", key: "research", label: "Research" },
-  { to: "/screeners", key: "screeners", label: "Screeners" },
-  { to: "/optimize", key: "optimize", label: "Optimize" },
-  { to: "/decide", key: "decide", label: "Decide" },
-  { to: "/portfolio", key: "portfolio", label: "Portfolio" },
-  { to: "/autoresearch", key: "autoresearch", label: "Autoresearch" },
-  { to: "/setup", key: "setup", label: "Setup" },
-];
 
 type Props = {
   active: AppNavActive;
-  /** Optional right side: e.g. tagline or a wide search input. */
+  /** Optional right side: e.g. a data-source tagline. */
   end?: React.ReactNode;
 };
 
 export function AppNav({ active, end }: Props) {
+  const { goTo } = useTicker();
+  const [draft, setDraft] = useState("");
+
+  const here = OTHER_DESTINATIONS.find((d) => d.key === active);
+
+  const search = (e: FormEvent) => {
+    e.preventDefault();
+    const clean = draft.trim();
+    if (!clean) return;
+    goTo(clean);
+    setDraft("");
+  };
+
   return (
     <div className="sticky top-0 z-30 bg-ink/95 backdrop-blur-sm">
       <nav className="border-b border-ink-line">
-        <div className="flex items-center justify-between gap-md px-lg py-sm">
-          <div className="flex min-w-0 items-center gap-lg">
-            <Link
-              to="/"
-              className="font-display text-[15px] tracking-[0.14em] text-bone transition-colors hover:text-oxide"
-              title="Back to overview"
+        <div className="flex items-center gap-md px-lg py-sm">
+          <Link
+            to="/"
+            className="shrink-0 font-display text-mark tracking-marker text-bone transition-colors hover:text-oxide"
+            title="Back to the landing page"
+          >
+            MJ
+          </Link>
+
+          <form onSubmit={search} className="flex min-w-0 grow items-center gap-xs">
+            <label htmlFor="ticker-search" className="sr-only">
+              Search a ticker
+            </label>
+            <input
+              id="ticker-search"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value.toUpperCase())}
+              placeholder="Search a ticker"
+              autoComplete="off"
+              spellCheck={false}
+              className="w-full max-w-[280px] border border-ink-line bg-ink px-sm py-1.5 font-display text-label tracking-label text-bone outline-none transition-colors placeholder:text-on-ink-faint focus:border-cobalt"
+            />
+            <button
+              type="submit"
+              className="shrink-0 border border-ink-line px-sm py-1.5 font-display text-label uppercase tracking-label text-on-ink-soft transition-colors hover:border-cobalt hover:text-bone"
             >
-              MJ
-            </Link>
-            <div className="scrollbar-none flex min-w-0 items-center gap-md overflow-x-auto">
-              {NAV.map((item) => {
-                const on = active === item.key;
+              Open
+            </button>
+          </form>
+
+          {end != null && <div className="hidden shrink-0 sm:flex">{end}</div>}
+
+          <details className="relative shrink-0 [&>summary::-webkit-details-marker]:hidden">
+            <summary
+              aria-label="Other sections"
+              className="cursor-pointer list-none border border-ink-line px-sm py-1.5 font-display text-label uppercase tracking-label text-on-ink-soft transition-colors hover:border-cobalt hover:text-bone"
+            >
+              {here ? `Other · ${here.label}` : "Other"} ▾
+            </summary>
+            {/* A landmark inside the disclosure, so a screen reader is told these
+                are navigation links rather than arbitrary revealed content. */}
+            <nav
+              aria-label="Other sections"
+              className="absolute right-0 z-40 mt-2xs min-w-[180px] border border-ink-line bg-ink-raised py-2xs"
+            >
+            <ul>
+              {OTHER_DESTINATIONS.map((d) => {
+                const on = d.key === active;
                 return (
-                  <Link
-                    key={item.key}
-                    to={item.to}
-                    className={`relative shrink-0 py-1 font-display text-label uppercase tracking-[0.14em] transition-colors ${
-                      on ? "text-bone" : "text-on-ink-faint hover:text-on-ink"
-                    }`}
-                  >
-                    {item.label}
-                    {on && (
-                      <span
-                        aria-hidden
-                        className="absolute -bottom-[9px] left-0 h-[2px] w-full bg-oxide"
-                      />
-                    )}
-                  </Link>
+                  <li key={d.key}>
+                    <Link
+                      to={d.to}
+                      aria-current={on ? "page" : undefined}
+                      className={`block px-sm py-1.5 font-display text-label uppercase tracking-label transition-colors hover:bg-ink hover:text-bone ${
+                        on ? "text-cadmium" : "text-on-ink-soft"
+                      }`}
+                    >
+                      {d.label}
+                      {on && <span className="ml-2xs text-on-ink-faint">· here</span>}
+                    </Link>
+                  </li>
                 );
               })}
-            </div>
-          </div>
-          {end != null && <div className="hidden shrink-0 sm:flex">{end}</div>}
+            </ul>
+            </nav>
+          </details>
         </div>
       </nav>
       <TickerBar />

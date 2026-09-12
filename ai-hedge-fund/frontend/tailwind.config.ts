@@ -82,6 +82,13 @@ export default {
          * whose vertical rhythm is already set by their container. */
         label: "12px",
 
+        /* Chrome marks: the wordmark and the active ticker. Whole pixels,
+         * because both render in the bitmap face, and named because the scale
+         * had nothing between `label` (12px) and `display-sm` (24px) — so the
+         * two sat as inline literals and had already drifted a pixel apart
+         * (15px and 16px) without anyone choosing that. One value now. */
+        mark: "16px",
+
         /* Prose and card titles, in rem so a reader who has raised their
          * browser's base size gets larger text. The whole-pixel rule above
          * binds the bitmap face, not Bricolage: these never render in Departure

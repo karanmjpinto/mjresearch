@@ -257,17 +257,19 @@ export function ResearchReport() {
   const fundamentals = (d?.fundamentals ?? {}) as Record<string, unknown>;
   const technicals = (d?.technicals ?? {}) as Record<string, unknown>;
   const ai = d?.ai_full;
+  /** Once the AI thesis is on screen the right rail is redundant — the synthesis
+   * card already carries conviction and stance, and the extra column only
+   * squeezes the analysis. Give the page back to the analysis. */
+  const aiResultsShown =
+    includeAi && !d?.ai_error && (Boolean(ai) || (d?.committee?.length ?? 0) > 0);
 
   return (
     <div className="flex flex-col h-screen">
-      <AppNav
-        active="research"
-        end={
-          <div className="w-80">
-            <ChatInput onSubmit={handleSearch} placeholder="Check another ticker..." />
-          </div>
-        }
-      />
+      {/* No search in the end slot: the nav carries one now, and two ticker
+          inputs in the same bar is a question about which one is real. The
+          full-page search below still stands for the empty state, where
+          choosing a company is the whole job. */}
+      <AppNav active="research" />
 
       <div className="flex grow overflow-hidden">
         {/* Main content */}
@@ -485,7 +487,7 @@ export function ResearchReport() {
 
           {/* Chart */}
           <div className="bg-surface-card rounded-xl p-4 h-72">
-            <PriceChart data={priceData.data?.data ?? []} />
+            <PriceChart data={priceData.data?.data ?? []} loading={priceData.isLoading} />
           </div>
 
           <ErrorBoundary>
