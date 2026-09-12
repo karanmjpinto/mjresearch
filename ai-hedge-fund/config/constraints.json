@@ -468,32 +468,99 @@
     {
       "id": "rare-earth-magnets",
       "system": "motion",
-      "name": "Rare earth permanent magnets",
-      "scarce_object": "Sintered NdFeB magnets, and the separated heavy rare earths in them",
-      "why": "Every actuator and traction motor needs them, and both the separation and the sintering are geographically concentrated enough to be a policy instrument as well as a supply chain.",
-      "measurements": [],
-      "routes": [],
-      "capture": {},
+      "name": "Heavy rare earth magnets (Dy/Tb grades)",
+      "scarce_object": "Sintered NdFeB magnets with dysprosium and terbium added for heat resistance",
+      "why": "The only constraint anywhere in this map that a named humanoid programme has publicly blamed for its own production. And the grade is the whole point: plain N35-N52 NdFeB is not controlled — the restricted grades are the high-coercivity ones with dysprosium and terbium added to survive heat and reverse fields, which is exactly what a hot robot joint needs.",
+      "measurements": [
+        {
+          "metric": "Terbium metal, export price against China domestic",
+          "value": 1557.0,
+          "unit": "$/kg FOB vs $1,097.08 domestic",
+          "normal": 1097.08,
+          "as_of": "2026-09-02",
+          "source": "https://rare-earth-mining.com/terbium-price/",
+          "note": "A 41.9% spread on the same metal in the same week is the cleanest measure of an export control actually biting anywhere in this research. For oxides the gaps ran wider in March 2026 — neodymium +63%, dysprosium +67%, terbium +47%. Watch the product form: oxide, metal and alloy are not interchangeable and must never be compared across. Trade site quoting SMM benchmarks."
+        },
+        {
+          "metric": "China share of global sintered magnet production",
+          "value": 94.0,
+          "unit": "%",
+          "normal": 50.0,
+          "as_of": "2025-10-23",
+          "source": "https://www.iea.org/commentaries/with-new-export-controls-on-critical-minerals-supply-concentration-risks-become-reality",
+          "note": "IEA: China holds about 60% of mining, 91% of separation and refining, and 94% of sintered permanent magnet production — against roughly 50% two decades ago, which is the baseline used here. Adamas Intelligence puts China above 99% of refined dysprosium and terbium specifically. Independent and authoritative, though dated Oct 2025, so it carries reduced weight. Source also: https://www.adamasintel.com/wp-content/uploads/2026/02/Adamas-Intelligence-Rare-Earth-Magnet-Market-Outlook-Top-Predictions-for-2026.pdf"
+        }
+      ],
+      "routes": [
+        {
+          "path": "Ex-China magnet plants now being built",
+          "status": "building",
+          "eta_months": 24,
+          "source": "https://mpmaterials.com/news/mp-materials-announces-transformational-public-private-partnership-with-the-department-of-defense-to-accelerate-u-s-rare-earth-magnet-independence/",
+          "note": "Real, funded, and roughly a decade short. Announced ex-China sintered capacity through 2028 totals 25,000-35,000 tonnes against 58,000 tonnes of Chinese magnet exports in 2024 — 43-60% partial diversification. MP Materials shipped first commercial NdFeB in Dec 2025 with its 10X plant commissioning 2028; e-VAC, Neo in Estonia and USA Rare Earth add the rest. NOTE: MP's Independence nameplate is reported as both 1,000 and 3,000 t/yr across three sources and is unresolved — do not model off either until MP's own filing is read."
+        },
+        {
+          "path": "Heavy rare earth feedstock outside China",
+          "status": "blocked",
+          "source": "https://www.adamasintel.com/wp-content/uploads/2026/02/Adamas-Intelligence-Rare-Earth-Magnet-Market-Outlook-Top-Predictions-for-2026.pdf",
+          "note": "The real gate, and it sits upstream of the magnet presses. Adamas: heavy rare earth availability outside China 'has potential to be a near-term bottleneck for the collective Western magnet industry scale-up', with Western NdPr output still covering under 15% of global demand. Lynas completed its first contracted separated dysprosium and terbium shipments only in early 2026. You can build a magnet plant faster than you can feed one."
+        },
+        {
+          "path": "Rare-earth-free motors",
+          "status": "unproven",
+          "source": "https://www.nironmagnetics.com/niron-magnetics-and-aspina-to-develop-rare-earth-free-motor-solutions-across-global-end-markets/",
+          "note": "Not yet a robot answer. Niron's July 2026 supply agreement names brushless DC motors, hybrid steppers and fan blowers — robotics is not referenced, with no volumes and no shipments — and Niron publishes no energy product, which is the one number deciding whether it substitutes in a joint. Against it: Unitree's G1 joints are specified as permanent-magnet synchronous and EngineAI claims 130 N·m/kg peak torque density. No magnet-free topology has been shown at that density and size."
+        },
+        {
+          "path": "Recycling end-of-life magnets",
+          "status": "blocked",
+          "source": "https://www.adamasintel.com/wp-content/uploads/2026/02/Adamas-Intelligence-Rare-Earth-Magnet-Market-Outlook-Top-Predictions-for-2026.pdf",
+          "note": "Global end-of-life NdFeB recycling runs under 1% to under 5%. EU recycled output is projected at about 3,800 t/yr by 2030 — roughly 20% of EU demand alone."
+        }
+      ],
+      "capture": {
+        "holder": "Chinese magnet makers, led by JL MAG",
+        "share_pct": 94,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "Profit growing faster than revenue is the tell, and robots are now visible inside it. JL MAG's H1 2026 net income rose 52% to RMB 462m on revenue up about a third to a record RMB 4.7bn, with ROBOTICS REVENUE DOUBLED and capacity going from 40,000 t/yr to 60,000 t/yr by 2027. Q1 2026 core earnings rose 65.95% on revenue up 16.05%. Its own capacity figure conflicts with a trade-site table showing 25,000+; the company figure is preferred and the conflict noted. Source: https://www.briefs.co/news/giant-rare-earth-magnet-maker-s-strongest-half-as-robot-and/",
+        "_share_basis": "94% is China's share of global sintered magnet production per the IEA, not any single company's share. This chokepoint is national rather than corporate, which is precisely what an export licensing regime makes it.",
+        "_named_programme": "McKinsey, 17 Apr 2026, reports that Elon Musk has publicly noted magnet supply constraints have affected Optimus production — the only named humanoid programme in all of this research citing any component as binding. Tesla's own sources were unreachable throughout, so this is verified-secondary. Source: https://www.mckinsey.com/industries/industrials/our-insights/turning-humanoid-supply-chain-constraints-into-billion-dollar-wins",
+        "_event_risk": "China's suspension of the extraterritorial expansion of its controls expires 10 Nov 2026. A dated cliff, not a standing condition. Licence approval counts or rates: none are published, at any date."
+      },
       "names": [
         {
-          "ticker": "MP",
-          "name": "MP Materials",
-          "exposure": "Mines and is building separation and magnet making outside China.",
+          "ticker": "300748.SZ",
+          "name": "JL MAG Rare-Earth",
           "band": "pure",
-          "source": ""
+          "exposure": "The world's largest rare-earth magnet maker, robotics revenue doubling in H1 2026, capacity to 60,000 t/yr by 2027.",
+          "source": "https://www.briefs.co/news/giant-rare-earth-magnet-maker-s-strongest-half-as-robot-and/"
         },
         {
           "ticker": "LYC.AX",
           "name": "Lynas Rare Earths",
-          "exposure": "The largest rare earth separator outside China.",
           "band": "pure",
+          "exposure": "The largest separator outside China and first to ship contracted separated dysprosium and terbium, early 2026. Upstream only, no magnets.",
+          "source": "https://www.adamasintel.com/wp-content/uploads/2026/02/Adamas-Intelligence-Rare-Earth-Magnet-Market-Outlook-Top-Predictions-for-2026.pdf"
+        },
+        {
+          "ticker": "MP",
+          "name": "MP Materials",
+          "band": "major",
+          "exposure": "The only US integrated mine-to-magnet operation, with a Department of Defense floor of $110/kg NdPr and a 7,000 t/yr magnet offtake for ten years.",
+          "source": "https://mpmaterials.com/news/mp-materials-announces-transformational-public-private-partnership-with-the-department-of-defense-to-accelerate-u-s-rare-earth-magnet-independence/"
+        },
+        {
+          "ticker": "USAR",
+          "name": "USA Rare Earth",
+          "band": "pure",
+          "exposure": "Stillwater, Oklahoma magnet plant, 600-1,200 t/yr phase one. Development stage.",
           "source": ""
         },
         {
           "ticker": "4063.T",
           "name": "Shin-Etsu Chemical",
-          "exposure": "Makes high-grade sintered magnets, inside a large diversified chemicals group.",
           "band": "minor",
+          "exposure": "Sintered NdFeB inside a large diversified chemicals group.",
           "source": ""
         }
       ]
@@ -503,10 +570,50 @@
       "system": "motion",
       "name": "Precision reducers",
       "scarce_object": "Strain-wave and cycloidal gearboxes for robot joints",
-      "why": "A humanoid needs dozens of them and they cannot be made loosely — the tolerance is the product. The usual constraint on robot unit economics before anything about the model.",
-      "measurements": [],
-      "routes": [],
-      "capture": {},
+      "why": "A humanoid needs dozens of them and the tolerance is the product, so this is the usual constraint on robot unit economics. Read it against the warning below, though: Unitree's own prospectus shows it self-researches over 90% of core components, and the robot makers integrating backwards may compress the merchant market even as unit volumes explode.",
+      "measurements": [
+        {
+          "metric": "Harmonic Drive Systems order backlog",
+          "value": 29457.0,
+          "unit": "¥m",
+          "normal": 20232.0,
+          "as_of": "2026-06-30",
+          "source": "https://finance.biggo.jp/news/jpx_tdnet_140120260804507706",
+          "note": "Backlog ¥29,457m, +45.6% year on year, on Q1 order intake of ¥24,128m, +55.7% — a 1.45x book-to-bill. Baseline derived from the stated growth rate. But read the capture leg before trusting it: the company attributes the drivers to global automation capex, a bulk North American surgical-robot order and generative-AI semicap equipment. Humanoids are not named in the filing at all."
+        },
+        {
+          "metric": "Laifual capacity utilisation",
+          "value": 95.1,
+          "unit": "%",
+          "normal": 95.1,
+          "as_of": "2026-06-30",
+          "source": "https://www.finanznachrichten.de/nachrichten-2026-08/69439912-zhejiang-laifual-drive-co-ltd-laifual-03952-hk-announces-2026-interim-results-011.htm",
+          "note": "95.1% with a backlog above 400,000 units, about 6.2 months of July capacity. Recorded with normal equal to the reading so it scores nothing — near-full utilisation is a ceiling, not an excess over one. And it is not representative: Leaderdrive, the larger Chinese player, ran 67.76% in 2025 after 42.67% in 2024 and pushed its expansion completion from end-2026 to end-2028, while Shuanghuan's RV arm withdrew its STAR Market IPO on 3 Sep 2026 with capacity absorption among the regulator's unresolved questions. Source: http://file.finance.sina.com.cn/211.154.219.97:9494/MRGG/CNSESH_STOCK/2026/2026-7/2026-07-10/12438947.PDF"
+        }
+      ],
+      "routes": [
+        {
+          "path": "Robot makers build their own",
+          "status": "building",
+          "eta_months": 12,
+          "source": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1sZWhMb0dBMFVuZFIxbzBtbElidl96MDk1cUMwWlFBVXhLTHp5ZGpVSlhSWmhkTTR3RnNrWlJuZjlnOHh6WFVBOS1IdlpjRnd0WGs4",
+          "note": "The route that matters, and it is the customer doing it. Unitree's STAR Market prospectus reports core-component self-research above 90% — motors, reducers, joint modules, dexterous hands in-house — with imported sourcing down to about 20% of raw materials. Fourier likewise built its own force sensor rather than buying one. A supplier's addressable market can shrink while the end market grows."
+        },
+        {
+          "path": "Chinese second-sourcing at a fraction of incumbent price",
+          "status": "open",
+          "source": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQSloyeGZ3b2xXbE41U0RtTHlENG1EVEFleV9GSmxqaVlEdEJKY1BsSnlDc2trU1JVZ093RjBueHdYd1Vta1Y5RmpuMEQ3OFdPd0NYQk1Kc1pvcWpXUGhMX2Ztd09YWHhiT2VLdTBPWDhyeDVZcnRtN1hybjRaSkllNGk5UXpGVnVN",
+          "note": "Already happening and already priced. In the adjacent force-sensor market the domestic-versus-imported gap went from roughly 3x to about 10x in eighteen months — domestic RMB 5,000-30,000 against international RMB 70,000-80,000 as of 9 Sep 2026. Recorded as open because the substitute exists, ships and is being bought."
+        }
+      ],
+      "capture": {
+        "holder": "Harmonic Drive Systems, Nabtesco",
+        "share_pct": null,
+        "pricing_power": "contested",
+        "pricing_evidence": "The supposed monopolist has no pricing power and its own accounts prove it. Harmonic Drive Systems' gross margin fell from 39.28% in FY3/22 to 26.69% in FY3/25, with OPERATING MARGIN HITTING 0.01% in FY3/25 — a monopolist does not print that. The recovery to 30.45% is utilisation, not price. Nabtesco is the only player with sourced price realisation, disclosing ¥500m of price pass-through in Component Solutions in H1 2026. Meanwhile Chinese selling prices are falling outright: Leaderdrive from about RMB 1,900 in 2017 to RMB 1,100 in 2024, and Laifual from RMB 802 in 2023 to RMB 573 in 2025. Sources: https://stockanalysis.com/quote/TYO/6324/financials/ , https://www.nabtesco.com/cms/wp-content/uploads/Results_Briefing_QA_for_FY2026_Q2.pdf",
+        "_warning": "Whole-robot prices are collapsing, which flows straight through to component ASPs. Unitree's own prospectus shows humanoid average selling price falling from RMB 593,400 in 2023 to RMB 167,600 over the first nine months of 2025 — a 72% decline in two years. A component supplier into that is facing price, not receiving it.",
+        "_where_the_rent_went": "Up a level, to the customer. Unitree's 2025 humanoid gross margin was 62.91% against Leaderdrive's 32.26% in H1 2026. The OEM that integrated the joint kept the rent."
+      },
       "names": [
         {
           "ticker": "6324.T",
@@ -1100,6 +1207,429 @@
           "source": "https://www.stocktitan.net/news/FN/fabrinet-announces-fourth-quarter-and-fiscal-year-2026-financial-vipiat88wd9l.html"
         }
       ]
+    },
+    {
+      "id": "wf6-tungsten-hexafluoride",
+      "system": "intelligence",
+      "name": "Tungsten hexafluoride (WF6)",
+      "scarce_object": "High-purity WF6 gas for filling contacts and vias",
+      "why": "On price, the tightest thing in this map: up 246% in a year after roughly a quarter of global high-end capacity was withdrawn, with no qualified non-Chinese replacement. Read the unresolved contradiction below before acting — sources disagree on whether the shutdown that caused it actually went ahead.",
+      "measurements": [
+        {
+          "metric": "China domestic 5N WF6 price",
+          "value": 267.0,
+          "unit": "$/kg",
+          "normal": 77.2,
+          "as_of": "2026-09-12",
+          "source": "https://www.scarceearth.io/reagents/tungsten-hexafluoride",
+          "note": "+246% year on year (RMB 523/kg to RMB 1,810/kg); the baseline is derived from that stated percentage. Export price was $149.79/kg in April 2026, +203.8% month on month. Corroborated across two independent outlets which reconcile at about 7.1 RMB/USD. Both are mid-tier sources and one contains an internal date error, which lowers confidence in the reporting even though the two agree. Source also: https://eu.36kr.com/en/p/3858510497780736"
+        },
+        {
+          "metric": "Global high-end WF6 capacity removed",
+          "value": 8500,
+          "unit": "t/yr demand vs 2,200 t/yr withdrawn",
+          "normal": 6300,
+          "as_of": "2026-06-18",
+          "source": "https://eu.36kr.com/en/p/3858510497780736",
+          "note": "Kanto Denka Kogyo and Central Glass together held about 25% of global high-end capacity, roughly 2,200 t/yr, against demand of 8,000-9,000 t/yr — implying a ~2,000 t gap in H2 2026. Baseline is demand net of the withdrawn capacity. Korean suppliers notified customers of 70-90% contract price increases."
+        }
+      ],
+      "routes": [
+        {
+          "path": "Qualify a non-Chinese replacement supplier",
+          "status": "blocked",
+          "source": "https://www.scarceearth.io/reagents/tungsten-hexafluoride",
+          "note": "No Western or non-Chinese Asian producer has been qualified by a leading-edge memory or logic fab as a replacement source. Foosung is attempting qualification and SK Specialty is supplying bridge volumes. There is also no substitute chemistry — WF6 is the only practical tungsten precursor for CVD fill."
+        },
+        {
+          "path": "Chinese domestic supply (CSSC Special Gases)",
+          "status": "unproven",
+          "source": "https://eu.36kr.com/en/p/3858510497780736",
+          "note": "Capacity undisclosed. And routing around a China-driven shortage via China is not a route around it for a Western fab."
+        }
+      ],
+      "capture": {
+        "holder": "Unclear — see the contradiction",
+        "share_pct": null,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "A 246% price move and 70-90% contract increases notified by Korean suppliers. Source: https://www.scarceearth.io/reagents/tungsten-hexafluoride",
+        "_unresolved": "MATERIAL AND UNRESOLVED. One source reports that Kanto Denka and Central Glass SUSPENDED the shutdown decision on 19 Jun 2026; two others state production permanently ceased on 1 Jul 2026. No primary disclosure from either company was found either way. The persisting price as of 12 Sep 2026 is the strongest evidence the disruption is real — but check both companies' own IR pages before acting, because if they stayed in the product they are beneficiaries and if they exited they are beneficiaries of nothing."
+      },
+      "names": [
+        {
+          "ticker": "4047.T",
+          "name": "Kanto Denka Kogyo",
+          "band": "major",
+          "exposure": "One of the two Japanese high-purity WF6 producers at the centre of the shortage. Check its own IR first — see the unresolved contradiction.",
+          "source": "https://www.scarceearth.io/reagents/tungsten-hexafluoride"
+        },
+        {
+          "ticker": "4044.T",
+          "name": "Central Glass",
+          "band": "minor",
+          "exposure": "The other Japanese producer, inside a diversified glass and chemicals group.",
+          "source": "https://www.scarceearth.io/reagents/tungsten-hexafluoride"
+        },
+        {
+          "ticker": "093370.KS",
+          "name": "Foosung",
+          "band": "major",
+          "exposure": "Korean fluorine chemicals, attempting qualification as a replacement source.",
+          "source": "https://www.scarceearth.io/reagents/tungsten-hexafluoride"
+        }
+      ]
+    },
+    {
+      "id": "t-glass-cloth",
+      "system": "intelligence",
+      "name": "Low-CTE glass cloth (T-glass)",
+      "scarce_object": "Low-thermal-expansion woven glass cloth for AI accelerator circuit boards",
+      "why": "The constraint nobody was looking for — it was not on the original research list and turned out to have the sharpest lead-time move of anything here. Nittobo is effectively the sole source of the sub-5ppm grade, and Nvidia is reported to have pre-paid its 2027 expansion.",
+      "measurements": [
+        {
+          "metric": "Low-CTE glass cloth lead time",
+          "value": 26,
+          "unit": "weeks",
+          "normal": 4,
+          "as_of": "2026-03-19",
+          "source": "https://electsources.com.tw/2026/03/19/2026-t-glass-shortage-disrupting-nvidia-apple-ai-hardware/",
+          "note": "From 4 weeks to over 6 months. Price went from $15-20/m² in 2025 to $30-50+/m² in 2026. Yole independently confirms the shortage exists (26 Feb 2026) though its report body is inaccessible. Adjacent corroboration from a different chain: 7628-spec electronic-grade cloth went from RMB 3.5 to over RMB 7.5 per metre, +114%. Dated March 2026, so this reading is stale and carries reduced weight."
+        }
+      ],
+      "routes": [
+        {
+          "path": "Second-source the cloth from Taiwan Glass or Nanya Plastics",
+          "status": "building",
+          "eta_months": 5,
+          "source": "https://electsources.com.tw/2026/03/19/2026-t-glass-shortage-disrupting-nvidia-apple-ai-hardware/",
+          "note": "The most useful qualification datapoint in the whole exercise because it is supplier-specific: Taiwan Glass and Nanya Plastics offer about 40% more capacity on a 3-6 month qualification, while Grace Fabric and PPG need 9-12 months. Credible for second-tier specs within a year — but not for the sub-5ppm low-CTE grade."
+        },
+        {
+          "path": "Nittobo's own expansion",
+          "status": "building",
+          "eta_months": 12,
+          "source": "https://electsources.com.tw/2026/03/19/2026-t-glass-shortage-disrupting-nvidia-apple-ai-hardware/",
+          "note": "Lands in 2027 and is reportedly pre-paid by Nvidia, so the incremental volume may already be committed."
+        }
+      ],
+      "capture": {
+        "holder": "Nitto Boseki (Nittobo)",
+        "share_pct": null,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "Price roughly doubled, from $15-20/m² to $30-50+/m², alongside a lead time going from 4 weeks to over 6 months. Source: https://electsources.com.tw/2026/03/19/2026-t-glass-shortage-disrupting-nvidia-apple-ai-hardware/",
+        "_gap": "No sourced share figure, and Nittobo's own disclosure was not verified. Described as effectively sole source for the low-CTE grade by one mid-tier outlet only."
+      },
+      "names": [
+        {
+          "ticker": "3110.T",
+          "name": "Nitto Boseki",
+          "band": "minor",
+          "exposure": "Effectively sole source of sub-5ppm low-CTE glass cloth, inside a textiles and materials group. Highest conviction and least verified name in this map — the ticker itself was not confirmed. Do the primary work before sizing.",
+          "source": "https://electsources.com.tw/2026/03/19/2026-t-glass-shortage-disrupting-nvidia-apple-ai-hardware/"
+        }
+      ]
+    },
+    {
+      "id": "hvlp-copper-foil",
+      "system": "intelligence",
+      "name": "HVLP copper foil",
+      "scarce_object": "Very-low-profile electrodeposited copper foil for high-speed circuit boards",
+      "why": "Quantified by the producer itself, which is rare. Mitsui Kinzoku told investors how much of its profit upgrade came from price rather than volume, and said outright that few competitors can make the higher grades at stable quality.",
+      "measurements": [
+        {
+          "metric": "Mitsui MicroThin monthly volume forecast, against its prior forecast",
+          "value": 600,
+          "unit": "thousand m²/month",
+          "normal": 225,
+          "as_of": "2026-08-21",
+          "source": "https://finance.biggo.com/news/JP_5706.T_2026-08-21",
+          "note": "Tripled from 200,000-250,000 to over 600,000 m²/month on optical transceiver demand. A demand-forecast revision rather than a direct tightness measure, which is why it is recorded with that caveat. Utilisation and backlog were not disclosed on the call."
+        }
+      ],
+      "routes": [
+        {
+          "path": "Mitsui's own ¥42bn capacity programme",
+          "status": "building",
+          "eta_months": 30,
+          "source": "https://finance.biggo.com/news/JP_5706.T_2026-08-21",
+          "note": "MicroThin from 4.9 to 8 million m²/month, VSP from 720 to 1,400 t/month, FaradFlex from 75,000 to 355,000 m²/month — all through 2030. Relief comes from the incumbent, on its own schedule, funded by the price increases it is charging. Credible on capacity, not on competition."
+        }
+      ],
+      "capture": {
+        "holder": "Mitsui Mining & Smelting",
+        "share_pct": null,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "The company quantified its own rent: of a ¥9.7bn copper-foil operating profit guidance raise, about ¥3.5bn came from price (MicroThin ~¥3bn, VSP ¥0.5-1bn). Two price increases in nine months, October 2025 and July 2026, with management stating that in higher HVLP grades 'the number of competitors capable of manufacturing at stable quality remains limited'. Management also says no further increases are currently planned. Source: https://finance.biggo.com/news/JP_5706.T_2026-08-21",
+        "_gap": "Copper foil's share of group revenue or profit was not disclosed, and no market share figure exists. A >90% premium-grade share claim appears on an undated low-quality page and is excluded."
+      },
+      "names": [
+        {
+          "ticker": "5706.T",
+          "name": "Mitsui Mining & Smelting",
+          "band": "minor",
+          "exposure": "Makes MicroThin and VSP copper foil, inside a non-ferrous smelter and miner. Real pricing power, heavily diluted.",
+          "source": "https://finance.biggo.com/news/JP_5706.T_2026-08-21"
+        }
+      ]
+    },
+    {
+      "id": "helium",
+      "system": "intelligence",
+      "name": "Helium",
+      "scarce_object": "Refined helium for fab cooling and purging",
+      "why": "A war, not a capex cycle. Roughly a third of world supply went offline after attacks on Qatar's Ras Laffan complex, and the six-month inventory buffer fabs were reported to hold in March 2026 expires around now.",
+      "measurements": [
+        {
+          "metric": "Helium spot price, indexed to pre-crisis",
+          "value": 200,
+          "unit": "index, pre-crisis = 100",
+          "normal": 100,
+          "as_of": "2026-04-24",
+          "source": "https://www.eetimes.com/what-hormuz-exposed-about-our-semiconductor-supply-chain/",
+          "note": "Spot prices doubled since the crisis began, per EE Times and independently per Granite Point. Qatar is about 34% of world helium; QatarEnergy declared force majeure on 2 Mar 2026 and repairs are estimated at 3-5 years. CONTRADICTION: one source reports helium prices DECLINED in Q2 2026 as routes improved, and no Q3 2026 price print could be obtained. Dated April 2026, so this reading is deliberately stale and weighted down. Source also: https://granitepointresearch.com/wp-content/uploads/2026/05/Helium-FOCUS-Report-20260511.pdf"
+        }
+      ],
+      "routes": [
+        {
+          "path": "Rebuild Qatari capacity",
+          "status": "blocked",
+          "source": "https://granitepointresearch.com/wp-content/uploads/2026/05/Helium-FOCUS-Report-20260511.pdf",
+          "note": "Repairs estimated at 3-5 years, with global stocks depleted after seven weeks of war and shipping lanes reportedly mined. No new non-Gulf capacity with dates or volumes could be sourced."
+        },
+        {
+          "path": "Fab-side helium recovery and recycling",
+          "status": "building",
+          "eta_months": 12,
+          "source": "https://www.cdhjgas.com/news/neon-6n-grade-prices-stabilize-post-crisis-as-semiconductor-fabs-achieve-70-90-recovery-rates-through-advanced-recycling",
+          "note": "Demand-side mitigation that is proven in the adjacent case: fabs achieved 70-90% on-site recovery for neon, which structurally removed that vulnerability after 2022. The same approach applies to helium, which is why this is recorded as a genuine partial route rather than blocked."
+        }
+      ],
+      "capture": {
+        "holder": "Linde, Air Liquide, Air Products, Nippon Sanso",
+        "share_pct": null,
+        "pricing_power": "contested",
+        "pricing_evidence": "Spot doubled, but helium contracts are typically long-dated so spot passes through slowly, and no electronics-segment margin evidence for any of the industrial gas majors could be sourced. Marked contested rather than demonstrated for that reason.",
+        "_gap": "No electronics end-market revenue share for any of the gas majors was found, and helium is a small line in each."
+      },
+      "names": [
+        {
+          "ticker": "LIN",
+          "name": "Linde",
+          "band": "minor",
+          "exposure": "Industrial and electronic gases including helium. Helium is a small line in a very large business.",
+          "source": ""
+        },
+        {
+          "ticker": "APD",
+          "name": "Air Products",
+          "band": "minor",
+          "exposure": "Industrial gases including helium.",
+          "source": ""
+        },
+        {
+          "ticker": "AI.PA",
+          "name": "Air Liquide",
+          "band": "minor",
+          "exposure": "Industrial and electronic gases including helium.",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "euv-mask-blanks",
+      "system": "intelligence",
+      "name": "EUV photomask blanks",
+      "verdict": "rejected",
+      "scarce_object": "Defect-free multilayer blanks for EUV photomasks",
+      "why": "A duopoly supplying a defect-critical input to every EUV layer.",
+      "rejected_because": "Hoya's own Q1 FY2026 presentation describes EUV blank demand as robust but contains no capacity utilisation figure, no supply-constraint statement, no lead time and no expansion timeline. Tellingly it is DUV blanks, not EUV, where Hoya cites the impact of high capacity utilisation. And adding a ¥42bn building for FY28 production is managing growth, not rationing a sold-out line. The rent is real — that segment runs a 55% operating margin — but the capacity is not the constraint, and mask blanks are not separately disclosed. Note also that no credible 2026-dated Hoya/AGC share split exists; the two available figures contradict each other. Source: https://finance.biggo.com/news/ir_7741.T_20260731_4f11eec74fb5",
+      "names": [
+        {
+          "ticker": "7741.T",
+          "name": "Hoya",
+          "band": "major",
+          "revenue_share_pct": 40,
+          "exposure": "EUV and DUV mask blanks inside Information & Communications, which is about 40% of revenue and 67% of group profit at a 55% operating margin — but also contains HDD glass and optics.",
+          "source": "https://finance.biggo.com/news/ir_7741.T_20260731_4f11eec74fb5"
+        }
+      ]
+    },
+    {
+      "id": "euv-pellicles",
+      "system": "intelligence",
+      "name": "EUV pellicles",
+      "verdict": "rejected",
+      "scarce_object": "Membranes protecting EUV photomasks at high source power",
+      "why": "A membrane that has to survive 1000W of EUV, from very few suppliers.",
+      "rejected_because": "Mitsui Chemicals' own release of 23 Apr 2026 is a NEDO DEVELOPMENT PROJECT — targeting 95% transmittance and durability of 10,000 wafers at 1000W — with no production volume, no investment figure and no mention of shortage or constraint anywhere in it. That is a technology gap being funded, not a capacity gap being rationed. Pellicle lead times, units per month and yields: no sourced figure found. Source: https://jp.mitsuichemicals.com/en/release/2026/2026_0423_2/index.htm",
+      "names": [
+        {
+          "ticker": "4183.T",
+          "name": "Mitsui Chemicals",
+          "band": "minor",
+          "exposure": "EUV pellicle development inside a large diversified chemicals group. Pellicle revenue is immaterial and undisclosed.",
+          "source": "https://jp.mitsuichemicals.com/en/release/2026/2026_0423_2/index.htm"
+        }
+      ]
+    },
+    {
+      "id": "neon",
+      "system": "intelligence",
+      "name": "Neon",
+      "verdict": "rejected",
+      "scarce_object": "High-purity neon for excimer laser gas mixtures",
+      "why": "The 2022 crisis input, and a standing worry ever since.",
+      "rejected_because": "Structurally fixed, and the fix is verifiable. 6N neon was around RMB 105/m³ in June 2026 against a crisis peak of RMB 60,000-80,000/m³, and fabs now recover and reuse 70-90% of neon on site. Two sources disagree on the absolute price by a factor of about 22 and one appears to misdate the peak, but both agree the direction is down and de-escalating. On-site recycling removed the 2022 vulnerability rather than merely easing it. Source: https://www.cdhjgas.com/news/neon-6n-grade-prices-stabilize-post-crisis-as-semiconductor-fabs-achieve-70-90-recovery-rates-through-advanced-recycling",
+      "names": []
+    },
+    {
+      "id": "antimony",
+      "system": "intelligence",
+      "name": "Antimony",
+      "verdict": "rejected",
+      "scarce_object": "Antimony metal and trioxide",
+      "why": "A critical mineral under Chinese export control, so worth testing.",
+      "rejected_because": "Fastmarkets, 7 Jan 2026: the 2026 market has 'ample supply' and is 'adequately supplied' rather than tight, with prices down from the July 2025 high of $59,750/tonne. And the end use is wrong for this map — about half is flame retardants, plus PV glass, cable and lead-acid batteries. It does not gate accelerators. Dated forward risk worth tracking rather than owning: China's suspension of its export ban to the US runs to 27 Nov 2026. Source: https://www.fastmarkets.com/insights/antimony-2026-ample-supply-strategic-demand-to-guide-geopolitical-oversight/",
+      "names": []
+    },
+    {
+      "id": "gallium-germanium",
+      "system": "intelligence",
+      "name": "Gallium and germanium",
+      "verdict": "rejected",
+      "scarce_object": "High-purity gallium and germanium metal",
+      "why": "The most severe export-control price dislocations anywhere in the supply chain.",
+      "rejected_because": "Real, severe and pointed at the wrong end market. Gallium 4N in Rotterdam reached $2,101.60/kg on 3 Mar 2026, up 123% year on year and 775% over the pre-control baseline, trading at 7-8x the China domestic price — the cleanest measure of export-control bite found anywhere. Germanium hit 26,500 CNY/kg on 11 Sep 2026, +84% year on year, with US warehouse material at $6,150/kg against $2,673/kg in China. But the end uses are GaAs and GaN radio frequency and power, infrared optics, fibre and SiGe. No evidence either gates accelerator, HBM or packaging production. The rent also accrues to Chinese refiners and licence-holding traders, not to listed Western equities. Source: https://galliumprice.com/market-data/price-today",
+      "names": []
+    },
+    {
+      "id": "robot-force-sensors",
+      "system": "motion",
+      "name": "Robot force and torque sensors",
+      "verdict": "rejected",
+      "scarce_object": "Six-axis force/torque and joint torque sensors for humanoid robots",
+      "why": "The obvious way to own the humanoid build-out without picking a robot: sell the sensor every joint needs. Tested because the Western incumbents ATI and Schunk look like a duopoly on paper.",
+      "rejected_because": "Three separate reasons, any one of which would be enough. First, the price umbrella has already broken: the domestic-versus-imported gap went from about 3x to roughly 10x in eighteen months, with Chinese six-axis at RMB 5,000-30,000 against international RMB 70,000-80,000, and one Hall-effect joint torque sensor launched at RMB 999. Second, the winners are not investable — the top three hold 92.8% of the Chinese humanoid segment with one supplier above 80%, and Bluedot, Kunwei, Yuli and Shenyuansheng are all private or subsidiary-held, while no six-axis maker has filed on the STAR Market. Korea's Aidin Robotics filed for KOSDAQ in Dec 2025 and would be the first pure robot-sensor listing anywhere, but is not listed yet. Third, and most damaging, the customers are integrating backwards: Unitree self-researches over 90% of core components and names no force-sensor supplier at all, and Fourier launched its own sub-RMB-5,000 unit rather than buying one. As a cross-check on the listed side, of twenty humanoid-exposed Chinese listed companies reviewed for H1 2026 only four disclosed any humanoid figure and none of the four is a force-sensor maker; where robot revenue is disclosed at all it is 1-3% of total. Sources: https://news.google.com/rss/articles/CBMiiAFBVV95cUxQSloyeGZ3b2xXbE41U0RtTHlENG1EVEFleV9GSmxqaVlEdEJKY1BsSnlDc2trU1JVZ093RjBueHdYd1Vta1Y5RmpuMEQ3OFdPd0NYQk1Kc1pvcWpXUGhMX2Ztd09YWHhiT2VLdTBPWDhyeDVZcnRtN1hybjRaSkllNGk5UXpGVnVN , https://news.google.com/rss/articles/CBMiU0FVX3lxTFBuZDZ6UklKYnFWQWJyTHNLWVRPVndwbjYyOW5TVENKcU1QQl9xbF9CSzNpdkhGRVRzWnVsVVBzMnVlRGM3RUpkb0x6MENaQXFZdXRF",
+      "names": [
+        {
+          "ticker": "NOVT",
+          "name": "Novanta",
+          "band": "minor",
+          "exposure": "Owns ATI Industrial Automation, the Western six-axis incumbent. Robotics and automation was $318.6m of $980.6m FY2025 revenue, and force/torque is not broken out within that — so the exposure is both small and unmeasurable, on top of facing the price collapse above.",
+          "source": ""
+        },
+        {
+          "ticker": "603662.SS",
+          "name": "Keli Sensing",
+          "band": "minor",
+          "exposure": "The clearest listed Chinese attempt, and it shows the problem: over 1,500 robot force sensors sold in 2025 and over 1,000 a month by early 2026, but no separate revenue line is disclosed for them at all.",
+          "source": "https://news.google.com/rss/articles/CBMiU0FVX3lxTFBuZDZ6UklKYnFWQWJyTHNLWVRPVndwbjYyOW5TVENKcU1QQl9xbF9CSzNpdkhGRVRzWnVsVVBzMnVlRGM3RUpkb0x6MENaQXFZdXRF"
+        }
+      ]
+    },
+    {
+      "id": "precision-bearings",
+      "system": "motion",
+      "name": "Precision bearings for robot joints",
+      "verdict": "rejected",
+      "scarce_object": "Crossed-roller and thin-section bearings for humanoid joints",
+      "why": "Every joint needs several, and the Japanese and German suppliers look concentrated.",
+      "rejected_because": "The tightness in this supply chain is real but it is AI semicap linear motion, not robot bearings, and three independent things say so. McKinsey classes standard bearings LOW bottleneck risk, noting that Bosch Rexroth, Hiwin and THK 'operate at significant industrial scale, providing sufficient overall capacity' — the acute item it names is planetary roller screws, not bearings. Schaeffler's Bearings and Industrial Solutions division grew 0.4% FX-adjusted in Q2 2026 and cut 1,650 heads over twelve months; a division shedding staff is not capacity constrained. And Nachi-Fujikoshi, which sells both under one roof, guides bearings +3.6% against robots +24.4%. THK's own margin bridge attributes ¥14.0bn of a ¥16.4bn first-half operating profit increase to VOLUME and only ¥0.7bn to variable cost ratio — operating leverage on semicap demand, not bearing price rent. The whole humanoid crossed-roller pool is sized around $16-23m for 2026, a rounding error against THK's ¥310bn. Sources: https://www.mckinsey.com/industries/industrials/our-insights/turning-humanoid-supply-chain-constraints-into-billion-dollar-wins , https://www.schaeffler.com/remotemedien/media/_shared_media_rwd/08_investor_relations/presentations/2026_q2_schaeffler_factbook.pdf , https://www.thk.com/jp/wordpress/wp-content/uploads/2026/08/Investor_Information_FY2026-2Q_en.pdf",
+      "names": [
+        {
+          "ticker": "6481.T",
+          "name": "THK",
+          "band": "pure",
+          "exposure": "Linear guides, ball screws and cross-roller rings. Backlog up 98.4% year on year — but the company attributes it to semiconductor capex, not robots.",
+          "source": "https://www.thk.com/jp/wordpress/wp-content/uploads/2026/08/Investor_Information_FY2026-2Q_en.pdf"
+        },
+        {
+          "ticker": "SHA.DE",
+          "name": "Schaeffler",
+          "band": "minor",
+          "exposure": "The one listed name with a disclosed humanoid order book, EUR 350m, and a named design win at XPeng Iron — but it sells actuator modules, not bearings, and the division holding it ran a −69.4% EBIT margin on EUR 0.2bn of FY2025 sales, about 1% of group.",
+          "source": "https://www.schaeffler.com/remotemedien/media/_shared_media_rwd/08_investor_relations/presentations/2026_q2_schaeffler_factbook.pdf"
+        }
+      ]
+    },
+    {
+      "id": "frameless-torque-motors",
+      "system": "motion",
+      "name": "Actuators and frameless torque motors",
+      "verdict": "rejected",
+      "scarce_object": "Frameless torque motors and integrated joint actuators",
+      "why": "The largest single line in a humanoid's bill of materials, at 40-60% by McKinsey's estimate.",
+      "rejected_because": "A cost problem and an input-cost problem, not an availability problem — and the cheap end is in stock while the expensive end is sold out. CubeMars lists frameless motors publicly at $51.90 to $171.90 with stock, and TQ-Group ships up to 50 units in two weeks; meanwhile every ROBOTIS DYNAMIXEL P-series SKU shows sold out at $1,897-3,542. On a dollars-per-newton-metre basis the Chinese planetary actuator is roughly fifteen times cheaper than the Korean integrated equivalent AND available. The pass-through pressure that does exist is magnets and copper, visible in four H1 2026 filings: Jiangsu Leili net profit −45.98% attributed to copper, aluminium and rare-earth prices, Zhaowei −34.10%, Zhongda Leader −40.09%, Inovance gross margin −0.49pp on raw material cost. The decisive test is an SEC full-text search of a year of filings: 'humanoid' plus 'frameless' returns ZERO filings; 'actuators' plus 'humanoid' returns exactly one, a rare-earth miner; 'torque motors' returns four, all Allient, which has never filed a document containing the word humanoid. And the two fastest-scaling makers internalised it — Figure designed its actuators completely in-house and says its disclosed ramp constraint was assembly throughput, not parts. Sources: https://www.cubemars.com/categorys/frameless-outrunner-torque-motor , https://www.figure.ai/news/ramping-figure-03-production",
+      "names": [
+        {
+          "ticker": "ALNT",
+          "name": "Allient",
+          "band": "minor",
+          "exposure": "The only US filer naming torque motors in its 10-K/10-Q — and it has zero filings containing 'humanoid'.",
+          "source": ""
+        },
+        {
+          "ticker": "300124.SZ",
+          "name": "Shenzhen Inovance",
+          "band": "minor",
+          "exposure": "China's number one general servo maker at about 35% share, with frameless motors in small-batch use at a leading humanoid maker. Its entire emerging-industries line is 5.9% of H1 2026 revenue, at a gross margin down 5.40 points.",
+          "source": ""
+        }
+      ]
+    }
+  ],
+  "_discredited_figures": [
+    {
+      "figure": "128 weeks / 144 weeks GSU / 60+ months HV transformer lead times",
+      "why": "Traced only to SEO trade blogs. The underlying real survey is Wood Mackenzie Q2 2025, and every 2026 article — including ones published in September 2026 — is recirculating it as if current. Use the BLS producer price indices instead."
+    },
+    {
+      "figure": "8-year gas turbine lead times; gas turbine prices up ~300% in three years",
+      "why": "The 300% claim traces to 24/7 Wall St with no baseline or methodology disclosed. Use GE Vernova's own disclosure: first-half 2026 orders priced more than 20% above Q4 2025."
+    },
+    {
+      "figure": "Satya Nadella on chips sitting in inventory that cannot be plugged in",
+      "why": "From the Bg2 Pod in NOVEMBER 2024, not a 2026 earnings call. At least one 2026 newsletter presents it as current."
+    },
+    {
+      "figure": "Ajinomoto functional materials sales +154%, profit +177%",
+      "why": "Misread of the primary deck, which labels its figures 'vs. the previous year' — 154% OF prior year is +54%, and +77% profit. Nearly triple the true growth rate is in circulation via Investing.com."
+    },
+    {
+      "figure": "Hoya expanded EUV mask blank capacity by 2.5 million units per year",
+      "why": "Global annual EUV mask blank demand is orders of magnitude below this. Fabricated or garbled."
+    },
+    {
+      "figure": "FC-BGA lead times of 20-28 weeks; Ibiden ~35% / Shinko ~18% / Unimicron ~14% substrate shares",
+      "why": "Chased to the article they are attributed to and they are NOT IN IT. Search-engine synthesis presented as reporting."
+    },
+    {
+      "figure": "High-NA EUV installs of 6-8 systems in 2025 and 12-15 in 2026",
+      "why": "ASML's audited annual report says 4 EXE units were recognised in 2025 and 2 in 2024. Reject the secondary figure."
+    },
+    {
+      "figure": "TSMC 2026 capex of TWD 60-64 billion (about $18.75-20 billion)",
+      "why": "Currency error by Investing.com. It is US$60-64bn."
+    },
+    {
+      "figure": "2,061 GW in the LBNL interconnection queue, quoted as current",
+      "why": "That is the 2025 edition using end-2024 data. Both emp.lbl.gov URLs return 403, so the 2026 figure is unverified. Note also the queue FELL 10% year on year on withdrawals — a scarcity metric that is going down."
+    },
+    {
+      "figure": "Any single-company HVDC cable market share percentage",
+      "why": "Vendor market-research estimates that contradict each other. Use the IEA's two-thirds and Offshore Magazine's 75% for the top three, and state the range."
+    },
+    {
+      "figure": "Lumentum at 50-60% of the global EML market; InP substrate concentration of ~75%",
+      "why": "The first is an analyst blog with no research-firm attribution. The second comes from a source that demonstrably conflates figures between Fabrinet and Marvell. Both excluded, which is why the InP entry's capture leg is unanswered."
+    },
+    {
+      "figure": "Any CoWoS wafers-per-month figure presented as TSMC-confirmed",
+      "why": "TSMC has never confirmed one. Estimates disagree by about 20% on the 2025 baseline and range 115k-140k for end-2026. Nvidia's 2026 allocation is variously 595k, 700k and 800-850k wafers."
+    },
+    {
+      "figure": "An ASML backlog figure for any quarter of 2026",
+      "why": "ASML discontinued quarterly bookings and backlog disclosure from Q1 2026. The newest official number is EUR 38.8bn at 31 Dec 2025. Any 2026 quarterly backlog is fabricated."
     }
   ]
 }

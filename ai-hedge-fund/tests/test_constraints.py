@@ -503,3 +503,40 @@ def test_concentration_remains_the_default() -> None:
 def test_an_unknown_rent_mechanism_is_refused() -> None:
     with pytest.raises(ConstraintError, match="unknown rent_mechanism"):
         capture_leg(pricing_power="demonstrated", rent_mechanism="vibes")
+
+
+# --- the discredited-figures guard -------------------------------------------
+
+
+def test_the_catalogue_records_figures_that_must_not_come_back() -> None:
+    """Numbers chased to their origin and found wrong are written down.
+
+    Several widely circulated figures dissolved on contact with primary
+    sources during research — transformer lead times that trace only to SEO
+    blogs, an Ajinomoto growth rate misread by a factor of three, substrate
+    market shares that are absent from the article they cite. Recording them
+    with the reason is what stops them being re-introduced by the next person
+    who finds them ranking well in a search.
+    """
+    raw = json.loads(cat.CATALOGUE_PATH.read_text(encoding="utf-8"))
+    discredited = raw.get("_discredited_figures", [])
+    assert discredited, "the guard list should not be silently emptied"
+    for entry in discredited:
+        assert entry.get("figure", "").strip(), "every entry names the figure"
+        assert len(entry.get("why", "").strip()) > 40, (
+            f"{entry.get('figure')!r} needs a reason specific enough to act on"
+        )
+
+
+def test_no_measurement_cites_a_figure_the_catalogue_has_discredited() -> None:
+    """The guard is load-bearing, not decorative.
+
+    Checks the specific numbers that were rejected during research do not
+    appear as live measurement values anywhere in the map.
+    """
+    banned = {128.0, 144.0, 2061.0}  # transformer/GSU lead-time weeks; the stale LBNL queue
+    for c in cat.load_catalogue():
+        for m in c.measurements:
+            assert m.value not in banned, (
+                f"{c.id}: measurement {m.metric!r} uses discredited value {m.value}"
+            )
