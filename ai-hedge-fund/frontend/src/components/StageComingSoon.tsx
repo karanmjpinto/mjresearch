@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { AppNav } from "@/components/AppNav";
 import { CompsField } from "@/components/CompsField";
+import { ConvictionChain } from "@/components/ConvictionChain";
 import { IntrinsicValue } from "@/components/IntrinsicValue";
 import { STAGES, type StageKey } from "@/lib/flow";
 
@@ -59,6 +60,7 @@ export function StageComingSoon({ stage }: { stage: Extract<StageKey, "lens" | "
           <div className="mt-xl flex flex-col gap-2xl border-t border-ink-line pt-lg">
             <CompsField ticker={ticker.toUpperCase()} />
             <IntrinsicValue ticker={ticker.toUpperCase()} />
+            <ConvictionChain ticker={ticker.toUpperCase()} />
           </div>
         )}
 

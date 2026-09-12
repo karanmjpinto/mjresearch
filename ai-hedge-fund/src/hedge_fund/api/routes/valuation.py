@@ -11,6 +11,14 @@ from hedge_fund.data.service import get_data_service
 from hedge_fund.valuation import implied_bands, summarise
 from hedge_fund.valuation.cost_of_capital import COMPANY_TYPES, CostOfCapitalError, build
 from hedge_fund.valuation.dcf import DCFError, Drivers, sensitivity, simulate, value
+from hedge_fund.valuation.conviction import (
+    EDGE_SOURCES,
+    ConvictionError,
+    conviction,
+    correction_leg,
+    fair_price_leg,
+    horizon_leg,
+)
 from hedge_fund.valuation.reference import ReferenceMissing
 
 logger = logging.getLogger(__name__)
@@ -297,3 +305,78 @@ async def intrinsic(
         "driver_notes": notes,
         "derived_but_overridable": missing,
     }
+
+
+@router.get("/conviction/{ticker}")
+async def conviction_chain(
+    ticker: str,
+    edge_source: str | None = Query(
+        None, description=f"Where the edge comes from: {', '.join(EDGE_SOURCES)}"
+    ),
+    margin_of_safety_pct: float | None = Query(
+        None, description="Left blank, it is taken from the comparable range."
+    ),
+    verified_ratio: float | None = Query(None, ge=0.0, le=1.0),
+    catalyst: str | None = Query(None),
+    catalyst_certainty: float | None = Query(None, ge=0.0, le=1.0),
+    finite_maturity: bool = Query(False),
+    friction_explained: bool = Query(False),
+    liquid: bool = Query(True),
+    days_to_catalyst: float | None = Query(None, gt=0),
+    holding_period_days: float | None = Query(None, gt=0),
+    recent_wins: int = Query(0, ge=0),
+) -> dict[str, Any]:
+    """The three requisites, multiplied — and what the weakest one allows.
+
+    Two of the three legs are judgments, so they are asked for rather than
+    derived. Only the margin of safety is filled in automatically, and only
+    because it is already computed next door.
+    """
+    t = ticker.strip().upper()
+
+    mos = margin_of_safety_pct
+    mos_source = "supplied"
+    if mos is None:
+        # The comparable range already knows the gap; no reason to ask twice.
+        try:
+            peers = _ds.get_peers(t)
+            price = _last_close(t)
+            if peers is not None and price:
+                metrics = dict(getattr(peers, "metrics", {}) or {})
+                bands, _ = implied_bands(
+                    price, dict(metrics.get(t) or {}), {k: v for k, v in metrics.items() if k != t}
+                )
+                s = summarise(bands, price)
+                if s.get("available") and s.get("mid"):
+                    mos = round((1 - price / float(s["mid"])) * 100, 2)
+                    mos_source = "from the comparable range"
+        except Exception as exc:  # a missing gap is not a reason to fail the chain
+            logger.debug("margin of safety lookup failed for %s: %s", t, exc)
+
+    try:
+        legs = [
+            fair_price_leg(
+                edge_source=edge_source,
+                margin_of_safety_pct=mos,
+                verified_ratio=verified_ratio,
+            ),
+            correction_leg(
+                catalyst=catalyst,
+                catalyst_certainty=catalyst_certainty,
+                finite_maturity=finite_maturity,
+                friction_explained=friction_explained,
+                liquid=liquid,
+            ),
+            horizon_leg(
+                days_to_catalyst=days_to_catalyst,
+                holding_period_days=holding_period_days,
+            ),
+        ]
+        result = conviction(legs, recent_wins=recent_wins)
+    except ConvictionError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+    result["ticker"] = t
+    result["margin_of_safety"] = {"value_pct": mos, "source": mos_source}
+    result["edge_sources_available"] = list(EDGE_SOURCES)
+    return result

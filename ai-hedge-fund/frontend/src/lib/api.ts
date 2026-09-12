@@ -711,6 +711,33 @@ export type Intrinsic =
       driver_notes: string[];
     };
 
+export type ConvictionLeg = {
+  key: "fair_price" | "correction" | "horizon";
+  label: string;
+  claim: string;
+  score: number | null;
+  detail: Record<string, unknown>;
+  open_questions: string[];
+};
+
+export type ConvictionChain = {
+  ticker: string;
+  legs: ConvictionLeg[];
+  margin_of_safety: { value_pct: number | null; source: string };
+  edge_sources_available: string[];
+} & (
+  | { available: false; reason: string; open_questions: string[]; unanswered: string[] }
+  | {
+      available: true;
+      score: number;
+      raw_product: number;
+      label: string;
+      weakest_leg: string;
+      structure: { allowed: string; because: string };
+      humility: { recent_wins: number; haircut: number; note: string };
+    }
+);
+
 export const api = {
   health: () => fetchJSON<{ status: string }>("/health"),
 
@@ -804,6 +831,16 @@ export const api = {
 
   getCompsRange: (ticker: string) =>
     fetchJSON<CompsRange>(`/valuation/comps/${encodeURIComponent(ticker)}`),
+
+  getConviction: (ticker: string, params: Record<string, string | number | boolean | undefined> = {}) => {
+    const q = Object.entries(params)
+      .filter(([, v]) => v !== undefined && v !== "")
+      .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`)
+      .join("&");
+    return fetchJSON<ConvictionChain>(
+      `/valuation/conviction/${encodeURIComponent(ticker)}${q ? `?${q}` : ""}`
+    );
+  },
 
   getIntrinsic: (ticker: string, params: Record<string, string | number | undefined> = {}) => {
     const q = Object.entries(params)
