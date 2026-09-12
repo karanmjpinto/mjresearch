@@ -989,6 +989,117 @@
           "source": "https://www.trendforce.com/news/2026/08/27/news-samsung-electro-mechanics-lg-innotek-ramp-up-ai-substrate-capacity-as-1h-utilization-reportedly-nears-90/"
         }
       ]
+    },
+    {
+      "id": "inp-laser-die",
+      "system": "intelligence",
+      "name": "Indium phosphide laser die",
+      "scarce_object": "InP wafers and the EML and continuous-wave laser die cut from them",
+      "why": "The most precisely located constraint in this map, because the supplier says exactly where it is. Coherent's CEO: 'Indium Phosphide capacity continues to be our primary constraint' — and in the same call, 'we are not constrained in the assembly and test capacity.' So the chokepoint is one layer above where most people look. Nvidia paid $2bn each to Coherent and Lumentum for capacity ACCESS RIGHTS, which is what you pay for when a good is rationed rather than sold.",
+      "measurements": [
+        {
+          "metric": "Lumentum shipments against customer demand for EML lasers",
+          "value": 130,
+          "unit": "index, demand = 100",
+          "normal": 100,
+          "as_of": "2026-08-11",
+          "source": "https://www.investing.com/news/transcripts/earnings-call-transcript-lumentum-tops-q4-2026-forecasts-as-ai-demand-lifts-outlook-93CH-4852933",
+          "note": "Lumentum's CEO said it is undershipping customer demand by roughly 30%, and that adding 20% of capacity did not close the gap — the imbalance widened. Reconfirmed on the 11 Aug 2026 call: 'we're still shipping behind customer demand on EML', with pump lasers 'effectively sold out for the foreseeable future'. Expressed as demand at 130 against shippable supply at 100. Note independent estimates of the gap range from 30% to 2x and cannot be reconciled; the 30% is the only one traceable to a named executive on a call."
+        },
+        {
+          "metric": "AXT gross margin, InP substrate supplier",
+          "value": 44.9,
+          "unit": "%",
+          "normal": 29.6,
+          "as_of": "2026-06-30",
+          "source": "https://www.stocktitan.net/news/AXTI/",
+          "note": "29.6% to 44.9% in a single quarter on record indium phosphide revenue, with revenue rising from $26.9m to $47.6m. A 15-point margin move in one quarter at the substrate layer is the cleanest evidence of where the squeeze actually sits."
+        }
+      ],
+      "routes": [
+        {
+          "path": "Silicon photonics instead of InP lasers",
+          "status": "blocked",
+          "source": "https://cignal.ai/2026/06/datacom-optical-component-revenue-doubles-to-7-7-billion-in-1q26/",
+          "note": "The obvious substitute, and it does not escape the constraint. Nearly all 1.6T modules now ship in silicon photonics configurations — but silicon cannot emit light, so they still need an external InP continuous-wave laser. Cignal AI has started forecasting the external-laser module market separately: over $100m in 2026 to more than $1.5bn a year by 2030. Silicon photonics moves the chokepoint from EML die to CW die. It stays inside InP."
+        },
+        {
+          "path": "Co-packaged optics",
+          "status": "blocked",
+          "source": "https://nvidianews.nvidia.com/news/vera-rubin-full-production-agentic-ai-factory",
+          "note": "Real and shipping — Nvidia declared Spectrum-X Ethernet Photonics in production on 31 May 2026 — but Nvidia's own claim is '4x fewer lasers', not zero, and both shipping platforms use external pluggable laser modules whose light source Nvidia names as Coherent's InP. It reduces laser count per port; it does not leave indium phosphide."
+        },
+        {
+          "path": "Copper instead of optics",
+          "status": "blocked",
+          "source": "https://www.sec.gov/Archives/edgar/data/1807794/000162828026043303/crdo-20260502.htm",
+          "note": "Bounded, and the vendor states the bound in its own 10-K: Credo's active electrical cables reach up to 7 metres across 100G through 1.6T, with microLED active LED cables extending to 30 metres. That covers scale-up inside a rack and cannot address scale-out. Worth noting the two best-informed parties flatly disagree — Credo's CEO describes copper replacing optics, while Ayar Labs' CEO said in the same month that copper is becoming the limiting factor."
+        },
+        {
+          "path": "Coherent's 3-inch to 6-inch InP wafer transition",
+          "status": "building",
+          "eta_months": 15,
+          "source": "https://www.theglobeandmail.com/investing/markets/stocks/COHR-N/pressreleases/3940280/coherent-cohr-q4-2026-earnings-call-transcript/",
+          "note": "The one route that genuinely relieves this, and it is the incumbent's own. InP laser output grew about 80% year on year, is set to double by the Sep-2026 quarter — a quarter ahead of plan — and more than double again by end-2027. Six-inch wafers give roughly 4x the usable area at about half the cost per device, with yields for EMLs, CW lasers and photodiodes already better on 6-inch than 3-inch. A $50m CHIPS letter of intent quadruples Sherman, Texas wafer capacity. Source also: https://www.stocktitan.net/news/COHR/coherent-announces-a-chips-letter-of-intent-for-50-million-to-expand-7rga9wc9u5or.html"
+        }
+      ],
+      "capture": {
+        "holder": "Coherent and Lumentum in laser die; AXT in substrate",
+        "share_pct": null,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "Margins, contracts and the buyer's own behaviour all point one way. Coherent's non-GAAP gross margin rose 215bp year on year to 40.2% with pricing 'agreed upon... out through the length of the LTA'; Lumentum's non-GAAP operating margin rose 2,160bp year on year to 36.6% on revenue up 109%, citing 'increased pricing on select products'. Lumentum prepaid AXT $43.5m, with a second $43.5m due in 2028, to reserve InP substrate through 2031 — you prepay for rationed goods. And Nvidia invested $2bn each in Coherent and Lumentum explicitly for 'future capacity access rights'. Independently, Cignal AI reports component shortages are slowing the usual price declines. Sources: https://www.sec.gov/Archives/edgar/data/0000820318/000119312526346860/d128030dex991.htm , https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Fourth-Quarter-and-Full-Fiscal-Year-2026-Results/default.aspx , https://www.sec.gov/Archives/edgar/data/1051627/000143774926024883/axti20260715_8k.htm , https://nvidianews.nvidia.com/news/nvidia-announces-strategic-partnership-with-lumentum-to-develop-state-of-the-art-optics-technology",
+        "_gap": "No verified market share. The figure in circulation — Lumentum at 50-60% of global EML — comes from an analyst blog with no research-firm attribution, and the InP substrate concentration figure traces to a source that demonstrably conflates data between companies. Both are excluded.",
+        "_note": "Dell'Oro independently called the AI back-end network market supply-constrained rather than demand-constrained for at least the next one to two years, 8 Sep 2026: https://lightwaveonline.com/home/article/55403498/ethernet-broadens-its-lead-in-ai-back-end-networks"
+      },
+      "names": [
+        {
+          "ticker": "LITE",
+          "name": "Lumentum Holdings",
+          "band": "pure",
+          "exposure": "EML and high-power CW laser die from two InP fabs in Japan plus a new US fab, and InP substrate reserved to 2031.",
+          "source": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Fourth-Quarter-and-Full-Fiscal-Year-2026-Results/default.aspx"
+        },
+        {
+          "ticker": "AXTI",
+          "name": "AXT Inc.",
+          "band": "pure",
+          "exposure": "Indium phosphide substrates — the wafer beneath every EML and CW laser. The smallest and least substitutable layer.",
+          "source": "https://www.sec.gov/Archives/edgar/data/1051627/000143774926024883/axti20260715_8k.htm"
+        },
+        {
+          "ticker": "COHR",
+          "name": "Coherent Corp.",
+          "band": "major",
+          "revenue_share_pct": 74,
+          "exposure": "InP laser die from its own 6-inch fabs, plus transceivers. Datacenter and communications was about 74% of FY2026 segment revenue and 79% of the June quarter.",
+          "source": "https://www.sec.gov/Archives/edgar/data/0000820318/000119312526346860/d128030dex991.htm"
+        },
+        {
+          "ticker": "CRDO",
+          "name": "Credo Technology",
+          "band": "major",
+          "exposure": "The copper alternative that bounds this constraint — active electrical cables to 7m, LED cables to 30m — plus 1.6T optical DSPs.",
+          "source": "https://www.sec.gov/Archives/edgar/data/1807794/000162828026043303/crdo-20260502.htm"
+        }
+      ]
+    },
+    {
+      "id": "optical-module-assembly",
+      "system": "intelligence",
+      "name": "Optical transceiver assembly",
+      "verdict": "rejected",
+      "scarce_object": "Contract assembly and test capacity for 800G and 1.6T transceivers",
+      "why": "The visible layer of the optics shortage, and the one most commentary points at.",
+      "rejected_because": "Both the customer and the contract manufacturer say otherwise. Coherent's CEO, 12 Aug 2026: 'we are not constrained... in the assembly and test capacity right now. We have that capacity available.' And Fabrinet, the largest independent optical contract manufacturer, earned a 12.2% non-GAAP gross margin in its June-2026 quarter — DOWN 30bp year on year on revenue up 45%. A genuine chokepoint does not have falling margins on record volume. Fabrinet is also adding capacity toward a stated $12.5-14bn potential run-rate against about $5.3bn today. The constraint is the laser die upstream, not the box it goes in. Sources: https://www.theglobeandmail.com/investing/markets/stocks/COHR-N/pressreleases/3940280/coherent-cohr-q4-2026-earnings-call-transcript/ , https://www.stocktitan.net/news/FN/fabrinet-announces-fourth-quarter-and-fiscal-year-2026-financial-vipiat88wd9l.html",
+      "names": [
+        {
+          "ticker": "FN",
+          "name": "Fabrinet",
+          "band": "pure",
+          "exposure": "Contract assembly and test of 800G and 1.6T transceivers; data centre was 48% of FY2026 revenue and Nvidia 16%. Thinnest margin in the chain, and falling.",
+          "source": "https://www.stocktitan.net/news/FN/fabrinet-announces-fourth-quarter-and-fiscal-year-2026-financial-vipiat88wd9l.html"
+        }
+      ]
     }
   ]
 }
