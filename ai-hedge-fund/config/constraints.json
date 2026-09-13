@@ -1582,7 +1582,7 @@
       "verdict": "rejected",
       "scarce_object": "Frameless torque motors and integrated joint actuators",
       "why": "The largest single line in a humanoid's bill of materials, at 40-60% by McKinsey's estimate.",
-      "rejected_because": "A cost problem and an input-cost problem, not an availability problem — and the cheap end is in stock while the expensive end is sold out. CubeMars lists frameless motors publicly at $51.90 to $171.90 with stock, and TQ-Group ships up to 50 units in two weeks; meanwhile every ROBOTIS DYNAMIXEL P-series SKU shows sold out at $1,897-3,542. On a dollars-per-newton-metre basis the Chinese planetary actuator is roughly fifteen times cheaper than the Korean integrated equivalent AND available. The pass-through pressure that does exist is magnets and copper, visible in four H1 2026 filings: Jiangsu Leili net profit −45.98% attributed to copper, aluminium and rare-earth prices, Zhaowei −34.10%, Zhongda Leader −40.09%, Inovance gross margin −0.49pp on raw material cost. The decisive test is an SEC full-text search of a year of filings: 'humanoid' plus 'frameless' returns ZERO filings; 'actuators' plus 'humanoid' returns exactly one, a rare-earth miner; 'torque motors' returns four, all Allient, which has never filed a document containing the word humanoid. And the two fastest-scaling makers internalised it — Figure designed its actuators completely in-house and says its disclosed ramp constraint was assembly throughput, not parts. Sources: https://www.cubemars.com/categorys/frameless-outrunner-torque-motor , https://www.figure.ai/news/ramping-figure-03-production",
+      "rejected_because": "A cost problem and an input-cost problem, not an availability problem — and the cheap end is in stock while the expensive end is sold out. CubeMars lists frameless motors publicly at $51.90 to $171.90 with stock, and TQ-Group ships up to 50 units in two weeks; meanwhile every ROBOTIS DYNAMIXEL P-series SKU shows sold out at $1,897-3,542. On a dollars-per-newton-metre basis the Chinese planetary actuator is roughly fifteen times cheaper than the Korean integrated equivalent AND available. The pass-through pressure that does exist is magnets and copper, visible in four H1 2026 filings: Jiangsu Leili net profit −45.98% attributed to copper, aluminium and rare-earth prices, Zhaowei −34.10%, Zhongda Leader −40.09%, Inovance gross margin −0.49pp on raw material cost. The decisive test is an SEC full-text search of a year of filings: 'humanoid' plus 'frameless' returns ZERO filings; 'actuators' plus 'humanoid' returns exactly one, a rare-earth miner; 'torque motors' returns four, all Allient, which has never filed a document containing the word humanoid. And the two fastest-scaling makers internalised it — Figure designed its actuators completely in-house and says its disclosed ramp constraint was assembly throughput, not parts. Sources: https://www.cubemars.com/categorys/frameless-outrunner-torque-motor , https://www.figure.ai/news/ramping-figure-03-production AND THE LEAD TIMES ARE NOW SOURCED, which is what this rejection was previously missing. Published distributor figures: Kollmorgen's current-generation TBM2G frameless motors quote about 9 weeks and the legacy TBM about 13 weeks; KEB Combivert S6 servo drives about 8 weeks with some SKUs in stock. Yaskawa states a normal AC servo lead time of about three months, currently running roughly one month longer. Nothing anywhere shows the six-to-twelve month servo lead times that circulate — this is lengthened, not broken. Sources: https://shop.oxni.ch/en/store/motoren/ddr/tbm and https://www.yaskawa-global.com/wp-content/uploads/2026/07/261Q_QA_EN.pdf Equally decisive: the order surge these companies are enjoying is semiconductor and data-centre demand, not humanoids. Mitsubishi's factory automation orders rose 42% year on year in the quarter to June 2026 after 30% the quarter before, attributed explicitly to semiconductor, electronic component and server capex; Yaskawa's semiconductor-related AC servo orders rose over 200% year on year. Humanoids are a rounding error in every disclosed figure. Source: https://www.MitsubishiElectric.com/en/pr/2026/pdf/0731_co2.pdf And Yaskawa's own constraint is neither capacity nor robots: utilisation sat below 75% in its June 2026 quarter because an ERP go-live halted production lines in May, costing about ¥2.5bn of operating profit, and management says plainly that floor space is not the issue — 'component supply could become a constraint. Servo products use many semiconductors.' It also volunteers that the market 'has some bubble-like characteristics'.",
       "names": [
         {
           "ticker": "ALNT",
@@ -1597,6 +1597,21 @@
           "band": "minor",
           "exposure": "China's number one general servo maker at about 35% share, with frameless motors in small-batch use at a leading humanoid maker. Its entire emerging-industries line is 5.9% of H1 2026 revenue, at a gross margin down 5.40 points.",
           "source": ""
+        },
+        {
+          "ticker": "NOVT",
+          "name": "Novanta",
+          "band": "minor",
+          "exposure": "The one real humanoid revenue event in this whole area, and the company sized it honestly: 'first significant orders of our servo drives to support the deployment of hundreds of humanoids' — from a small base, and explicitly 'not a significant part of what drove the margin this quarter'. Robotics revenue up 13.5%, but frameless motors and force sensing are not broken out.",
+          "source": "https://www.sec.gov/Archives/edgar/data/0001076930/000119312526335356/novt-ex99_1.htm"
+        },
+        {
+          "ticker": "6506.T",
+          "name": "Yaskawa Electric",
+          "band": "minor",
+          "revenue_share_pct": 43,
+          "exposure": "Motion Control was 43% of FY2025 revenue and is guided to a 15% operating margin. It has bought Tokyo Robotics and is developing humanoid actuators — with no revenue attached to them. About 25% of AC servo demand is semiconductors, which is what is actually moving.",
+          "source": "https://www.yaskawa-global.com/wp-content/uploads/2026/07/261Q_QA_EN.pdf"
         }
       ]
     }
@@ -1661,6 +1676,14 @@
     {
       "figure": "Harmonic reducer per-company shares of HDS 40.4% / Shimpo 14.7% / Leaderdrive 12.0% / Laifual 7.4%",
       "why": "Contradicts GGII's own top-four aggregate for the same market and traces only to brokerage blog posts with no originating research firm. Use the CIC table in Laifual's HKEX prospectus instead, which is a commissioned report but is at least named, dated and inside a regulated filing."
+    },
+    {
+      "figure": "Six-to-twelve month lead times for servo motors and frameless torque motors",
+      "why": "Not supported anywhere. The published figures are about 9 weeks for current-generation Kollmorgen TBM2G frameless, 13 weeks for the legacy TBM, 8 weeks for KEB S6 drives, and about four months for Yaskawa AC servo against a stated three-month norm. Lengthened, not broken — and the lengthening is semiconductor demand, not robots."
+    },
+    {
+      "figure": "Any Nidec figure dated after November 2025",
+      "why": "None exists. Nidec's most recent English disclosure is the quarter ended 30 Sep 2025; its full-year forecast is undetermined, and it carries an active third-party committee investigation into suspected inappropriate accounting which management itself says could have a 'material and pervasive impact' on the consolidated statements. Any Nidec-based supply-chain model is running on roughly ten-month-old numbers carrying restatement risk. Source: https://www.nidec.com/files/user/www-nidec-com/ir/library/earnings/2026/FY25Q2_2_en.pdf"
     }
   ]
 }
