@@ -40,7 +40,9 @@ function LegCard({ leg }: { leg: ConvictionLeg }) {
         <p className="mt-xs text-body-xs text-cadmium">Unanswered</p>
       ) : (
         <>
-          <p className="mt-xs font-display text-mark text-bone tabular">{score.toFixed(2)}</p>
+          <p className="mt-xs font-display text-mark text-bone tabular">
+            {score.toFixed(2)}
+          </p>
           <div className="mt-2xs h-1 rounded bg-ink" aria-hidden>
             <div
               className={`h-full rounded ${score < 0.3 ? "bg-oxide" : "bg-cobalt"}`}
@@ -70,22 +72,26 @@ export function ConvictionChain({ ticker }: { ticker: string }) {
     enabled: Boolean(ticker),
   });
 
-  const set = (k: keyof typeof form) => (v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const set = (k: keyof typeof form) => (v: string) =>
+    setForm((f) => ({ ...f, [k]: v }));
   const d = q.data;
 
   const input =
     "border border-ink-line bg-ink px-sm py-1.5 font-display text-label text-bone outline-none transition-colors placeholder:text-on-ink-faint focus:border-cobalt";
 
   return (
-    <section className="flex flex-col gap-md" aria-label={`Conviction for ${ticker}`}>
+    <section
+      className="flex flex-col gap-md"
+      aria-label={`Conviction for ${ticker}`}
+    >
       <div className="flex flex-col gap-2xs">
         <span className="font-display text-label uppercase tracking-label text-on-ink-faint">
           Conviction · three claims, multiplied
         </span>
         <p className="max-w-[72ch] text-body-xs text-on-ink-faint">
-          Your price is right, and the market corrects, and it corrects while you can still be
-          holding. One weak link caps the result, which is the point of multiplying rather than
-          averaging.
+          Your price is right, and the market corrects, and it corrects while
+          you can still be holding. One weak link caps the result, which is the
+          point of multiplying rather than averaging.
         </p>
       </div>
 
@@ -177,7 +183,8 @@ export function ConvictionChain({ ticker }: { ticker: string }) {
             className={input}
           />
           <span className="text-body-xs text-on-ink-faint">
-            A streak raises confidence without adding evidence, so it takes a haircut.
+            A streak raises confidence without adding evidence, so it takes a
+            haircut.
           </span>
         </label>
 
@@ -204,7 +211,10 @@ export function ConvictionChain({ ticker }: { ticker: string }) {
               <div key={leg.key} className="flex flex-1 items-center gap-xs">
                 <LegCard leg={leg} />
                 {i < d.legs.length - 1 && (
-                  <span aria-hidden className="font-display text-mark text-on-ink-faint">
+                  <span
+                    aria-hidden
+                    className="font-display text-mark text-on-ink-faint"
+                  >
                     ×
                   </span>
                 )}
@@ -234,20 +244,27 @@ export function ConvictionChain({ ticker }: { ticker: string }) {
             <div className="flex flex-col gap-xs">
               <p className="text-body-sm text-on-ink-soft">
                 Conviction{" "}
-                <span className="tabular text-bone">{(d.score * 100).toFixed(0)}%</span> —{" "}
-                {d.label}. Weakest link: <span className="text-on-ink">{d.weakest_leg}</span>.
+                <span className="tabular text-bone">
+                  {(d.score * 100).toFixed(0)}%
+                </span>{" "}
+                — {d.label}. Weakest link:{" "}
+                <span className="text-on-ink">{d.weakest_leg}</span>.
               </p>
               <div className="border border-ink-line bg-ink-raised p-sm">
                 <p className="font-display text-label uppercase tracking-label text-cobalt">
                   What this allows
                 </p>
-                <p className="mt-2xs text-body-sm text-on-ink">{d.structure.allowed}</p>
+                <p className="mt-2xs text-body-sm text-on-ink">
+                  {d.structure.allowed}
+                </p>
                 <p className="mt-2xs max-w-[72ch] text-body-xs text-on-ink-faint">
                   {d.structure.because}
                 </p>
               </div>
               {d.humility.haircut > 0 && (
-                <p className="max-w-[72ch] text-body-xs text-oxide">{d.humility.note}</p>
+                <p className="max-w-[72ch] text-body-xs text-oxide">
+                  {d.humility.note}
+                </p>
               )}
             </div>
           )}

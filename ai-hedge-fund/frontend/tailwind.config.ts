@@ -36,12 +36,12 @@ export default {
         "on-canvas": {
           DEFAULT: "oklch(26% 0.018 62 / <alpha-value>)",
           soft: "oklch(46% 0.022 64 / <alpha-value>)",
-          faint: "oklch(62% 0.020 66 / <alpha-value>)",
+          faint: "oklch(51.5% 0.020 66 / <alpha-value>)",
         },
         "on-ink": {
           DEFAULT: "oklch(92% 0.012 82 / <alpha-value>)",
           soft: "oklch(72% 0.014 76 / <alpha-value>)",
-          faint: "oklch(54% 0.014 70 / <alpha-value>)",
+          faint: "oklch(62% 0.014 70 / <alpha-value>)",
         },
 
         /* Legacy names kept so views not yet reworked stay coherent
@@ -65,12 +65,23 @@ export default {
       fontFamily: {
         display: ['"Departure Mono"', "ui-monospace", "monospace"],
         mono: ['"Departure Mono"', "ui-monospace", "monospace"],
-        sans: ['"Bricolage Grotesque"', "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: [
+          '"Bricolage Grotesque"',
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+        ],
       },
       fontSize: {
         /* Whole pixels: the display face is a bitmap and blurs off-grid. */
-        "display-xl": ["72px", { lineHeight: "1.02", letterSpacing: "-0.01em" }],
-        "display-lg": ["56px", { lineHeight: "1.05", letterSpacing: "-0.01em" }],
+        "display-xl": [
+          "72px",
+          { lineHeight: "1.02", letterSpacing: "-0.01em" },
+        ],
+        "display-lg": [
+          "56px",
+          { lineHeight: "1.05", letterSpacing: "-0.01em" },
+        ],
         "display-md": ["36px", { lineHeight: "1.1" }],
         "display-sm": ["24px", { lineHeight: "1.15" }],
 
@@ -103,8 +114,8 @@ export default {
         body: ["1rem", { lineHeight: "1.7" }],
         "body-sm": ["0.9375rem", { lineHeight: "1.65" }],
         "body-xs": ["0.875rem", { lineHeight: "1.6" }],
-        "title-sm": ["1.1875rem", { lineHeight: "1.3" }],
-        "title-xs": ["1.0625rem", { lineHeight: "1.35" }],
+        "title-sm": ["1.375rem", { lineHeight: "1.3" }],
+        "title-xs": ["1.1875rem", { lineHeight: "1.35" }],
 
         /* The chapter headings on the landing page. Fluid rather than a whole
          * pixel, which the note above warns against — at intermediate widths it
@@ -141,6 +152,13 @@ export default {
         "2xl": "var(--space-2xl)",
         "3xl": "var(--space-3xl)",
         "4xl": "var(--space-4xl)",
+      },
+      /* One declared light, from src/index.css. Named `elev` rather than
+       * `shadow` because the point is which surfaces sit above the ground,
+       * not that they have a shadow. */
+      boxShadow: {
+        "elev-1": "var(--elev-1)",
+        "elev-2": "var(--elev-2)",
       },
       transitionTimingFunction: {
         /* Exponential deceleration — things stop the way real objects do. */

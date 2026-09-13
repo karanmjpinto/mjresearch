@@ -83,7 +83,7 @@ function Validation({ v }: { v: ValidationView }) {
   );
 
   return (
-    <div className="border border-ink-line bg-ink-raised p-md">
+    <div className="border border-ink-line bg-ink-raised p-md shadow-elev-1">
       <div className="flex flex-wrap items-baseline justify-between gap-md">
         <p className="font-display text-label uppercase tracking-label text-on-ink-soft">
           Does it hold up?
@@ -291,6 +291,15 @@ export function ConstraintsView() {
 
   const d = q.data;
 
+  // Read every group defensively. The type says these are always present, but
+  // a type describes what the server should send rather than what it did: a
+  // frontend deployed either side of a backend change will meet a response
+  // missing a group, and reaching straight into it took down the whole page
+  // rather than hiding one section.
+  const curated = d?.curated?.constraints ?? [];
+  const mine = d?.from_your_notes?.constraints ?? [];
+  const dismissed = d?.checked_and_rejected?.constraints ?? [];
+
   return (
     <div className="flex min-h-dvh flex-col bg-ink">
       <AppNav active="screeners" />
@@ -361,7 +370,7 @@ export function ConstraintsView() {
                 <h2 className="font-display text-label uppercase tracking-label text-cadmium">
                   Researched
                   <span className="ml-xs text-on-ink-faint">
-                    {d.curated.constraints.length}
+                    {curated.length}
                   </span>
                 </h2>
                 <p className="mt-2xs max-w-[52ch] text-body-xs text-on-ink-faint">
@@ -369,13 +378,13 @@ export function ConstraintsView() {
                   evidence is there.
                 </p>
               </div>
-              {d.curated.note && (
+              {d.curated?.note && (
                 <p className="py-sm text-body-sm text-on-ink-soft">
-                  {d.curated.note}
+                  {d.curated?.note}
                 </p>
               )}
               <ul className="mt-sm flex flex-col gap-md">
-                {d.curated.constraints.map((c) => (
+                {curated.map((c) => (
                   <CuratedCard key={c.id} c={c} />
                 ))}
               </ul>
@@ -385,22 +394,20 @@ export function ConstraintsView() {
               <div className="border-b border-ink-line pb-xs">
                 <h2 className="font-display text-label uppercase tracking-label text-verdigris">
                   From your notes
-                  <span className="ml-xs text-on-ink-faint">
-                    {d.from_your_notes.constraints.length}
-                  </span>
+                  <span className="ml-xs text-on-ink-faint">{mine.length}</span>
                 </h2>
                 <p className="mt-2xs max-w-[52ch] text-body-xs text-on-ink-faint">
                   Subjects you already write about as constraints. Never scored
                   — a note is not a measurement.
                 </p>
               </div>
-              {d.from_your_notes.note && (
+              {d.from_your_notes?.note && (
                 <p className="py-sm max-w-[52ch] text-body-sm text-on-ink-soft">
-                  {d.from_your_notes.note}
+                  {d.from_your_notes?.note}
                 </p>
               )}
               <ul className="mt-sm flex flex-col gap-md">
-                {d.from_your_notes.constraints.map((c) => (
+                {mine.map((c) => (
                   <DerivedCard key={c.id} c={c} />
                 ))}
               </ul>
@@ -408,7 +415,7 @@ export function ConstraintsView() {
           </div>
         )}
 
-        {d && d.checked_and_rejected.constraints.length > 0 && (
+        {dismissed.length > 0 && (
           <section
             className="mt-2xl border-t border-ink-line pt-lg"
             aria-label="Checked and rejected"
@@ -420,14 +427,14 @@ export function ConstraintsView() {
               <summary className="cursor-pointer font-display text-label uppercase tracking-label text-on-ink-soft transition-colors hover:text-bone">
                 Checked and rejected
                 <span className="ml-xs text-on-ink-faint">
-                  {d.checked_and_rejected.constraints.length}
+                  {dismissed.length}
                 </span>
               </summary>
               <p className="mt-xs max-w-[72ch] text-body-xs text-on-ink-faint">
-                {d.checked_and_rejected.note}
+                {d?.checked_and_rejected?.note}
               </p>
               <ul className="mt-sm flex flex-col gap-sm">
-                {d.checked_and_rejected.constraints.map((c) => (
+                {dismissed.map((c) => (
                   <li key={c.id} className="border-l-2 border-ink-line pl-md">
                     <h3 className="font-display text-body-sm text-on-ink">
                       {c.name}

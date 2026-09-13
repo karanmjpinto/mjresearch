@@ -797,8 +797,11 @@ export type ConstraintSummary = {
 export type ConstraintMap = {
   systems: string[];
   filtered_to: string | null;
-  curated: { constraints: ConstraintSummary[]; note: string | null };
-  from_your_notes: { constraints: ConstraintSummary[]; note: string | null };
+  /** Optional on purpose: a frontend can be deployed either side of a backend
+   *  change, so the client must tolerate a group being absent rather than
+   *  crash the page reaching into it. */
+  curated?: { constraints: ConstraintSummary[]; note: string | null };
+  from_your_notes?: { constraints: ConstraintSummary[]; note: string | null };
   /** Negative results. Knowing a chokepoint was checked and did not hold is
    *  what stops the same idea being re-researched from scratch each quarter. */
   checked_and_rejected: {

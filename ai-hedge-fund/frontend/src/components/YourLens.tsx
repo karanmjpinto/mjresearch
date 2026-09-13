@@ -104,7 +104,7 @@ function CoverageBar({ data }: { data: LensView }) {
         : "bg-oxide";
 
   return (
-    <div className="border border-ink-line bg-ink-raised p-md">
+    <div className="border border-ink-line bg-ink-raised p-md shadow-elev-1">
       <div className="flex flex-wrap items-end justify-between gap-md">
         <div>
           <p className="font-display text-label uppercase tracking-label text-on-ink-soft">
@@ -154,7 +154,7 @@ export function YourLens({ ticker }: { ticker: string }) {
 
   if (q.error || !q.data) {
     return (
-      <div className="border border-oxide bg-ink-raised p-md">
+      <div className="border border-oxide bg-ink-raised p-md shadow-elev-1">
         <p className="font-display text-label uppercase tracking-label text-cadmium">
           Could not read your notes
         </p>
@@ -183,7 +183,7 @@ export function YourLens({ ticker }: { ticker: string }) {
   // "unavailable" message would send you looking for the wrong problem.
   if (d.unreadable) {
     return (
-      <div className="border border-dashed border-oxide bg-ink-raised p-md">
+      <div className="border border-dashed border-oxide bg-ink-raised p-md shadow-elev-1">
         {/* Amber, not oxide. Oxide text on this ground measures 2.76:1, below
             even the 3.0 floor for UI text — the border carries the alarm
             instead, where contrast is not load-bearing for reading. */}
@@ -201,7 +201,7 @@ export function YourLens({ ticker }: { ticker: string }) {
   // saying so plainly beats an empty panel that looks like a failed request.
   if (!d.configured) {
     return (
-      <div className="border border-dashed border-ink-line bg-ink-raised p-md">
+      <div className="border border-dashed border-ink-line bg-ink-raised p-md shadow-elev-1">
         <p className="font-display text-label uppercase tracking-label text-cadmium">
           No vault connected
         </p>
