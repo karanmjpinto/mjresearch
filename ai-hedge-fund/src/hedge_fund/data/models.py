@@ -137,6 +137,14 @@ class SectorPerformance(BaseModel):
     one_year: list[SectorChange] = Field(default_factory=list)
     source: str = "unknown"
 
+    #: What the percentages actually measure, in one sentence, from whoever
+    #: produced them. "Sector performance" names at least two different
+    #: statistics in common use — a cap-weighted index return and an average
+    #: across constituents — and they can differ by more than a factor of two
+    #: on the same sector over the same year. A number this ambiguous has to
+    #: carry its own definition to the screen.
+    basis: str = ""
+
 
 # ------------------------------------------------------------------
 # Fama-French factors

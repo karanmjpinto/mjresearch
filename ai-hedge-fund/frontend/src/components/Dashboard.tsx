@@ -51,16 +51,25 @@ export function Dashboard() {
     if (ticker) navigate(`/research/${ticker}`);
   };
 
-  const sectorData =
-    sectors.data?.realtime ??
-    sectors.data?.one_day ??
-    sectors.data?.five_day ??
-    [];
-  const sectorLabel = sectors.data?.realtime
-    ? "Real-time"
-    : sectors.data?.one_day
-      ? "1 Day"
-      : "5 Day";
+  /* Pick the shortest window that actually has rows.
+   *
+   * This was written with `??`, which only falls through on null or undefined —
+   * and the API always sends every window, empty ones as `[]`. So an empty
+   * `realtime` satisfied the coalesce, `sectorData` was permanently `[]`, and
+   * the label permanently read "Real-time". The panel would have stayed blank
+   * even once the data behind it was correct, which is why this and the
+   * provider had to be fixed together. `realtime` is now only ever populated
+   * by a genuine intraday feed; the ETF-derived provider leaves it empty and
+   * this falls through to the one-day ranking. */
+  const sectorWindows = [
+    { label: "Real-time", rows: sectors.data?.realtime },
+    { label: "1 day", rows: sectors.data?.one_day },
+    { label: "5 day", rows: sectors.data?.five_day },
+    { label: "Year to date", rows: sectors.data?.ytd },
+  ] as const;
+  const chosen = sectorWindows.find((w) => (w.rows?.length ?? 0) > 0);
+  const sectorData = chosen?.rows ?? [];
+  const sectorLabel = chosen?.label ?? "";
 
   const activeProviders = providers.data?.providers.filter((p) => p.available).length ?? 0;
   const totalProviders = providers.data?.providers.length ?? 0;
@@ -133,7 +142,16 @@ export function Dashboard() {
                     ? `${sectorData[0].sector}: ${sectorData[0].change_pct >= 0 ? "+" : ""}${sectorData[0].change_pct.toFixed(2)}%`
                     : "—"
               }
-              sub={sectors.isPending ? "Loading…" : sectorData.length > 0 ? "Top mover today" : "Unavailable"}
+              /* Not "today": the window shown is whichever one has data, and
+               * labelling a year-to-date leader as a daily mover would be a
+               * wrong statement rather than a vague one. */
+              sub={
+                sectors.isPending
+                  ? "Loading…"
+                  : sectorData.length > 0
+                    ? `Leader, ${sectorLabel.toLowerCase()}`
+                    : "Unavailable"
+              }
               href="#sectors"
               cta={sectorData.length > 0 ? "All sectors ↓" : ""}
             />
@@ -269,12 +287,22 @@ export function Dashboard() {
             <div id="sectors" className="bg-surface-card rounded-xl p-4 border border-border/60">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs text-gray-500 uppercase tracking-wider">Sector drift</p>
-                <span className="text-label text-gray-600">{sectorLabel}</span>
+                {/* No window chosen means no data; an empty span would still
+                  * take its place in the flex row and push the heading off
+                  * centre for no reason. */}
+                {sectorLabel && (
+                  <span className="text-label text-gray-600">{sectorLabel}</span>
+                )}
               </div>
+              {/* Every sector, not the top eight. A ranking exists to show
+                * both ends — the sector being sold is as much of a finding as
+                * the one being bought, and a silent slice put the bottom three
+                * out of reach with nothing to say they were missing. Eleven
+                * rows of 12px cost less vertical space than the truncation
+                * cost in information. */}
               {sectorData.length > 0 ? (
-                sectorData
+                [...sectorData]
                   .sort((a, b) => b.change_pct - a.change_pct)
-                  .slice(0, 8)
                   .map((s) => (
                     <div key={s.sector} className="flex justify-between py-0.5 text-label">
                       <span className="text-gray-400 truncate mr-2">{s.sector}</span>
@@ -293,10 +321,25 @@ export function Dashboard() {
                     </div>
                   ))
               ) : (
-                <p className="text-sm text-gray-500">Loading…</p>
+                /* "Loading…" was shown for the empty case too, so a panel with
+                 * no source behind it claimed to be still fetching — for as
+                 * long as the app stayed open. */
+                <p className="text-sm text-gray-500">
+                  {sectors.isPending
+                    ? "Loading…"
+                    : sectors.isError
+                      ? "Could not reach the sector feed."
+                      : "No sector data available."}
+                </p>
               )}
-              {sectors.data?.source && (
-                <p className="text-label text-gray-600 mt-2">{sectors.data.source}</p>
+              {/* The basis, not just the source name. "Sector performance"
+                * names at least two different statistics in common use, and
+                * they differ by more than a factor of two on the same sector
+                * over the same year — so the panel says which one this is. */}
+              {sectors.data?.basis && (
+                <p className="text-label text-gray-600 mt-2 leading-snug">
+                  {sectors.data.basis}
+                </p>
               )}
             </div>
 
