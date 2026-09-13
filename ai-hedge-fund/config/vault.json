@@ -1,0 +1,11 @@
+{
+  "_comment": "Which of your notes are lenses rather than subjects. The vault path itself is never stored here - this repository is public - it comes from VAULT_PATH in the environment.",
+  "framework_folders": [
+    "Investing"
+  ],
+  "framework_titles": [
+    "Technical Moat Assessment Framework",
+    "First Principles and Mental Models MoC",
+    "Maps of Content (MOCs)"
+  ]
+}

@@ -13,6 +13,8 @@ from hedge_fund.api.routes import (
     autoresearch,
     backtest,
     decisions,
+    constraints,
+    knowledge,
     data,
     methodology,
     optimize as optimize_route,
@@ -22,6 +24,7 @@ from hedge_fund.api.routes import (
     screeners,
     setup as setup_route,
     simulation,
+    valuation,
 )
 from hedge_fund.db.session import init_db
 from hedge_fund.settings import settings
@@ -64,6 +67,7 @@ app.add_middleware(
 
 app.include_router(data.router, prefix="/api/data", tags=["data"])
 app.include_router(research.router, prefix="/api/research", tags=["research"])
+app.include_router(valuation.router, prefix="/api/valuation", tags=["valuation"])
 app.include_router(simulation.router, prefix="/api/simulation", tags=["simulation"])
 app.include_router(portfolio.router, prefix="/api/portfolio", tags=["portfolio"])
 app.include_router(screeners.router, prefix="/api/screeners", tags=["screeners"])
@@ -74,6 +78,8 @@ app.include_router(methodology.router, prefix="/api/methodology", tags=["methodo
 app.include_router(setup_route.router, prefix="/api/setup", tags=["setup"])
 app.include_router(autoresearch.router, prefix="/api/autoresearch", tags=["autoresearch"])
 app.include_router(decisions.router, prefix="/api/decisions", tags=["decisions"])
+app.include_router(knowledge.router, prefix="/api/knowledge", tags=["knowledge"])
+app.include_router(constraints.router, prefix="/api/constraints", tags=["constraints"])
 
 
 @app.get("/api/health")

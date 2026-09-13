@@ -68,10 +68,7 @@ export function Dashboard() {
 
   return (
     <div className="flex flex-col h-dvh">
-      <AppNav
-        active="home"
-        end={<span className="text-xs text-gray-600 font-mono">Ollama · yfinance · EDGAR · MCP</span>}
-      />
+      <AppNav active="home" />
 
       <div className="grow overflow-y-auto">
         <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col gap-8">

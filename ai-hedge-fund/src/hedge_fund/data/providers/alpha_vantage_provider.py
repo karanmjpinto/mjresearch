@@ -62,6 +62,19 @@ class AlphaVantageProvider(BaseProvider):
                 logger.warning("Alpha Vantage rate limit or info: %s", data)
                 return None
 
+            # As of this writing Alpha Vantage answers `function=SECTOR` with a
+            # bare `{}` on a valid, non-rate-limited key: the endpoint has been
+            # retired. Say so, rather than returning an object whose every
+            # period is empty — the panel would read that as "no sector moved",
+            # which is a claim about the market instead of a gap in the feed.
+            if not any(k.startswith("Rank ") for k in data):
+                logger.warning(
+                    "Alpha Vantage returned no sector ranks (keys: %s). The SECTOR "
+                    "endpoint appears to be retired; sector drift is unavailable.",
+                    sorted(data) or "none",
+                )
+                return None
+
             def _parse_sector_data(period_data: dict) -> list[dict]:
                 if not period_data:
                     return []

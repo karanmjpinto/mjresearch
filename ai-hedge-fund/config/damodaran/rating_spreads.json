@@ -1,0 +1,297 @@
+{
+  "as_of": "2026-01-09",
+  "tables": {
+    "large_cap": {
+      "label": "If interest coverage ratio is If long term interest coverage ratio is",
+      "bands": [
+        {
+          "coverage_from": -100000.0,
+          "coverage_to": 0.199999,
+          "rating": "D2/D",
+          "spread": 0.19
+        },
+        {
+          "coverage_from": 0.2,
+          "coverage_to": 0.649999,
+          "rating": "C2/C",
+          "spread": 0.16
+        },
+        {
+          "coverage_from": 0.65,
+          "coverage_to": 0.799999,
+          "rating": "Ca2/CC",
+          "spread": 0.126101
+        },
+        {
+          "coverage_from": 0.8,
+          "coverage_to": 1.249999,
+          "rating": "Caa/CCC",
+          "spread": 0.0885
+        },
+        {
+          "coverage_from": 1.25,
+          "coverage_to": 1.499999,
+          "rating": "B3/B-",
+          "spread": 0.050899
+        },
+        {
+          "coverage_from": 1.5,
+          "coverage_to": 1.749999,
+          "rating": "B2/B",
+          "spread": 0.032098
+        },
+        {
+          "coverage_from": 1.75,
+          "coverage_to": 1.999999,
+          "rating": "B1/B+",
+          "spread": 0.027531
+        },
+        {
+          "coverage_from": 2.0,
+          "coverage_to": 2.2499999,
+          "rating": "Ba2/BB",
+          "spread": 0.018395
+        },
+        {
+          "coverage_from": 2.25,
+          "coverage_to": 2.49999,
+          "rating": "Ba1/BB+",
+          "spread": 0.013828
+        },
+        {
+          "coverage_from": 2.5,
+          "coverage_to": 2.999999,
+          "rating": "Baa2/BBB",
+          "spread": 0.011113
+        },
+        {
+          "coverage_from": 3.0,
+          "coverage_to": 4.249999,
+          "rating": "A3/A-",
+          "spread": 0.008872
+        },
+        {
+          "coverage_from": 4.25,
+          "coverage_to": 5.499999,
+          "rating": "A2/A",
+          "spread": 0.007751
+        },
+        {
+          "coverage_from": 5.5,
+          "coverage_to": 6.499999,
+          "rating": "A1/A+",
+          "spread": 0.007003
+        },
+        {
+          "coverage_from": 6.5,
+          "coverage_to": 8.499999,
+          "rating": "Aa2/AA",
+          "spread": 0.005506
+        },
+        {
+          "coverage_from": 8.5,
+          "coverage_to": 100000.0,
+          "rating": "Aaa/AAA",
+          "spread": 0.004
+        }
+      ]
+    },
+    "small_cap": {
+      "label": "If interest coverage ratio is",
+      "bands": [
+        {
+          "coverage_from": -100000.0,
+          "coverage_to": 0.499999,
+          "rating": "D2/D",
+          "spread": 0.19
+        },
+        {
+          "coverage_from": 0.5,
+          "coverage_to": 0.799999,
+          "rating": "C2/C",
+          "spread": 0.16
+        },
+        {
+          "coverage_from": 0.8,
+          "coverage_to": 1.249999,
+          "rating": "Ca2/CC",
+          "spread": 0.126101
+        },
+        {
+          "coverage_from": 1.25,
+          "coverage_to": 1.499999,
+          "rating": "Caa/CCC",
+          "spread": 0.0885
+        },
+        {
+          "coverage_from": 1.5,
+          "coverage_to": 1.999999,
+          "rating": "B3/B-",
+          "spread": 0.050899
+        },
+        {
+          "coverage_from": 2.0,
+          "coverage_to": 2.499999,
+          "rating": "B2/B",
+          "spread": 0.032098
+        },
+        {
+          "coverage_from": 2.5,
+          "coverage_to": 2.999999,
+          "rating": "B1/B+",
+          "spread": 0.027531
+        },
+        {
+          "coverage_from": 3.0,
+          "coverage_to": 3.499999,
+          "rating": "Ba2/BB",
+          "spread": 0.018395
+        },
+        {
+          "coverage_from": 3.5,
+          "coverage_to": 3.9999999,
+          "rating": "Ba1/BB+",
+          "spread": 0.013828
+        },
+        {
+          "coverage_from": 4.0,
+          "coverage_to": 4.499999,
+          "rating": "Baa2/BBB",
+          "spread": 0.011113
+        },
+        {
+          "coverage_from": 4.5,
+          "coverage_to": 5.999999,
+          "rating": "A3/A-",
+          "spread": 0.008872
+        },
+        {
+          "coverage_from": 6.0,
+          "coverage_to": 7.499999,
+          "rating": "A2/A",
+          "spread": 0.007751
+        },
+        {
+          "coverage_from": 7.5,
+          "coverage_to": 9.499999,
+          "rating": "A1/A+",
+          "spread": 0.007003
+        },
+        {
+          "coverage_from": 9.5,
+          "coverage_to": 12.499999,
+          "rating": "Aa2/AA",
+          "spread": 0.005506
+        },
+        {
+          "coverage_from": 12.5,
+          "coverage_to": 100000.0,
+          "rating": "Aaa/AAA",
+          "spread": 0.004
+        }
+      ]
+    },
+    "financial": {
+      "label": "For infrastructure companies/Utilities",
+      "bands": [
+        {
+          "coverage_from": -100000.0,
+          "coverage_to": 0.199999,
+          "rating": "D2/D",
+          "spread": 0.19
+        },
+        {
+          "coverage_from": 0.2,
+          "coverage_to": 0.499999,
+          "rating": "C2/C",
+          "spread": 0.16
+        },
+        {
+          "coverage_from": 0.5,
+          "coverage_to": 0.749999,
+          "rating": "Ca2/CC",
+          "spread": 0.126101
+        },
+        {
+          "coverage_from": 0.75,
+          "coverage_to": 0.999999,
+          "rating": "Caa/CCC",
+          "spread": 0.0885
+        },
+        {
+          "coverage_from": 1.0,
+          "coverage_to": 1.199999,
+          "rating": "B3/B-",
+          "spread": 0.050899
+        },
+        {
+          "coverage_from": 1.2,
+          "coverage_to": 1.399999,
+          "rating": "B2/B",
+          "spread": 0.032098
+        },
+        {
+          "coverage_from": 1.4,
+          "coverage_to": 1.599999,
+          "rating": "B1/B+",
+          "spread": 0.027531
+        },
+        {
+          "coverage_from": 1.6,
+          "coverage_to": 1.799999,
+          "rating": "Ba2/BB",
+          "spread": 0.018395
+        },
+        {
+          "coverage_from": 1.8,
+          "coverage_to": 1.999999,
+          "rating": "Ba1/BB+",
+          "spread": 0.013828
+        },
+        {
+          "coverage_from": 2.0,
+          "coverage_to": 2.249999,
+          "rating": "Baa2/BBB",
+          "spread": 0.011113
+        },
+        {
+          "coverage_from": 2.25,
+          "coverage_to": 2.999999,
+          "rating": "A3/A-",
+          "spread": 0.008872
+        },
+        {
+          "coverage_from": 3.0,
+          "coverage_to": 3.499999,
+          "rating": "A2/A",
+          "spread": 0.007751
+        },
+        {
+          "coverage_from": 3.5,
+          "coverage_to": 3.999999,
+          "rating": "A1/A+",
+          "spread": 0.007003
+        },
+        {
+          "coverage_from": 4.0,
+          "coverage_to": 4.49999,
+          "rating": "Aa2/AA",
+          "spread": 0.005506
+        },
+        {
+          "coverage_from": 4.5,
+          "coverage_to": 100000.0,
+          "rating": "Aaa/AAA",
+          "spread": 0.004
+        }
+      ]
+    }
+  },
+  "provenance": {
+    "source": "https://pages.stern.nyu.edu/~adamodar/pc/datasets/ratings.xls",
+    "file": "ratings.xls",
+    "sheet": "Start here Ratings sheet",
+    "retrieved": "2026-09-13",
+    "note": "Published by Aswath Damodaran (NYU Stern). Vendored so a valuation does not change because a spreadsheet updated overnight."
+  }
+}

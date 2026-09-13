@@ -13,7 +13,8 @@
  * see: the rail is what changes how this feels, not the URL.
  */
 
-export type StageKey = "ticker" | "story" | "numbers" | "lens" | "value" | "play";
+export type StageKey =
+  "ticker" | "story" | "numbers" | "lens" | "value" | "play";
 
 /** Stages with a screen of their own — every key except the entry step. */
 export type DestinationKey = Exclude<StageKey, "ticker">;
@@ -66,7 +67,7 @@ export const STAGES: readonly Stage[] = [
     label: "Your lens",
     question: "What do I already know here?",
     segment: "lens",
-    status: "planned",
+    status: "live",
   },
   {
     key: "value",
@@ -97,7 +98,7 @@ export type DestinationStage = Stage & { key: DestinationKey; segment: string };
  * that the entry step is not in this list, which the filter already guarantees.
  */
 export const DESTINATIONS: readonly DestinationStage[] = STAGES.filter(
-  (s): s is DestinationStage => s.segment !== null
+  (s): s is DestinationStage => s.segment !== null,
 );
 
 const BY_SEGMENT = new Map(DESTINATIONS.map((s) => [s.segment, s.key]));
@@ -110,7 +111,9 @@ export function stagePath(key: DestinationKey, ticker: string): string {
   const stage = DESTINATIONS.find((s) => s.key === key);
   if (!stage) throw new Error(`unknown stage: ${key}`);
   const clean = ticker.trim().toUpperCase();
-  return clean ? `/${stage.segment}/${encodeURIComponent(clean)}` : `/${stage.segment}`;
+  return clean
+    ? `/${stage.segment}/${encodeURIComponent(clean)}`
+    : `/${stage.segment}`;
 }
 
 /**
@@ -130,14 +133,19 @@ export function stageFor(pathname: string): StageKey | null {
 /** Matches a flow route carrying a symbol, for pulling the symbol back out. */
 export const TICKER_PATH_RE = new RegExp(
   `^/(${DESTINATIONS.map((s) => s.segment).join("|")})/([^/?#]+)`,
-  "i"
+  "i",
 );
 
 /**
  * Everything that is not about one company. These keep working untouched; they
  * just stop competing for attention with the flow.
  */
-export const OTHER_DESTINATIONS: readonly { to: string; key: string; label: string }[] = [
+export const OTHER_DESTINATIONS: readonly {
+  to: string;
+  key: string;
+  label: string;
+}[] = [
+  { to: "/constraints", key: "constraints", label: "Find a constraint" },
   { to: "/dashboard", key: "home", label: "Dashboard" },
   { to: "/screeners", key: "screeners", label: "Screeners" },
   { to: "/portfolio", key: "portfolio", label: "Portfolio" },

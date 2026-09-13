@@ -320,7 +320,12 @@ export interface BacktestResult {
   params: Record<string, number>;
   start_date: string;
   end_date: string;
-  equity_curve: Array<{ date: string; equity: number; benchmark: number; position: number }>;
+  equity_curve: Array<{
+    date: string;
+    equity: number;
+    benchmark: number;
+    position: number;
+  }>;
   metrics: BacktestMetrics;
   benchmark_metrics: BacktestMetrics;
   trades: BacktestTrade[];
@@ -378,7 +383,6 @@ export interface OptimizeResult {
 // ------------------------------------------------------------------
 // API methods
 // ------------------------------------------------------------------
-
 
 // --- Plan pipeline ---
 
@@ -447,7 +451,11 @@ export interface PlanResult {
   ai_full?: Record<string, unknown>;
   evaluation?: { notes?: string[]; narrative_grounded?: boolean };
   verification?: Verification;
-  plan?: { question: string; nodes: PlanNodeSpec[]; clarifications: PlanClarification[] };
+  plan?: {
+    question: string;
+    nodes: PlanNodeSpec[];
+    clarifications: PlanClarification[];
+  };
   execution?: {
     plan_hash: string;
     snapshot_sha256: string;
@@ -465,7 +473,11 @@ export interface PlanResult {
   planner_model?: string;
   run_uid?: string;
   ai_error?: { error: string; message: string };
-  data_quality?: { providers_used: string[]; warning_count: number; warnings: string[] };
+  data_quality?: {
+    providers_used: string[];
+    warning_count: number;
+    warnings: string[];
+  };
 }
 
 export interface MetricSignature {
@@ -473,11 +485,15 @@ export interface MetricSignature {
   label: string;
   tier: string;
   description: string;
-  params: { name: string; type: string; description: string; default?: unknown }[];
+  params: {
+    name: string;
+    type: string;
+    description: string;
+    default?: unknown;
+  }[];
   outputs: { name: string; type: string; description: string; unit?: string }[];
   notes?: string;
 }
-
 
 // --- Setup ---
 
@@ -497,7 +513,12 @@ export interface SetupKey {
 
 export interface SetupInfo {
   keys: SetupKey[];
-  providers: { name: string; available: boolean; categories: string[]; priority: number }[];
+  providers: {
+    name: string;
+    available: boolean;
+    categories: string[];
+    priority: number;
+  }[];
   summary: {
     providers_working: number;
     providers_total: number;
@@ -571,7 +592,6 @@ export interface RunSummary {
   harness?: Record<string, unknown>;
 }
 
-
 // --- Decisions ---
 
 export interface SizingAssessment {
@@ -611,7 +631,10 @@ export interface DecisionRow {
   proposed_weight_pct: number | null;
   price_at_decision: number | null;
   sizing: SizingAssessment | null;
-  portfolio_context: { total_value?: number; holdings?: { ticker: string; weight_pct: number }[] } | null;
+  portfolio_context: {
+    total_value?: number;
+    holdings?: { ticker: string; weight_pct: number }[];
+  } | null;
   research_run_uid: string | null;
   review_note: string | null;
   created_at: string | null;
@@ -623,23 +646,323 @@ export interface DecisionRow {
   };
 }
 
+/** One multiple's implied value range for the subject. */
+export type CompsBand = {
+  metric: string;
+  label: string;
+  low: number;
+  mid: number;
+  high: number;
+  peer_count: number;
+  subject_multiple: number;
+  /** The per-share quantity recovered from the subject's own multiple. */
+  per_share: number;
+  peer_multiple: { low: number; mid: number; high: number };
+  /** False when the subject's multiple is too far from the peer set to compare. */
+  applicable: boolean;
+  note: string | null;
+};
+
+export type CompsRange = {
+  ticker: string;
+  price: number | null;
+  /** "curated" when the peer set was hand-picked, "sic" when inherited. */
+  basis: string;
+  vetted: boolean;
+  as_of: string | null;
+  peers: string[];
+  bands: CompsBand[];
+  dropped: { metric: string; reason: string; usable_peers: number }[];
+  summary: {
+    available: boolean;
+    reason?: string;
+    low?: number;
+    mid?: number;
+    high?: number;
+    price?: number;
+    position?: string;
+    upside_to_mid_pct?: number;
+    methods?: number;
+    excluded?: string[];
+    inapplicable?: string[];
+  };
+};
+
+export type CostOfCapital = {
+  cost_of_equity_pct: number | null;
+  cost_of_debt_after_tax_pct: number | null;
+  wacc_pct: number | null;
+  steps: string[];
+  missing: string[];
+  inputs: Record<string, unknown>;
+};
+
+export type Intrinsic =
+  | {
+      ticker: string;
+      available: false;
+      reason: string;
+      /** Drivers that could not be derived and must be supplied. */
+      missing: string[];
+      cost_of_capital: CostOfCapital;
+      notes?: string[];
+    }
+  | {
+      ticker: string;
+      name?: string | null;
+      available: true;
+      price: number | null;
+      base_case: {
+        value_per_share: number;
+        terminal_share_of_value: number;
+        inputs: Record<string, number | null>;
+        years: Record<string, number>[];
+      };
+      distribution: {
+        runs: number;
+        rejected: number;
+        seed: number;
+        percentiles: Record<string, number>;
+        histogram: { from: number; to: number; count: number }[];
+        price?: number;
+        probability_value_above_price?: number;
+        median_upside_pct?: number;
+        independence_note: string;
+      };
+      cost_of_capital: CostOfCapital;
+      cost_of_capital_note: string;
+      driver_notes: string[];
+    };
+
+export type ConcentrationRow = {
+  ticker: string;
+  weight_pct: number;
+  /** null when the position is above the policy ceiling entirely. */
+  claims_at_least: number | null;
+  off_the_scale: boolean;
+  band_max_pct?: number;
+  finding: string;
+  stated_conviction?: number;
+  allowed_weight_pct?: number;
+  overclaimed?: boolean;
+  gap_note?: string;
+};
+
+export type ConcentrationView = {
+  ticker: string;
+  available: boolean;
+  /** Present when unavailable — an unanswered chain yields no size at all. */
+  reason?: string;
+  open_questions?: string[];
+  conviction?: number;
+  band?: {
+    max_weight_pct: number;
+    because: string;
+    implied_names: number;
+    implied_names_note: string;
+  };
+  structure?: { allowed: string; because: string } | null;
+  book?: {
+    positions: number;
+    rows: ConcentrationRow[];
+    overclaimed?: string[];
+    finding: string;
+  };
+  /** Holdings left out of the comparison, and why. Never silently partial. */
+  book_excluded?: string[];
+  book_excluded_note?: string;
+  book_note?: string;
+};
+
+export type LegView = {
+  key: string;
+  label: string;
+  claim: string;
+  /** null means unanswered. A blank is not a zero and not a pass. */
+  score: number | null;
+  detail: Record<string, unknown>;
+  open_questions: string[];
+};
+
+export type ValidationView = {
+  available: boolean;
+  reason?: string;
+  /** Absent when `available` is false — an unvalidated constraint has no score
+   *  at all rather than a zero, so the field is not sent. */
+  score?: number;
+  label?: "strong" | "partial" | "weak";
+  weakest_leg?: string;
+  structure?: { allowed: string; because: string };
+  legs?: LegView[];
+  unanswered?: string[];
+  open_questions?: string[];
+};
+
+export type ConstraintName = {
+  ticker: string;
+  name: string;
+  exposure: string;
+  band: "pure" | "major" | "minor";
+  band_means: string;
+  revenue_share_pct: number | null;
+  source: string;
+};
+
+export type ConstraintSummary = {
+  id: string;
+  /** null for a vault-derived candidate: your notes do not sort themselves. */
+  system: string | null;
+  name: string;
+  source: "curated" | "your notes";
+  why: string;
+  /** "rejected" means checked and answered in the negative — kept on purpose. */
+  verdict?: "open" | "rejected";
+  rejected_because?: string;
+  validation: ValidationView;
+  /** Curated entries only. */
+  scarce_object?: string;
+  name_count?: number;
+  /** Vault-derived entries only. */
+  note_count?: number;
+  flagged_count?: number;
+  notes?: { title: string; path: string }[];
+  evidence_in_your_words?: {
+    title: string;
+    path: string;
+    term: string;
+    quote: string;
+  }[];
+};
+
+export type ConstraintMap = {
+  systems: string[];
+  filtered_to: string | null;
+  /** Optional on purpose: a frontend can be deployed either side of a backend
+   *  change, so the client must tolerate a group being absent rather than
+   *  crash the page reaching into it. */
+  curated?: { constraints: ConstraintSummary[]; note: string | null };
+  from_your_notes?: { constraints: ConstraintSummary[]; note: string | null };
+  /** Negative results. Knowing a chokepoint was checked and did not hold is
+   *  what stops the same idea being re-researched from scratch each quarter. */
+  checked_and_rejected: {
+    constraints: ConstraintSummary[];
+    note: string | null;
+  };
+};
+
+export type ConstraintCandidates = {
+  constraint: { id: string; name: string; system: string };
+  validation: ValidationView;
+  ranked_by: string;
+  names: ConstraintName[];
+};
+
+export type LensMatch = {
+  kind: "company" | "theme" | "framework";
+  title: string;
+  path: string;
+  /** The rule that surfaced this note. Never empty — a match with no stated
+   *  reason is indistinguishable from a coincidence of words. */
+  reason: string;
+  tags: string[];
+};
+
+export type LensCoverage = {
+  score: number;
+  label: "direct" | "thematic" | "none";
+  company_notes: number;
+  theme_notes: number;
+  frameworks_available: number;
+  finding: string;
+};
+
+export type LensView = {
+  ticker: string;
+  /** False when no vault is configured. A state, not an error: the rest of the
+   *  flow does not depend on a personal folder existing on this machine. */
+  configured: boolean;
+  /** True when a vault is configured but the folder did not answer in time —
+   *  an unmounted drive, or a process without permission to read it. A
+   *  different problem from having no vault, and a different fix. */
+  unreadable?: boolean;
+  finding: string;
+  coverage: LensCoverage;
+  company: LensMatch[];
+  themes: LensMatch[];
+  frameworks: LensMatch[];
+  /** How many rows each group hid, keyed to match the group names above. */
+  truncated?: { company: number; themes: number; frameworks: number };
+  /** Counts only — the vault path is deliberately absent from the response. */
+  vault?: { notes: number; built_at?: string };
+  subject?: {
+    name: string | null;
+    sector: string | null;
+    industry: string | null;
+  };
+};
+
+export type ConvictionLeg = {
+  key: "fair_price" | "correction" | "horizon";
+  label: string;
+  claim: string;
+  score: number | null;
+  detail: Record<string, unknown>;
+  open_questions: string[];
+};
+
+export type ConvictionChain = {
+  ticker: string;
+  legs: ConvictionLeg[];
+  margin_of_safety: { value_pct: number | null; source: string };
+  edge_sources_available: string[];
+} & (
+  | {
+      available: false;
+      reason: string;
+      open_questions: string[];
+      unanswered: string[];
+    }
+  | {
+      available: true;
+      score: number;
+      raw_product: number;
+      label: string;
+      weakest_leg: string;
+      structure: { allowed: string; because: string };
+      humility: { recent_wins: number; haircut: number; note: string };
+    }
+);
+
 export const api = {
   health: () => fetchJSON<{ status: string }>("/health"),
 
   // --- Runs ---
 
   getRuns: (ticker?: string, limit = 20) =>
-    fetchJSON<{ count: number; runs: { run_uid: string; ticker: string; mode: string; output?: { conviction_score?: number; stance?: string }; created_at: string }[] }>(
-      `/runs?limit=${limit}${ticker ? `&ticker=${encodeURIComponent(ticker)}` : ""}`
+    fetchJSON<{
+      count: number;
+      runs: {
+        run_uid: string;
+        ticker: string;
+        mode: string;
+        output?: { conviction_score?: number; stance?: string };
+        created_at: string;
+      }[];
+    }>(
+      `/runs?limit=${limit}${ticker ? `&ticker=${encodeURIComponent(ticker)}` : ""}`,
     ),
 
   // --- Decisions ---
 
-  sizePosition: (body: { ticker: string; amount?: number; weight_pct?: number }) =>
-    postJSON<{ assessment: SizingAssessment; portfolio: Record<string, unknown> }>(
-      "/decisions/size",
-      body
-    ),
+  sizePosition: (body: {
+    ticker: string;
+    amount?: number;
+    weight_pct?: number;
+  }) =>
+    postJSON<{
+      assessment: SizingAssessment;
+      portfolio: Record<string, unknown>;
+    }>("/decisions/size", body),
 
   recordDecision: (body: {
     ticker: string;
@@ -653,7 +976,7 @@ export const api = {
 
   getDecisions: (ticker?: string, limit = 100) =>
     fetchJSON<{ count: number; decisions: DecisionRow[] }>(
-      `/decisions?limit=${limit}${ticker ? `&ticker=${encodeURIComponent(ticker)}` : ""}`
+      `/decisions?limit=${limit}${ticker ? `&ticker=${encodeURIComponent(ticker)}` : ""}`,
     ),
 
   // --- Setup ---
@@ -661,9 +984,12 @@ export const api = {
   getSetup: () => fetchJSON<SetupInfo>("/setup"),
 
   saveKeys: (updates: { env: string; value: string }[]) =>
-    postJSON<{ ok: boolean; written: string[]; restart_required: boolean }>("/setup/keys", {
-      updates,
-    }),
+    postJSON<{ ok: boolean; written: string[]; restart_required: boolean }>(
+      "/setup/keys",
+      {
+        updates,
+      },
+    ),
 
   // --- Autoresearch ---
 
@@ -671,26 +997,33 @@ export const api = {
 
   getExperiments: (runTag?: string, limit = 100) =>
     fetchJSON<{ count: number; experiments: ExperimentRow[] }>(
-      `/autoresearch/experiments?limit=${limit}${runTag ? `&run_tag=${encodeURIComponent(runTag)}` : ""}`
+      `/autoresearch/experiments?limit=${limit}${runTag ? `&run_tag=${encodeURIComponent(runTag)}` : ""}`,
     ),
 
   getRunSummary: (runTag: string) =>
-    fetchJSON<RunSummary>(`/autoresearch/summary/${encodeURIComponent(runTag)}`),
+    fetchJSON<RunSummary>(
+      `/autoresearch/summary/${encodeURIComponent(runTag)}`,
+    ),
 
-  getLoopStatus: () => fetchJSON<{ running: string[]; busy: boolean }>("/autoresearch/status"),
+  getLoopStatus: () =>
+    fetchJSON<{ running: string[]; busy: boolean }>("/autoresearch/status"),
 
   startLoop: (body: {
     run_tag: string;
     tickers: string[];
     experiments?: number;
     days?: number;
-  }) => postJSON<{ started: boolean; run_tag: string; poll: string }>("/autoresearch/run", body),
+  }) =>
+    postJSON<{ started: boolean; run_tag: string; poll: string }>(
+      "/autoresearch/run",
+      body,
+    ),
 
   // --- Plan pipeline ---
 
   getMetricCatalog: () =>
     fetchJSON<{ count: number; tiers: string[]; metrics: MetricSignature[] }>(
-      "/research/metrics"
+      "/research/metrics",
     ),
 
   runPlan: (body: {
@@ -701,43 +1034,106 @@ export const api = {
     plan_override?: unknown;
   }) => postJSON<PlanResult>("/research/plan", body),
 
-
   // --- Original 5 data endpoints ---
 
   getPrice: (ticker: string, days = 365) =>
-    fetchJSON<{ ticker: string; count: number; data: Record<string, unknown>[] }>(
-      `/data/price/${ticker}?days=${days}`
-    ),
+    fetchJSON<{
+      ticker: string;
+      count: number;
+      data: Record<string, unknown>[];
+    }>(`/data/price/${ticker}?days=${days}`),
 
   getFundamentals: (ticker: string) =>
     fetchJSON<Record<string, unknown>>(`/data/fundamentals/${ticker}`),
+
+  // --- Constraints: the way in with no ticker ---
+
+  getConstraints: (system?: string | null) =>
+    fetchJSON<ConstraintMap>(
+      `/constraints${system ? `?system=${encodeURIComponent(system)}` : ""}`,
+    ),
+
+  getConstraintCandidates: (id: string) =>
+    fetchJSON<ConstraintCandidates>(
+      `/constraints/${encodeURIComponent(id)}/candidates`,
+    ),
+
+  // --- Your own notes (stage 04) ---
+
+  getLens: (ticker: string) =>
+    fetchJSON<LensView>(`/knowledge/lens/${encodeURIComponent(ticker)}`),
+
+  getVaultStatus: () =>
+    fetchJSON<{ configured: boolean; notes: number; built_at?: string }>(
+      `/knowledge/status`,
+    ),
+
+  // --- Valuation ---
+
+  getCompsRange: (ticker: string) =>
+    fetchJSON<CompsRange>(`/valuation/comps/${encodeURIComponent(ticker)}`),
+
+  getConviction: (
+    ticker: string,
+    params: Record<string, string | number | boolean | undefined> = {},
+  ) => {
+    const q = Object.entries(params)
+      .filter(([, v]) => v !== undefined && v !== "")
+      .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`)
+      .join("&");
+    return fetchJSON<ConvictionChain>(
+      `/valuation/conviction/${encodeURIComponent(ticker)}${q ? `?${q}` : ""}`,
+    );
+  },
+
+  getConcentration: (ticker: string, convictionScore?: number) => {
+    const q =
+      convictionScore === undefined
+        ? ""
+        : `?conviction_score=${convictionScore}`;
+    return fetchJSON<ConcentrationView>(
+      `/valuation/concentration/${encodeURIComponent(ticker)}${q}`,
+    );
+  },
+
+  getIntrinsic: (
+    ticker: string,
+    params: Record<string, string | number | undefined> = {},
+  ) => {
+    const q = Object.entries(params)
+      .filter(([, v]) => v !== undefined && v !== "")
+      .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`)
+      .join("&");
+    return fetchJSON<Intrinsic>(
+      `/valuation/intrinsic/${encodeURIComponent(ticker)}${q ? `?${q}` : ""}`,
+    );
+  },
 
   getTechnicals: (ticker: string) =>
     fetchJSON<Record<string, unknown>>(`/data/technicals/${ticker}`),
 
   getMacro: (series: string, days = 1825) =>
     fetchJSON<{ series: string; data: Record<string, unknown>[] }>(
-      `/data/macro/${series}?days=${days}`
+      `/data/macro/${series}?days=${days}`,
     ),
 
   getNews: (query: string, limit = 10) =>
     fetchJSON<{ articles: Record<string, unknown>[] }>(
-      `/data/news?q=${encodeURIComponent(query)}&limit=${limit}`
+      `/data/news?q=${encodeURIComponent(query)}&limit=${limit}`,
     ),
 
   // --- New data endpoints (13) ---
 
-  getESG: (ticker: string) =>
-    fetchJSON<ESGScores>(`/data/esg/${ticker}`),
+  getESG: (ticker: string) => fetchJSON<ESGScores>(`/data/esg/${ticker}`),
 
   getInsider: (ticker: string) =>
     fetchJSON<{ ticker: string; transactions: InsiderTransaction[] }>(
-      `/data/insider/${ticker}`
+      `/data/insider/${ticker}`,
     ),
 
   getInstitutional: (ticker: string) =>
     fetchJSON<{ ticker: string; holders: InstitutionalHolder[] }>(
-      `/data/institutional/${ticker}`
+      `/data/institutional/${ticker}`,
     ),
 
   getEarnings: (ticker: string) =>
@@ -752,20 +1148,19 @@ export const api = {
   getSectorPerformance: () =>
     fetchJSON<SectorPerformance>("/data/sector-performance"),
 
-  getFamaFrench: () =>
-    fetchJSON<FamaFrenchFactors>("/data/fama-french"),
+  getFamaFrench: () => fetchJSON<FamaFrenchFactors>("/data/fama-french"),
 
   getOptions: (ticker: string) =>
     fetchJSON<OptionsChain>(`/data/options/${ticker}`),
 
   getFilings: (ticker: string) =>
     fetchJSON<{ ticker: string; filings: SECFiling[] }>(
-      `/data/filings/${ticker}`
+      `/data/filings/${ticker}`,
     ),
 
   getCongressional: (ticker: string) =>
     fetchJSON<{ ticker: string; trades: CongressionalTrade[] }>(
-      `/data/congressional/${ticker}`
+      `/data/congressional/${ticker}`,
     ),
 
   getPeers: (ticker: string) =>
@@ -775,8 +1170,7 @@ export const api = {
     fetchJSON<{ providers: ProviderStatus[] }>("/data/providers/status"),
 
   /** Named ticker lists — edit `config/watchlists.json` on the server. */
-  getWatchlists: () =>
-    fetchJSON<Record<string, string[]>>("/data/watchlists"),
+  getWatchlists: () => fetchJSON<Record<string, string[]>>("/data/watchlists"),
 
   // --- Backtest ---
 
@@ -821,7 +1215,11 @@ export const api = {
     watchlist_group?: string;
     universe?: string;
     max_symbols?: number;
-  }) => postJSON<AcquisitionCompounderScreenerResponse>("/screeners/acquisition-compounder", body),
+  }) =>
+    postJSON<AcquisitionCompounderScreenerResponse>(
+      "/screeners/acquisition-compounder",
+      body,
+    ),
 
   /** Index universes (S&P 500, NASDAQ-100, …) for screeners. */
   getScreenerUniverses: () =>
@@ -830,7 +1228,9 @@ export const api = {
   // --- Research ---
 
   getPersonas: () =>
-    fetchJSON<{ personas: { id: string }[]; default_committee: string[] }>("/research/personas"),
+    fetchJSON<{ personas: { id: string }[]; default_committee: string[] }>(
+      "/research/personas",
+    ),
 
   checkTicker: (
     ticker: string,
@@ -839,7 +1239,7 @@ export const api = {
       committee?: boolean;
       persona?: string | null;
       committee_personas?: string[] | null;
-    } = {}
+    } = {},
   ) => {
     const {
       includeAi = false,
@@ -878,8 +1278,7 @@ export const api = {
       }>;
     }>("/portfolio"),
 
-  getRisk: () =>
-    fetchJSON<Record<string, unknown>>("/portfolio/risk"),
+  getRisk: () => fetchJSON<Record<string, unknown>>("/portfolio/risk"),
 
   getTransactions: (limit = 100) =>
     fetchJSON<{
@@ -919,11 +1318,8 @@ export const api = {
   portfolioWithdraw: (body: { amount: number; note?: string }) =>
     postJSON("/portfolio/cash/withdraw", body),
 
-  portfolioSplit: (body: {
-    ticker: string;
-    ratio: number;
-    note?: string;
-  }) => postJSON("/portfolio/corporate/split", body),
+  portfolioSplit: (body: { ticker: string; ratio: number; note?: string }) =>
+    postJSON("/portfolio/corporate/split", body),
 
   portfolioDividend: (body: {
     ticker: string;
@@ -931,8 +1327,10 @@ export const api = {
     note?: string;
   }) => postJSON("/portfolio/corporate/dividend", body),
 
-  patchHolding: (ticker: string, body: { shares?: number; avg_cost?: number }) =>
-    patchJSON(`/portfolio/holdings/${encodeURIComponent(ticker)}`, body),
+  patchHolding: (
+    ticker: string,
+    body: { shares?: number; avg_cost?: number },
+  ) => patchJSON(`/portfolio/holdings/${encodeURIComponent(ticker)}`, body),
 };
 
 /** FinBERT headline sentiment from /research/check (optional `uv add` sentiment extra on API). */
@@ -997,7 +1395,9 @@ export interface ResearchCheckResponse {
   ai_error?: { error: string; message?: string };
   evaluation?: Record<string, unknown>;
   ai_model?: string | null;
-  ai_usage?: { prompt_tokens: number | null; completion_tokens: number | null } | Record<string, unknown>;
+  ai_usage?:
+    | { prompt_tokens: number | null; completion_tokens: number | null }
+    | Record<string, unknown>;
   persona_id?: string | null;
   committee?: CommitteeEntry[] | null;
   synthesis?: Record<string, unknown> | null;

@@ -1,0 +1,1080 @@
+{
+  "as_of": "2026-01-01",
+  "countries": {
+    "Abu Dhabi": {
+      "region": "Middle East",
+      "rating": "Aa2",
+      "country_risk_premium": 0.006391,
+      "total_erp": 0.048691
+    },
+    "Albania": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Ba3",
+      "country_risk_premium": 0.04656,
+      "total_erp": 0.08886
+    },
+    "Andorra (Principality of)": {
+      "region": "Western Europe",
+      "rating": "Baa1",
+      "country_risk_premium": 0.020694,
+      "total_erp": 0.062994
+    },
+    "Angola": {
+      "region": "Africa",
+      "rating": "B3",
+      "country_risk_premium": 0.084143,
+      "total_erp": 0.126443
+    },
+    "Argentina": {
+      "region": "Central and South America",
+      "rating": "Caa1",
+      "country_risk_premium": 0.097077,
+      "total_erp": 0.139377
+    },
+    "Armenia": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Ba3",
+      "country_risk_premium": 0.04656,
+      "total_erp": 0.08886
+    },
+    "Aruba": {
+      "region": "Caribbean",
+      "rating": "Baa3",
+      "country_risk_premium": 0.028454,
+      "total_erp": 0.070754
+    },
+    "Australia": {
+      "region": "Australia & New Zealand",
+      "rating": "Aaa",
+      "country_risk_premium": 0.0,
+      "total_erp": 0.0423
+    },
+    "Austria": {
+      "region": "Western Europe",
+      "rating": "Aa1",
+      "country_risk_premium": 0.003555,
+      "total_erp": 0.045855
+    },
+    "Azerbaijan": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Baa3",
+      "country_risk_premium": 0.028454,
+      "total_erp": 0.070754
+    },
+    "Bahamas": {
+      "region": "Caribbean",
+      "rating": "B1",
+      "country_risk_premium": 0.058277,
+      "total_erp": 0.100577
+    },
+    "Bahrain": {
+      "region": "Middle East",
+      "rating": "B2",
+      "country_risk_premium": 0.07121,
+      "total_erp": 0.11351
+    },
+    "Bangladesh": {
+      "region": "Asia",
+      "rating": "B2",
+      "country_risk_premium": 0.07121,
+      "total_erp": 0.11351
+    },
+    "Barbados": {
+      "region": "Caribbean",
+      "rating": "B2",
+      "country_risk_premium": 0.07121,
+      "total_erp": 0.11351
+    },
+    "Belarus": {
+      "region": "Eastern Europe & Russia",
+      "rating": "C",
+      "country_risk_premium": 0.266591,
+      "total_erp": 0.308891
+    },
+    "Belgium": {
+      "region": "Western Europe",
+      "rating": "Aa3",
+      "country_risk_premium": 0.00776,
+      "total_erp": 0.05006
+    },
+    "Belize": {
+      "region": "Central and South America",
+      "rating": "Caa1",
+      "country_risk_premium": 0.097077,
+      "total_erp": 0.139377
+    },
+    "Benin": {
+      "region": "Africa",
+      "rating": "B1",
+      "country_risk_premium": 0.058277,
+      "total_erp": 0.100577
+    },
+    "Bermuda": {
+      "region": "Caribbean",
+      "rating": "A2",
+      "country_risk_premium": 0.010955,
+      "total_erp": 0.053255
+    },
+    "Bolivia": {
+      "region": "Central and South America",
+      "rating": "Ca",
+      "country_risk_premium": 0.155354,
+      "total_erp": 0.197654
+    },
+    "Bosnia and Herzegovina": {
+      "region": "Eastern Europe & Russia",
+      "rating": "B3",
+      "country_risk_premium": 0.084143,
+      "total_erp": 0.126443
+    },
+    "Botswana": {
+      "region": "Africa",
+      "rating": "Baa1",
+      "country_risk_premium": 0.020694,
+      "total_erp": 0.062994
+    },
+    "Brazil": {
+      "region": "Central and South America",
+      "rating": "Ba1",
+      "country_risk_premium": 0.03241,
+      "total_erp": 0.07471
+    },
+    "Bulgaria": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Baa1",
+      "country_risk_premium": 0.020694,
+      "total_erp": 0.062994
+    },
+    "Burkina Faso": {
+      "region": "Africa",
+      "rating": "Caa1",
+      "country_risk_premium": 0.097077,
+      "total_erp": 0.139377
+    },
+    "Cambodia": {
+      "region": "Asia",
+      "rating": "B2",
+      "country_risk_premium": 0.07121,
+      "total_erp": 0.11351
+    },
+    "Cameroon": {
+      "region": "Africa",
+      "rating": "Caa1",
+      "country_risk_premium": 0.097077,
+      "total_erp": 0.139377
+    },
+    "Canada": {
+      "region": "North America",
+      "rating": "Aaa",
+      "country_risk_premium": 0.0,
+      "total_erp": 0.0423
+    },
+    "Cape Verde": {
+      "region": "Africa",
+      "rating": "B2",
+      "country_risk_premium": 0.07121,
+      "total_erp": 0.11351
+    },
+    "Cayman Islands": {
+      "region": "Caribbean",
+      "rating": "Aa3",
+      "country_risk_premium": 0.00776,
+      "total_erp": 0.05006
+    },
+    "Chile": {
+      "region": "Central and South America",
+      "rating": "A2",
+      "country_risk_premium": 0.010955,
+      "total_erp": 0.053255
+    },
+    "China": {
+      "region": "Asia",
+      "rating": "A1",
+      "country_risk_premium": 0.009129,
+      "total_erp": 0.051429
+    },
+    "Colombia": {
+      "region": "Central and South America",
+      "rating": "Baa3",
+      "country_risk_premium": 0.028454,
+      "total_erp": 0.070754
+    },
+    "Congo (Democratic Republic of)": {
+      "region": "Africa",
+      "rating": "B3",
+      "country_risk_premium": 0.084143,
+      "total_erp": 0.126443
+    },
+    "Congo (Republic of)": {
+      "region": "Africa",
+      "rating": "Caa2",
+      "country_risk_premium": 0.116553,
+      "total_erp": 0.158853
+    },
+    "Cook Islands": {
+      "region": "Australia & New Zealand",
+      "rating": "B1",
+      "country_risk_premium": 0.058277,
+      "total_erp": 0.100577
+    },
+    "Costa Rica": {
+      "region": "Central and South America",
+      "rating": "Ba2",
+      "country_risk_premium": 0.038953,
+      "total_erp": 0.081253
+    },
+    "C\u00f4te d'Ivoire": {
+      "region": "Africa",
+      "rating": "Ba2",
+      "country_risk_premium": 0.038953,
+      "total_erp": 0.081253
+    },
+    "Croatia": {
+      "region": "Eastern Europe & Russia",
+      "rating": "A3",
+      "country_risk_premium": 0.01552,
+      "total_erp": 0.05782
+    },
+    "Cuba": {
+      "region": "Caribbean",
+      "rating": "Ca",
+      "country_risk_premium": 0.155354,
+      "total_erp": 0.197654
+    },
+    "Curacao": {
+      "region": "Caribbean",
+      "rating": "Baa3",
+      "country_risk_premium": 0.028454,
+      "total_erp": 0.070754
+    },
+    "Cyprus": {
+      "region": "Western Europe",
+      "rating": "A3",
+      "country_risk_premium": 0.01552,
+      "total_erp": 0.05782
+    },
+    "Czech Republic": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Aa3",
+      "country_risk_premium": 0.00776,
+      "total_erp": 0.05006
+    },
+    "Denmark": {
+      "region": "Western Europe",
+      "rating": "Aaa",
+      "country_risk_premium": 0.0,
+      "total_erp": 0.0423
+    },
+    "Dominican Republic": {
+      "region": "Caribbean",
+      "rating": "Ba2",
+      "country_risk_premium": 0.038953,
+      "total_erp": 0.081253
+    },
+    "Ecuador": {
+      "region": "Central and South America",
+      "rating": "Caa3",
+      "country_risk_premium": 0.129487,
+      "total_erp": 0.171787
+    },
+    "Egypt": {
+      "region": "Africa",
+      "rating": "Caa1",
+      "country_risk_premium": 0.097077,
+      "total_erp": 0.139377
+    },
+    "El Salvador": {
+      "region": "Central and South America",
+      "rating": "B3",
+      "country_risk_premium": 0.084143,
+      "total_erp": 0.126443
+    },
+    "Estonia": {
+      "region": "Eastern Europe & Russia",
+      "rating": "A1",
+      "country_risk_premium": 0.009129,
+      "total_erp": 0.051429
+    },
+    "Ethiopia": {
+      "region": "Africa",
+      "rating": "Caa2",
+      "country_risk_premium": 0.116553,
+      "total_erp": 0.158853
+    },
+    "Fiji": {
+      "region": "Asia",
+      "rating": "B1",
+      "country_risk_premium": 0.058277,
+      "total_erp": 0.100577
+    },
+    "Finland": {
+      "region": "Western Europe",
+      "rating": "Aa1",
+      "country_risk_premium": 0.003555,
+      "total_erp": 0.045855
+    },
+    "France": {
+      "region": "Western Europe",
+      "rating": "Aa3",
+      "country_risk_premium": 0.00776,
+      "total_erp": 0.05006
+    },
+    "Gabon": {
+      "region": "Africa",
+      "rating": "Caa2",
+      "country_risk_premium": 0.116553,
+      "total_erp": 0.158853
+    },
+    "Georgia": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Ba2",
+      "country_risk_premium": 0.038953,
+      "total_erp": 0.081253
+    },
+    "Germany": {
+      "region": "Western Europe",
+      "rating": "Aaa",
+      "country_risk_premium": 0.0,
+      "total_erp": 0.0423
+    },
+    "Ghana": {
+      "region": "Africa",
+      "rating": "Caa1",
+      "country_risk_premium": 0.097077,
+      "total_erp": 0.139377
+    },
+    "Greece": {
+      "region": "Western Europe",
+      "rating": "Baa3",
+      "country_risk_premium": 0.028454,
+      "total_erp": 0.070754
+    },
+    "Guatemala": {
+      "region": "Central and South America",
+      "rating": "Ba1",
+      "country_risk_premium": 0.03241,
+      "total_erp": 0.07471
+    },
+    "Guernsey (States of)": {
+      "region": "Western Europe",
+      "rating": "A1",
+      "country_risk_premium": 0.009129,
+      "total_erp": 0.051429
+    },
+    "Honduras": {
+      "region": "Central and South America",
+      "rating": "B1",
+      "country_risk_premium": 0.058277,
+      "total_erp": 0.100577
+    },
+    "Hong Kong": {
+      "region": "Asia",
+      "rating": "Aa3",
+      "country_risk_premium": 0.00776,
+      "total_erp": 0.05006
+    },
+    "Hungary": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Baa2",
+      "country_risk_premium": 0.02465,
+      "total_erp": 0.06695
+    },
+    "Iceland": {
+      "region": "Western Europe",
+      "rating": "A1",
+      "country_risk_premium": 0.009129,
+      "total_erp": 0.051429
+    },
+    "India": {
+      "region": "Asia",
+      "rating": "Baa3",
+      "country_risk_premium": 0.028454,
+      "total_erp": 0.070754
+    },
+    "Indonesia": {
+      "region": "Asia",
+      "rating": "Baa2",
+      "country_risk_premium": 0.02465,
+      "total_erp": 0.06695
+    },
+    "Iraq": {
+      "region": "Middle East",
+      "rating": "Caa1",
+      "country_risk_premium": 0.097077,
+      "total_erp": 0.139377
+    },
+    "Ireland": {
+      "region": "Western Europe",
+      "rating": "Aa3",
+      "country_risk_premium": 0.00776,
+      "total_erp": 0.05006
+    },
+    "Isle of Man": {
+      "region": "Western Europe",
+      "rating": "Aa3",
+      "country_risk_premium": 0.00776,
+      "total_erp": 0.05006
+    },
+    "Israel": {
+      "region": "Middle East",
+      "rating": "Baa1",
+      "country_risk_premium": 0.020694,
+      "total_erp": 0.062994
+    },
+    "Italy": {
+      "region": "Western Europe",
+      "rating": "Baa2",
+      "country_risk_premium": 0.02465,
+      "total_erp": 0.06695
+    },
+    "Jamaica": {
+      "region": "Caribbean",
+      "rating": "Ba3",
+      "country_risk_premium": 0.04656,
+      "total_erp": 0.08886
+    },
+    "Japan": {
+      "region": "Asia",
+      "rating": "A1",
+      "country_risk_premium": 0.009129,
+      "total_erp": 0.051429
+    },
+    "Jersey (States of)": {
+      "region": "Western Europe",
+      "rating": "Aa3",
+      "country_risk_premium": 0.00776,
+      "total_erp": 0.05006
+    },
+    "Jordan": {
+      "region": "Middle East",
+      "rating": "Ba3",
+      "country_risk_premium": 0.04656,
+      "total_erp": 0.08886
+    },
+    "Kazakhstan": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Baa1",
+      "country_risk_premium": 0.020694,
+      "total_erp": 0.062994
+    },
+    "Kenya": {
+      "region": "Africa",
+      "rating": "B3",
+      "country_risk_premium": 0.084143,
+      "total_erp": 0.126443
+    },
+    "Korea": {
+      "region": "Asia",
+      "rating": "Aa2",
+      "country_risk_premium": 0.006391,
+      "total_erp": 0.048691
+    },
+    "Kuwait": {
+      "region": "Middle East",
+      "rating": "A1",
+      "country_risk_premium": 0.009129,
+      "total_erp": 0.051429
+    },
+    "Kyrgyzstan": {
+      "region": "Eastern Europe & Russia",
+      "rating": "B3",
+      "country_risk_premium": 0.084143,
+      "total_erp": 0.126443
+    },
+    "Laos": {
+      "region": "Asia",
+      "rating": "Caa2",
+      "country_risk_premium": 0.116553,
+      "total_erp": 0.158853
+    },
+    "Latvia": {
+      "region": "Eastern Europe & Russia",
+      "rating": "A3",
+      "country_risk_premium": 0.01552,
+      "total_erp": 0.05782
+    },
+    "Lebanon": {
+      "region": "Middle East",
+      "rating": "C",
+      "country_risk_premium": 0.266591,
+      "total_erp": 0.308891
+    },
+    "Liechtenstein": {
+      "region": "Western Europe",
+      "rating": "Aaa",
+      "country_risk_premium": 0.0,
+      "total_erp": 0.0423
+    },
+    "Lithuania": {
+      "region": "Eastern Europe & Russia",
+      "rating": "A2",
+      "country_risk_premium": 0.010955,
+      "total_erp": 0.053255
+    },
+    "Luxembourg": {
+      "region": "Western Europe",
+      "rating": "Aaa",
+      "country_risk_premium": 0.0,
+      "total_erp": 0.0423
+    },
+    "Macao": {
+      "region": "Asia",
+      "rating": "Aa3",
+      "country_risk_premium": 0.00776,
+      "total_erp": 0.05006
+    },
+    "Macedonia": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Ba3",
+      "country_risk_premium": 0.04656,
+      "total_erp": 0.08886
+    },
+    "Malaysia": {
+      "region": "Asia",
+      "rating": "A3",
+      "country_risk_premium": 0.01552,
+      "total_erp": 0.05782
+    },
+    "Maldives": {
+      "region": "Asia",
+      "rating": "Caa2",
+      "country_risk_premium": 0.116553,
+      "total_erp": 0.158853
+    },
+    "Mali": {
+      "region": "Africa",
+      "rating": "Caa2",
+      "country_risk_premium": 0.116553,
+      "total_erp": 0.158853
+    },
+    "Malta": {
+      "region": "Western Europe",
+      "rating": "A2",
+      "country_risk_premium": 0.010955,
+      "total_erp": 0.053255
+    },
+    "Mauritius": {
+      "region": "Africa",
+      "rating": "Baa3",
+      "country_risk_premium": 0.028454,
+      "total_erp": 0.070754
+    },
+    "Mexico": {
+      "region": "Central and South America",
+      "rating": "Baa2",
+      "country_risk_premium": 0.02465,
+      "total_erp": 0.06695
+    },
+    "Moldova": {
+      "region": "Eastern Europe & Russia",
+      "rating": "B3",
+      "country_risk_premium": 0.084143,
+      "total_erp": 0.126443
+    },
+    "Mongolia": {
+      "region": "Asia",
+      "rating": "B1",
+      "country_risk_premium": 0.058277,
+      "total_erp": 0.100577
+    },
+    "Montenegro": {
+      "region": "Eastern Europe & Russia",
+      "rating": "B1",
+      "country_risk_premium": 0.058277,
+      "total_erp": 0.100577
+    },
+    "Montserrat": {
+      "region": "Caribbean",
+      "rating": "Baa3",
+      "country_risk_premium": 0.028454,
+      "total_erp": 0.070754
+    },
+    "Morocco": {
+      "region": "Africa",
+      "rating": "Ba1",
+      "country_risk_premium": 0.03241,
+      "total_erp": 0.07471
+    },
+    "Mozambique": {
+      "region": "Africa",
+      "rating": "Caa3",
+      "country_risk_premium": 0.129487,
+      "total_erp": 0.171787
+    },
+    "Namibia": {
+      "region": "Africa",
+      "rating": "B1",
+      "country_risk_premium": 0.058277,
+      "total_erp": 0.100577
+    },
+    "Nepal": {
+      "region": "Asia",
+      "rating": "Ba3",
+      "country_risk_premium": 0.04656,
+      "total_erp": 0.08886
+    },
+    "Netherlands": {
+      "region": "Western Europe",
+      "rating": "Aaa",
+      "country_risk_premium": 0.0,
+      "total_erp": 0.0423
+    },
+    "New Zealand": {
+      "region": "Australia & New Zealand",
+      "rating": "Aaa",
+      "country_risk_premium": 0.0,
+      "total_erp": 0.0423
+    },
+    "Nicaragua": {
+      "region": "Central and South America",
+      "rating": "B2",
+      "country_risk_premium": 0.07121,
+      "total_erp": 0.11351
+    },
+    "Niger": {
+      "region": "Africa",
+      "rating": "Caa3",
+      "country_risk_premium": 0.129487,
+      "total_erp": 0.171787
+    },
+    "Nigeria": {
+      "region": "Africa",
+      "rating": "B3",
+      "country_risk_premium": 0.084143,
+      "total_erp": 0.126443
+    },
+    "Norway": {
+      "region": "Western Europe",
+      "rating": "Aaa",
+      "country_risk_premium": 0.0,
+      "total_erp": 0.0423
+    },
+    "Oman": {
+      "region": "Middle East",
+      "rating": "Baa3",
+      "country_risk_premium": 0.028454,
+      "total_erp": 0.070754
+    },
+    "Pakistan": {
+      "region": "Asia",
+      "rating": "Caa1",
+      "country_risk_premium": 0.097077,
+      "total_erp": 0.139377
+    },
+    "Panama": {
+      "region": "Central and South America",
+      "rating": "Baa3",
+      "country_risk_premium": 0.028454,
+      "total_erp": 0.070754
+    },
+    "Papua New Guinea": {
+      "region": "Asia",
+      "rating": "B2",
+      "country_risk_premium": 0.07121,
+      "total_erp": 0.11351
+    },
+    "Paraguay": {
+      "region": "Central and South America",
+      "rating": "Baa3",
+      "country_risk_premium": 0.028454,
+      "total_erp": 0.070754
+    },
+    "Peru": {
+      "region": "Central and South America",
+      "rating": "Baa1",
+      "country_risk_premium": 0.020694,
+      "total_erp": 0.062994
+    },
+    "Philippines": {
+      "region": "Asia",
+      "rating": "Baa2",
+      "country_risk_premium": 0.02465,
+      "total_erp": 0.06695
+    },
+    "Poland": {
+      "region": "Eastern Europe & Russia",
+      "rating": "A2",
+      "country_risk_premium": 0.010955,
+      "total_erp": 0.053255
+    },
+    "Portugal": {
+      "region": "Western Europe",
+      "rating": "A3",
+      "country_risk_premium": 0.01552,
+      "total_erp": 0.05782
+    },
+    "Qatar": {
+      "region": "Middle East",
+      "rating": "Aa2",
+      "country_risk_premium": 0.006391,
+      "total_erp": 0.048691
+    },
+    "Ras Al Khaimah (Emirate of)": {
+      "region": "Middle East",
+      "rating": "A3",
+      "country_risk_premium": 0.01552,
+      "total_erp": 0.05782
+    },
+    "Romania": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Baa3",
+      "country_risk_premium": 0.028454,
+      "total_erp": 0.070754
+    },
+    "Rwanda": {
+      "region": "Africa",
+      "rating": "B2",
+      "country_risk_premium": 0.07121,
+      "total_erp": 0.11351
+    },
+    "Saudi Arabia": {
+      "region": "Middle East",
+      "rating": "Aa3",
+      "country_risk_premium": 0.00776,
+      "total_erp": 0.05006
+    },
+    "Senegal": {
+      "region": "Africa",
+      "rating": "Caa1",
+      "country_risk_premium": 0.097077,
+      "total_erp": 0.139377
+    },
+    "Serbia": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Ba2",
+      "country_risk_premium": 0.038953,
+      "total_erp": 0.081253
+    },
+    "Sharjah": {
+      "region": "Middle East",
+      "rating": "Ba1",
+      "country_risk_premium": 0.03241,
+      "total_erp": 0.07471
+    },
+    "Singapore": {
+      "region": "Asia",
+      "rating": "Aaa",
+      "country_risk_premium": 0.0,
+      "total_erp": 0.0423
+    },
+    "Slovakia": {
+      "region": "Eastern Europe & Russia",
+      "rating": "A3",
+      "country_risk_premium": 0.01552,
+      "total_erp": 0.05782
+    },
+    "Slovenia": {
+      "region": "Eastern Europe & Russia",
+      "rating": "A3",
+      "country_risk_premium": 0.01552,
+      "total_erp": 0.05782
+    },
+    "Solomon Islands": {
+      "region": "Asia",
+      "rating": "Caa1",
+      "country_risk_premium": 0.097077,
+      "total_erp": 0.139377
+    },
+    "South Africa": {
+      "region": "Africa",
+      "rating": "Ba2",
+      "country_risk_premium": 0.038953,
+      "total_erp": 0.081253
+    },
+    "Spain": {
+      "region": "Western Europe",
+      "rating": "A3",
+      "country_risk_premium": 0.01552,
+      "total_erp": 0.05782
+    },
+    "Sri Lanka": {
+      "region": "Asia",
+      "rating": "Ca",
+      "country_risk_premium": 0.155354,
+      "total_erp": 0.197654
+    },
+    "St. Maarten": {
+      "region": "Caribbean",
+      "rating": "Ba2",
+      "country_risk_premium": 0.038953,
+      "total_erp": 0.081253
+    },
+    "St. Vincent & the Grenadines": {
+      "region": "Caribbean",
+      "rating": "B3",
+      "country_risk_premium": 0.084143,
+      "total_erp": 0.126443
+    },
+    "Suriname": {
+      "region": "Central and South America",
+      "rating": "Caa1",
+      "country_risk_premium": 0.097077,
+      "total_erp": 0.139377
+    },
+    "Swaziland": {
+      "region": "Africa",
+      "rating": "B2",
+      "country_risk_premium": 0.07121,
+      "total_erp": 0.11351
+    },
+    "Sweden": {
+      "region": "Western Europe",
+      "rating": "Aaa",
+      "country_risk_premium": 0.0,
+      "total_erp": 0.0423
+    },
+    "Switzerland": {
+      "region": "Western Europe",
+      "rating": "Aaa",
+      "country_risk_premium": 0.0,
+      "total_erp": 0.0423
+    },
+    "Taiwan": {
+      "region": "Asia",
+      "rating": "Aa3",
+      "country_risk_premium": 0.00776,
+      "total_erp": 0.05006
+    },
+    "Tajikistan": {
+      "region": "Eastern Europe & Russia",
+      "rating": "B3",
+      "country_risk_premium": 0.084143,
+      "total_erp": 0.126443
+    },
+    "Tanzania": {
+      "region": "Africa",
+      "rating": "B1",
+      "country_risk_premium": 0.058277,
+      "total_erp": 0.100577
+    },
+    "Thailand": {
+      "region": "Asia",
+      "rating": "Baa1",
+      "country_risk_premium": 0.020694,
+      "total_erp": 0.062994
+    },
+    "Togo": {
+      "region": "Africa",
+      "rating": "B3",
+      "country_risk_premium": 0.084143,
+      "total_erp": 0.126443
+    },
+    "Trinidad and Tobago": {
+      "region": "Caribbean",
+      "rating": "Ba2",
+      "country_risk_premium": 0.038953,
+      "total_erp": 0.081253
+    },
+    "Tunisia": {
+      "region": "Africa",
+      "rating": "Caa1",
+      "country_risk_premium": 0.097077,
+      "total_erp": 0.139377
+    },
+    "Turkey": {
+      "region": "Western Europe",
+      "rating": "Ba3",
+      "country_risk_premium": 0.04656,
+      "total_erp": 0.08886
+    },
+    "Turks and Caicos Islands": {
+      "region": "Caribbean",
+      "rating": "Baa1",
+      "country_risk_premium": 0.020694,
+      "total_erp": 0.062994
+    },
+    "Uganda": {
+      "region": "Africa",
+      "rating": "B3",
+      "country_risk_premium": 0.084143,
+      "total_erp": 0.126443
+    },
+    "Ukraine": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Ca",
+      "country_risk_premium": 0.155354,
+      "total_erp": 0.197654
+    },
+    "United Arab Emirates": {
+      "region": "Middle East",
+      "rating": "Aa2",
+      "country_risk_premium": 0.006391,
+      "total_erp": 0.048691
+    },
+    "United Kingdom": {
+      "region": "Western Europe",
+      "rating": "Aa3",
+      "country_risk_premium": 0.00776,
+      "total_erp": 0.05006
+    },
+    "United States": {
+      "region": "North America",
+      "rating": "Aa1",
+      "country_risk_premium": 0.002334,
+      "total_erp": 0.0446
+    },
+    "Uruguay": {
+      "region": "Central and South America",
+      "rating": "Baa1",
+      "country_risk_premium": 0.020694,
+      "total_erp": 0.062994
+    },
+    "Uzbekistan": {
+      "region": "Eastern Europe & Russia",
+      "rating": "Ba3",
+      "country_risk_premium": 0.04656,
+      "total_erp": 0.08886
+    },
+    "Venezuela": {
+      "region": "Central and South America",
+      "rating": "C",
+      "country_risk_premium": 0.266591,
+      "total_erp": 0.308891
+    },
+    "Vietnam": {
+      "region": "Asia",
+      "rating": "Ba2",
+      "country_risk_premium": 0.038953,
+      "total_erp": 0.081253
+    },
+    "Zambia": {
+      "region": "Africa",
+      "rating": "Caa2",
+      "country_risk_premium": 0.116553,
+      "total_erp": 0.158853
+    },
+    "Algeria": {
+      "region": "67",
+      "rating": "0.10057659756375703",
+      "country_risk_premium": null,
+      "total_erp": 0.038255
+    },
+    "Brunei": {
+      "region": "80.75",
+      "rating": "0.050060069127288796",
+      "country_risk_premium": null,
+      "total_erp": 0.005094
+    },
+    "Gambia": {
+      "region": "65.5",
+      "rating": "0.11351004610923837",
+      "country_risk_premium": null,
+      "total_erp": 0.046745
+    },
+    "Guinea": {
+      "region": "59.5",
+      "rating": "0.15885319512751409",
+      "country_risk_premium": null,
+      "total_erp": 0.07651
+    },
+    "Guinea-Bissau": {
+      "region": "60.75",
+      "rating": "0.13937694320020103",
+      "country_risk_premium": null,
+      "total_erp": 0.063725
+    },
+    "Guyana": {
+      "region": "75.5",
+      "rating": "0.06299351767277012",
+      "country_risk_premium": null,
+      "total_erp": 0.013584
+    },
+    "Haiti": {
+      "region": "56.75",
+      "rating": "0.17178664367299545",
+      "country_risk_premium": null,
+      "total_erp": 0.085
+    },
+    "Iran": {
+      "region": "61.25",
+      "rating": "0.13937694320020103",
+      "country_risk_premium": null,
+      "total_erp": 0.063725
+    },
+    "Korea, D.P.R.": {
+      "region": "51",
+      "rating": "0.1976535407639581",
+      "country_risk_premium": null,
+      "total_erp": 0.10198
+    },
+    "Liberia": {
+      "region": "57.75",
+      "rating": "0.15885319512751409",
+      "country_risk_premium": null,
+      "total_erp": 0.07651
+    },
+    "Libya": {
+      "region": "71.5",
+      "rating": "0.08125250385462612",
+      "country_risk_premium": null,
+      "total_erp": 0.02557
+    },
+    "Madagascar": {
+      "region": "62.5",
+      "rating": "0.1264434946547197",
+      "country_risk_premium": null,
+      "total_erp": 0.055235
+    },
+    "Malawi": {
+      "region": "56",
+      "rating": "0.17178664367299545",
+      "country_risk_premium": null,
+      "total_erp": 0.085
+    },
+    "Myanmar": {
+      "region": "54.75",
+      "rating": "0.1976535407639581",
+      "country_risk_premium": null,
+      "total_erp": 0.10198
+    },
+    "Russia": {
+      "region": "70.25",
+      "rating": "0.08125250385462612",
+      "country_risk_premium": null,
+      "total_erp": 0.02557
+    },
+    "Sierra Leone": {
+      "region": "62.75",
+      "rating": "0.1264434946547197",
+      "country_risk_premium": null,
+      "total_erp": 0.055235
+    },
+    "Somalia": {
+      "region": "55.5",
+      "rating": "0.17178664367299545",
+      "country_risk_premium": null,
+      "total_erp": 0.085
+    },
+    "Sudan": {
+      "region": "47.75",
+      "rating": "0.30889117303269015",
+      "country_risk_premium": null,
+      "total_erp": 0.175
+    },
+    "Syria": {
+      "region": "51.5",
+      "rating": "0.1976535407639581",
+      "country_risk_premium": null,
+      "total_erp": 0.10198
+    },
+    "Yemen, Republic": {
+      "region": "51.75",
+      "rating": "0.1976535407639581",
+      "country_risk_premium": null,
+      "total_erp": 0.10198
+    },
+    "Zimbabwe": {
+      "region": "58.5",
+      "rating": "0.15885319512751409",
+      "country_risk_premium": null,
+      "total_erp": 0.07651
+    }
+  },
+  "provenance": {
+    "source": "https://pages.stern.nyu.edu/~adamodar/pc/datasets/ctryprem.xlsx",
+    "file": "ctryprem.xlsx",
+    "sheet": "ERPs by country",
+    "retrieved": "2026-09-13",
+    "note": "Published by Aswath Damodaran (NYU Stern). Vendored so a valuation does not change because a spreadsheet updated overnight."
+  }
+}

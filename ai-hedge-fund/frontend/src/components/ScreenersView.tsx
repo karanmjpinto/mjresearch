@@ -132,7 +132,6 @@ export function ScreenersView() {
     <div className="flex flex-col min-h-screen">
       <AppNav
         active="screeners"
-        end={<span className="text-xs text-gray-600 font-mono">Ollama · yfinance · committee</span>}
       />
 
       <div className="p-6 max-w-7xl mx-auto w-full flex flex-col gap-6 grow">

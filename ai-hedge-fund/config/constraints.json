@@ -1,0 +1,1689 @@
+{
+  "_comment": "The curated constraint map. Every measurement carries a source URL and the date it refers to; an entry with no measurements is deliberately kept and renders as unvalidated, because the gaps are the research queue rather than something to hide. Lead-time figures widely circulated for transformers, turbines and switchgear in 2026 (128 weeks, 144 weeks, 60+ months, 8 years) trace only to SEO trade blogs and are NOT recorded here. Do not add a number without a primary or specialist source.",
+  "_schema": {
+    "measurements": "value/unit measured at as_of, against `normal` = the same metric in an unconstrained market. Without `normal` a number cannot carry the binding leg.",
+    "routes": "status: blocked | unproven | building | open. `building` needs eta_months or it cannot be sized.",
+    "capture": "share_pct of the chokepoint, pricing_power: demonstrated | contested | absent, with pricing_evidence naming the quarter and source.",
+    "names": "band: pure | major | minor — a stated judgment about the business, never a computed score."
+  },
+  "constraints": [
+    {
+      "id": "hbm-memory",
+      "system": "intelligence",
+      "name": "Memory (HBM and conventional DRAM)",
+      "scarce_object": "Stacked DRAM with through-silicon vias, and the DRAM wafer capacity behind it",
+      "why": "The buyer publishes the size of the squeeze: Nvidia's supply commitments more than doubled in a quarter and its filing names memory as the reason, while its own gross margin guide falls. But read the second measurement before acting — price growth has decelerated three quarters running, and within memory it is conventional DDR5, not HBM, that now earns the better margin.",
+      "measurements": [
+        {
+          "metric": "Nvidia supply and capacity commitments",
+          "value": 279,
+          "unit": "$bn",
+          "normal": 119,
+          "as_of": "2026-07-26",
+          "source": "https://www.sec.gov/Archives/edgar/data/0001045810/000104581026000075/nvda-20260726.htm",
+          "note": "10-Q for the quarter ended 26 Jul 2026, against $119bn the prior quarter. The filing states these commitments are for data centre infrastructure, 'primarily memory' and manufacturing facilities. Baseline is the prior quarter, not a long-run normal."
+        },
+        {
+          "metric": "Conventional DRAM contract price, indexed to prior quarter",
+          "value": 115.5,
+          "unit": "index, prior quarter = 100",
+          "normal": 100,
+          "as_of": "2026-09-07",
+          "source": "https://www.trendforce.com/presscenter/news/20260907-13219.html",
+          "note": "3Q26 guided +13-18% q/q. Still rising, but this is the THIRD straight deceleration: +93-98% in 1Q26, +58-63% in 2Q26, +13-18% in 3Q26. TrendForce attributes the slowdown to demand shifting to lower-capacity parts and customers hitting price-absorption limits — demand destruction, not supply relief. Treat a rising number on a falling second derivative as a constraint being paid for, not one getting tighter."
+        },
+        {
+          "metric": "SK hynix fabrication facility utilisation",
+          "value": 100,
+          "unit": "%",
+          "normal": 100,
+          "as_of": "2026-06-30",
+          "source": "https://www.sec.gov/Archives/edgar/data/0002120882/000119312526354777/d147827d6k.htm",
+          "note": "100% through H1 2026, per the company's own 6-K. Recorded with normal = 100 so it contributes nothing to the score: full utilisation is the ceiling, not an excess over it. Kept because it is the cleanest primary confirmation there is no idle capacity. Industry inventories reported below 10 days by KB Securities, 7 Sep 2026: https://www.businesskorea.co.kr/news/articleView.html?idxno=276296"
+        }
+      ],
+      "routes": [
+        {
+          "path": "Memory suppliers add DRAM and HBM capacity",
+          "status": "building",
+          "eta_months": 24,
+          "source": "https://www.fool.com/earnings/call-transcripts/2026/08/31/nvidia-nvda-q2-2027-earnings-call-transcript/",
+          "note": "Nvidia CFO on the 26 Aug 2026 call: supply expected 'to remain a bottleneck, at least through the end of fiscal year 28'. Taken as the buyer's own estimate of when relief arrives, which is roughly 24 months out — not an independent capacity schedule."
+        },
+        {
+          "path": "Design around it — fewer HBM stacks per accelerator",
+          "status": "unproven",
+          "source": "",
+          "note": "NO SOURCED FIGURE FOUND. Stack counts per accelerator have been rising rather than falling, but no primary source was verified for this, so it is recorded as unproven rather than blocked."
+        },
+        {
+          "path": "CXMT and other new entrants take share",
+          "status": "building",
+          "eta_months": 18,
+          "source": "https://www.businesskorea.co.kr/news/articleView.html?idxno=276741",
+          "note": "CXMT reached roughly 7-10% of global DRAM with an 82% operating margin in 2Q26 and has begun small-scale HBM3E production, with expansion planned for 2027 and qualification underway at Cambricon and Alibaba T-Head. The most credible route around this constraint, and the one least discussed."
+        },
+        {
+          "path": "Suppliers shift wafers from HBM to conventional DDR5",
+          "status": "open",
+          "source": "https://www.trendforce.com/presscenter/news/20260602-13074.html",
+          "note": "Already happening, and it is why the HBM-specific version of this thesis is weaker than it looks: HBM profitability fell below DDR5 64GB RDIMM in 1Q26 and trails it by roughly 40 percentage points as of 25 Aug 2026. HBM wafer revenue was overtaken by DDR5. The incentive points away from HBM, so 'HBM is sold out' and 'HBM is where the money is' are no longer the same claim. Source also: https://www.trendforce.com/news/2026/08/25/news-nvidias-reported-15-server-hike-boosts-samsung-sk-hynix-with-hbm-prices-potentially-up-50-in-2027/"
+        }
+      ],
+      "capture": {
+        "holder": "The three incumbent DRAM makers (SK Hynix, Samsung, Micron)",
+        "share_pct": 90,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "Margins, not assertions. Micron non-GAAP gross margin 84.9% in the quarter ended 28 May 2026, up from 74.9% the prior quarter and 39.0% a year earlier, guiding ~86%; SK hynix operating margin 76% in 2Q26, up 4pp q/q; Samsung's device solutions division at a ~70% operating margin. And the buyer is passing the cost on rather than compressing them: Nvidia is reported to be raising server prices more than 15% for 2027 while holding its own gross margin at 75-80%. Sources: https://www.sec.gov/Archives/edgar/data/723125/000072312526000013/a2026q3ex991-pressrelease.htm , https://www.trendforce.com/news/2026/08/25/news-nvidias-reported-15-server-hike-boosts-samsung-sk-hynix-with-hbm-prices-potentially-up-50-in-2027/",
+        "_share_basis": "HBM share 2Q26 per Counterpoint: SK hynix 50%, Samsung 33%, Micron 18% — the three are effectively the whole HBM market. 90% is used rather than 100% because CXMT now holds roughly 7-10% of conventional DRAM and has started small-scale HBM3E. Source: https://counterpointresearch.com/en/insights/global-dram-and-hbm-market-share",
+        "_warning": "Their pricing power is real but it is strongest in conventional DDR5, not HBM. If the thesis is specifically HBM scarcity, this leg is weaker than the score implies — see the open workaround above."
+      },
+      "names": [
+        {
+          "ticker": "MU",
+          "name": "Micron Technology",
+          "exposure": "Makes DRAM and HBM directly; one of three suppliers of the scarce part.",
+          "band": "pure",
+          "source": ""
+        },
+        {
+          "ticker": "000660.KS",
+          "name": "SK Hynix",
+          "exposure": "The largest HBM supplier to accelerator makers; memory is substantially the whole business.",
+          "band": "pure",
+          "source": ""
+        },
+        {
+          "ticker": "BESI.AS",
+          "name": "BE Semiconductor Industries",
+          "exposure": "Hybrid bonding equipment used to stack HBM dies; sells the tool the constraint runs through.",
+          "band": "major",
+          "source": ""
+        },
+        {
+          "ticker": "KLIC",
+          "name": "Kulicke & Soffa",
+          "exposure": "Thermocompression and advanced bonding equipment for stacked memory packaging.",
+          "band": "major",
+          "source": ""
+        },
+        {
+          "ticker": "005930.KS",
+          "name": "Samsung Electronics",
+          "exposure": "A major DRAM and HBM supplier, inside a group spanning handsets, displays and foundry.",
+          "band": "minor",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "gas-turbine-slots",
+      "system": "power",
+      "name": "Gas turbine delivery slots",
+      "scarce_object": "Heavy-duty gas turbine production slots, and the generator step-up and switchgear that energise them",
+      "why": "Announced data centre capacity means nothing until a megawatt can be delivered. The order book is now several years of production, and the manufacturer's own margin expansion is attributed partly to price — a constraint whose holder is visibly able to charge for it.",
+      "measurements": [
+        {
+          "metric": "GE Vernova gas power backlog and slot reservations, against annual production",
+          "value": 116,
+          "unit": "GW of orders vs 20 GW/yr output",
+          "normal": 20,
+          "as_of": "2026-06-30",
+          "source": "https://www.sec.gov/Archives/edgar/data/0001996810/000199681026000147/gev2q2026form8-k.pdf",
+          "note": "116 GW of equipment backlog (53 GW) plus slot reservation agreements (63 GW) against production of 20 GW annualised in Q3 2026 — close to six years of output already committed. Baseline is current production capacity, which is what makes a backlog a constraint rather than a sales figure."
+        },
+        {
+          "metric": "GE Vernova gas power backlog and slot reservations",
+          "value": 116,
+          "unit": "GW",
+          "normal": 100,
+          "as_of": "2026-06-30",
+          "source": "https://www.sec.gov/Archives/edgar/data/0001996810/000199681026000147/gev2q2026form8-k.pdf",
+          "note": "Grew from 100 GW to 116 GW in one quarter, with the company guiding to at least 125 GW by year-end 2026. Baseline is the prior quarter."
+        },
+        {
+          "metric": "US producer price index, turbines and turbine generator sets",
+          "value": 289.639,
+          "unit": "index (BLS PCU333611)",
+          "normal": 270.686,
+          "as_of": "2026-08-01",
+          "source": "https://fred.stlouisfed.org/data/PCU333611333611.txt",
+          "note": "COUNTER-EVIDENCE, recorded deliberately. +7.0% since Dec 2024 and +32% since Jan 2019 — the LEAST inflation of any grid equipment series, against transformers at +90% and switchgear at +98%, despite turbines carrying by far the loudest backlog numbers. Caveat: NAICS 333611 covers steam and hydraulic turbines too and prices US domestic shipments, so export-priced heavy-frame units and slot-reservation premia may sit outside it. Read as a flag on the turbine pricing-power narrative rather than a refutation of it."
+        }
+      ],
+      "routes": [
+        {
+          "path": "The manufacturer raises turbine output",
+          "status": "building",
+          "eta_months": 24,
+          "source": "https://www.sec.gov/Archives/edgar/data/0001996810/000199681026000147/gev2q2026form8-k.pdf",
+          "note": "GE Vernova's stated path is 20 GW annualised in Q3 2026, 24 GW in 2028 and 30 GW in 2030. A 50% increase over four years against a backlog growing 16 GW in a quarter — the fix is real but slower than the queue."
+        },
+        {
+          "path": "Behind-the-meter and alternative generation bypasses the queue",
+          "status": "unproven",
+          "source": "",
+          "note": "NO SOURCED FIGURE FOUND for how much load has actually been served this way. Plausible and widely discussed, which is exactly why it is recorded as unproven rather than assumed away."
+        },
+        {
+          "path": "Reciprocating engines instead of turbines",
+          "status": "building",
+          "eta_months": 18,
+          "source": "https://www.powermag.com/engine-power-plants-surge-as-data-centers-drive-unprecedented-demand/",
+          "note": "The most credible bypass in the whole map, and buyers are already using it at scale: Caterpillar/Joule Utah 4,000 MW, Caterpillar/AIP West Virginia 2,000 MW, Caterpillar/Hunt 1,000 MW, INNIO/VoltaGrid 2,300 MW, Wärtsilä 429 MW. Wärtsilä's 412 MW Ohio data-centre order delivers early 2028 and it is adding 35% capacity at Vaasa by Q1 2028. Not a like-for-like replacement for baseload combined cycle, but plainly a substitute for data-centre bridge power."
+        },
+        {
+          "path": "Refurbished aeroderivatives",
+          "status": "building",
+          "eta_months": 12,
+          "source": "https://www.powermag.com/engine-power-plants-surge-as-data-centers-drive-unprecedented-demand/",
+          "note": "ProEnergy overhauls used CF6-80C2 cores into 48-50 MW PE6000 units against 3-5 year waits for a new LM6000. A real 650 MW order (13 units) is placed. Faster than any factory expansion because the cores already exist."
+        }
+      ],
+      "capture": {
+        "holder": "GE Vernova, Siemens Energy, Mitsubishi Heavy Industries",
+        "share_pct": 66,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "GE Vernova's CEO on the Q2 2026 call: first-half 2026 orders were priced more than 20% above Q4 2025 equipment orders. Power segment EBITDA margin 18.8%, +240bp reported and +320bp organic, which the 8-K attributes to 'favorable price and higher volume'. Siemens Gas Services 17.3% margin. Source: https://www.sec.gov/Archives/edgar/data/0001996810/000199681026000147/gevpressrelease2q26.htm",
+        "_share_basis": "Global Energy Monitor, Aug 2024: the top three provide about two-thirds of turbines for gas plants under construction. Its own stated caveat is that data was unavailable for 17% of construction-stage and 69% of pre-construction plants, so treat 66% as the best available rather than precise. Source: https://globalenergymonitor.org/research/leading-three-manufacturers-providing-two-thirds-turbines-gas-fired-power-plants-under",
+        "_warning": "Read alongside the turbine price index above, which inflates least of any link in this chain."
+      },
+      "names": [
+        {
+          "ticker": "GEV",
+          "name": "GE Vernova",
+          "exposure": "Sells the turbines and the electrification equipment; Power and Electrification are the bulk of the company.",
+          "band": "major",
+          "source": "https://www.sec.gov/Archives/edgar/data/0001996810/000199681026000147/gev2q2026form8-k.pdf"
+        },
+        {
+          "ticker": "ENR.DE",
+          "name": "Siemens Energy",
+          "exposure": "Gas turbines plus grid transmission equipment; both sit on this chokepoint.",
+          "band": "major",
+          "source": ""
+        },
+        {
+          "ticker": "7011.T",
+          "name": "Mitsubishi Heavy Industries",
+          "exposure": "Heavy-duty gas turbines, inside a group also spanning aerospace, shipbuilding and defence.",
+          "band": "minor",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "euv-lithography",
+      "system": "intelligence",
+      "name": "EUV lithography",
+      "scarce_object": "Extreme-ultraviolet scanners, and the light sources and optics inside them",
+      "why": "A single supplier for the tool every leading-edge logic and DRAM node depends on, with 2027 output already close to fully sold. The contradiction is left standing on purpose: TSMC said on 16 Jul 2026 that it foresees no capacity bottleneck and that packaging is what limits its customers — so the tool maker's book and its largest customer disagree about what binds.",
+      "measurements": [
+        {
+          "metric": "Low-NA EUV systems ASML plans to ship in FY2026",
+          "value": 65,
+          "unit": "systems",
+          "normal": 48,
+          "as_of": "2026-07-15",
+          "source": "https://ourbrand.asml.com/asset/1fd3908a-0381-47b5-9b69-a3094f656651/2026_07_15-ASML-Transcript-investor-call-Q2-2026.pdf",
+          "note": "CFO on the Q2 2026 call: 'around 65 Low NA EUV systems this year', against 48 EUV systems recognised in FY2025 (44 NXE + 4 EXE) per the annual report. Baseline is last year's actual output. Source for the 48: https://ourbrand.asml.com/m/419103cb23dfeaa4/original/asml-2025-annual-report-financial-performance-section.pdf"
+        },
+        {
+          "metric": "ASML FY2026 revenue guidance, against its own January guide",
+          "value": 44,
+          "unit": "€bn (midpoint)",
+          "normal": 36.5,
+          "as_of": "2026-07-15",
+          "source": "https://www.asml.com/en/news/press-releases/2026/q2-2026-financial-results",
+          "note": "Guided €43-45bn on 15 Jul 2026, raised twice from €34-39bn in January and €36-40bn in April. Three consecutive raises and no cuts. January guide: https://www.asml.com/en/news/press-releases/2026/q4-2025-financial-results"
+        }
+      ],
+      "routes": [
+        {
+          "path": "Use DUV multi-patterning instead of EUV",
+          "status": "blocked",
+          "source": "https://ourbrand.asml.com/asset/1fd3908a-0381-47b5-9b69-a3094f656651/2026_07_15-ASML-Transcript-investor-call-Q2-2026.pdf",
+          "note": "The substitution is running in reverse. ASML's CEO on 15 Jul 2026: Low-NA EUV growth is 'driven by the increasing replacement of multi-patterning with more cost-effective single-exposure EUV'. Customers are moving towards the constraint, not away from it. No primary-sourced figure for the multi-patterning cost penalty was found; the numbers circulating in blogs cite nothing."
+        },
+        {
+          "path": "ASML raises Low-NA output ~30% in 2027, investigating another ~30% for 2028",
+          "status": "building",
+          "eta_months": 12,
+          "source": "https://ourbrand.asml.com/asset/1fd3908a-0381-47b5-9b69-a3094f656651/2026_07_15-ASML-Transcript-investor-call-Q2-2026.pdf",
+          "note": "The main thing that actually relieves this, and it is the monopolist's own decision. Note 2027 is already 'close to being fully covered with orders'."
+        },
+        {
+          "path": "High-NA EUV as a volume route",
+          "status": "blocked",
+          "source": "https://ourbrand.asml.com/m/419103cb23dfeaa4/original/asml-2025-annual-report-financial-performance-section.pdf",
+          "note": "A capability route, not a volume one: 4 EXE systems recognised in FY2025 and 2 in FY2024, and the annual report records them as dilutive to gross margin. Intel has qualified High-NA on select 18A layers, but ASML itself says maturity is improving only 'towards' the level required for high-volume manufacturing."
+        },
+        {
+          "path": "Domestic Chinese lithography (SMEE SSA800 and the SiCarrier EUV programme)",
+          "status": "blocked",
+          "source": "https://asiatimes.com/2026/07/chinas-duv-lithography-still-lags-asml-by-four-generations/",
+          "note": "SSA800 is immersion DUV targeting 28nm, reported at roughly 5 units in 2026, and still imports Zeiss lenses and ArF sources. Not a route around leading-edge EUV on any horizon that matters here."
+        },
+        {
+          "path": "Canon nanoimprint lithography",
+          "status": "blocked",
+          "source": "https://global.canon/en/news/2024/20240926.html",
+          "note": "Commercialised in 2023 and first shipped in Sep 2024 for R&D and prototype production. No high-volume logic or DRAM insertion found, and no disclosed NIL revenue."
+        }
+      ],
+      "capture": {
+        "holder": "ASML",
+        "share_pct": 100,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "Sole supplier of EUV scanners for high-volume manufacturing, and the margin follows: gross margin 51.3% FY2024, 52.8% FY2025, 54.0% in Q2 2026, guided 55-57% for Q3 2026, with the FY2026 range raised from 51-53% to 54-56%. The CFO on the 15 Jul 2026 call: the current environment 'provides more flexibility for pricing than what you would have had'. Sources: https://www.asml.com/en/news/press-releases/2026/q2-2026-financial-results and https://ourbrand.asml.com/asset/1fd3908a-0381-47b5-9b69-a3094f656651/2026_07_15-ASML-Transcript-investor-call-Q2-2026.pdf",
+        "_note": "share_pct 100 is for EUV specifically, where ASML is the only supplier. Across all lithography its share is reported at ~94%, but that figure rests on 2024 data. No 2026-dated independent share figure was verified."
+      },
+      "names": [
+        {
+          "ticker": "ASML",
+          "name": "ASML Holding",
+          "band": "pure",
+          "revenue_share_pct": 57,
+          "exposure": "The only maker of EUV scanners for high-volume manufacturing, and it captures the rent directly.",
+          "source": "https://ourbrand.asml.com/asset/1fd3908a-0381-47b5-9b69-a3094f656651/2026_07_15-ASML-Transcript-investor-call-Q2-2026.pdf"
+        },
+        {
+          "ticker": "6920.T",
+          "name": "Lasertec",
+          "band": "major",
+          "exposure": "Actinic EUV photomask inspection — the step that qualifies an EUV mask before it can be used.",
+          "source": ""
+        },
+        {
+          "ticker": "7751.T",
+          "name": "Canon",
+          "band": "minor",
+          "exposure": "Part of the residual non-EUV lithography share, and the only nanoimprint vendor.",
+          "source": ""
+        },
+        {
+          "ticker": "7731.T",
+          "name": "Nikon",
+          "band": "minor",
+          "exposure": "The other part of the residual lithography share. No EUV product.",
+          "source": ""
+        }
+      ],
+      "_unlisted_chokepoints": "The two tightest monopolies inside the scanner are not investable: Carl Zeiss SMT, sole supplier of EUV projection optics, is wholly owned by the Carl Zeiss Foundation, and TRUMPF, which makes the CO2 drive lasers, is family-held. Carl Zeiss Meditec (AFX) is a medical-device company and is NOT the optics entity — a tempting and wrong substitute. Cymer, the light-source maker, is an ASML subsidiary, so that exposure already sits inside ASML."
+    },
+    {
+      "id": "advanced-packaging",
+      "system": "intelligence",
+      "name": "Advanced packaging (CoWoS-class)",
+      "scarce_object": "2.5D and 3D packaging capacity joining logic dies to stacked memory on an interposer",
+      "why": "The clearest internal contradiction in this map, and it is inside one company three weeks apart. TSMC's CEO, 16 Jul 2026: 'our packaging capacity is so tight that now it's limiting my customers' growth.' TSMC's VP of Advanced Packaging, 11 Aug 2026: supply is now 'very close' to demand — and the bottlenecks he named were MEMORY and ABF SUBSTRATES, not packaging. Both are the company's own words. Read this as a constraint handing over to the next one rather than as a live squeeze.",
+      "measurements": [
+        {
+          "metric": "TSMC FY2026 capital expenditure guidance, against its prior guide",
+          "value": 62,
+          "unit": "$bn (midpoint)",
+          "normal": 54,
+          "as_of": "2026-07-16",
+          "source": "https://www.trendforce.com/news/2026/07/16/news-tsmc-lifts-2026-capex-15-to-60-64b-hikes-sales-outlook-to-over-40-despite-q3-margin-dip/",
+          "note": "Raised to $60-64bn from $52-56bn on the Q2 2026 call, with 10-20% earmarked for advanced packaging, test and mask. A capex raise is a response to a constraint, not a measure of it — which is why this scores modestly."
+        }
+      ],
+      "routes": [
+        {
+          "path": "TSMC's own capacity has caught up",
+          "status": "open",
+          "source": "https://www.trendforce.com/news/2026/08/11/news-tsmcs-5-5-reticle-cowos-reportedly-tops-99-yield-flags-memory-abf-as-ai-bottlenecks/",
+          "note": "TSMC's VP of Advanced Packaging on 11 Aug 2026: CoWoS capacity has nearly doubled each year for three years and supply is 'very close' to market demand, with 5.5-reticle CoWoS in volume production at 98-99% yield across ten facilities. The independent gap estimate fell from about 20% to about 10% by end-2026. Marked open because the supplier itself says the shortage is substantially closed — the strongest possible source for that claim, and the reason this entry is not treated as a live squeeze. Gap source: https://www.trendforce.com/news/2026/06/15/news-tsmc-cowos-supply-demand-gap-reportedly-seen-narrowing-from-20-to-10-by-end-2026-as-capacity-expands/"
+        },
+        {
+          "path": "Outsourcing the chip-on-interposer step to OSATs",
+          "status": "building",
+          "eta_months": 6,
+          "source": "https://www.trendforce.com/news/2026/08/05/news-tsmc-reportedly-expands-outsourcing-of-key-cowos-front-end-step-to-osats-amid-rising-nvidia-asic-demand/",
+          "note": "TSMC is moving part of the work to ASE, Amkor and SPIL, adding an estimated 50,000-60,000 wafers a month against its own 120,000-140,000. Note the CEO publicly WELCOMED rival packaging capacity on the Q2 call — behaviour consistent with a constraint he does not expect to monetise indefinitely. Which OSATs are actually qualified for which customer could not be corroborated from any filing; treat the qualification claims as unverified."
+        },
+        {
+          "path": "Panel-level packaging (CoPoS/FOPLP) and glass substrates",
+          "status": "blocked",
+          "source": "https://www.trendforce.com/presscenter/news/20260617-13107.html",
+          "note": "Not a relief valve this cycle. Panel format standardised at 310x310mm with 2026 for validation, 2027 for pilot and mass production in 2H 2028 at the earliest — one report says Q4 2030 on warpage and uniformity. TSMC's own glass pilot line was 'about another one year to be mature' as of 16 Jul 2026."
+        }
+      ],
+      "capture": {
+        "holder": "TSMC, with ASE, Amkor and SPIL taking the overflow",
+        "share_pct": null,
+        "pricing_power": "contested",
+        "pricing_evidence": "Pointing both ways, which is why it is contested rather than demonstrated. For: ASE raised advanced packaging quotes more than 20% (reported 1 Jul 2026) and CoWoS wafer ASP is put near $10,000, comparable to 7nm. Against: TSMC's Q3 2026 gross margin is guided to 65-67% from a record 67.7%, i.e. sequential compression; and TSMC is reported to be DELAYING its 2027 advanced packaging equipment orders, which reads as a company seeing excess capacity ahead. That last item is the single most important loosening datapoint and it is paywalled and uncorroborated — verify it before acting. Source: https://www.digitimes.com/news/a20260901PD219/tsmc-cowos-equipment-packaging-capacity.html",
+        "_gap": "No sourced market share for advanced packaging of AI accelerators exists. TSMC's 120,000-140,000 wafers a month against an industry approaching 200,000 would imply a share, but that division is arithmetic on two press estimates, not a sourced figure, so it is not recorded as one."
+      },
+      "names": [
+        {
+          "ticker": "AMKR",
+          "name": "Amkor Technology",
+          "exposure": "The largest named recipient of TSMC's packaging outsourcing, but NOT an AI pure play: its own 10-Q puts Computing at just 22% of Q2 2026 sales against Communications at 42%.",
+          "band": "minor",
+          "source": "https://www.sec.gov/Archives/edgar/data/1047127/000104712726000046/amkr-20260630.htm"
+        },
+        {
+          "ticker": "ASX",
+          "name": "ASE Technology Holding",
+          "exposure": "The largest outsourced packaging and test provider.",
+          "band": "major",
+          "source": ""
+        },
+        {
+          "ticker": "TSM",
+          "name": "Taiwan Semiconductor Manufacturing",
+          "exposure": "Holds the dominant 2.5D packaging capacity. Advanced packaging is TSMC-confirmed at 8% of revenue in 2024, slightly over 10% in 2025 and guided to low-teens for 2026 — so the exposure is real but diluted.",
+          "band": "minor",
+          "source": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-01/51d09df96cd89ac19d65af39032b038dc2896a24/TSMC%204Q25%20Transcript.pdf",
+          "revenue_share_pct": 12
+        },
+        {
+          "ticker": "CAMT",
+          "name": "Camtek",
+          "band": "major",
+          "exposure": "Inspection and metrology for CoWoS-class interconnect. Its own SEC filing discloses a $31m order from a leading OSAT 'mainly for CoWoS-like packaging' and over $90m of Q1 2026 OSAT orders — the cleanest filing-level proof that the outsourcing is real.",
+          "source": "https://www.sec.gov/Archives/edgar/data/1109138/000117891326001836/zk2634993.htm"
+        },
+        {
+          "ticker": "BESI.AS",
+          "name": "BE Semiconductor Industries",
+          "band": "pure",
+          "exposure": "Hybrid bonding and thermocompression bonders — the tightest tool in the 3D stack. Q2 2026 orders +129% year on year at a 65.7% gross margin.",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "large-power-transformers",
+      "system": "power",
+      "name": "Large power transformers",
+      "scarce_object": "High-voltage transformers and generator step-up units, and the grain-oriented electrical steel in them",
+      "why": "Nothing connects to the grid without one, and lead times are genuinely years. But the price series says this constraint has stopped tightening: the producer price index was flat for six months of 2026 before a single step in July, and Siemens Energy's own CFO calls pricing 'plateauing on a high level'. The widely quoted lead times all trace back to one Wood Mackenzie survey from Q2 2025 — 15 months old and still being recirculated as news.",
+      "measurements": [
+        {
+          "metric": "US producer price index, electric power and specialty transformers",
+          "value": 475.065,
+          "unit": "index (BLS PCU335311)",
+          "normal": 432.642,
+          "as_of": "2026-08-01",
+          "source": "https://fred.stlouisfed.org/data/PCU335311335311.txt",
+          "note": "Aug 2026 against Dec 2024 as the baseline. +9.8% over twenty months — real, but the slowest-moving of the grid equipment series. Flat from Dec 2025 (455.909) to Jun 2026 (456.6), then a discrete +4.0% step in July and flat again in August: the shape of a tariff or copper pass-through, not of continuously tightening scarcity. This is monthly primary government data, which is why it is used instead of the circulating lead times."
+        }
+      ],
+      "routes": [
+        {
+          "path": "North American OEM capacity expansion (~$2bn announced since 2023)",
+          "status": "building",
+          "eta_months": 18,
+          "source": "https://www.utilitydive.com/news/hitachi-unveils-1b-grid-manufacturing-investment-including-virginia-trans/759219/",
+          "note": "Hitachi Energy's $457m South Boston, Virginia large-transformer plant is operational 2028; Siemens Energy Charlotte early 2027; Eaton South Carolina 2027. Most of the announced capacity lands 2027-2028, after the current build wave's critical path. Hitachi withheld the capacity uplift as commercially sensitive."
+        },
+        {
+          "path": "Defense Production Act Title III purchases and loan guarantees",
+          "status": "unproven",
+          "source": "https://www.whitehouse.gov/presidential-actions/2026/04/presidential-determination-pursuant-to-section-303-of-the-defense-production-act-of-1950-as-amended-on-grid-infrastructure-equipment-and-supply-chain-capacity/",
+          "note": "A 20 Apr 2026 determination names transformers, HV circuit breakers and electrical core steel as essential to national defence. No dollar amount in the determination, and roughly $323m of DPA funding remained for FY2026 across five simultaneous energy determinations. Symbolically large, financially immaterial at current appropriations."
+        }
+      ],
+      "capture": {
+        "holder": "Hitachi Energy and Siemens Energy, the top two",
+        "share_pct": 20,
+        "pricing_power": "contested",
+        "pricing_evidence": "Hitachi Energy's adjusted EBITA margin went 6.1% (FY21) to 13.4% (FY25) with order backlog $57.9bn, +33% — so the rent was captured. But the company's own deck captions the backlog chart 'Backlog margin improvement... After FY28', i.e. the higher-priced work converts later; Siemens Energy's CFO calls pricing 'plateauing on a high level'; and the PPI above went flat for six months. Marked contested rather than demonstrated because two independent signals say the pricing power has stopped expanding. Source: https://www.hitachi.com/content/dam/hitachi/global/en/press/files/2026/04/260427/2025_Anpre.pdf",
+        "_gap": "No independently verified large-power-transformer market share exists. The one vendor estimate found is internally inconsistent — it sizes the global market at $23.2bn against Hitachi Energy's own $19.8bn of revenue.",
+        "_share_basis": "The best-quality share data found anywhere in this exercise, and it argues AGAINST concentration. European Commission merger case M.9447 (Hitachi/ABB Power Grids, decision 2 Jun 2020) publishes revenue-based bands tested in the Commission's own market investigation: Hitachi Energy (then ABB Power Grids) at [10-20]% of global power transformers and Siemens at [10-20]%, with TBEA, GE/Alstom, SGB and Xian XD all present behind them. The lower bound of the two combined is used, 20%. That is an oligopoly at best, not a chokepoint — which is consistent with the price index going flat for six months and Siemens Energy's own CFO calling pricing 'plateauing on a high level'. Caveat: 2018 vintage, so structural evidence rather than current share. Source: https://ec.europa.eu/competition/mergers/cases1/202034/m9447_557_3.pdf",
+        "_do_not_add": "Siemens Energy separately claims about 20% at its Nov 2025 capital markets day, but that is a share of the global INSTALLED population of transformers, not of annual sales. Different denominator — do not add it to the Commission's revenue share.",
+        "_correction": "ABB is not a holder of this chokepoint. It sold Power Grids to Hitachi, closing 2020, so every ABB transformer and HV switchgear share in the older literature is now Hitachi Energy's."
+      },
+      "names": [
+        {
+          "ticker": "ENR.DE",
+          "name": "Siemens Energy",
+          "exposure": "Grid Technologies builds high-voltage transformers and substations.",
+          "band": "major",
+          "source": "",
+          "revenue_share_pct": null
+        },
+        {
+          "ticker": "6501.T",
+          "name": "Hitachi",
+          "exposure": "Hitachi Energy is a leading transformer maker, inside a very diversified group.",
+          "band": "minor",
+          "source": ""
+        },
+        {
+          "ticker": "ETN",
+          "name": "Eaton",
+          "exposure": "Electrical distribution and switchgear for data centre power trains.",
+          "band": "minor",
+          "source": ""
+        },
+        {
+          "ticker": "HUBB",
+          "name": "Hubbell",
+          "exposure": "Utility grid components including transformers and enclosures.",
+          "band": "minor",
+          "source": ""
+        },
+        {
+          "ticker": "267260.KS",
+          "name": "HD Hyundai Electric",
+          "band": "major",
+          "revenue_share_pct": 26,
+          "exposure": "The strongest current-vintage share figure in the set: 25.7% of the US market for transformers of 100 MVA and above in 2025, up from 17.2% in 2024 and number one for a second year — per Goulden Reports, a specialist third party. US-only and above 100 MVA only.",
+          "source": "https://en.sedaily.com/finance/2026/08/02/early-bet-pays-off-hd-hyundai-electric-produces-1000th"
+        }
+      ]
+    },
+    {
+      "id": "rare-earth-magnets",
+      "system": "motion",
+      "name": "Heavy rare earth magnets (Dy/Tb grades)",
+      "scarce_object": "Sintered NdFeB magnets with dysprosium and terbium added for heat resistance",
+      "why": "The only constraint anywhere in this map that a named humanoid programme has publicly blamed for its own production. And the grade is the whole point: plain N35-N52 NdFeB is not controlled — the restricted grades are the high-coercivity ones with dysprosium and terbium added to survive heat and reverse fields, which is exactly what a hot robot joint needs.",
+      "measurements": [
+        {
+          "metric": "Terbium metal, export price against China domestic",
+          "value": 1557.0,
+          "unit": "$/kg FOB vs $1,097.08 domestic",
+          "normal": 1097.08,
+          "as_of": "2026-09-02",
+          "source": "https://rare-earth-mining.com/terbium-price/",
+          "note": "A 41.9% spread on the same metal in the same week is the cleanest measure of an export control actually biting anywhere in this research. For oxides the gaps ran wider in March 2026 — neodymium +63%, dysprosium +67%, terbium +47%. Watch the product form: oxide, metal and alloy are not interchangeable and must never be compared across. Trade site quoting SMM benchmarks."
+        },
+        {
+          "metric": "China share of global sintered magnet production",
+          "value": 94.0,
+          "unit": "%",
+          "normal": 50.0,
+          "as_of": "2025-10-23",
+          "source": "https://www.iea.org/commentaries/with-new-export-controls-on-critical-minerals-supply-concentration-risks-become-reality",
+          "note": "IEA: China holds about 60% of mining, 91% of separation and refining, and 94% of sintered permanent magnet production — against roughly 50% two decades ago, which is the baseline used here. Adamas Intelligence puts China above 99% of refined dysprosium and terbium specifically. Independent and authoritative, though dated Oct 2025, so it carries reduced weight. Source also: https://www.adamasintel.com/wp-content/uploads/2026/02/Adamas-Intelligence-Rare-Earth-Magnet-Market-Outlook-Top-Predictions-for-2026.pdf"
+        }
+      ],
+      "routes": [
+        {
+          "path": "Ex-China magnet plants now being built",
+          "status": "building",
+          "eta_months": 24,
+          "source": "https://mpmaterials.com/news/mp-materials-announces-transformational-public-private-partnership-with-the-department-of-defense-to-accelerate-u-s-rare-earth-magnet-independence/",
+          "note": "Real, funded, and roughly a decade short. Announced ex-China sintered capacity through 2028 totals 25,000-35,000 tonnes against 58,000 tonnes of Chinese magnet exports in 2024 — 43-60% partial diversification. MP Materials shipped first commercial NdFeB in Dec 2025 with its 10X plant commissioning 2028; e-VAC, Neo in Estonia and USA Rare Earth add the rest. NOTE: MP's Independence nameplate is reported as both 1,000 and 3,000 t/yr across three sources and is unresolved — do not model off either until MP's own filing is read."
+        },
+        {
+          "path": "Heavy rare earth feedstock outside China",
+          "status": "blocked",
+          "source": "https://www.adamasintel.com/wp-content/uploads/2026/02/Adamas-Intelligence-Rare-Earth-Magnet-Market-Outlook-Top-Predictions-for-2026.pdf",
+          "note": "The real gate, and it sits upstream of the magnet presses. Adamas: heavy rare earth availability outside China 'has potential to be a near-term bottleneck for the collective Western magnet industry scale-up', with Western NdPr output still covering under 15% of global demand. Lynas completed its first contracted separated dysprosium and terbium shipments only in early 2026. You can build a magnet plant faster than you can feed one."
+        },
+        {
+          "path": "Rare-earth-free motors",
+          "status": "unproven",
+          "source": "https://www.nironmagnetics.com/niron-magnetics-and-aspina-to-develop-rare-earth-free-motor-solutions-across-global-end-markets/",
+          "note": "Not yet a robot answer. Niron's July 2026 supply agreement names brushless DC motors, hybrid steppers and fan blowers — robotics is not referenced, with no volumes and no shipments — and Niron publishes no energy product, which is the one number deciding whether it substitutes in a joint. Against it: Unitree's G1 joints are specified as permanent-magnet synchronous and EngineAI claims 130 N·m/kg peak torque density. No magnet-free topology has been shown at that density and size."
+        },
+        {
+          "path": "Recycling end-of-life magnets",
+          "status": "blocked",
+          "source": "https://www.adamasintel.com/wp-content/uploads/2026/02/Adamas-Intelligence-Rare-Earth-Magnet-Market-Outlook-Top-Predictions-for-2026.pdf",
+          "note": "Global end-of-life NdFeB recycling runs under 1% to under 5%. EU recycled output is projected at about 3,800 t/yr by 2030 — roughly 20% of EU demand alone."
+        }
+      ],
+      "capture": {
+        "holder": "Chinese magnet makers, led by JL MAG",
+        "share_pct": 94,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "Profit growing faster than revenue is the tell, and robots are now visible inside it. JL MAG's H1 2026 net income rose 52% to RMB 462m on revenue up about a third to a record RMB 4.7bn, with ROBOTICS REVENUE DOUBLED and capacity going from 40,000 t/yr to 60,000 t/yr by 2027. Q1 2026 core earnings rose 65.95% on revenue up 16.05%. Its own capacity figure conflicts with a trade-site table showing 25,000+; the company figure is preferred and the conflict noted. Source: https://www.briefs.co/news/giant-rare-earth-magnet-maker-s-strongest-half-as-robot-and/",
+        "_share_basis": "94% is China's share of global sintered magnet production per the IEA, not any single company's share. This chokepoint is national rather than corporate, which is precisely what an export licensing regime makes it.",
+        "_named_programme": "McKinsey, 17 Apr 2026, reports that Elon Musk has publicly noted magnet supply constraints have affected Optimus production — the only named humanoid programme in all of this research citing any component as binding. Tesla's own sources were unreachable throughout, so this is verified-secondary. Source: https://www.mckinsey.com/industries/industrials/our-insights/turning-humanoid-supply-chain-constraints-into-billion-dollar-wins",
+        "_event_risk": "China's suspension of the extraterritorial expansion of its controls expires 10 Nov 2026. A dated cliff, not a standing condition. Licence approval counts or rates: none are published, at any date."
+      },
+      "names": [
+        {
+          "ticker": "300748.SZ",
+          "name": "JL MAG Rare-Earth",
+          "band": "pure",
+          "exposure": "The world's largest rare-earth magnet maker, robotics revenue doubling in H1 2026, capacity to 60,000 t/yr by 2027.",
+          "source": "https://www.briefs.co/news/giant-rare-earth-magnet-maker-s-strongest-half-as-robot-and/"
+        },
+        {
+          "ticker": "LYC.AX",
+          "name": "Lynas Rare Earths",
+          "band": "pure",
+          "exposure": "The largest separator outside China and first to ship contracted separated dysprosium and terbium, early 2026. Upstream only, no magnets.",
+          "source": "https://www.adamasintel.com/wp-content/uploads/2026/02/Adamas-Intelligence-Rare-Earth-Magnet-Market-Outlook-Top-Predictions-for-2026.pdf"
+        },
+        {
+          "ticker": "MP",
+          "name": "MP Materials",
+          "band": "major",
+          "exposure": "The only US integrated mine-to-magnet operation, with a Department of Defense floor of $110/kg NdPr and a 7,000 t/yr magnet offtake for ten years.",
+          "source": "https://mpmaterials.com/news/mp-materials-announces-transformational-public-private-partnership-with-the-department-of-defense-to-accelerate-u-s-rare-earth-magnet-independence/"
+        },
+        {
+          "ticker": "USAR",
+          "name": "USA Rare Earth",
+          "band": "pure",
+          "exposure": "Stillwater, Oklahoma magnet plant, 600-1,200 t/yr phase one. Development stage.",
+          "source": ""
+        },
+        {
+          "ticker": "4063.T",
+          "name": "Shin-Etsu Chemical",
+          "band": "minor",
+          "exposure": "Sintered NdFeB inside a large diversified chemicals group.",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "precision-reducers",
+      "system": "motion",
+      "name": "Precision reducers",
+      "scarce_object": "Strain-wave and cycloidal gearboxes for robot joints",
+      "why": "A humanoid needs dozens of them and the tolerance is the product, so this is the usual constraint on robot unit economics. Read it against the warning below, though: Unitree's own prospectus shows it self-researches over 90% of core components, and the robot makers integrating backwards may compress the merchant market even as unit volumes explode.",
+      "measurements": [
+        {
+          "metric": "Harmonic Drive Systems order backlog",
+          "value": 29457.0,
+          "unit": "¥m",
+          "normal": 20232.0,
+          "as_of": "2026-06-30",
+          "source": "https://finance.biggo.jp/news/jpx_tdnet_140120260804507706",
+          "note": "Backlog ¥29,457m, +45.6% year on year, on Q1 order intake of ¥24,128m, +55.7% — a 1.45x book-to-bill. Baseline derived from the stated growth rate. But read the capture leg before trusting it: the company attributes the drivers to global automation capex, a bulk North American surgical-robot order and generative-AI semicap equipment. Humanoids are not named in the filing at all."
+        },
+        {
+          "metric": "Laifual capacity utilisation",
+          "value": 95.1,
+          "unit": "%",
+          "normal": 95.1,
+          "as_of": "2026-06-30",
+          "source": "https://www.finanznachrichten.de/nachrichten-2026-08/69439912-zhejiang-laifual-drive-co-ltd-laifual-03952-hk-announces-2026-interim-results-011.htm",
+          "note": "95.1% with a backlog above 400,000 units, about 6.2 months of July capacity. Recorded with normal equal to the reading so it scores nothing — near-full utilisation is a ceiling, not an excess over one. And it is not representative: Leaderdrive, the larger Chinese player, ran 67.76% in 2025 after 42.67% in 2024 and pushed its expansion completion from end-2026 to end-2028, while Shuanghuan's RV arm withdrew its STAR Market IPO on 3 Sep 2026 with capacity absorption among the regulator's unresolved questions. Source: http://file.finance.sina.com.cn/211.154.219.97:9494/MRGG/CNSESH_STOCK/2026/2026-7/2026-07-10/12438947.PDF"
+        }
+      ],
+      "routes": [
+        {
+          "path": "Robot makers build their own",
+          "status": "building",
+          "eta_months": 12,
+          "source": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE1sZWhMb0dBMFVuZFIxbzBtbElidl96MDk1cUMwWlFBVXhLTHp5ZGpVSlhSWmhkTTR3RnNrWlJuZjlnOHh6WFVBOS1IdlpjRnd0WGs4",
+          "note": "The route that matters, and it is the customer doing it. Unitree's STAR Market prospectus reports core-component self-research above 90% — motors, reducers, joint modules, dexterous hands in-house — with imported sourcing down to about 20% of raw materials. Fourier likewise built its own force sensor rather than buying one. A supplier's addressable market can shrink while the end market grows."
+        },
+        {
+          "path": "Chinese second-sourcing at a fraction of incumbent price",
+          "status": "open",
+          "source": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQSloyeGZ3b2xXbE41U0RtTHlENG1EVEFleV9GSmxqaVlEdEJKY1BsSnlDc2trU1JVZ093RjBueHdYd1Vta1Y5RmpuMEQ3OFdPd0NYQk1Kc1pvcWpXUGhMX2Ztd09YWHhiT2VLdTBPWDhyeDVZcnRtN1hybjRaSkllNGk5UXpGVnVN",
+          "note": "Already happening and already priced. In the adjacent force-sensor market the domestic-versus-imported gap went from roughly 3x to about 10x in eighteen months — domestic RMB 5,000-30,000 against international RMB 70,000-80,000 as of 9 Sep 2026. Recorded as open because the substitute exists, ships and is being bought."
+        }
+      ],
+      "capture": {
+        "holder": "Nabtesco in medium and large robot joints; Leaderdrive and Laifual in Chinese harmonic",
+        "share_pct": 60,
+        "pricing_power": "contested",
+        "pricing_evidence": "The supposed monopolist has no pricing power and its own accounts prove it. Harmonic Drive Systems' gross margin fell from 39.28% in FY3/22 to 26.69% in FY3/25, with OPERATING MARGIN HITTING 0.01% in FY3/25 — a monopolist does not print that. The recovery to 30.45% is utilisation, not price. Nabtesco is the only player with sourced price realisation, disclosing ¥500m of price pass-through in Component Solutions in H1 2026. Meanwhile Chinese selling prices are falling outright: Leaderdrive from about RMB 1,900 in 2017 to RMB 1,100 in 2024, and Laifual from RMB 802 in 2023 to RMB 573 in 2025. Sources: https://stockanalysis.com/quote/TYO/6324/financials/ , https://www.nabtesco.com/cms/wp-content/uploads/Results_Briefing_QA_for_FY2026_Q2.pdf",
+        "_warning": "Whole-robot prices are collapsing, which flows straight through to component ASPs. Unitree's own prospectus shows humanoid average selling price falling from RMB 593,400 in 2023 to RMB 167,600 over the first nine months of 2025 — a 72% decline in two years. A component supplier into that is facing price, not receiving it.",
+        "_where_the_rent_went": "Up a level, to the customer. Unitree's 2025 humanoid gross margin was 62.91% against Leaderdrive's 32.26% in H1 2026. The OEM that integrated the joint kept the rent.",
+        "_share_basis": "Nabtesco puts itself at about 60% of precision reducers for MEDIUM AND LARGE industrial robot joints globally — stated on p.29 of its FY2026 Q2 deck and labelled 当社推計, its own estimate, with the metric left unstated (neither units nor revenue). Narrow denominator: that application, not all precision reducers and not all RV. Source: https://www.nabtesco.com/cms/wp-content/uploads/Results_Briefing_Material_for_FY2026_Q2.pdf",
+        "_china_is_a_different_market": "And in China the incumbent has already lost. The CIC table inside Laifual's June 2026 HKEX prospectus puts 2025 Chinese robot harmonic shipments at Leaderdrive 27.5%, Laifual 21.4% and Harmonic Drive Systems 4.4% — the Japanese incumbent fifth, on units. On revenue HDS is third at 8.8%, i.e. it still prices above the locals but ships a fraction of the volume. HDS's own deck, citing MIR, puts it at 12.1% of the whole Chinese harmonic market in 2024 across all uses; different denominator and year, so the two do not reconcile and neither should be made to. Sources: https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0622/2026062200047.pdf and https://www.hds.co.jp/Portals/0/files/ir/event/investor/pdf/setsumeikai%2020250520.pdf",
+        "_gap": "No global harmonic share for Harmonic Drive Systems exists in any of its own decks or in a reachable research-firm source. Its listing filings claim rank, not percentage."
+      },
+      "names": [
+        {
+          "ticker": "6324.T",
+          "name": "Harmonic Drive Systems",
+          "exposure": "Strain-wave gearing is essentially the entire business.",
+          "band": "pure",
+          "source": ""
+        },
+        {
+          "ticker": "6268.T",
+          "name": "Nabtesco",
+          "exposure": "Cycloidal precision reducers for industrial robot joints.",
+          "band": "major",
+          "source": ""
+        },
+        {
+          "ticker": "6506.T",
+          "name": "Yaskawa Electric",
+          "exposure": "Servo motors and drives; a buyer of reducers as much as a seller into the chokepoint.",
+          "band": "minor",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "hv-switchgear",
+      "system": "power",
+      "name": "High-voltage switchgear and breakers",
+      "scarce_object": "Gas-insulated switchgear bays, HV circuit breakers and the data-centre electrical package",
+      "why": "The most under-narrated constraint here. Switchgear prices are inflating three times faster than transformers in 2026, the announced new capacity is one plant with no published date, and the US market for HV gas-insulated switchgear is only about 250-300 bays a year — so a single hyperscale campus can absorb a material share of national annual output, and there is no spot market to clear against.",
+      "measurements": [
+        {
+          "metric": "US producer price index, switchgear and switchboard apparatus",
+          "value": 411.453,
+          "unit": "index (BLS PCU335313)",
+          "normal": 329.584,
+          "as_of": "2026-08-01",
+          "source": "https://fred.stlouisfed.org/data/PCU335313335313.txt",
+          "note": "Aug 2026 against Dec 2024. +24.8% over twenty months, +11.4% in the first eight months of 2026 alone (about 17% annualised) and +3.6% in August by itself. The only equipment series checked that has doubled since Jan 2019 (208.2). Monthly primary BLS data — not a survey, not vendor-supplied."
+        },
+        {
+          "metric": "Powell Industries order backlog against quarterly revenue",
+          "value": 2400,
+          "unit": "$m backlog vs $311.7m quarterly revenue",
+          "normal": 311.7,
+          "as_of": "2026-06-30",
+          "source": "https://www.sec.gov/Archives/edgar/data/80420/000008042026000103/ex991-powlq3xfy2026earning.htm",
+          "note": "Backlog $2.4bn, up 69% from $1.4bn, on quarterly revenue of $311.7m — roughly 7.7 times quarterly sales. New orders $934m, +158% year on year. Management cites 'a continued strong and stable pricing environment'."
+        }
+      ],
+      "routes": [
+        {
+          "path": "Siemens Energy greenfield HV switchgear plant, Mississippi",
+          "status": "building",
+          "eta_months": 36,
+          "source": "https://www.siemens-energy.com/global/en/home/press-releases/siemens-energy-is-investing--1-billion-and-creating-highly-skill.html",
+          "note": "Announced 3 Feb 2026 inside a $1bn US programme, about 300 jobs. The primary release discloses NO capacity figure and NO completion date — verified by reading it. Separately the company dates its meaningful gas-insulated switchgear capacity step to 2030, which is where the 36-month estimate comes from."
+        },
+        {
+          "path": "Eaton capacity expansion across Electrical Americas",
+          "status": "building",
+          "eta_months": 24,
+          "source": "https://www.fool.com/earnings/call-transcripts/2026/08/07/eaton-etn-q2-2026-earnings-call-transcript/",
+          "note": "Management cites over $1bn of capacity expansion and two dozen projects coming online. No per-project capacity disclosed."
+        },
+        {
+          "path": "SF6-free designs, modular skid substations, lower-voltage topologies",
+          "status": "unproven",
+          "source": "",
+          "note": "NO SOURCED FIGURE FOUND on capacity, lead-time benefit or adoption rate. Plausible and undocumented."
+        }
+      ],
+      "capture": {
+        "holder": "Hitachi Energy, the leader in high-voltage switchgear",
+        "share_pct": 20,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "The broadest margin expansion of any constraint in this map: Siemens Energy Grid Technologies 19.9% (+400bp), Eaton Electrical Americas 27.5% (+190bp sequentially, with pricing actions explicitly timed and a further +250bp guided for Q3), Vertiv 22.6% adjusted (+410bp), GE Vernova Electrification 18.4% (+390bp reported, +700bp organic), Powell 30.6% gross margin. Sources: https://www.fool.com/earnings/call-transcripts/2026/08/07/eaton-etn-q2-2026-earnings-call-transcript/ , https://www.sec.gov/Archives/edgar/data/80420/000008042026000103/ex991-powlq3xfy2026earning.htm",
+        "_gap": "No percentage share of HV switchgear or GIS exists from any source for Eaton, Powell, Schneider, GE Vernova or Mitsubishi Electric. Newton-Evans names the participants but publishes no percentages for switchgear, GIS or breakers — only the HV bushings figure, which is adjacent and must not be presented as a switchgear share.",
+        "_warning": "The rent is captured at the HV and data-centre-specific end and NOT in commodity electrical distribution: Schneider Electric's net price impact was minus 120bp in H1 2026, with €280m of product pricing against €330m of raw-material and €104m of tariff headwind. Same end market, opposite sign.",
+        "_share_basis": "European Commission case M.9447, revenue bands from its own market investigation: the merged Hitachi Energy at [10-20]% of global HV switchgear across all types, [20-30]% of HV circuit breakers in 2018 (and [30-40]% on a five-year average), [10-20]% of HV gas-insulated switchgear, and [40-50]% of the narrower HV generator circuit breaker niche. The lower bound for all-type HV switchgear is used, 20%. Hitachi Energy separately claims to have 'installed 1 out of 4 high-voltage switchgear in the world' — but that is an installed-base claim footnoted as an internal estimate, not an annual revenue share. 2018 vintage. Source: https://ec.europa.eu/competition/mergers/cases1/202034/m9447_557_3.pdf"
+      },
+      "names": [
+        {
+          "ticker": "POWL",
+          "name": "Powell Industries",
+          "band": "pure",
+          "exposure": "Custom-engineered medium- and low-voltage switchgear and electrical houses. Effectively single-segment.",
+          "source": "https://www.sec.gov/Archives/edgar/data/80420/000008042026000103/ex991-powlq3xfy2026earning.htm"
+        },
+        {
+          "ticker": "VRT",
+          "name": "Vertiv",
+          "band": "pure",
+          "exposure": "The data-centre power train — busway, UPS and switchgear-adjacent gear. Note it stopped disclosing backlog in Q2 2026.",
+          "source": ""
+        },
+        {
+          "ticker": "ETN",
+          "name": "Eaton",
+          "band": "major",
+          "exposure": "Switchgear, switchboards, panelboards and busway, plus the whole data-centre electrical package.",
+          "source": "https://www.fool.com/earnings/call-transcripts/2026/08/07/eaton-etn-q2-2026-earnings-call-transcript/"
+        },
+        {
+          "ticker": "ENR.DE",
+          "name": "Siemens Energy",
+          "band": "major",
+          "revenue_share_pct": 32,
+          "exposure": "Gas-insulated switchgear and HV breakers through Grid Technologies.",
+          "source": ""
+        },
+        {
+          "ticker": "267260.KS",
+          "name": "HD Hyundai Electric",
+          "band": "major",
+          "exposure": "Switchgear, breakers and GIS into US data centres; 73% of Q1 new orders from North America, 25.1% operating margin.",
+          "source": ""
+        },
+        {
+          "ticker": "6501.T",
+          "name": "Hitachi",
+          "band": "minor",
+          "revenue_share_pct": 30,
+          "exposure": "Hitachi Energy GIS and HV products, inside a very diversified group.",
+          "source": "https://www.hitachi.com/content/dam/hitachi/global/en/press/files/2026/04/260427/2025_Anpre.pdf"
+        }
+      ]
+    },
+    {
+      "id": "interconnection-capacity",
+      "system": "power",
+      "name": "Grid interconnection and firm capacity",
+      "scarce_object": "An interconnection position, and firm capacity that already has one",
+      "why": "The only constraint here with a market-clearing price — and it has hit its administrative ceiling three auctions running while still short of the reliability requirement. PJM's own uncapped simulation says the market would clear 70% to 140% higher. The price cap is the only thing between owners of existing interconnected capacity and a further doubling. It is also the least routable: every bypass redistributes scarce firm capacity rather than creating it.",
+      "measurements": [
+        {
+          "metric": "PJM capacity auction clearing price, 2028/29 delivery year",
+          "value": 325.0,
+          "unit": "$/MW-day UCAP",
+          "normal": 28.92,
+          "as_of": "2026-07-14",
+          "source": "https://avalonenergy.us/2026/07/pjm-2028-2029-base-residual-auction-clears-at-price-cap/",
+          "note": "Cleared at the $325.00 cap on 14 Jul 2026 — the third consecutive auction at the cap — and still 6,831 MW (5.6%) short of the reliability requirement. Baseline is the 2024/25 clearing price of $28.92, i.e. an 11x move in four delivery years. PJM's own uncapped simulation: $554.72/MW-day RTO-wide and $776.69 in ComEd."
+        },
+        {
+          "metric": "Median interconnection request to commercial operation",
+          "value": 61,
+          "unit": "months",
+          "normal": 22,
+          "as_of": "2025-12-31",
+          "source": "https://www.rtoinsider.com/136008-lbnl-interconnection-report-2026-signs-improvement/",
+          "note": "Lawrence Berkeley 'Queued Up: 2026 Edition', data to end-2025: 61 months for 2025 completions against 36 months for 2015 and 22 months in 2008, which is the baseline used here. Of capacity requesting 2000-2020, only 13% reached operation and 75% withdrew. NOTE the total queue actually FELL 10% year on year on withdrawals — gas rose 86% while solar, storage and wind all declined. Anyone quoting '2,300 GW stuck in the queue' as a scarcity metric is quoting a number that is going down. The LBNL PDF itself could not be retrieved; the +86% and the report's existence are corroborated by RTO Insider."
+        }
+      ],
+      "routes": [
+        {
+          "path": "Co-location behind an existing nuclear plant",
+          "status": "building",
+          "eta_months": 30,
+          "source": "https://www.vnf.com/ferc-provides-further-guidance-on-co-located-load-interconnection",
+          "note": "The only route delivering gigawatt-scale firm power without a queue position, and it is available to about five companies. Talen/AWS runs 840-1,200 MW from 2029 to 1,680-1,920 MW by 2032; Constellation's Crane restart (819 MW nameplate) is pulled forward to 2027, entirely contracted to Microsoft. But FERC's EL25-49 exists precisely because co-location lets a generator serve load outside the tariff, and the 16 Apr 2026 compliance order pushed toward these arrangements paying transmission service. The regulatory direction is to tax the bypass, not widen it."
+        },
+        {
+          "path": "Curtailable or flexible load",
+          "status": "blocked",
+          "source": "https://www.whitecase.com/insight-alert/puct-affirms-curtailment-authority-over-co-located-data-centers-first-net-metering",
+          "note": "Not actually a route around this constraint, and worth recording as such. Curtailment reduces DEMAND; it does not add a single megawatt of firm capacity, so it never competes the rent away. If anything it protects it: PJM's Non-Capacity-Backed Load takes curtailment ahead of ordinary load, Texas SB6 requires large loads to curtail in emergencies, and the PUCT has affirmed curtailment authority over co-located data centres. The regulatory direction is to tax the bypass, not widen it — which makes an existing firm megawatt more valuable, not less."
+        },
+        {
+          "path": "Fast-track interconnection lanes",
+          "status": "blocked",
+          "source": "https://www.misoenergy.org/meet-miso/media-center/2026---news-releases/miso-accelerates-resource-additions-with-third-eras-cycle/",
+          "note": "Capped and temporary by design, so they cannot relieve the constraint. PJM's Reliability Resource Initiative selected 51 projects for 9,361 MW, 90% online only by 2030 — against a shortfall already running 6,831 MW in a single delivery year. MISO's ERAS is capped at 68 projects and sunsets 31 Aug 2027. Queue-jumping lanes, not capacity."
+        }
+      ],
+      "capture": {
+        "holder": "Owners of existing interconnected firm capacity",
+        "share_pct": null,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "Three consecutive PJM auctions at the administrative cap, each short of requirement, with the ISO's own uncapped simulations at $554.72/MW-day RTO-wide and $776.69 in ComEd. Total 2027/28 auction cost $16.4bn for 134,479 MW. Revealed price of an interconnected fleet: Constellation paid $16.4bn ($26.6bn including debt) for Calpine. Source: https://avalonenergy.us/2026/07/pjm-2028-2029-base-residual-auction-clears-at-price-cap/",
+        "_gap": "Utility-side rent — large-load tariff terms, minimum-take provisions, rate-base growth — NO SOURCED FIGURES FOUND. Not populated.",
+        "_warning": "Owners of unbuilt queue positions earn none of this. And treat ERCOT's 474 GW large-load queue as an option-strike register rather than a demand forecast: on 3 Aug 2026 the Governor of Texas ordered an audit of every data centre in the interconnection process before any further project advances. The state itself does not believe the number.",
+        "rent_mechanism": "market_price",
+        "_why_market_price": "There is no concentrated holder here: a PJM capacity auction pays every owner of an interconnected megawatt the same clearing price. Share is unmeasurable and would be meaningless — the published price is stronger evidence than any share figure could be, so this leg is carried by the price alone."
+      },
+      "names": [
+        {
+          "ticker": "TLN",
+          "name": "Talen Energy",
+          "band": "pure",
+          "exposure": "Susquehanna nuclear contracted to AWS through 2042. Purest exposure, and single-asset concentration risk.",
+          "source": ""
+        },
+        {
+          "ticker": "CEG",
+          "name": "Constellation Energy",
+          "band": "pure",
+          "exposure": "Over 19,000 MW of nuclear, the Microsoft Crane PPA, and Calpine's gas fleet since Jan 2026.",
+          "source": ""
+        },
+        {
+          "ticker": "VST",
+          "name": "Vistra",
+          "band": "major",
+          "exposure": "Nuclear plus a large PJM and ERCOT gas fleet earning capped capacity prices.",
+          "source": ""
+        },
+        {
+          "ticker": "NRG",
+          "name": "NRG Energy",
+          "band": "major",
+          "exposure": "PJM and ERCOT generation earning cap-clearing capacity revenue.",
+          "source": ""
+        },
+        {
+          "ticker": "EXC",
+          "name": "Exelon",
+          "band": "minor",
+          "exposure": "Pure transmission and distribution inside PJM — collects the build-out, not the capacity price.",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "hvdc-subsea-cable",
+      "system": "power",
+      "name": "HVDC subsea and underground cable",
+      "scarce_object": "High-voltage direct-current cable, and the ships that lay it",
+      "why": "Three firms hold roughly two-thirds to three-quarters of the market with order books stretching toward 2030, and the cleanest pricing-power signature anywhere in this map: NKT expanded its transmission margin by 500 basis points while that segment's revenue FELL 20%. Higher-priced backlog converting on falling volume is what a real chokepoint looks like from the outside.",
+      "measurements": [
+        {
+          "metric": "Cable procurement lead time",
+          "value": 30,
+          "unit": "months",
+          "normal": 12,
+          "as_of": "2025-02-25",
+          "source": "https://www.iea.org/reports/building-the-future-transmission-grid/executive-summary",
+          "note": "IEA 'Building the Future Transmission Grid': two to three years to procure cables, with DC cables extending beyond five years, and average lead times almost doubled since 2021 — which is where the 12-month baseline comes from. The IEA also puts cable prices at nearly double 2019 levels, independently consistent with the BLS wire index at +84.7% since Jan 2019. Dated Feb 2025, so this reading is deliberately stale and carries reduced weight."
+        },
+        {
+          "metric": "NKT transmission order backlog against annual revenue",
+          "value": 13000,
+          "unit": "€m backlog vs €2,700m annual revenue",
+          "normal": 2700,
+          "as_of": "2026-06-30",
+          "source": "https://view.news.eu.nasdaq.com/view?id=b6f2ea0cfacf72db169463a0152e4cf93&lang=en",
+          "note": "€13.0bn backlog (€11.6bn at standard metal prices) against FY26 guidance of €2.65-2.75bn of group revenue — roughly five years of the whole company. A further €2.5bn of TenneT framework projects sits outside backlog entirely."
+        }
+      ],
+      "routes": [
+        {
+          "path": "New cable plants and laying vessels",
+          "status": "building",
+          "eta_months": 15,
+          "source": "https://view.news.eu.nasdaq.com/view?id=b6f2ea0cfacf72db169463a0152e4cf93&lang=en",
+          "note": "The best-provisioned route-around in this map. NKT's Karlskrona 640kV/3GW capability is operational from 2027 plus a second vessel; Nexans' third vessel Electra entered service in Q2 2026; LS GreenLink's $680m Virginia plant completes phase one Q3 2027 and is fully operational Q1 2028; Sumitomo's £350m Port of Nigg plant is operational 2026. Real relief from 2027-28 — but the books already stretch to 2030."
+        },
+        {
+          "path": "Advanced conductors instead of new lines",
+          "status": "unproven",
+          "source": "https://www.compositesworld.com/news/ts-conductor-opens-134-million-south-carolina-facility-for-aecc-conductor-cores",
+          "note": "Potentially the best route-around of all, because it raises the capacity of existing lines rather than needing new ones. TS Conductor's $134m South Carolina plant opened May 2026 with phase one up to 10x its first plant's output. The claim that these conductors double or triple line capacity is the company's own and not independently verified, and NO km/yr, customers or order figures are published. Both TS Conductor and CTC Global are private, so there is no clean listed exposure to this route — a genuine gap in the investable universe."
+        },
+        {
+          "path": "Aluminium substituted for copper",
+          "status": "unproven",
+          "source": "",
+          "note": "Economically compelling — copper is up 52% since Dec 2024 against aluminium at 24% — but NO QUANTIFIED SUBSTITUTION RATE FOUND."
+        }
+      ],
+      "capture": {
+        "holder": "Prysmian, NKT, Nexans",
+        "share_pct": 70,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "NKT's transmission operational EBITDA margin went 15.2% to 20.2% year on year while that segment's revenue fell from €419m to €334m — 500 basis points of expansion on a 20% volume decline, which is higher-priced backlog converting. Prysmian's transmission margin went 17.1% to 21.2% and it raised full-year guidance; Nexans' PWR-Transmission margin went 11.8% to 13.7%. Sources: https://view.news.eu.nasdaq.com/view?id=b6f2ea0cfacf72db169463a0152e4cf93&lang=en , https://www.prysmian.com/en/media/press-releases/prysmian-raises-guidance-after-its-best-quarter-yet",
+        "_share_basis": "The IEA puts Prysmian, Nexans and NKT at around two-thirds of the global HVDC market (Feb 2025); Offshore Magazine puts the same three at 75% (Nov 2024). 70% is the midpoint of two independent sources rather than a precise figure. Single-company share percentages from vendor market-research contradict each other and are not used.",
+        "_warning": "Copper mill-product prices are rising about 3.5x faster than finished wire prices, so at the commodity-wire end this is margin compression, not rent. The rent is specific to HVDC transmission."
+      },
+      "names": [
+        {
+          "ticker": "NKT.CO",
+          "name": "NKT A/S",
+          "band": "pure",
+          "revenue_share_pct": 43,
+          "exposure": "The most concentrated listed HVDC play — transmission was 43% of Q2 2026 group revenue.",
+          "source": "https://view.news.eu.nasdaq.com/view?id=b6f2ea0cfacf72db169463a0152e4cf93&lang=en"
+        },
+        {
+          "ticker": "PRY.MI",
+          "name": "Prysmian",
+          "band": "major",
+          "exposure": "The largest HVDC subsea and underground cable maker, with a €17bn transmission backlog.",
+          "source": "https://www.prysmian.com/en/media/press-releases/prysmian-raises-guidance-after-its-best-quarter-yet"
+        },
+        {
+          "ticker": "NEX.PA",
+          "name": "Nexans",
+          "band": "major",
+          "exposure": "Subsea HVDC and interconnectors, with three laying vessels including Electra from Q2 2026.",
+          "source": ""
+        },
+        {
+          "ticker": "CENER.AT",
+          "name": "Cenergy Holdings",
+          "band": "major",
+          "exposure": "Hellenic Cables submarine and land HV, €3.9bn backlog, expanding into Maryland.",
+          "source": ""
+        },
+        {
+          "ticker": "5802.T",
+          "name": "Sumitomo Electric",
+          "band": "minor",
+          "exposure": "HVDC subsea cable; the £350m Port of Nigg plant is operational 2026. Inside a very diversified group.",
+          "source": ""
+        }
+      ]
+    },
+    {
+      "id": "silicon-wafers-300mm",
+      "system": "intelligence",
+      "name": "300mm silicon wafers",
+      "verdict": "rejected",
+      "scarce_object": "Polished and epitaxial 300mm prime silicon wafers",
+      "why": "An apparent duopoly supplying the input every chip needs. Checked, and the economics say the opposite.",
+      "rejected_because": "A supplier that cannot raise price in a record-shipment quarter is not the constraint. SUMCO posted a ¥6.3bn operating LOSS for H1 FY2026 despite 300mm shipments at record market levels, and its president said '5% or 10% price hikes won't come close to covering rising costs' and that it is not even considering negotiations for the next round of long-term agreements. That is negative rent, not a chokepoint. Source: https://finance.biggo.com/news/JP_3436.T_2026-08-07",
+      "names": [
+        {
+          "ticker": "3436.T",
+          "name": "SUMCO",
+          "band": "pure",
+          "exposure": "300mm polished and epitaxial wafers. Loss-making.",
+          "source": "https://finance.biggo.com/news/JP_3436.T_2026-08-07"
+        }
+      ]
+    },
+    {
+      "id": "euv-photoresist",
+      "system": "intelligence",
+      "name": "EUV photoresist",
+      "verdict": "rejected",
+      "scarce_object": "Chemically amplified resists for extreme-ultraviolet exposure",
+      "why": "A specialised chemistry with few qualified suppliers, feeding every leading-edge layer.",
+      "rejected_because": "Demand is booming and supply is not the gate. Tokyo Ohka's EUV resist revenue rose 65% year on year in H1 FY2026 at a 20.7% operating margin, but management used no constrained language at all and described pricing adjustments as a net profit-REDUCING factor — it is conceding price, not extracting it — while adding capacity at four sites simultaneously. Own it as a volume compounder, not a scarcity rent. Source: https://finance.biggo.com/news/JP_4186.T_2026-08-06",
+      "names": [
+        {
+          "ticker": "4186.T",
+          "name": "Tokyo Ohka Kogyo",
+          "band": "major",
+          "revenue_share_pct": 53,
+          "exposure": "EUV and ArF photoresists. Electronic functional materials were 53% of H1 FY2026 revenue.",
+          "source": "https://finance.biggo.com/news/JP_4186.T_2026-08-06"
+        }
+      ]
+    },
+    {
+      "id": "cmp-consumables",
+      "system": "intelligence",
+      "name": "CMP slurries and pads",
+      "verdict": "rejected",
+      "scarce_object": "Chemical-mechanical planarisation slurries and polishing pads",
+      "why": "A consumable every wafer passes through many times over.",
+      "rejected_because": "No constraint language and no chokepoint economics. Entegris reported an 18.6% operating margin for Q2 2026 with its CEO citing 'improving semiconductor demand and accelerating customer capital investments' — growth framing, not rationing — and CMP is not even broken out. No 2026 lead time or price increase could be sourced. Source: https://investor.entegris.com/news/news-details/2026/Entegris-Reports-Results-for-Second-Quarter-of-2026/default.aspx",
+      "names": [
+        {
+          "ticker": "ENTG",
+          "name": "Entegris",
+          "band": "major",
+          "revenue_share_pct": 42,
+          "exposure": "Materials Solutions was 42% of Q2 2026 revenue; CMP itself is not disclosed separately.",
+          "source": "https://investor.entegris.com/news/news-details/2026/Entegris-Reports-Results-for-Second-Quarter-of-2026/default.aspx"
+        }
+      ]
+    },
+    {
+      "id": "abf-film",
+      "system": "intelligence",
+      "name": "ABF build-up film",
+      "verdict": "rejected",
+      "scarce_object": "Ajinomoto Build-up Film, the dielectric in flip-chip package substrates",
+      "why": "The most-cited bottleneck in the packaging chain, held by one company at over 95% share. Worth testing precisely because everyone repeats it.",
+      "rejected_because": "The film is not the gate; the substrate fabrication below it is. Ajinomoto's own ICT briefing of 30 Jun 2026 says in terms: 'There are no concerns about our current supply chain overall' — while it raises film prices 30% into a downstream shortage it does not itself have. Its Q1 results are attributed to 'product mix improvements rather than price increases'. The rent is real (product margin went from about 30% in FY2018 to over 50%) but the constraint sits one layer down, which is why this map tracks the substrate step instead. Source: https://www.ajinomoto.co.jp/company/en/ir/event/business_briefing/main/011117/teaserItems1/01/linkList/03/link/20260630_presentation_E.pdf",
+      "names": [
+        {
+          "ticker": "2802.T",
+          "name": "Ajinomoto",
+          "band": "minor",
+          "exposure": "Over 95% of the ABF market, but this is mostly a food company: the entire ABF-driven FY2026 upgrade was 0.52% of group revenue. Seasonings and Foods alone is ¥936.9bn.",
+          "source": "https://www.ajinomoto.co.jp/company/en/ir/event/business_briefing/main/011117/teaserItems1/01/linkList/03/link/20260630_presentation_E.pdf"
+        }
+      ]
+    },
+    {
+      "id": "abf-substrates",
+      "system": "intelligence",
+      "name": "ABF package substrates",
+      "scarce_object": "Flip-chip BGA substrates built from ABF build-up film, and the fabrication capacity for them",
+      "why": "Where the packaging constraint is moving, named by the people who would know. TSMC's VP of Advanced Packaging pointed at ABF substrates and memory — not CoWoS — as the 2026 bottlenecks, and the independent gap series goes from roughly balanced in 2026 to a 22% shortage in 2027 and 29% in 2028. Note the film itself is NOT the constraint: Ajinomoto, which makes over 95% of it, says it has no supply concerns. The gate is the substrate fabrication step.",
+      "measurements": [
+        {
+          "metric": "Unimicron 2026 capital expenditure, against its original plan",
+          "value": 53.7,
+          "unit": "NT$bn",
+          "normal": 34.0,
+          "as_of": "2026-08-27",
+          "source": "https://www.trendforce.com/news/2026/08/27/news-samsung-electro-mechanics-lg-innotek-ramp-up-ai-substrate-capacity-as-1h-utilization-reportedly-nears-90/",
+          "note": "Raised from NT$34bn to NT$53.7bn with 80-85% directed to ABF, which is a capital response to a constraint rather than a measure of it — hence the modest score. Ibiden separately committed ¥500bn over three years from FY2026 to take AI-server substrate capacity to 2.5x by FY2028."
+        },
+        {
+          "metric": "LG Innotek packaging line utilisation",
+          "value": 94,
+          "unit": "%",
+          "normal": 94,
+          "as_of": "2026-06-30",
+          "source": "https://www.trendforce.com/news/2026/08/27/news-samsung-electro-mechanics-lg-innotek-ramp-up-ai-substrate-capacity-as-1h-utilization-reportedly-nears-90/",
+          "note": "94% in H1 2026, with Samsung Electro-Mechanics at 89%. Recorded with normal equal to the reading so it contributes nothing to the score: near-full utilisation is a ceiling, not an excess over one. Kept because it is the clearest evidence there is no idle substrate capacity to absorb 2027."
+        }
+      ],
+      "routes": [
+        {
+          "path": "Substrate makers add ABF capacity",
+          "status": "building",
+          "eta_months": 18,
+          "source": "https://www.trendforce.com/news/2026/08/27/news-samsung-electro-mechanics-lg-innotek-ramp-up-ai-substrate-capacity-as-1h-utilization-reportedly-nears-90/",
+          "note": "Industry capex of about $19.1bn across 2025-2028, Ibiden to 2.5x by FY2028, Kinsus about +25% next year, LG Innotek's Vietnam plant completing May 2027. Real, funded and dated — and all of it arriving into the 22% gap rather than ahead of it."
+        },
+        {
+          "path": "A new substrate line inside two years",
+          "status": "blocked",
+          "source": "https://semiconductorx.com/packaging-substrates-interposers.html",
+          "note": "Structurally impossible on the timescale that matters: 18-24 months from announcement to first production plus further quarters of pattern development, yield ramp and customer qualification. A Counterpoint analyst puts greenfield at more than 2.5 years to mass production. This is why the substrate step, not the film above it, is the gate."
+        },
+        {
+          "path": "Glass core substrates",
+          "status": "blocked",
+          "source": "https://www.trendforce.com/news/2026/06/05/news-glass-substrates-eye-2027-launch-scale-toward-2030-as-cowos-costs-rise-and-hyperscaler-demand-grows/",
+          "note": "Early commercialisation 2027, ramp 2029, scale 2030 or later. Absolics was still in yield stabilisation in May 2026. Not this cycle."
+        }
+      ],
+      "capture": {
+        "holder": "Ibiden, with Unimicron, Nan Ya PCB and Kinsus behind it",
+        "share_pct": 70,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "Quarterly price escalation with no stated ceiling, plus margin to match. The Taiwan Printed Circuit Association reported on 19 Aug 2026 that ABF long-term-agreement prices rise 10-15% per quarter from Q3 2026 with spot above 20%, BT substrate 20-30% quarterly, and that Unimicron, Nan Ya PCB and Kinsus are all running at full capacity with 'no clear price ceiling currently in sight' through 2028. Ibiden ran a 28.3% electronics operating margin on customers 'willing to accept a price increase'; Samsung Electro-Mechanics' packaging operating profit rose 237% year on year and LG Innotek's 94%. Sources: https://www.pcbshop.org/en/articles/detail.asp?serno=371 and https://www.trendforce.com/news/2026/08/27/news-samsung-electro-mechanics-lg-innotek-ramp-up-ai-substrate-capacity-as-1h-utilization-reportedly-nears-90/",
+        "_gap": "No verified market share. The figures circulating for Ibiden, Shinko, Unimicron and others trace to unattributed aggregators, not reporting. Note also that Shinko Electric, historically a top-two holder, was delisted in June 2025 — which structurally raises the scarcity value of the remaining listed names.",
+        "_share_basis": "Ibiden puts its own share of IC package substrates FOR AI SERVERS at 70-80%, and has said so in three consecutive disclosures — May 2025, Oct 2025 and Feb 2026 — with competitors at 'at most about 30%' combined. The lower bound of its own range is used. This is a company estimate, not independent, and the denominator is narrower than the whole FC-BGA market: AI-server substrates specifically. Source: https://www.ibiden.co.jp/ir/items/QA_FY2025Q3.pdf",
+        "_volatility": "Ibiden's own May 2026 Q&A adds that this share is generation-cyclical — near 100% at each new generation's ramp, then shedding 20-30 points over the following three to six months as competitors qualify. A single point estimate understates that swing, so treat 70% as a trough-ish figure rather than a stable one. Source: https://www.ibiden.co.jp/ir/items/QA_FY25Q4.pdf"
+      },
+      "names": [
+        {
+          "ticker": "3037.TW",
+          "name": "Unimicron Technology",
+          "band": "pure",
+          "exposure": "ABF substrates, with 80-85% of a sharply raised 2026 capex aimed at them. Also building Intel's EMIB substrates.",
+          "source": "https://www.trendforce.com/news/2026/08/27/news-samsung-electro-mechanics-lg-innotek-ramp-up-ai-substrate-capacity-as-1h-utilization-reportedly-nears-90/"
+        },
+        {
+          "ticker": "4062.T",
+          "name": "Ibiden",
+          "band": "major",
+          "revenue_share_pct": 87,
+          "exposure": "High-layer-count FC-BGA substrates for GPUs and accelerators. Electronics is about 87% of group operating profit.",
+          "source": "https://au.investing.com/news/transcripts/earnings-call-transcript-ibiden-q1-2026-beats-forecasts-lifts-outlook-93CH-4575419"
+        },
+        {
+          "ticker": "8046.TW",
+          "name": "Nan Ya PCB",
+          "band": "pure",
+          "exposure": "ABF and BT substrates, running at full capacity with quarterly price increases.",
+          "source": ""
+        },
+        {
+          "ticker": "3189.TW",
+          "name": "Kinsus Interconnect",
+          "band": "pure",
+          "exposure": "ABF substrates; about 25% more capacity next year.",
+          "source": ""
+        },
+        {
+          "ticker": "009150.KS",
+          "name": "Samsung Electro-Mechanics",
+          "band": "major",
+          "exposure": "AI and FC-BGA substrates to Nvidia, Google and Amazon; packaging operating profit up 237% year on year.",
+          "source": "https://www.trendforce.com/news/2026/08/27/news-samsung-electro-mechanics-lg-innotek-ramp-up-ai-substrate-capacity-as-1h-utilization-reportedly-nears-90/"
+        }
+      ]
+    },
+    {
+      "id": "inp-laser-die",
+      "system": "intelligence",
+      "name": "Indium phosphide laser die",
+      "scarce_object": "InP wafers and the EML and continuous-wave laser die cut from them",
+      "why": "The most precisely located constraint in this map, because the supplier says exactly where it is. Coherent's CEO: 'Indium Phosphide capacity continues to be our primary constraint' — and in the same call, 'we are not constrained in the assembly and test capacity.' So the chokepoint is one layer above where most people look. Nvidia paid $2bn each to Coherent and Lumentum for capacity ACCESS RIGHTS, which is what you pay for when a good is rationed rather than sold.",
+      "measurements": [
+        {
+          "metric": "Lumentum shipments against customer demand for EML lasers",
+          "value": 130,
+          "unit": "index, demand = 100",
+          "normal": 100,
+          "as_of": "2026-08-11",
+          "source": "https://www.investing.com/news/transcripts/earnings-call-transcript-lumentum-tops-q4-2026-forecasts-as-ai-demand-lifts-outlook-93CH-4852933",
+          "note": "Lumentum's CEO said it is undershipping customer demand by roughly 30%, and that adding 20% of capacity did not close the gap — the imbalance widened. Reconfirmed on the 11 Aug 2026 call: 'we're still shipping behind customer demand on EML', with pump lasers 'effectively sold out for the foreseeable future'. Expressed as demand at 130 against shippable supply at 100. Note independent estimates of the gap range from 30% to 2x and cannot be reconciled; the 30% is the only one traceable to a named executive on a call."
+        },
+        {
+          "metric": "AXT gross margin, InP substrate supplier",
+          "value": 44.9,
+          "unit": "%",
+          "normal": 29.6,
+          "as_of": "2026-06-30",
+          "source": "https://www.stocktitan.net/news/AXTI/",
+          "note": "29.6% to 44.9% in a single quarter on record indium phosphide revenue, with revenue rising from $26.9m to $47.6m. A 15-point margin move in one quarter at the substrate layer is the cleanest evidence of where the squeeze actually sits."
+        }
+      ],
+      "routes": [
+        {
+          "path": "Silicon photonics instead of InP lasers",
+          "status": "blocked",
+          "source": "https://cignal.ai/2026/06/datacom-optical-component-revenue-doubles-to-7-7-billion-in-1q26/",
+          "note": "The obvious substitute, and it does not escape the constraint. Nearly all 1.6T modules now ship in silicon photonics configurations — but silicon cannot emit light, so they still need an external InP continuous-wave laser. Cignal AI has started forecasting the external-laser module market separately: over $100m in 2026 to more than $1.5bn a year by 2030. Silicon photonics moves the chokepoint from EML die to CW die. It stays inside InP."
+        },
+        {
+          "path": "Co-packaged optics",
+          "status": "blocked",
+          "source": "https://nvidianews.nvidia.com/news/vera-rubin-full-production-agentic-ai-factory",
+          "note": "Real and shipping — Nvidia declared Spectrum-X Ethernet Photonics in production on 31 May 2026 — but Nvidia's own claim is '4x fewer lasers', not zero, and both shipping platforms use external pluggable laser modules whose light source Nvidia names as Coherent's InP. It reduces laser count per port; it does not leave indium phosphide."
+        },
+        {
+          "path": "Copper instead of optics",
+          "status": "blocked",
+          "source": "https://www.sec.gov/Archives/edgar/data/1807794/000162828026043303/crdo-20260502.htm",
+          "note": "Bounded, and the vendor states the bound in its own 10-K: Credo's active electrical cables reach up to 7 metres across 100G through 1.6T, with microLED active LED cables extending to 30 metres. That covers scale-up inside a rack and cannot address scale-out. Worth noting the two best-informed parties flatly disagree — Credo's CEO describes copper replacing optics, while Ayar Labs' CEO said in the same month that copper is becoming the limiting factor."
+        },
+        {
+          "path": "Coherent's 3-inch to 6-inch InP wafer transition",
+          "status": "building",
+          "eta_months": 15,
+          "source": "https://www.theglobeandmail.com/investing/markets/stocks/COHR-N/pressreleases/3940280/coherent-cohr-q4-2026-earnings-call-transcript/",
+          "note": "The one route that genuinely relieves this, and it is the incumbent's own. InP laser output grew about 80% year on year, is set to double by the Sep-2026 quarter — a quarter ahead of plan — and more than double again by end-2027. Six-inch wafers give roughly 4x the usable area at about half the cost per device, with yields for EMLs, CW lasers and photodiodes already better on 6-inch than 3-inch. A $50m CHIPS letter of intent quadruples Sherman, Texas wafer capacity. Source also: https://www.stocktitan.net/news/COHR/coherent-announces-a-chips-letter-of-intent-for-50-million-to-expand-7rga9wc9u5or.html"
+        }
+      ],
+      "capture": {
+        "holder": "The three EML makers (Lumentum, Broadcom, Mitsubishi Electric); Coherent among the top four in CW-DFB",
+        "share_pct": 72,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "Margins, contracts and the buyer's own behaviour all point one way. Coherent's non-GAAP gross margin rose 215bp year on year to 40.2% with pricing 'agreed upon... out through the length of the LTA'; Lumentum's non-GAAP operating margin rose 2,160bp year on year to 36.6% on revenue up 109%, citing 'increased pricing on select products'. Lumentum prepaid AXT $43.5m, with a second $43.5m due in 2028, to reserve InP substrate through 2031 — you prepay for rationed goods. And Nvidia invested $2bn each in Coherent and Lumentum explicitly for 'future capacity access rights'. Independently, Cignal AI reports component shortages are slowing the usual price declines. Sources: https://www.sec.gov/Archives/edgar/data/0000820318/000119312526346860/d128030dex991.htm , https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Fourth-Quarter-and-Full-Fiscal-Year-2026-Results/default.aspx , https://www.sec.gov/Archives/edgar/data/1051627/000143774926024883/axti20260715_8k.htm , https://nvidianews.nvidia.com/news/nvidia-announces-strategic-partnership-with-lumentum-to-develop-state-of-the-art-optics-technology",
+        "_note": "Dell'Oro independently called the AI back-end network market supply-constrained rather than demand-constrained for at least the next one to two years, 8 Sep 2026: https://lightwaveonline.com/home/article/55403498/ethernet-broadens-its-lead-in-ai-back-end-networks",
+        "_share_basis": "TrendForce, 2026: Lumentum, Broadcom and Mitsubishi Electric together hold about 72% of the global EML market, and Broadcom, Sumitomo, Coherent and LandMark/LuxNet about 74% of CW-DFB laser capacity. Independent, and an aggregate — the release gives no per-company split, and recovering one would mean dividing estimates, which is how the discredited figures in this file got made. So the holder is stated as the group the 72% actually covers. Source: https://www.semiconductor-today.com/news_items/2026/jun/trendforce-040626.shtml"
+      },
+      "names": [
+        {
+          "ticker": "LITE",
+          "name": "Lumentum Holdings",
+          "band": "pure",
+          "exposure": "EML and high-power CW laser die from two InP fabs in Japan plus a new US fab, and InP substrate reserved to 2031.",
+          "source": "https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Fourth-Quarter-and-Full-Fiscal-Year-2026-Results/default.aspx"
+        },
+        {
+          "ticker": "AXTI",
+          "name": "AXT Inc.",
+          "band": "pure",
+          "exposure": "Indium phosphide substrates — the wafer beneath every EML and CW laser. The smallest and least substitutable layer.",
+          "source": "https://www.sec.gov/Archives/edgar/data/1051627/000143774926024883/axti20260715_8k.htm"
+        },
+        {
+          "ticker": "COHR",
+          "name": "Coherent Corp.",
+          "band": "major",
+          "revenue_share_pct": 74,
+          "exposure": "InP laser die from its own 6-inch fabs, plus transceivers. Datacenter and communications was about 74% of FY2026 segment revenue and 79% of the June quarter.",
+          "source": "https://www.sec.gov/Archives/edgar/data/0000820318/000119312526346860/d128030dex991.htm"
+        },
+        {
+          "ticker": "CRDO",
+          "name": "Credo Technology",
+          "band": "major",
+          "exposure": "The copper alternative that bounds this constraint — active electrical cables to 7m, LED cables to 30m — plus 1.6T optical DSPs.",
+          "source": "https://www.sec.gov/Archives/edgar/data/1807794/000162828026043303/crdo-20260502.htm"
+        }
+      ]
+    },
+    {
+      "id": "optical-module-assembly",
+      "system": "intelligence",
+      "name": "Optical transceiver assembly",
+      "verdict": "rejected",
+      "scarce_object": "Contract assembly and test capacity for 800G and 1.6T transceivers",
+      "why": "The visible layer of the optics shortage, and the one most commentary points at.",
+      "rejected_because": "Both the customer and the contract manufacturer say otherwise. Coherent's CEO, 12 Aug 2026: 'we are not constrained... in the assembly and test capacity right now. We have that capacity available.' And Fabrinet, the largest independent optical contract manufacturer, earned a 12.2% non-GAAP gross margin in its June-2026 quarter — DOWN 30bp year on year on revenue up 45%. A genuine chokepoint does not have falling margins on record volume. Fabrinet is also adding capacity toward a stated $12.5-14bn potential run-rate against about $5.3bn today. The constraint is the laser die upstream, not the box it goes in. Sources: https://www.theglobeandmail.com/investing/markets/stocks/COHR-N/pressreleases/3940280/coherent-cohr-q4-2026-earnings-call-transcript/ , https://www.stocktitan.net/news/FN/fabrinet-announces-fourth-quarter-and-fiscal-year-2026-financial-vipiat88wd9l.html",
+      "names": [
+        {
+          "ticker": "FN",
+          "name": "Fabrinet",
+          "band": "pure",
+          "exposure": "Contract assembly and test of 800G and 1.6T transceivers; data centre was 48% of FY2026 revenue and Nvidia 16%. Thinnest margin in the chain, and falling.",
+          "source": "https://www.stocktitan.net/news/FN/fabrinet-announces-fourth-quarter-and-fiscal-year-2026-financial-vipiat88wd9l.html"
+        }
+      ]
+    },
+    {
+      "id": "wf6-tungsten-hexafluoride",
+      "system": "intelligence",
+      "name": "Tungsten hexafluoride (WF6)",
+      "scarce_object": "High-purity WF6 gas for filling contacts and vias",
+      "why": "On price, the tightest thing in this map: up 246% in a year after roughly a quarter of global high-end capacity was withdrawn, with no qualified non-Chinese replacement. Read the unresolved contradiction below before acting — sources disagree on whether the shutdown that caused it actually went ahead.",
+      "measurements": [
+        {
+          "metric": "China domestic 5N WF6 price",
+          "value": 267.0,
+          "unit": "$/kg",
+          "normal": 77.2,
+          "as_of": "2026-09-12",
+          "source": "https://www.scarceearth.io/reagents/tungsten-hexafluoride",
+          "note": "+246% year on year (RMB 523/kg to RMB 1,810/kg); the baseline is derived from that stated percentage. Export price was $149.79/kg in April 2026, +203.8% month on month. Corroborated across two independent outlets which reconcile at about 7.1 RMB/USD. Both are mid-tier sources and one contains an internal date error, which lowers confidence in the reporting even though the two agree. Source also: https://eu.36kr.com/en/p/3858510497780736"
+        },
+        {
+          "metric": "Global high-end WF6 capacity removed",
+          "value": 8500,
+          "unit": "t/yr demand vs 2,200 t/yr withdrawn",
+          "normal": 6300,
+          "as_of": "2026-06-18",
+          "source": "https://eu.36kr.com/en/p/3858510497780736",
+          "note": "Kanto Denka Kogyo and Central Glass together held about 25% of global high-end capacity, roughly 2,200 t/yr, against demand of 8,000-9,000 t/yr — implying a ~2,000 t gap in H2 2026. Baseline is demand net of the withdrawn capacity. Korean suppliers notified customers of 70-90% contract price increases."
+        }
+      ],
+      "routes": [
+        {
+          "path": "Qualify a non-Chinese replacement supplier",
+          "status": "blocked",
+          "source": "https://www.scarceearth.io/reagents/tungsten-hexafluoride",
+          "note": "No Western or non-Chinese Asian producer has been qualified by a leading-edge memory or logic fab as a replacement source. Foosung is attempting qualification and SK Specialty is supplying bridge volumes. There is also no substitute chemistry — WF6 is the only practical tungsten precursor for CVD fill."
+        },
+        {
+          "path": "Chinese domestic supply (CSSC Special Gases)",
+          "status": "unproven",
+          "source": "https://eu.36kr.com/en/p/3858510497780736",
+          "note": "Capacity undisclosed. And routing around a China-driven shortage via China is not a route around it for a Western fab."
+        }
+      ],
+      "capture": {
+        "holder": "Unclear — see the contradiction",
+        "share_pct": null,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "A 246% price move and 70-90% contract increases notified by Korean suppliers. Source: https://www.scarceearth.io/reagents/tungsten-hexafluoride",
+        "_unresolved": "RESOLVED, and against the suspension. TrendForce reported on 12 Jun 2026 that Kanto Denka and Central Glass cease WF6 production on 1 July 2026, which agrees with the two outlets stating a permanent halt and against the single report of a suspension. The price still standing at +246% in September is consistent with that. One consequence worth carrying: any historical WF6 share table for those two describes a supply base that no longer exists — the same staleness problem as Shinko in substrates. It also means both are beneficiaries of nothing here, so they are kept in the names list as the cause of the shortage rather than as a way to own it.",
+        "_gap": "No per-company WF6 share exists from any credible source. Two circulating figures were traced and rejected: 'Foosung ~10% of global WF6' runs back through an exchange blog to an anonymous social account, and the 'Kanto Denka + Central Glass = 25%' figure is a division of an unnamed tonnage by a denominator that itself varies 50% between articles — arithmetic on estimates, which is exactly the failure this file guards against."
+      },
+      "names": [
+        {
+          "ticker": "4047.T",
+          "name": "Kanto Denka Kogyo",
+          "band": "major",
+          "exposure": "One of the two Japanese high-purity WF6 producers at the centre of the shortage. Confirmed to be exiting the product from 1 July 2026 — the cause of the shortage, not a way to own it.",
+          "source": "https://www.scarceearth.io/reagents/tungsten-hexafluoride"
+        },
+        {
+          "ticker": "4044.T",
+          "name": "Central Glass",
+          "band": "minor",
+          "exposure": "The other Japanese producer, inside a diversified glass and chemicals group. Confirmed to be exiting the product from 1 July 2026 — the cause of the shortage, not a way to own it.",
+          "source": "https://www.scarceearth.io/reagents/tungsten-hexafluoride"
+        },
+        {
+          "ticker": "093370.KS",
+          "name": "Foosung",
+          "band": "major",
+          "exposure": "Korean fluorine chemicals, attempting qualification as a replacement source.",
+          "source": "https://www.scarceearth.io/reagents/tungsten-hexafluoride"
+        }
+      ]
+    },
+    {
+      "id": "t-glass-cloth",
+      "system": "intelligence",
+      "name": "Low-CTE glass cloth (T-glass)",
+      "scarce_object": "Low-thermal-expansion woven glass cloth for AI accelerator circuit boards",
+      "why": "The constraint nobody was looking for — it was not on the original research list and turned out to have the sharpest lead-time move of anything here. Nittobo is effectively the sole source of the sub-5ppm grade, and Nvidia is reported to have pre-paid its 2027 expansion.",
+      "measurements": [
+        {
+          "metric": "Low-CTE glass cloth lead time",
+          "value": 26,
+          "unit": "weeks",
+          "normal": 4,
+          "as_of": "2026-03-19",
+          "source": "https://electsources.com.tw/2026/03/19/2026-t-glass-shortage-disrupting-nvidia-apple-ai-hardware/",
+          "note": "From 4 weeks to over 6 months. Price went from $15-20/m² in 2025 to $30-50+/m² in 2026. Yole independently confirms the shortage exists (26 Feb 2026) though its report body is inaccessible. Adjacent corroboration from a different chain: 7628-spec electronic-grade cloth went from RMB 3.5 to over RMB 7.5 per metre, +114%. Dated March 2026, so this reading is stale and carries reduced weight."
+        }
+      ],
+      "routes": [
+        {
+          "path": "Second-source the cloth from Taiwan Glass or Nanya Plastics",
+          "status": "building",
+          "eta_months": 5,
+          "source": "https://electsources.com.tw/2026/03/19/2026-t-glass-shortage-disrupting-nvidia-apple-ai-hardware/",
+          "note": "The most useful qualification datapoint in the whole exercise because it is supplier-specific: Taiwan Glass and Nanya Plastics offer about 40% more capacity on a 3-6 month qualification, while Grace Fabric and PPG need 9-12 months. Credible for second-tier specs within a year — but not for the sub-5ppm low-CTE grade."
+        },
+        {
+          "path": "Nittobo's own expansion",
+          "status": "building",
+          "eta_months": 12,
+          "source": "https://electsources.com.tw/2026/03/19/2026-t-glass-shortage-disrupting-nvidia-apple-ai-hardware/",
+          "note": "Lands in 2027 and is reportedly pre-paid by Nvidia, so the incremental volume may already be committed."
+        }
+      ],
+      "capture": {
+        "holder": "Nitto Boseki (Nittobo)",
+        "share_pct": 90,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "Price roughly doubled, from $15-20/m² to $30-50+/m², alongside a lead time going from 4 weeks to over 6 months. Source: https://electsources.com.tw/2026/03/19/2026-t-glass-shortage-disrupting-nvidia-apple-ai-hardware/",
+        "_share_basis": "TrendForce, Apr 2026: Nittobo holds about 90% of global T-glass and 60-70% of NER-glass. Independent, though TrendForce names no source of its own and does not say whether the basis is revenue, volume or capacity. Note also that Nittobo's own Integrated Report contains NO percentage — it claims only 'top domestic market share for many items' — so this is not a company claim. And 90% is for T-glass specifically, not for low-CTE cloth in general, which is the wider category this entry describes. Source: https://insights.trendforce.com/p/glass-fiber-cloth-shortage"
+      },
+      "names": [
+        {
+          "ticker": "3110.T",
+          "name": "Nitto Boseki",
+          "band": "minor",
+          "exposure": "Effectively sole source of sub-5ppm low-CTE glass cloth, inside a textiles and materials group. Highest conviction and least verified name in this map — the ticker itself was not confirmed. Do the primary work before sizing.",
+          "source": "https://electsources.com.tw/2026/03/19/2026-t-glass-shortage-disrupting-nvidia-apple-ai-hardware/"
+        }
+      ]
+    },
+    {
+      "id": "hvlp-copper-foil",
+      "system": "intelligence",
+      "name": "HVLP copper foil",
+      "scarce_object": "Very-low-profile electrodeposited copper foil for high-speed circuit boards",
+      "why": "Quantified by the producer itself, which is rare. Mitsui Kinzoku told investors how much of its profit upgrade came from price rather than volume, and said outright that few competitors can make the higher grades at stable quality.",
+      "measurements": [
+        {
+          "metric": "Mitsui MicroThin monthly volume forecast, against its prior forecast",
+          "value": 600,
+          "unit": "thousand m²/month",
+          "normal": 225,
+          "as_of": "2026-08-21",
+          "source": "https://finance.biggo.com/news/JP_5706.T_2026-08-21",
+          "note": "Tripled from 200,000-250,000 to over 600,000 m²/month on optical transceiver demand. A demand-forecast revision rather than a direct tightness measure, which is why it is recorded with that caveat. Utilisation and backlog were not disclosed on the call."
+        }
+      ],
+      "routes": [
+        {
+          "path": "Mitsui's own ¥42bn capacity programme",
+          "status": "building",
+          "eta_months": 30,
+          "source": "https://finance.biggo.com/news/JP_5706.T_2026-08-21",
+          "note": "MicroThin from 4.9 to 8 million m²/month, VSP from 720 to 1,400 t/month, FaradFlex from 75,000 to 355,000 m²/month — all through 2030. Relief comes from the incumbent, on its own schedule, funded by the price increases it is charging. Credible on capacity, not on competition."
+        }
+      ],
+      "capture": {
+        "holder": "Mitsui Mining & Smelting",
+        "share_pct": 60,
+        "pricing_power": "demonstrated",
+        "pricing_evidence": "The company quantified its own rent: of a ¥9.7bn copper-foil operating profit guidance raise, about ¥3.5bn came from price (MicroThin ~¥3bn, VSP ¥0.5-1bn). Two price increases in nine months, October 2025 and July 2026, with management stating that in higher HVLP grades 'the number of competitors capable of manufacturing at stable quality remains limited'. Management also says no further increases are currently planned. Source: https://finance.biggo.com/news/JP_5706.T_2026-08-21",
+        "_gap": "Copper foil's share of group revenue or profit was not disclosed, and no market share figure exists. A >90% premium-grade share claim appears on an undated low-quality page and is excluded.",
+        "_share_basis": "Mitsui Kinzoku claimed 60% of high-grade VSP foil for AI servers in its Integrated Report 2025 — its own claim, no external source, metric unstated. Narrow denominator: the AI-server high-grade slice, not HVLP overall. AND IT HAS SINCE WITHDRAWN THE FIGURE: the same top-share-products list in the 2026 report keeps carrier-attached foil at 95% and drops the VSP entry entirely, with the 2026 VSP section giving only capacity and volume. A company that stops publishing a share is worth noticing. Treat 60% as a FY2025 figure no longer being stood behind. Sources: https://www.mitsui-kinzoku.com/Portals/0/CSR/integrated_report/2025/JP/integrated_report2025.pdf and https://www.mitsui-kinzoku.com/Portals/0/CSR/integrated_report/2026/JP/integrated_report2026.pdf",
+        "_do_not_conflate": "Mitsui's 95-97% claims are for MicroThin, the carrier-attached ultra-thin foil used in package substrates — a DIFFERENT product from the HVLP/VSP high-speed circuit foil this entry is about. The circulating 'over 90% of global premium circuit copper foil' claim is that conflation, and it is why the number is in the discredited list rather than here."
+      },
+      "names": [
+        {
+          "ticker": "5706.T",
+          "name": "Mitsui Mining & Smelting",
+          "band": "minor",
+          "exposure": "Makes MicroThin and VSP copper foil, inside a non-ferrous smelter and miner. Real pricing power, heavily diluted.",
+          "source": "https://finance.biggo.com/news/JP_5706.T_2026-08-21"
+        }
+      ]
+    },
+    {
+      "id": "helium",
+      "system": "intelligence",
+      "name": "Helium",
+      "scarce_object": "Refined helium for fab cooling and purging",
+      "why": "A war, not a capex cycle. Roughly a third of world supply went offline after attacks on Qatar's Ras Laffan complex, and the six-month inventory buffer fabs were reported to hold in March 2026 expires around now.",
+      "measurements": [
+        {
+          "metric": "Helium spot price, indexed to pre-crisis",
+          "value": 200,
+          "unit": "index, pre-crisis = 100",
+          "normal": 100,
+          "as_of": "2026-04-24",
+          "source": "https://www.eetimes.com/what-hormuz-exposed-about-our-semiconductor-supply-chain/",
+          "note": "Spot prices doubled since the crisis began, per EE Times and independently per Granite Point. Qatar is about 34% of world helium; QatarEnergy declared force majeure on 2 Mar 2026 and repairs are estimated at 3-5 years. CONTRADICTION: one source reports helium prices DECLINED in Q2 2026 as routes improved, and no Q3 2026 price print could be obtained. Dated April 2026, so this reading is deliberately stale and weighted down. Source also: https://granitepointresearch.com/wp-content/uploads/2026/05/Helium-FOCUS-Report-20260511.pdf"
+        }
+      ],
+      "routes": [
+        {
+          "path": "Rebuild Qatari capacity",
+          "status": "blocked",
+          "source": "https://granitepointresearch.com/wp-content/uploads/2026/05/Helium-FOCUS-Report-20260511.pdf",
+          "note": "Repairs estimated at 3-5 years, with global stocks depleted after seven weeks of war and shipping lanes reportedly mined. No new non-Gulf capacity with dates or volumes could be sourced."
+        },
+        {
+          "path": "Fab-side helium recovery and recycling",
+          "status": "building",
+          "eta_months": 12,
+          "source": "https://www.cdhjgas.com/news/neon-6n-grade-prices-stabilize-post-crisis-as-semiconductor-fabs-achieve-70-90-recovery-rates-through-advanced-recycling",
+          "note": "Demand-side mitigation that is proven in the adjacent case: fabs achieved 70-90% on-site recovery for neon, which structurally removed that vulnerability after 2022. The same approach applies to helium, which is why this is recorded as a genuine partial route rather than blocked."
+        }
+      ],
+      "capture": {
+        "holder": "Linde, Air Liquide, Air Products, Nippon Sanso",
+        "share_pct": null,
+        "pricing_power": "contested",
+        "pricing_evidence": "Spot doubled, but helium contracts are typically long-dated so spot passes through slowly, and no electronics-segment margin evidence for any of the industrial gas majors could be sourced. Marked contested rather than demonstrated for that reason.",
+        "_gap": "No company-level share of global or electronic-grade helium exists from any primary or independent source. Linde's and Air Products' 10-Ks contain none; the FTC's own helium complaint calls the world market 'highly concentrated' by HHI but publishes no percentages in the public version; USGS gives country shares only. Vendor pages give Linde variously 18%, 22% and 24.5% for the same year with no stated method — mutually inconsistent, so excluded."
+      },
+      "names": [
+        {
+          "ticker": "LIN",
+          "name": "Linde",
+          "band": "minor",
+          "exposure": "Industrial and electronic gases including helium. Electronics is 9% of sales by end market per its own investor deck, with about 2% more sitting in an unconsolidated Taiwan joint venture.",
+          "source": "https://assets.linde.com/-/media/global/corporate/corporate/documents/investors/events-and-presentations/why-linde-presentation.pdf",
+          "revenue_share_pct": 9
+        },
+        {
+          "ticker": "APD",
+          "name": "Air Products",
+          "band": "minor",
+          "exposure": "Industrial gases including helium.",
+          "source": ""
+        },
+        {
+          "ticker": "AI.PA",
+          "name": "Air Liquide",
+          "band": "minor",
+          "exposure": "Industrial and electronic gases including helium. Electronics was 9.1% of group revenue in FY2025 — sourced from its own results.",
+          "source": "https://www.airliquide.com/sites/airliquide.com/files/2026-02/air-liquide-pr-fy-2025-with-record-performance-and-confident-in-its-transformation-dynamic-air-liquide-confirms-its-growth-outlook.pdf",
+          "revenue_share_pct": 9.1
+        }
+      ]
+    },
+    {
+      "id": "euv-mask-blanks",
+      "system": "intelligence",
+      "name": "EUV photomask blanks",
+      "verdict": "rejected",
+      "scarce_object": "Defect-free multilayer blanks for EUV photomasks",
+      "why": "A duopoly supplying a defect-critical input to every EUV layer.",
+      "rejected_because": "Hoya's own Q1 FY2026 presentation describes EUV blank demand as robust but contains no capacity utilisation figure, no supply-constraint statement, no lead time and no expansion timeline. Tellingly it is DUV blanks, not EUV, where Hoya cites the impact of high capacity utilisation. And adding a ¥42bn building for FY28 production is managing growth, not rationing a sold-out line. The rent is real — that segment runs a 55% operating margin — but the capacity is not the constraint, and mask blanks are not separately disclosed. Note also that no credible 2026-dated Hoya/AGC share split exists; the two available figures contradict each other. Source: https://finance.biggo.com/news/ir_7741.T_20260731_4f11eec74fb5",
+      "names": [
+        {
+          "ticker": "7741.T",
+          "name": "Hoya",
+          "band": "major",
+          "revenue_share_pct": 40,
+          "exposure": "EUV and DUV mask blanks inside Information & Communications, which is about 40% of revenue and 67% of group profit at a 55% operating margin — but also contains HDD glass and optics.",
+          "source": "https://finance.biggo.com/news/ir_7741.T_20260731_4f11eec74fb5"
+        }
+      ]
+    },
+    {
+      "id": "euv-pellicles",
+      "system": "intelligence",
+      "name": "EUV pellicles",
+      "verdict": "rejected",
+      "scarce_object": "Membranes protecting EUV photomasks at high source power",
+      "why": "A membrane that has to survive 1000W of EUV, from very few suppliers.",
+      "rejected_because": "Mitsui Chemicals' own release of 23 Apr 2026 is a NEDO DEVELOPMENT PROJECT — targeting 95% transmittance and durability of 10,000 wafers at 1000W — with no production volume, no investment figure and no mention of shortage or constraint anywhere in it. That is a technology gap being funded, not a capacity gap being rationed. Pellicle lead times, units per month and yields: no sourced figure found. Source: https://jp.mitsuichemicals.com/en/release/2026/2026_0423_2/index.htm",
+      "names": [
+        {
+          "ticker": "4183.T",
+          "name": "Mitsui Chemicals",
+          "band": "minor",
+          "exposure": "EUV pellicle development inside a large diversified chemicals group. Pellicle revenue is immaterial and undisclosed.",
+          "source": "https://jp.mitsuichemicals.com/en/release/2026/2026_0423_2/index.htm"
+        }
+      ]
+    },
+    {
+      "id": "neon",
+      "system": "intelligence",
+      "name": "Neon",
+      "verdict": "rejected",
+      "scarce_object": "High-purity neon for excimer laser gas mixtures",
+      "why": "The 2022 crisis input, and a standing worry ever since.",
+      "rejected_because": "Structurally fixed, and the fix is verifiable. 6N neon was around RMB 105/m³ in June 2026 against a crisis peak of RMB 60,000-80,000/m³, and fabs now recover and reuse 70-90% of neon on site. Two sources disagree on the absolute price by a factor of about 22 and one appears to misdate the peak, but both agree the direction is down and de-escalating. On-site recycling removed the 2022 vulnerability rather than merely easing it. Source: https://www.cdhjgas.com/news/neon-6n-grade-prices-stabilize-post-crisis-as-semiconductor-fabs-achieve-70-90-recovery-rates-through-advanced-recycling",
+      "names": []
+    },
+    {
+      "id": "antimony",
+      "system": "intelligence",
+      "name": "Antimony",
+      "verdict": "rejected",
+      "scarce_object": "Antimony metal and trioxide",
+      "why": "A critical mineral under Chinese export control, so worth testing.",
+      "rejected_because": "Fastmarkets, 7 Jan 2026: the 2026 market has 'ample supply' and is 'adequately supplied' rather than tight, with prices down from the July 2025 high of $59,750/tonne. And the end use is wrong for this map — about half is flame retardants, plus PV glass, cable and lead-acid batteries. It does not gate accelerators. Dated forward risk worth tracking rather than owning: China's suspension of its export ban to the US runs to 27 Nov 2026. Source: https://www.fastmarkets.com/insights/antimony-2026-ample-supply-strategic-demand-to-guide-geopolitical-oversight/",
+      "names": []
+    },
+    {
+      "id": "gallium-germanium",
+      "system": "intelligence",
+      "name": "Gallium and germanium",
+      "verdict": "rejected",
+      "scarce_object": "High-purity gallium and germanium metal",
+      "why": "The most severe export-control price dislocations anywhere in the supply chain.",
+      "rejected_because": "Real, severe and pointed at the wrong end market. Gallium 4N in Rotterdam reached $2,101.60/kg on 3 Mar 2026, up 123% year on year and 775% over the pre-control baseline, trading at 7-8x the China domestic price — the cleanest measure of export-control bite found anywhere. Germanium hit 26,500 CNY/kg on 11 Sep 2026, +84% year on year, with US warehouse material at $6,150/kg against $2,673/kg in China. But the end uses are GaAs and GaN radio frequency and power, infrared optics, fibre and SiGe. No evidence either gates accelerator, HBM or packaging production. The rent also accrues to Chinese refiners and licence-holding traders, not to listed Western equities. Source: https://galliumprice.com/market-data/price-today",
+      "names": []
+    },
+    {
+      "id": "robot-force-sensors",
+      "system": "motion",
+      "name": "Robot force and torque sensors",
+      "verdict": "rejected",
+      "scarce_object": "Six-axis force/torque and joint torque sensors for humanoid robots",
+      "why": "The obvious way to own the humanoid build-out without picking a robot: sell the sensor every joint needs. Tested because the Western incumbents ATI and Schunk look like a duopoly on paper.",
+      "rejected_because": "Three separate reasons, any one of which would be enough. First, the price umbrella has already broken: the domestic-versus-imported gap went from about 3x to roughly 10x in eighteen months, with Chinese six-axis at RMB 5,000-30,000 against international RMB 70,000-80,000, and one Hall-effect joint torque sensor launched at RMB 999. Second, the winners are not investable — the top three hold 92.8% of the Chinese humanoid segment with one supplier above 80%, and Bluedot, Kunwei, Yuli and Shenyuansheng are all private or subsidiary-held, while no six-axis maker has filed on the STAR Market. Korea's Aidin Robotics filed for KOSDAQ in Dec 2025 and would be the first pure robot-sensor listing anywhere, but is not listed yet. Third, and most damaging, the customers are integrating backwards: Unitree self-researches over 90% of core components and names no force-sensor supplier at all, and Fourier launched its own sub-RMB-5,000 unit rather than buying one. As a cross-check on the listed side, of twenty humanoid-exposed Chinese listed companies reviewed for H1 2026 only four disclosed any humanoid figure and none of the four is a force-sensor maker; where robot revenue is disclosed at all it is 1-3% of total. Sources: https://news.google.com/rss/articles/CBMiiAFBVV95cUxQSloyeGZ3b2xXbE41U0RtTHlENG1EVEFleV9GSmxqaVlEdEJKY1BsSnlDc2trU1JVZ093RjBueHdYd1Vta1Y5RmpuMEQ3OFdPd0NYQk1Kc1pvcWpXUGhMX2Ztd09YWHhiT2VLdTBPWDhyeDVZcnRtN1hybjRaSkllNGk5UXpGVnVN , https://news.google.com/rss/articles/CBMiU0FVX3lxTFBuZDZ6UklKYnFWQWJyTHNLWVRPVndwbjYyOW5TVENKcU1QQl9xbF9CSzNpdkhGRVRzWnVsVVBzMnVlRGM3RUpkb0x6MENaQXFZdXRF",
+      "names": [
+        {
+          "ticker": "NOVT",
+          "name": "Novanta",
+          "band": "minor",
+          "exposure": "Owns ATI Industrial Automation, the Western six-axis incumbent. Robotics and automation was $318.6m of $980.6m FY2025 revenue, and force/torque is not broken out within that — so the exposure is both small and unmeasurable, on top of facing the price collapse above.",
+          "source": ""
+        },
+        {
+          "ticker": "603662.SS",
+          "name": "Keli Sensing",
+          "band": "minor",
+          "exposure": "The clearest listed Chinese attempt, and it shows the problem: over 1,500 robot force sensors sold in 2025 and over 1,000 a month by early 2026, but no separate revenue line is disclosed for them at all.",
+          "source": "https://news.google.com/rss/articles/CBMiU0FVX3lxTFBuZDZ6UklKYnFWQWJyTHNLWVRPVndwbjYyOW5TVENKcU1QQl9xbF9CSzNpdkhGRVRzWnVsVVBzMnVlRGM3RUpkb0x6MENaQXFZdXRF"
+        }
+      ]
+    },
+    {
+      "id": "precision-bearings",
+      "system": "motion",
+      "name": "Precision bearings for robot joints",
+      "verdict": "rejected",
+      "scarce_object": "Crossed-roller and thin-section bearings for humanoid joints",
+      "why": "Every joint needs several, and the Japanese and German suppliers look concentrated.",
+      "rejected_because": "The tightness in this supply chain is real but it is AI semicap linear motion, not robot bearings, and three independent things say so. McKinsey classes standard bearings LOW bottleneck risk, noting that Bosch Rexroth, Hiwin and THK 'operate at significant industrial scale, providing sufficient overall capacity' — the acute item it names is planetary roller screws, not bearings. Schaeffler's Bearings and Industrial Solutions division grew 0.4% FX-adjusted in Q2 2026 and cut 1,650 heads over twelve months; a division shedding staff is not capacity constrained. And Nachi-Fujikoshi, which sells both under one roof, guides bearings +3.6% against robots +24.4%. THK's own margin bridge attributes ¥14.0bn of a ¥16.4bn first-half operating profit increase to VOLUME and only ¥0.7bn to variable cost ratio — operating leverage on semicap demand, not bearing price rent. The whole humanoid crossed-roller pool is sized around $16-23m for 2026, a rounding error against THK's ¥310bn. Sources: https://www.mckinsey.com/industries/industrials/our-insights/turning-humanoid-supply-chain-constraints-into-billion-dollar-wins , https://www.schaeffler.com/remotemedien/media/_shared_media_rwd/08_investor_relations/presentations/2026_q2_schaeffler_factbook.pdf , https://www.thk.com/jp/wordpress/wp-content/uploads/2026/08/Investor_Information_FY2026-2Q_en.pdf",
+      "names": [
+        {
+          "ticker": "6481.T",
+          "name": "THK",
+          "band": "pure",
+          "exposure": "Linear guides, ball screws and cross-roller rings. Backlog up 98.4% year on year — but the company attributes it to semiconductor capex, not robots.",
+          "source": "https://www.thk.com/jp/wordpress/wp-content/uploads/2026/08/Investor_Information_FY2026-2Q_en.pdf"
+        },
+        {
+          "ticker": "SHA.DE",
+          "name": "Schaeffler",
+          "band": "minor",
+          "exposure": "The one listed name with a disclosed humanoid order book, EUR 350m, and a named design win at XPeng Iron — but it sells actuator modules, not bearings, and the division holding it ran a −69.4% EBIT margin on EUR 0.2bn of FY2025 sales, about 1% of group.",
+          "source": "https://www.schaeffler.com/remotemedien/media/_shared_media_rwd/08_investor_relations/presentations/2026_q2_schaeffler_factbook.pdf"
+        }
+      ]
+    },
+    {
+      "id": "frameless-torque-motors",
+      "system": "motion",
+      "name": "Actuators and frameless torque motors",
+      "verdict": "rejected",
+      "scarce_object": "Frameless torque motors and integrated joint actuators",
+      "why": "The largest single line in a humanoid's bill of materials, at 40-60% by McKinsey's estimate.",
+      "rejected_because": "A cost problem and an input-cost problem, not an availability problem — and the cheap end is in stock while the expensive end is sold out. CubeMars lists frameless motors publicly at $51.90 to $171.90 with stock, and TQ-Group ships up to 50 units in two weeks; meanwhile every ROBOTIS DYNAMIXEL P-series SKU shows sold out at $1,897-3,542. On a dollars-per-newton-metre basis the Chinese planetary actuator is roughly fifteen times cheaper than the Korean integrated equivalent AND available. The pass-through pressure that does exist is magnets and copper, visible in four H1 2026 filings: Jiangsu Leili net profit −45.98% attributed to copper, aluminium and rare-earth prices, Zhaowei −34.10%, Zhongda Leader −40.09%, Inovance gross margin −0.49pp on raw material cost. The decisive test is an SEC full-text search of a year of filings: 'humanoid' plus 'frameless' returns ZERO filings; 'actuators' plus 'humanoid' returns exactly one, a rare-earth miner; 'torque motors' returns four, all Allient, which has never filed a document containing the word humanoid. And the two fastest-scaling makers internalised it — Figure designed its actuators completely in-house and says its disclosed ramp constraint was assembly throughput, not parts. Sources: https://www.cubemars.com/categorys/frameless-outrunner-torque-motor , https://www.figure.ai/news/ramping-figure-03-production AND THE LEAD TIMES ARE NOW SOURCED, which is what this rejection was previously missing. Published distributor figures: Kollmorgen's current-generation TBM2G frameless motors quote about 9 weeks and the legacy TBM about 13 weeks; KEB Combivert S6 servo drives about 8 weeks with some SKUs in stock. Yaskawa states a normal AC servo lead time of about three months, currently running roughly one month longer. Nothing anywhere shows the six-to-twelve month servo lead times that circulate — this is lengthened, not broken. Sources: https://shop.oxni.ch/en/store/motoren/ddr/tbm and https://www.yaskawa-global.com/wp-content/uploads/2026/07/261Q_QA_EN.pdf Equally decisive: the order surge these companies are enjoying is semiconductor and data-centre demand, not humanoids. Mitsubishi's factory automation orders rose 42% year on year in the quarter to June 2026 after 30% the quarter before, attributed explicitly to semiconductor, electronic component and server capex; Yaskawa's semiconductor-related AC servo orders rose over 200% year on year. Humanoids are a rounding error in every disclosed figure. Source: https://www.MitsubishiElectric.com/en/pr/2026/pdf/0731_co2.pdf And Yaskawa's own constraint is neither capacity nor robots: utilisation sat below 75% in its June 2026 quarter because an ERP go-live halted production lines in May, costing about ¥2.5bn of operating profit, and management says plainly that floor space is not the issue — 'component supply could become a constraint. Servo products use many semiconductors.' It also volunteers that the market 'has some bubble-like characteristics'.",
+      "names": [
+        {
+          "ticker": "ALNT",
+          "name": "Allient",
+          "band": "minor",
+          "exposure": "The only US filer naming torque motors in its 10-K/10-Q — and it has zero filings containing 'humanoid'.",
+          "source": ""
+        },
+        {
+          "ticker": "300124.SZ",
+          "name": "Shenzhen Inovance",
+          "band": "minor",
+          "exposure": "China's number one general servo maker at about 35% share, with frameless motors in small-batch use at a leading humanoid maker. Its entire emerging-industries line is 5.9% of H1 2026 revenue, at a gross margin down 5.40 points.",
+          "source": ""
+        },
+        {
+          "ticker": "NOVT",
+          "name": "Novanta",
+          "band": "minor",
+          "exposure": "The one real humanoid revenue event in this whole area, and the company sized it honestly: 'first significant orders of our servo drives to support the deployment of hundreds of humanoids' — from a small base, and explicitly 'not a significant part of what drove the margin this quarter'. Robotics revenue up 13.5%, but frameless motors and force sensing are not broken out.",
+          "source": "https://www.sec.gov/Archives/edgar/data/0001076930/000119312526335356/novt-ex99_1.htm"
+        },
+        {
+          "ticker": "6506.T",
+          "name": "Yaskawa Electric",
+          "band": "minor",
+          "revenue_share_pct": 43,
+          "exposure": "Motion Control was 43% of FY2025 revenue and is guided to a 15% operating margin. It has bought Tokyo Robotics and is developing humanoid actuators — with no revenue attached to them. About 25% of AC servo demand is semiconductors, which is what is actually moving.",
+          "source": "https://www.yaskawa-global.com/wp-content/uploads/2026/07/261Q_QA_EN.pdf"
+        }
+      ]
+    }
+  ],
+  "_discredited_figures": [
+    {
+      "figure": "128 weeks / 144 weeks GSU / 60+ months HV transformer lead times",
+      "why": "Traced only to SEO trade blogs. The underlying real survey is Wood Mackenzie Q2 2025, and every 2026 article — including ones published in September 2026 — is recirculating it as if current. Use the BLS producer price indices instead."
+    },
+    {
+      "figure": "8-year gas turbine lead times; gas turbine prices up ~300% in three years",
+      "why": "The 300% claim traces to 24/7 Wall St with no baseline or methodology disclosed. Use GE Vernova's own disclosure: first-half 2026 orders priced more than 20% above Q4 2025."
+    },
+    {
+      "figure": "Satya Nadella on chips sitting in inventory that cannot be plugged in",
+      "why": "From the Bg2 Pod in NOVEMBER 2024, not a 2026 earnings call. At least one 2026 newsletter presents it as current."
+    },
+    {
+      "figure": "Ajinomoto functional materials sales +154%, profit +177%",
+      "why": "Misread of the primary deck, which labels its figures 'vs. the previous year' — 154% OF prior year is +54%, and +77% profit. Nearly triple the true growth rate is in circulation via Investing.com."
+    },
+    {
+      "figure": "Hoya expanded EUV mask blank capacity by 2.5 million units per year",
+      "why": "Global annual EUV mask blank demand is orders of magnitude below this. Fabricated or garbled."
+    },
+    {
+      "figure": "FC-BGA lead times of 20-28 weeks; Ibiden ~35% / Shinko ~18% / Unimicron ~14% substrate shares",
+      "why": "Chased to the article they are attributed to and they are NOT IN IT. Search-engine synthesis presented as reporting."
+    },
+    {
+      "figure": "High-NA EUV installs of 6-8 systems in 2025 and 12-15 in 2026",
+      "why": "ASML's audited annual report says 4 EXE units were recognised in 2025 and 2 in 2024. Reject the secondary figure."
+    },
+    {
+      "figure": "TSMC 2026 capex of TWD 60-64 billion (about $18.75-20 billion)",
+      "why": "Currency error by Investing.com. It is US$60-64bn."
+    },
+    {
+      "figure": "2,061 GW in the LBNL interconnection queue, quoted as current",
+      "why": "That is the 2025 edition using end-2024 data. Both emp.lbl.gov URLs return 403, so the 2026 figure is unverified. Note also the queue FELL 10% year on year on withdrawals — a scarcity metric that is going down."
+    },
+    {
+      "figure": "Any single-company HVDC cable market share percentage",
+      "why": "Vendor market-research estimates that contradict each other. Use the IEA's two-thirds and Offshore Magazine's 75% for the top three, and state the range."
+    },
+    {
+      "figure": "Lumentum at 50-60% of the global EML market; InP substrate concentration of ~75%",
+      "why": "The first is an analyst blog with no research-firm attribution. The second comes from a source that demonstrably conflates figures between Fabrinet and Marvell. Both excluded, which is why the InP entry's capture leg is unanswered."
+    },
+    {
+      "figure": "Any CoWoS wafers-per-month figure presented as TSMC-confirmed",
+      "why": "TSMC has never confirmed one. Estimates disagree by about 20% on the 2025 baseline and range 115k-140k for end-2026. Nvidia's 2026 allocation is variously 595k, 700k and 800-850k wafers."
+    },
+    {
+      "figure": "An ASML backlog figure for any quarter of 2026",
+      "why": "ASML discontinued quarterly bookings and backlog disclosure from Q1 2026. The newest official number is EUR 38.8bn at 31 Dec 2025. Any 2026 quarterly backlog is fabricated."
+    },
+    {
+      "figure": "Mitsui Kinzoku at over 90% of global premium-grade circuit copper foil",
+      "why": "A conflation of two different products. Mitsui's 95-97% claims are for MicroThin carrier-attached ultra-thin foil for package substrates; its HVLP/VSP high-speed circuit foil claim was 60%, for the AI-server slice only, and the company dropped even that from its 2026 report. Anyone quoting >90% for circuit foil has merged the two."
+    },
+    {
+      "figure": "Harmonic reducer per-company shares of HDS 40.4% / Shimpo 14.7% / Leaderdrive 12.0% / Laifual 7.4%",
+      "why": "Contradicts GGII's own top-four aggregate for the same market and traces only to brokerage blog posts with no originating research firm. Use the CIC table in Laifual's HKEX prospectus instead, which is a commissioned report but is at least named, dated and inside a regulated filing."
+    },
+    {
+      "figure": "Six-to-twelve month lead times for servo motors and frameless torque motors",
+      "why": "Not supported anywhere. The published figures are about 9 weeks for current-generation Kollmorgen TBM2G frameless, 13 weeks for the legacy TBM, 8 weeks for KEB S6 drives, and about four months for Yaskawa AC servo against a stated three-month norm. Lengthened, not broken — and the lengthening is semiconductor demand, not robots."
+    },
+    {
+      "figure": "Any Nidec figure dated after November 2025",
+      "why": "None exists. Nidec's most recent English disclosure is the quarter ended 30 Sep 2025; its full-year forecast is undetermined, and it carries an active third-party committee investigation into suspected inappropriate accounting which management itself says could have a 'material and pervasive impact' on the consolidated statements. Any Nidec-based supply-chain model is running on roughly ten-month-old numbers carrying restatement risk. Source: https://www.nidec.com/files/user/www-nidec-com/ir/library/earnings/2026/FY25Q2_2_en.pdf"
+    }
+  ]
+}
