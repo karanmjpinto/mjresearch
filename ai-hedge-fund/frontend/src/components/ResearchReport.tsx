@@ -257,6 +257,11 @@ export function ResearchReport() {
   const fundamentals = (d?.fundamentals ?? {}) as Record<string, unknown>;
   const technicals = (d?.technicals ?? {}) as Record<string, unknown>;
   const ai = d?.ai_full;
+  /** Once the AI thesis is on screen the right rail is redundant — the synthesis
+   * card already carries conviction and stance, and the extra column only
+   * squeezes the analysis. Give the page back to the analysis. */
+  const aiResultsShown =
+    includeAi && !d?.ai_error && (Boolean(ai) || (d?.committee?.length ?? 0) > 0);
 
   return (
     <div className="flex flex-col h-screen">
@@ -735,49 +740,51 @@ export function ResearchReport() {
           </ErrorBoundary>
         </main>
 
-        {/* Right sidebar */}
-        <aside className="w-72 border-l border-border p-4 overflow-y-auto flex flex-col gap-4">
-          <ConvictionGauge
-            score={d?.conviction ?? null}
-            label={d?.stance ?? undefined}
-          />
-          <div className="bg-surface-card rounded-xl p-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Sector</p>
-            <p className="text-sm text-white">{fundamentals.sector as string ?? "N/A"}</p>
-            <p className="text-xs text-gray-500 mt-1">{fundamentals.industry as string ?? ""}</p>
-          </div>
-          <div className="bg-surface-card rounded-xl p-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Exchange</p>
-            <p className="text-sm text-white">{fundamentals.exchange as string ?? "N/A"}</p>
-            <p className="text-xs text-gray-500 mt-1">{fundamentals.currency as string ?? "USD"}</p>
-          </div>
-          {d?.news_sentiment && (
+        {/* Right sidebar — hidden once the AI analysis is showing */}
+        {!aiResultsShown && (
+          <aside className="w-72 shrink-0 border-l border-border p-4 overflow-y-auto flex flex-col gap-4">
+            <ConvictionGauge
+              score={d?.conviction ?? null}
+              label={d?.stance ?? undefined}
+            />
             <div className="bg-surface-card rounded-xl p-4">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Headline sentiment (FinBERT)</p>
-              {d.news_sentiment.enabled ? (
-                <>
-                  <p className="text-lg font-bold text-white font-mono">
-                    {d.news_sentiment.aggregate.mean_signed != null
-                      ? d.news_sentiment.aggregate.mean_signed.toFixed(2)
-                      : "—"}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    mean signed · {d.news_sentiment.aggregate.article_count} headlines
-                  </p>
-                  <p className="text-label text-gray-600 mt-2 truncate" title={d.news_sentiment.model ?? ""}>
-                    {d.news_sentiment.model ?? "model"}
-                  </p>
-                </>
-              ) : (
-                <p className="text-xs text-gray-500">
-                  {d.news_sentiment.reason === "transformers_not_installed"
-                    ? "Not installed — enable with --extra sentiment"
-                    : d.news_sentiment.reason ?? "Off"}
-                </p>
-              )}
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Sector</p>
+              <p className="text-sm text-white">{fundamentals.sector as string ?? "N/A"}</p>
+              <p className="text-xs text-gray-500 mt-1">{fundamentals.industry as string ?? ""}</p>
             </div>
-          )}
-        </aside>
+            <div className="bg-surface-card rounded-xl p-4">
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Exchange</p>
+              <p className="text-sm text-white">{fundamentals.exchange as string ?? "N/A"}</p>
+              <p className="text-xs text-gray-500 mt-1">{fundamentals.currency as string ?? "USD"}</p>
+            </div>
+            {d?.news_sentiment && (
+              <div className="bg-surface-card rounded-xl p-4">
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Headline sentiment (FinBERT)</p>
+                {d.news_sentiment.enabled ? (
+                  <>
+                    <p className="text-lg font-bold text-white font-mono">
+                      {d.news_sentiment.aggregate.mean_signed != null
+                        ? d.news_sentiment.aggregate.mean_signed.toFixed(2)
+                        : "—"}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      mean signed · {d.news_sentiment.aggregate.article_count} headlines
+                    </p>
+                    <p className="text-label text-gray-600 mt-2 truncate" title={d.news_sentiment.model ?? ""}>
+                      {d.news_sentiment.model ?? "model"}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-xs text-gray-500">
+                    {d.news_sentiment.reason === "transformers_not_installed"
+                      ? "Not installed — enable with --extra sentiment"
+                      : d.news_sentiment.reason ?? "Off"}
+                  </p>
+                )}
+              </div>
+            )}
+          </aside>
+        )}
       </div>
     </div>
   );
