@@ -214,6 +214,8 @@ export interface SectorPerformance {
   ytd: Array<{ sector: string; change_pct: number }>;
   one_year: Array<{ sector: string; change_pct: number }>;
   source: string;
+  /** What the percentages measure, from whoever produced them. */
+  basis: string;
 }
 
 export interface FamaFrenchFactors {

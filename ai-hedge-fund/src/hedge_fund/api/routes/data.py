@@ -160,7 +160,7 @@ async def get_sentiment(ticker: str):
 
 @router.get("/sector-performance")
 async def get_sector_performance():
-    """Real-time sector performance rankings."""
+    """Sector performance rankings, best to worst, over six windows."""
     result = _ds.get_sector_performance()
     if result is None:
         return {
@@ -172,6 +172,7 @@ async def get_sector_performance():
             "ytd": [],
             "one_year": [],
             "source": "unavailable",
+            "basis": "",
         }
     return _serialize(result)
 
