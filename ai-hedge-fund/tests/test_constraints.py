@@ -540,3 +540,30 @@ def test_no_measurement_cites_a_figure_the_catalogue_has_discredited() -> None:
             assert m.value not in banned, (
                 f"{c.id}: measurement {m.metric!r} uses discredited value {m.value}"
             )
+
+
+def test_three_adequate_legs_do_not_earn_a_green_light() -> None:
+    """0.6 x 0.6 x 0.6 is 0.22 — nothing is weak, and nothing is strong.
+
+    Before this case existed the chain returned "the constraint supports a
+    position" on a product of 0.25, because no single leg was weak enough to
+    name. The honest answer when every leg is merely adequate is about size,
+    not structure.
+    """
+    legs = [
+        binding_leg([tight(value=80.0, normal=50.0)]),  # 0.6
+        durability_leg([Route(path="x", status="building", eta_months=24)]),  # 0.7
+        capture_leg(share_pct=65, pricing_power="demonstrated", pricing_evidence="+20%, Q2"),
+    ]
+    out = validate(legs)
+    assert out["available"] is True
+    assert out["score"] < 0.5
+    assert all((leg.score or 0) > 0 for leg in legs)
+    assert out["structure"]["allowed"] == "a small position, not a concentrated one"
+    assert "multiply to very little" in out["structure"]["because"]
+
+
+def test_the_green_light_still_fires_when_the_product_is_genuinely_strong() -> None:
+    out = validate(full_legs())
+    assert out["score"] >= 0.5
+    assert out["structure"]["allowed"] == "the constraint supports a position"

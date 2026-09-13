@@ -428,11 +428,14 @@
         }
       ],
       "capture": {
-        "holder": "Hitachi Energy, Siemens Energy, GE Vernova",
-        "share_pct": null,
+        "holder": "Hitachi Energy and Siemens Energy, the top two",
+        "share_pct": 20,
         "pricing_power": "contested",
         "pricing_evidence": "Hitachi Energy's adjusted EBITA margin went 6.1% (FY21) to 13.4% (FY25) with order backlog $57.9bn, +33% — so the rent was captured. But the company's own deck captions the backlog chart 'Backlog margin improvement... After FY28', i.e. the higher-priced work converts later; Siemens Energy's CFO calls pricing 'plateauing on a high level'; and the PPI above went flat for six months. Marked contested rather than demonstrated because two independent signals say the pricing power has stopped expanding. Source: https://www.hitachi.com/content/dam/hitachi/global/en/press/files/2026/04/260427/2025_Anpre.pdf",
-        "_gap": "No independently verified large-power-transformer market share exists. The one vendor estimate found is internally inconsistent — it sizes the global market at $23.2bn against Hitachi Energy's own $19.8bn of revenue."
+        "_gap": "No independently verified large-power-transformer market share exists. The one vendor estimate found is internally inconsistent — it sizes the global market at $23.2bn against Hitachi Energy's own $19.8bn of revenue.",
+        "_share_basis": "The best-quality share data found anywhere in this exercise, and it argues AGAINST concentration. European Commission merger case M.9447 (Hitachi/ABB Power Grids, decision 2 Jun 2020) publishes revenue-based bands tested in the Commission's own market investigation: Hitachi Energy (then ABB Power Grids) at [10-20]% of global power transformers and Siemens at [10-20]%, with TBEA, GE/Alstom, SGB and Xian XD all present behind them. The lower bound of the two combined is used, 20%. That is an oligopoly at best, not a chokepoint — which is consistent with the price index going flat for six months and Siemens Energy's own CFO calling pricing 'plateauing on a high level'. Caveat: 2018 vintage, so structural evidence rather than current share. Source: https://ec.europa.eu/competition/mergers/cases1/202034/m9447_557_3.pdf",
+        "_do_not_add": "Siemens Energy separately claims about 20% at its Nov 2025 capital markets day, but that is a share of the global INSTALLED population of transformers, not of annual sales. Different denominator — do not add it to the Commission's revenue share.",
+        "_correction": "ABB is not a holder of this chokepoint. It sold Power Grids to Hitachi, closing 2020, so every ABB transformer and HV switchgear share in the older literature is now Hitachi Energy's."
       },
       "names": [
         {
@@ -440,7 +443,8 @@
           "name": "Siemens Energy",
           "exposure": "Grid Technologies builds high-voltage transformers and substations.",
           "band": "major",
-          "source": ""
+          "source": "",
+          "revenue_share_pct": null
         },
         {
           "ticker": "6501.T",
@@ -462,6 +466,14 @@
           "exposure": "Utility grid components including transformers and enclosures.",
           "band": "minor",
           "source": ""
+        },
+        {
+          "ticker": "267260.KS",
+          "name": "HD Hyundai Electric",
+          "band": "major",
+          "revenue_share_pct": 26,
+          "exposure": "The strongest current-vintage share figure in the set: 25.7% of the US market for transformers of 100 MVA and above in 2025, up from 17.2% in 2024 and number one for a second year — per Goulden Reports, a specialist third party. US-only and above 100 MVA only.",
+          "source": "https://en.sedaily.com/finance/2026/08/02/early-bet-pays-off-hd-hyundai-electric-produces-1000th"
         }
       ]
     },
@@ -607,12 +619,15 @@
         }
       ],
       "capture": {
-        "holder": "Harmonic Drive Systems, Nabtesco",
-        "share_pct": null,
+        "holder": "Nabtesco in medium and large robot joints; Leaderdrive and Laifual in Chinese harmonic",
+        "share_pct": 60,
         "pricing_power": "contested",
         "pricing_evidence": "The supposed monopolist has no pricing power and its own accounts prove it. Harmonic Drive Systems' gross margin fell from 39.28% in FY3/22 to 26.69% in FY3/25, with OPERATING MARGIN HITTING 0.01% in FY3/25 — a monopolist does not print that. The recovery to 30.45% is utilisation, not price. Nabtesco is the only player with sourced price realisation, disclosing ¥500m of price pass-through in Component Solutions in H1 2026. Meanwhile Chinese selling prices are falling outright: Leaderdrive from about RMB 1,900 in 2017 to RMB 1,100 in 2024, and Laifual from RMB 802 in 2023 to RMB 573 in 2025. Sources: https://stockanalysis.com/quote/TYO/6324/financials/ , https://www.nabtesco.com/cms/wp-content/uploads/Results_Briefing_QA_for_FY2026_Q2.pdf",
         "_warning": "Whole-robot prices are collapsing, which flows straight through to component ASPs. Unitree's own prospectus shows humanoid average selling price falling from RMB 593,400 in 2023 to RMB 167,600 over the first nine months of 2025 — a 72% decline in two years. A component supplier into that is facing price, not receiving it.",
-        "_where_the_rent_went": "Up a level, to the customer. Unitree's 2025 humanoid gross margin was 62.91% against Leaderdrive's 32.26% in H1 2026. The OEM that integrated the joint kept the rent."
+        "_where_the_rent_went": "Up a level, to the customer. Unitree's 2025 humanoid gross margin was 62.91% against Leaderdrive's 32.26% in H1 2026. The OEM that integrated the joint kept the rent.",
+        "_share_basis": "Nabtesco puts itself at about 60% of precision reducers for MEDIUM AND LARGE industrial robot joints globally — stated on p.29 of its FY2026 Q2 deck and labelled 当社推計, its own estimate, with the metric left unstated (neither units nor revenue). Narrow denominator: that application, not all precision reducers and not all RV. Source: https://www.nabtesco.com/cms/wp-content/uploads/Results_Briefing_Material_for_FY2026_Q2.pdf",
+        "_china_is_a_different_market": "And in China the incumbent has already lost. The CIC table inside Laifual's June 2026 HKEX prospectus puts 2025 Chinese robot harmonic shipments at Leaderdrive 27.5%, Laifual 21.4% and Harmonic Drive Systems 4.4% — the Japanese incumbent fifth, on units. On revenue HDS is third at 8.8%, i.e. it still prices above the locals but ships a fraction of the volume. HDS's own deck, citing MIR, puts it at 12.1% of the whole Chinese harmonic market in 2024 across all uses; different denominator and year, so the two do not reconcile and neither should be made to. Sources: https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0622/2026062200047.pdf and https://www.hds.co.jp/Portals/0/files/ir/event/investor/pdf/setsumeikai%2020250520.pdf",
+        "_gap": "No global harmonic share for Harmonic Drive Systems exists in any of its own decks or in a reachable research-firm source. Its listing filings claim rank, not percentage."
       },
       "names": [
         {
@@ -687,12 +702,13 @@
         }
       ],
       "capture": {
-        "holder": "Eaton, Siemens Energy, Hitachi Energy, Powell, Vertiv",
-        "share_pct": null,
+        "holder": "Hitachi Energy, the leader in high-voltage switchgear",
+        "share_pct": 20,
         "pricing_power": "demonstrated",
         "pricing_evidence": "The broadest margin expansion of any constraint in this map: Siemens Energy Grid Technologies 19.9% (+400bp), Eaton Electrical Americas 27.5% (+190bp sequentially, with pricing actions explicitly timed and a further +250bp guided for Q3), Vertiv 22.6% adjusted (+410bp), GE Vernova Electrification 18.4% (+390bp reported, +700bp organic), Powell 30.6% gross margin. Sources: https://www.fool.com/earnings/call-transcripts/2026/08/07/eaton-etn-q2-2026-earnings-call-transcript/ , https://www.sec.gov/Archives/edgar/data/80420/000008042026000103/ex991-powlq3xfy2026earning.htm",
-        "_gap": "No verified HV switchgear market share exists. The nearest specialist figure is Newton-Evans putting Hitachi Energy at 38-40% of US HV bushings — adjacent, not switchgear.",
-        "_warning": "The rent is captured at the HV and data-centre-specific end and NOT in commodity electrical distribution: Schneider Electric's net price impact was minus 120bp in H1 2026, with €280m of product pricing against €330m of raw-material and €104m of tariff headwind. Same end market, opposite sign."
+        "_gap": "No percentage share of HV switchgear or GIS exists from any source for Eaton, Powell, Schneider, GE Vernova or Mitsubishi Electric. Newton-Evans names the participants but publishes no percentages for switchgear, GIS or breakers — only the HV bushings figure, which is adjacent and must not be presented as a switchgear share.",
+        "_warning": "The rent is captured at the HV and data-centre-specific end and NOT in commodity electrical distribution: Schneider Electric's net price impact was minus 120bp in H1 2026, with €280m of product pricing against €330m of raw-material and €104m of tariff headwind. Same end market, opposite sign.",
+        "_share_basis": "European Commission case M.9447, revenue bands from its own market investigation: the merged Hitachi Energy at [10-20]% of global HV switchgear across all types, [20-30]% of HV circuit breakers in 2018 (and [30-40]% on a five-year average), [10-20]% of HV gas-insulated switchgear, and [40-50]% of the narrower HV generator circuit breaker niche. The lower bound for all-type HV switchgear is used, 20%. Hitachi Energy separately claims to have 'installed 1 out of 4 high-voltage switchgear in the world' — but that is an installed-base claim footnoted as an internal estimate, not an annual revenue share. 2018 vintage. Source: https://ec.europa.eu/competition/mergers/cases1/202034/m9447_557_3.pdf"
       },
       "names": [
         {
@@ -1052,11 +1068,13 @@
         }
       ],
       "capture": {
-        "holder": "Unimicron, Ibiden, Nan Ya PCB, Kinsus, Samsung Electro-Mechanics",
-        "share_pct": null,
+        "holder": "Ibiden, with Unimicron, Nan Ya PCB and Kinsus behind it",
+        "share_pct": 70,
         "pricing_power": "demonstrated",
         "pricing_evidence": "Quarterly price escalation with no stated ceiling, plus margin to match. The Taiwan Printed Circuit Association reported on 19 Aug 2026 that ABF long-term-agreement prices rise 10-15% per quarter from Q3 2026 with spot above 20%, BT substrate 20-30% quarterly, and that Unimicron, Nan Ya PCB and Kinsus are all running at full capacity with 'no clear price ceiling currently in sight' through 2028. Ibiden ran a 28.3% electronics operating margin on customers 'willing to accept a price increase'; Samsung Electro-Mechanics' packaging operating profit rose 237% year on year and LG Innotek's 94%. Sources: https://www.pcbshop.org/en/articles/detail.asp?serno=371 and https://www.trendforce.com/news/2026/08/27/news-samsung-electro-mechanics-lg-innotek-ramp-up-ai-substrate-capacity-as-1h-utilization-reportedly-nears-90/",
-        "_gap": "No verified market share. The figures circulating for Ibiden, Shinko, Unimicron and others trace to unattributed aggregators, not reporting. Note also that Shinko Electric, historically a top-two holder, was delisted in June 2025 — which structurally raises the scarcity value of the remaining listed names."
+        "_gap": "No verified market share. The figures circulating for Ibiden, Shinko, Unimicron and others trace to unattributed aggregators, not reporting. Note also that Shinko Electric, historically a top-two holder, was delisted in June 2025 — which structurally raises the scarcity value of the remaining listed names.",
+        "_share_basis": "Ibiden puts its own share of IC package substrates FOR AI SERVERS at 70-80%, and has said so in three consecutive disclosures — May 2025, Oct 2025 and Feb 2026 — with competitors at 'at most about 30%' combined. The lower bound of its own range is used. This is a company estimate, not independent, and the denominator is narrower than the whole FC-BGA market: AI-server substrates specifically. Source: https://www.ibiden.co.jp/ir/items/QA_FY2025Q3.pdf",
+        "_volatility": "Ibiden's own May 2026 Q&A adds that this share is generation-cyclical — near 100% at each new generation's ramp, then shedding 20-30 points over the following three to six months as competitors qualify. A single point estimate understates that swing, so treat 70% as a trough-ish figure rather than a stable one. Source: https://www.ibiden.co.jp/ir/items/QA_FY25Q4.pdf"
       },
       "names": [
         {
@@ -1151,12 +1169,12 @@
         }
       ],
       "capture": {
-        "holder": "Coherent and Lumentum in laser die; AXT in substrate",
-        "share_pct": null,
+        "holder": "The three EML makers (Lumentum, Broadcom, Mitsubishi Electric); Coherent among the top four in CW-DFB",
+        "share_pct": 72,
         "pricing_power": "demonstrated",
         "pricing_evidence": "Margins, contracts and the buyer's own behaviour all point one way. Coherent's non-GAAP gross margin rose 215bp year on year to 40.2% with pricing 'agreed upon... out through the length of the LTA'; Lumentum's non-GAAP operating margin rose 2,160bp year on year to 36.6% on revenue up 109%, citing 'increased pricing on select products'. Lumentum prepaid AXT $43.5m, with a second $43.5m due in 2028, to reserve InP substrate through 2031 — you prepay for rationed goods. And Nvidia invested $2bn each in Coherent and Lumentum explicitly for 'future capacity access rights'. Independently, Cignal AI reports component shortages are slowing the usual price declines. Sources: https://www.sec.gov/Archives/edgar/data/0000820318/000119312526346860/d128030dex991.htm , https://investor.lumentum.com/financial-news-releases/news-details/2026/Lumentum-Announces-Fourth-Quarter-and-Full-Fiscal-Year-2026-Results/default.aspx , https://www.sec.gov/Archives/edgar/data/1051627/000143774926024883/axti20260715_8k.htm , https://nvidianews.nvidia.com/news/nvidia-announces-strategic-partnership-with-lumentum-to-develop-state-of-the-art-optics-technology",
-        "_gap": "No verified market share. The figure in circulation — Lumentum at 50-60% of global EML — comes from an analyst blog with no research-firm attribution, and the InP substrate concentration figure traces to a source that demonstrably conflates data between companies. Both are excluded.",
-        "_note": "Dell'Oro independently called the AI back-end network market supply-constrained rather than demand-constrained for at least the next one to two years, 8 Sep 2026: https://lightwaveonline.com/home/article/55403498/ethernet-broadens-its-lead-in-ai-back-end-networks"
+        "_note": "Dell'Oro independently called the AI back-end network market supply-constrained rather than demand-constrained for at least the next one to two years, 8 Sep 2026: https://lightwaveonline.com/home/article/55403498/ethernet-broadens-its-lead-in-ai-back-end-networks",
+        "_share_basis": "TrendForce, 2026: Lumentum, Broadcom and Mitsubishi Electric together hold about 72% of the global EML market, and Broadcom, Sumitomo, Coherent and LandMark/LuxNet about 74% of CW-DFB laser capacity. Independent, and an aggregate — the release gives no per-company split, and recovering one would mean dividing estimates, which is how the discredited figures in this file got made. So the holder is stated as the group the 72% actually covers. Source: https://www.semiconductor-today.com/news_items/2026/jun/trendforce-040626.shtml"
       },
       "names": [
         {
@@ -1253,21 +1271,22 @@
         "share_pct": null,
         "pricing_power": "demonstrated",
         "pricing_evidence": "A 246% price move and 70-90% contract increases notified by Korean suppliers. Source: https://www.scarceearth.io/reagents/tungsten-hexafluoride",
-        "_unresolved": "MATERIAL AND UNRESOLVED. One source reports that Kanto Denka and Central Glass SUSPENDED the shutdown decision on 19 Jun 2026; two others state production permanently ceased on 1 Jul 2026. No primary disclosure from either company was found either way. The persisting price as of 12 Sep 2026 is the strongest evidence the disruption is real — but check both companies' own IR pages before acting, because if they stayed in the product they are beneficiaries and if they exited they are beneficiaries of nothing."
+        "_unresolved": "RESOLVED, and against the suspension. TrendForce reported on 12 Jun 2026 that Kanto Denka and Central Glass cease WF6 production on 1 July 2026, which agrees with the two outlets stating a permanent halt and against the single report of a suspension. The price still standing at +246% in September is consistent with that. One consequence worth carrying: any historical WF6 share table for those two describes a supply base that no longer exists — the same staleness problem as Shinko in substrates. It also means both are beneficiaries of nothing here, so they are kept in the names list as the cause of the shortage rather than as a way to own it.",
+        "_gap": "No per-company WF6 share exists from any credible source. Two circulating figures were traced and rejected: 'Foosung ~10% of global WF6' runs back through an exchange blog to an anonymous social account, and the 'Kanto Denka + Central Glass = 25%' figure is a division of an unnamed tonnage by a denominator that itself varies 50% between articles — arithmetic on estimates, which is exactly the failure this file guards against."
       },
       "names": [
         {
           "ticker": "4047.T",
           "name": "Kanto Denka Kogyo",
           "band": "major",
-          "exposure": "One of the two Japanese high-purity WF6 producers at the centre of the shortage. Check its own IR first — see the unresolved contradiction.",
+          "exposure": "One of the two Japanese high-purity WF6 producers at the centre of the shortage. Confirmed to be exiting the product from 1 July 2026 — the cause of the shortage, not a way to own it.",
           "source": "https://www.scarceearth.io/reagents/tungsten-hexafluoride"
         },
         {
           "ticker": "4044.T",
           "name": "Central Glass",
           "band": "minor",
-          "exposure": "The other Japanese producer, inside a diversified glass and chemicals group.",
+          "exposure": "The other Japanese producer, inside a diversified glass and chemicals group. Confirmed to be exiting the product from 1 July 2026 — the cause of the shortage, not a way to own it.",
           "source": "https://www.scarceearth.io/reagents/tungsten-hexafluoride"
         },
         {
@@ -1314,10 +1333,10 @@
       ],
       "capture": {
         "holder": "Nitto Boseki (Nittobo)",
-        "share_pct": null,
+        "share_pct": 90,
         "pricing_power": "demonstrated",
         "pricing_evidence": "Price roughly doubled, from $15-20/m² to $30-50+/m², alongside a lead time going from 4 weeks to over 6 months. Source: https://electsources.com.tw/2026/03/19/2026-t-glass-shortage-disrupting-nvidia-apple-ai-hardware/",
-        "_gap": "No sourced share figure, and Nittobo's own disclosure was not verified. Described as effectively sole source for the low-CTE grade by one mid-tier outlet only."
+        "_share_basis": "TrendForce, Apr 2026: Nittobo holds about 90% of global T-glass and 60-70% of NER-glass. Independent, though TrendForce names no source of its own and does not say whether the basis is revenue, volume or capacity. Note also that Nittobo's own Integrated Report contains NO percentage — it claims only 'top domestic market share for many items' — so this is not a company claim. And 90% is for T-glass specifically, not for low-CTE cloth in general, which is the wider category this entry describes. Source: https://insights.trendforce.com/p/glass-fiber-cloth-shortage"
       },
       "names": [
         {
@@ -1357,10 +1376,12 @@
       ],
       "capture": {
         "holder": "Mitsui Mining & Smelting",
-        "share_pct": null,
+        "share_pct": 60,
         "pricing_power": "demonstrated",
         "pricing_evidence": "The company quantified its own rent: of a ¥9.7bn copper-foil operating profit guidance raise, about ¥3.5bn came from price (MicroThin ~¥3bn, VSP ¥0.5-1bn). Two price increases in nine months, October 2025 and July 2026, with management stating that in higher HVLP grades 'the number of competitors capable of manufacturing at stable quality remains limited'. Management also says no further increases are currently planned. Source: https://finance.biggo.com/news/JP_5706.T_2026-08-21",
-        "_gap": "Copper foil's share of group revenue or profit was not disclosed, and no market share figure exists. A >90% premium-grade share claim appears on an undated low-quality page and is excluded."
+        "_gap": "Copper foil's share of group revenue or profit was not disclosed, and no market share figure exists. A >90% premium-grade share claim appears on an undated low-quality page and is excluded.",
+        "_share_basis": "Mitsui Kinzoku claimed 60% of high-grade VSP foil for AI servers in its Integrated Report 2025 — its own claim, no external source, metric unstated. Narrow denominator: the AI-server high-grade slice, not HVLP overall. AND IT HAS SINCE WITHDRAWN THE FIGURE: the same top-share-products list in the 2026 report keeps carrier-attached foil at 95% and drops the VSP entry entirely, with the 2026 VSP section giving only capacity and volume. A company that stops publishing a share is worth noticing. Treat 60% as a FY2025 figure no longer being stood behind. Sources: https://www.mitsui-kinzoku.com/Portals/0/CSR/integrated_report/2025/JP/integrated_report2025.pdf and https://www.mitsui-kinzoku.com/Portals/0/CSR/integrated_report/2026/JP/integrated_report2026.pdf",
+        "_do_not_conflate": "Mitsui's 95-97% claims are for MicroThin, the carrier-attached ultra-thin foil used in package substrates — a DIFFERENT product from the HVLP/VSP high-speed circuit foil this entry is about. The circulating 'over 90% of global premium circuit copper foil' claim is that conflation, and it is why the number is in the discredited list rather than here."
       },
       "names": [
         {
@@ -1409,15 +1430,16 @@
         "share_pct": null,
         "pricing_power": "contested",
         "pricing_evidence": "Spot doubled, but helium contracts are typically long-dated so spot passes through slowly, and no electronics-segment margin evidence for any of the industrial gas majors could be sourced. Marked contested rather than demonstrated for that reason.",
-        "_gap": "No electronics end-market revenue share for any of the gas majors was found, and helium is a small line in each."
+        "_gap": "No company-level share of global or electronic-grade helium exists from any primary or independent source. Linde's and Air Products' 10-Ks contain none; the FTC's own helium complaint calls the world market 'highly concentrated' by HHI but publishes no percentages in the public version; USGS gives country shares only. Vendor pages give Linde variously 18%, 22% and 24.5% for the same year with no stated method — mutually inconsistent, so excluded."
       },
       "names": [
         {
           "ticker": "LIN",
           "name": "Linde",
           "band": "minor",
-          "exposure": "Industrial and electronic gases including helium. Helium is a small line in a very large business.",
-          "source": ""
+          "exposure": "Industrial and electronic gases including helium. Electronics is 9% of sales by end market per its own investor deck, with about 2% more sitting in an unconsolidated Taiwan joint venture.",
+          "source": "https://assets.linde.com/-/media/global/corporate/corporate/documents/investors/events-and-presentations/why-linde-presentation.pdf",
+          "revenue_share_pct": 9
         },
         {
           "ticker": "APD",
@@ -1430,8 +1452,9 @@
           "ticker": "AI.PA",
           "name": "Air Liquide",
           "band": "minor",
-          "exposure": "Industrial and electronic gases including helium.",
-          "source": ""
+          "exposure": "Industrial and electronic gases including helium. Electronics was 9.1% of group revenue in FY2025 — sourced from its own results.",
+          "source": "https://www.airliquide.com/sites/airliquide.com/files/2026-02/air-liquide-pr-fy-2025-with-record-performance-and-confident-in-its-transformation-dynamic-air-liquide-confirms-its-growth-outlook.pdf",
+          "revenue_share_pct": 9.1
         }
       ]
     },
@@ -1630,6 +1653,14 @@
     {
       "figure": "An ASML backlog figure for any quarter of 2026",
       "why": "ASML discontinued quarterly bookings and backlog disclosure from Q1 2026. The newest official number is EUR 38.8bn at 31 Dec 2025. Any 2026 quarterly backlog is fabricated."
+    },
+    {
+      "figure": "Mitsui Kinzoku at over 90% of global premium-grade circuit copper foil",
+      "why": "A conflation of two different products. Mitsui's 95-97% claims are for MicroThin carrier-attached ultra-thin foil for package substrates; its HVLP/VSP high-speed circuit foil claim was 60%, for the AI-server slice only, and the company dropped even that from its 2026 report. Anyone quoting >90% for circuit foil has merged the two."
+    },
+    {
+      "figure": "Harmonic reducer per-company shares of HDS 40.4% / Shimpo 14.7% / Leaderdrive 12.0% / Laifual 7.4%",
+      "why": "Contradicts GGII's own top-four aggregate for the same market and traces only to brokerage blog posts with no originating research firm. Use the CIC table in Laifual's HKEX prospectus instead, which is a commissioned report but is at least named, dated and inside a regulated filing."
     }
   ]
 }

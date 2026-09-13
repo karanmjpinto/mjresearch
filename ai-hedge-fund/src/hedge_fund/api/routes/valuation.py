@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import json
 import logging
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 
 from hedge_fund.data.service import get_data_service
 from hedge_fund.valuation import implied_bands, summarise
+from hedge_fund.valuation.concentration import concentration
 from hedge_fund.valuation.cost_of_capital import COMPANY_TYPES, CostOfCapitalError, build
 from hedge_fund.valuation.dcf import DCFError, Drivers, sensitivity, simulate, value
 from hedge_fund.valuation.conviction import (
@@ -380,3 +383,114 @@ async def conviction_chain(
     result["margin_of_safety"] = {"value_pct": mos, "source": mos_source}
     result["edge_sources_available"] = list(EDGE_SOURCES)
     return result
+
+
+def _book_weights() -> dict[str, float]:
+    """Current holdings as a percentage of the book, or empty if unavailable.
+
+    Best-effort on purpose. The concentration policy is useful without a book —
+    it still says what a conviction permits — so a portfolio that cannot be
+    priced costs the comparison and not the answer.
+    """
+    # parents[4], not [3]: this module sits two directories deeper than the
+    # ones that read config with [3], and the first version of this silently
+    # pointed at src/config, found nothing, and returned an empty book through
+    # the handler below. A broad `except` around a path is how that stayed
+    # invisible, so the miss is now logged loudly enough to notice.
+    path = Path(__file__).resolve().parents[4] / "config" / "portfolio.json"
+    try:
+        cfg = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("no usable portfolio config at %s (%s); sizing without a book", path, exc)
+        return {}
+
+    book_ccy = str(cfg.get("currency", "")).strip().upper() or "USD"
+    values: dict[str, float] = {}
+    skipped: list[str] = []
+    for h in cfg.get("holdings", []):
+        tkr = str(h.get("ticker", "")).strip().upper()
+        shares = _num(h.get("shares"))
+        if not tkr or not shares:
+            continue
+
+        # Currency first, and this is not a nicety. There is no FX conversion
+        # here, so a lira-priced holding multiplied by lira shares and summed
+        # into a dollar book is not a small error — on the real portfolio it
+        # made a Turkish airline 54% of the book and would have reported a
+        # wildly over-concentrated position that does not exist. A holding in
+        # another currency is excluded and named, never converted by guesswork.
+        ccy = str(h.get("currency", book_ccy)).strip().upper() or book_ccy
+        if ccy != book_ccy:
+            skipped.append(f"{tkr} ({ccy})")
+            continue
+
+        price = _last_close(tkr)
+        if price is None:
+            skipped.append(f"{tkr} (no price)")
+            continue
+        values[tkr] = shares * price
+
+    total = sum(values.values()) + (_num(cfg.get("cash")) or 0.0)
+    if total <= 0:
+        return {}
+    if skipped:
+        logger.info("book comparison excludes %s", ", ".join(skipped))
+    weights = {k: round(v / total * 100, 4) for k, v in values.items()}
+    # The excluded names ride along under a reserved key so the caller can say
+    # the comparison is partial rather than quietly presenting it as the book.
+    weights["__excluded__"] = skipped  # type: ignore[assignment]
+    return weights
+
+
+@router.get("/concentration/{ticker}")
+async def concentration_policy(
+    ticker: str,
+    conviction_score: float | None = Query(
+        None,
+        ge=0.0,
+        le=1.0,
+        description="Left blank, the chain next door is not re-run — pass the score it produced.",
+    ),
+    against_book: bool = Query(
+        True, description="Also check current holdings against the conviction each one claims."
+    ),
+) -> dict[str, Any]:
+    """How big the view may be, and whether the book already agrees.
+
+    Deliberately takes a score rather than recomputing the chain: the chain
+    needs answers to two judgment questions, and silently re-deriving it here
+    with defaults would produce a size from a thesis nobody stated.
+    """
+    t = ticker.strip().upper()
+
+    if conviction_score is None:
+        return {
+            "ticker": t,
+            "available": False,
+            "reason": (
+                "No conviction score supplied. Answer the three requisites next door "
+                "first — a size derived from an unstated thesis is just a number."
+            ),
+            "book": None,
+        }
+
+    chain = {"available": True, "score": conviction_score, "structure": None}
+    raw = _book_weights() if against_book else {}
+    excluded = raw.pop("__excluded__", []) if raw else []
+    weights = {k: float(v) for k, v in raw.items()}
+    out = concentration(chain, weights_pct=weights or None)
+    out["ticker"] = t
+    if excluded:
+        out["book_excluded"] = excluded
+        out["book_excluded_note"] = (
+            "Left out of the comparison because there is no FX conversion here: a holding "
+            "priced in another currency cannot be summed into this book without inventing a "
+            "rate. The weights shown are of the priced, same-currency part only."
+        )
+    if against_book and not weights:
+        out["book_note"] = (
+            "The book could not be priced, so there is nothing to compare against. "
+            "Holdings in a currency the price feed did not return are left out rather "
+            "than mixed into one weight."
+        )
+    return out

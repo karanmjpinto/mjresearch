@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { AppNav } from "@/components/AppNav";
+import { ConcentrationPanel } from "@/components/ConcentrationPanel";
 import { api, type DecisionRow, type SizingAssessment } from "@/lib/api";
 import { useTicker } from "@/lib/ticker-context";
 
@@ -28,7 +29,9 @@ const ACTION_TONE: Record<string, string> = {
 };
 
 const n = (v: number | null | undefined, dp = 2, suffix = "") =>
-  v === null || v === undefined || !Number.isFinite(v) ? "—" : `${v.toFixed(dp)}${suffix}`;
+  v === null || v === undefined || !Number.isFinite(v)
+    ? "—"
+    : `${v.toFixed(dp)}${suffix}`;
 
 function Stat({
   label,
@@ -43,7 +46,11 @@ function Stat({
 }) {
   return (
     <div className="bg-ink-raised px-lg py-md">
-      <div className={`font-display text-[20px] tabular ${tone ?? "text-bone"}`}>{value}</div>
+      <div
+        className={`font-display text-[20px] tabular ${tone ?? "text-bone"}`}
+      >
+        {value}
+      </div>
       <div className="mt-2xs font-display text-label uppercase tracking-[0.13em] text-on-ink-faint">
         {label}
       </div>
@@ -54,19 +61,31 @@ function Stat({
 
 function SizingPanel({ a }: { a: SizingAssessment }) {
   const volTone =
-    a.diversifying === true ? "text-verdigris" : a.diversifying === false ? "text-oxide" : "text-bone";
+    a.diversifying === true
+      ? "text-verdigris"
+      : a.diversifying === false
+        ? "text-oxide"
+        : "text-bone";
   return (
     <>
       <div className="grid gap-px bg-ink-line sm:grid-cols-4">
         <Stat
           label="of the book"
           value={n(a.proposed_weight_pct, 1, "%")}
-          sub={a.rank_after ? `would rank #${a.rank_after} of ${a.holdings_after}` : undefined}
+          sub={
+            a.rank_after
+              ? `would rank #${a.rank_after} of ${a.holdings_after}`
+              : undefined
+          }
         />
         <Stat
           label="correlation to book"
           value={n(a.correlation_to_book, 2)}
-          sub={a.overlap_observations ? `${a.overlap_observations} overlapping days` : "not enough overlap"}
+          sub={
+            a.overlap_observations
+              ? `${a.overlap_observations} overlapping days`
+              : "not enough overlap"
+          }
           tone={
             a.correlation_to_book !== null && a.correlation_to_book >= 0.75
               ? "text-oxide"
@@ -97,13 +116,16 @@ function SizingPanel({ a }: { a: SizingAssessment }) {
         <p className="mt-sm text-[13px] leading-relaxed text-on-ink-soft">
           Top three holdings{" "}
           <span className="font-display text-bone">
-            {n(a.concentration_top3_before_pct, 0, "%")} → {n(a.concentration_top3_after_pct, 0, "%")}
+            {n(a.concentration_top3_before_pct, 0, "%")} →{" "}
+            {n(a.concentration_top3_after_pct, 0, "%")}
           </span>
           {a.existing_weight_pct ? (
             <>
               . You already hold{" "}
-              <span className="font-display text-bone">{n(a.existing_weight_pct, 1, "%")}</span> of this
-              name.
+              <span className="font-display text-bone">
+                {n(a.existing_weight_pct, 1, "%")}
+              </span>{" "}
+              of this name.
             </>
           ) : (
             ". This would be a new position."
@@ -112,14 +134,20 @@ function SizingPanel({ a }: { a: SizingAssessment }) {
       )}
 
       {a.flags.map((f) => (
-        <p key={f} className="mt-sm bg-oxide/15 px-md py-sm text-[13px] leading-relaxed text-oxide">
+        <p
+          key={f}
+          className="mt-sm bg-oxide/15 px-md py-sm text-[13px] leading-relaxed text-oxide"
+        >
           {f}
         </p>
       ))}
       {a.notes.length > 0 && (
         <ul className="mt-sm space-y-1">
           {a.notes.map((note) => (
-            <li key={note} className="text-[12px] leading-relaxed text-on-ink-faint">
+            <li
+              key={note}
+              className="text-[12px] leading-relaxed text-on-ink-faint"
+            >
               {note}
             </li>
           ))}
@@ -131,11 +159,13 @@ function SizingPanel({ a }: { a: SizingAssessment }) {
 
 function DecisionCard({ d }: { d: DecisionRow }) {
   const o = d.outcome;
-  const favour = o?.scored ? o.in_your_favour_pct ?? 0 : null;
+  const favour = o?.scored ? (o.in_your_favour_pct ?? 0) : null;
   return (
     <article className="border-t border-ink-line px-lg py-md first:border-t-0">
       <div className="flex flex-wrap items-baseline gap-sm">
-        <span className={`px-2 py-0.5 font-display text-label uppercase tracking-[0.12em] ${ACTION_TONE[d.action] ?? "bg-ink-line text-on-ink"}`}>
+        <span
+          className={`px-2 py-0.5 font-display text-label uppercase tracking-[0.12em] ${ACTION_TONE[d.action] ?? "bg-ink-line text-on-ink"}`}
+        >
           {d.action}
         </span>
         <span className="font-display text-[14px] text-bone">{d.ticker}</span>
@@ -192,7 +222,7 @@ export function DecideView() {
 
   const carried = (location.state ?? {}) as CarriedResearch;
   const [ticker, setTicker] = useState(
-    (routeTicker ?? activeTicker ?? "").toUpperCase()
+    (routeTicker ?? activeTicker ?? "").toUpperCase(),
   );
   const [amount, setAmount] = useState<string>("");
   const [action, setAction] = useState<string>("buy");
@@ -213,7 +243,7 @@ export function DecideView() {
       api.sizePosition(
         amount.trim()
           ? { ticker, amount: Number(amount) }
-          : { ticker, weight_pct: 5 }
+          : { ticker, weight_pct: 5 },
       ),
     onSuccess: (r) => setAssessment(r.assessment),
   });
@@ -241,13 +271,22 @@ export function DecideView() {
 
       <main className="mx-auto max-w-5xl px-lg py-xl">
         <header className="mb-lg">
-          <h1 className="font-display text-display-sm tracking-tight text-bone">Decide</h1>
+          <h1 className="font-display text-display-sm tracking-tight text-bone">
+            Decide
+          </h1>
           <p className="mt-sm max-w-[72ch] text-[15px] leading-relaxed text-on-ink-soft">
-            A conviction score tells you whether a name is good. Whether you should own it
-            depends on what you already hold — so this sizes the position against your book,
-            and records the call with that context attached.
+            A conviction score tells you whether a name is good. Whether you
+            should own it depends on what you already hold — so this sizes the
+            position against your book, and records the call with that context
+            attached.
           </p>
         </header>
+
+        {ticker && (
+          <div className="mb-lg border-t border-ink-line pt-lg">
+            <ConcentrationPanel ticker={ticker.toUpperCase()} />
+          </div>
+        )}
 
         {carried.run_uid && (
           <div className="mb-lg border border-cobalt/40 bg-cobalt/10 px-lg py-md">
@@ -256,8 +295,10 @@ export function DecideView() {
             </p>
             <p className="mt-2xs text-[13px] leading-relaxed text-on-ink-soft">
               {carried.stance ?? "—"} at conviction{" "}
-              <span className="font-display tabular text-bone">{carried.conviction ?? "—"}</span>.
-              This decision will be filed against run{" "}
+              <span className="font-display tabular text-bone">
+                {carried.conviction ?? "—"}
+              </span>
+              . This decision will be filed against run{" "}
               <span className="font-display text-on-ink-faint">
                 {carried.run_uid.slice(0, 8)}
               </span>
@@ -312,7 +353,9 @@ export function DecideView() {
             </div>
           </div>
           {size.isError && (
-            <p className="mt-sm text-[12px] text-oxide">{(size.error as Error).message}</p>
+            <p className="mt-sm text-[12px] text-oxide">
+              {(size.error as Error).message}
+            </p>
           )}
         </section>
 
@@ -334,7 +377,9 @@ export function DecideView() {
                     type="button"
                     onClick={() => setAction(a)}
                     className={`px-4 py-2 font-display text-label uppercase tracking-[0.12em] transition-colors ${
-                      action === a ? ACTION_TONE[a] : "bg-ink text-on-ink-faint hover:text-on-ink"
+                      action === a
+                        ? ACTION_TONE[a]
+                        : "bg-ink text-on-ink-faint hover:text-on-ink"
                     }`}
                   >
                     {a}
@@ -359,11 +404,14 @@ export function DecideView() {
                   {decide.isPending ? "Recording…" : "Record decision"}
                 </button>
                 <span className="text-[12px] text-on-ink-faint">
-                  Saved with your current weights and correlation, so it can be reviewed fairly later.
+                  Saved with your current weights and correlation, so it can be
+                  reviewed fairly later.
                 </span>
               </div>
               {decide.isError && (
-                <p className="mt-sm text-[12px] text-oxide">{(decide.error as Error).message}</p>
+                <p className="mt-sm text-[12px] text-oxide">
+                  {(decide.error as Error).message}
+                </p>
               )}
             </div>
           </section>
@@ -374,16 +422,22 @@ export function DecideView() {
             <h2 className="font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
               Decision log
             </h2>
-            {ticker && <span className="font-display text-label text-on-ink-faint">{ticker}</span>}
+            {ticker && (
+              <span className="font-display text-label text-on-ink-faint">
+                {ticker}
+              </span>
+            )}
           </div>
           {(history.data?.decisions ?? []).length === 0 ? (
             <p className="px-lg py-xl text-[13px] leading-relaxed text-on-ink-faint">
-              No decisions recorded yet. Once you record one, it comes back here with the move
-              since — so the question at review is whether the reasoning held, not just whether
-              the price went up.
+              No decisions recorded yet. Once you record one, it comes back here
+              with the move since — so the question at review is whether the
+              reasoning held, not just whether the price went up.
             </p>
           ) : (
-            history.data?.decisions.map((d) => <DecisionCard key={d.id} d={d} />)
+            history.data?.decisions.map((d) => (
+              <DecisionCard key={d.id} d={d} />
+            ))
           )}
         </section>
       </main>

@@ -734,6 +734,46 @@ export type Intrinsic =
       driver_notes: string[];
     };
 
+export type ConcentrationRow = {
+  ticker: string;
+  weight_pct: number;
+  /** null when the position is above the policy ceiling entirely. */
+  claims_at_least: number | null;
+  off_the_scale: boolean;
+  band_max_pct?: number;
+  finding: string;
+  stated_conviction?: number;
+  allowed_weight_pct?: number;
+  overclaimed?: boolean;
+  gap_note?: string;
+};
+
+export type ConcentrationView = {
+  ticker: string;
+  available: boolean;
+  /** Present when unavailable — an unanswered chain yields no size at all. */
+  reason?: string;
+  open_questions?: string[];
+  conviction?: number;
+  band?: {
+    max_weight_pct: number;
+    because: string;
+    implied_names: number;
+    implied_names_note: string;
+  };
+  structure?: { allowed: string; because: string } | null;
+  book?: {
+    positions: number;
+    rows: ConcentrationRow[];
+    overclaimed?: string[];
+    finding: string;
+  };
+  /** Holdings left out of the comparison, and why. Never silently partial. */
+  book_excluded?: string[];
+  book_excluded_note?: string;
+  book_note?: string;
+};
+
 export type LegView = {
   key: string;
   label: string;
@@ -1043,6 +1083,16 @@ export const api = {
       .join("&");
     return fetchJSON<ConvictionChain>(
       `/valuation/conviction/${encodeURIComponent(ticker)}${q ? `?${q}` : ""}`,
+    );
+  },
+
+  getConcentration: (ticker: string, convictionScore?: number) => {
+    const q =
+      convictionScore === undefined
+        ? ""
+        : `?conviction_score=${convictionScore}`;
+    return fetchJSON<ConcentrationView>(
+      `/valuation/concentration/${encodeURIComponent(ticker)}${q}`,
     );
   },
 

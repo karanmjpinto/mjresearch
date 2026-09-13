@@ -82,6 +82,18 @@ STRUCTURE_RULE: dict[str | None, tuple[str, str]] = {
         "No leg is the clear weak point: it is tight, it is hard to route "
         "around, and the holder can price it.",
     ),
+    # Three legs that each clear the bar can still multiply to very little —
+    # 0.6 x 0.6 x 0.6 is 0.22. Before this case existed the chain handed out
+    # the green light above on a product of 0.25, because no single leg was
+    # weak enough to name. Nothing is broken in that situation and nothing is
+    # strong either, and the honest answer is the size rather than the
+    # structure.
+    "__diffuse__": (
+        "a small position, not a concentrated one",
+        "No single leg is the problem — they are all merely adequate, and three "
+        "adequate legs multiply to very little. Nothing here argues against the "
+        "trade; nothing argues for making it big either.",
+    ),
 }
 
 
@@ -457,7 +469,15 @@ def validate(legs: list[Leg]) -> dict[str, Any]:
         raw *= leg.score or 0.0
 
     weakest = min(legs, key=lambda leg: leg.score or 0.0)
-    action, why = STRUCTURE_RULE[weakest.key if (weakest.score or 0) < 0.5 else None]
+    if (weakest.score or 0.0) < 0.5:
+        key: str | None = weakest.key
+    elif raw < 0.5:
+        # Every leg clears the bar and the product still does not. Naming a
+        # weakest leg here would be arbitrary, so the rule speaks to size.
+        key = "__diffuse__"
+    else:
+        key = None
+    action, why = STRUCTURE_RULE[key]
     return {
         "available": True,
         "score": round(_clamp(raw), 4),
