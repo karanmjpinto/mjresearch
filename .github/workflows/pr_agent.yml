@@ -6,7 +6,8 @@
 # Setup:
 #   1. On your Ollama machine: ollama pull qwen3:30b && ollama serve
 #   2. Register a self-hosted runner: repo Settings > Actions > Runners > New
-#   3. Commit THIS file to .github/workflows/pr_agent.yml
+#   3. Commit THIS file to .github/workflows/pr_agent.yml, then enable it:
+#        gh variable set PR_AGENT_RUNNER --body true
 #   4. Also commit .pr_agent.toml (from this same folder) to your repo ROOT.
 #      PR-Agent auto-loads a repo-root .pr_agent.toml on every run — that's
 #      what carries the model settings AND the design-review instructions
@@ -17,9 +18,9 @@
 #
 # SECURITY — this repo is PUBLIC. A self-hosted runner on a public repo lets an
 # outsider execute code on the runner machine (your laptop), which GitHub
-# documents as unsafe. Two guards below are the minimum mitigation, and neither
-# is a substitute for running the runner in a throwaway VM/container if you ever
-# accept outside contributions.
+# documents as unsafe. The per-event guards below are the minimum mitigation,
+# and they are not a substitute for running the runner in a throwaway
+# VM/container if you ever accept outside contributions.
 
 on:
   pull_request:
@@ -41,7 +42,16 @@ jobs:
     # like it covers both and covers neither: on an issue_comment the first
     # clause is true, the expression short-circuits, and every comment from
     # every account runs.
+    #
+    # The `vars.PR_AGENT_RUNNER` switch is the third condition, and it is about
+    # noise rather than safety. `runs-on: self-hosted` with no runner
+    # registered does not fail and does not skip — it queues, so every pull
+    # request carries a check that stays pending forever and no `gh pr checks`
+    # ever settles. Dormant until you register a runner and set the repo
+    # variable PR_AGENT_RUNNER to "true":
+    #   gh variable set PR_AGENT_RUNNER --body true
     if: >-
+      vars.PR_AGENT_RUNNER == 'true' &&
       github.event.sender.type != 'Bot' &&
       (
         (github.event_name == 'pull_request' &&
