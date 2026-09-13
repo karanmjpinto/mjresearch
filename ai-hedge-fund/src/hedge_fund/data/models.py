@@ -109,14 +109,32 @@ class NewsSentiment(BaseModel):
 # ------------------------------------------------------------------
 
 
+class SectorChange(BaseModel):
+    """One sector's move over one period."""
+
+    sector: str
+    change_pct: float
+
+
 class SectorPerformance(BaseModel):
-    real_time: dict[str, float] = Field(default_factory=dict)
-    one_day: dict[str, float] = Field(default_factory=dict)
-    five_day: dict[str, float] = Field(default_factory=dict)
-    one_month: dict[str, float] = Field(default_factory=dict)
-    three_month: dict[str, float] = Field(default_factory=dict)
-    ytd: dict[str, float] = Field(default_factory=dict)
-    one_year: dict[str, float] = Field(default_factory=dict)
+    """Sector moves, one ranked list per period.
+
+    A list of rows rather than a `{sector: pct}` mapping, because the order is
+    the information — Alpha Vantage returns these ranked best-to-worst and the
+    panel reads as a ranking. A dict threw that away, and the field was named
+    `real_time` while every producer and consumer said `realtime`, so nothing
+    ever populated: pydantic silently dropped the unknown key and rejected the
+    row lists as non-dicts, and the whole object came back as None. The wire
+    shape here is the one the API fallback and the frontend type already use.
+    """
+
+    realtime: list[SectorChange] = Field(default_factory=list)
+    one_day: list[SectorChange] = Field(default_factory=list)
+    five_day: list[SectorChange] = Field(default_factory=list)
+    one_month: list[SectorChange] = Field(default_factory=list)
+    three_month: list[SectorChange] = Field(default_factory=list)
+    ytd: list[SectorChange] = Field(default_factory=list)
+    one_year: list[SectorChange] = Field(default_factory=list)
     source: str = "unknown"
 
 
