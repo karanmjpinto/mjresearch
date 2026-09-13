@@ -1,0 +1,88 @@
+# PR-Agent local config — points reviews at your own Ollama instance
+# running qwen3:30b, so nothing leaves your machine and there's no API bill.
+#
+# Where this file has to live:
+#   - GitHub Action: repo root, as .pr_agent.toml. PR-Agent fetches it from the
+#     PR branch on every run. That is what this copy is.
+#   - Local CLI: pr-agent does NOT read ~/.pr-agent/.pr_agent.toml by itself —
+#     its only local sources are the package settings dir and a [tool.pr-agent]
+#     block in the repo-root pyproject.toml. Point it at a user-level file with
+#     --extra_config_url / PR_AGENT_EXTRA_CONFIG_URL. The `pr-review` wrapper in
+#     ~/.local/bin does that for you.
+#
+# Bundles three review layers into one model, all comment-only (advisory,
+# never blocking) except the core code review:
+#   1. Code review (bugs, logic, security) — PR-Agent's built-in behavior.
+#   2. Design Review — DIY UI/accessibility checks (see below).
+#   3. Prose Review — structural anti-AI-slop checks on copy/marketing text.
+
+[config]
+# qwen3:30b-pr is qwen3:30b with `PARAMETER num_ctx 32768` baked in, so the
+# window matches custom_model_max_tokens below. Without it the model inherits
+# the server's OLLAMA_CONTEXT_LENGTH (262144 here), allocates ~45GB of KV cache
+# and spills to CPU. Recreate it with:
+#   printf 'FROM qwen3:30b\nPARAMETER num_ctx 32768\n' | ollama create qwen3:30b-pr -f -
+model = "ollama/qwen3:30b-pr"
+fallback_models = ["ollama/qwen3:30b-pr"]
+custom_model_max_tokens = 32000
+# A 30B model reviewing a full diff locally takes well over PR-Agent's 120s default.
+ai_timeout = 900
+
+[ollama]
+# Local Ollama server. Leave api_key empty — it's only needed for Ollama Cloud.
+api_base = "http://localhost:11434"
+api_key = ""
+
+# ---------------------------------------------------------------------------
+# DIY design review layer (free approximation of tools like rams.ai)
+#
+# Rams itself is a hosted GitHub App with no self-host/config-file option —
+# it needs its own paid plan for a private repo. This section instead teaches
+# PR-Agent's existing /review and /improve commands to also check UI/design
+# concerns, using the same qwen3:30b model you're already running for free.
+# It won't match a dedicated 313-rule engine or give a 0-100 score, but it
+# covers the same broad categories at no extra cost.
+# ---------------------------------------------------------------------------
+
+[pr_reviewer]
+# Default is 3, and code, design and prose findings all compete for those slots.
+num_max_findings = 12
+
+extra_instructions = [
+    # PR-Agent's /review output is a closed Pydantic schema (see pr_reviewer_prompts.toml).
+    # There is no free-text field, so a '## Design Review' heading cannot be rendered --
+    # anything outside the schema is dropped. Design and prose findings therefore have to
+    # travel as `key_issues_to_review` entries, tagged by their `issue_header`.
+    "In addition to the normal code review, also review any UI/frontend code (components, styles, templates, markup) as a design reviewer would.",
+    "Emit every design finding as an entry in `key_issues_to_review`, with `issue_header` starting with the literal prefix 'Design: ' (for example 'Design: contrast', 'Design: hardcoded token'). Do not invent headings or sections outside the response schema - they will be discarded.",
+    "Accessibility: flag missing alt text, missing form labels, missing/incorrect ARIA roles or attributes, insufficient color contrast (aim for WCAG 2.1 AA, ~4.5:1 for normal text), non-focusable or non-keyboard-operable interactive elements, and missing visible focus states.",
+    "You are often shown only a diff, with no access to the repo's tailwind.config or CSS. In that situation you CANNOT see which utility classes are design tokens, so never claim a semantic class name (bg-verdigris, text-on-ink-faint, bg-ink-raised) bypasses the token system - a named class is evidence OF a token system, not against it. Only flag colors you can actually see in the diff as literal hex/rgb/hsl values.",
+    "For the same reason, never assert a contrast failure you cannot compute. If the concrete color values are not visible in the diff, say nothing rather than flagging a contrast risk you were unable to check.",
+    "Color: flag hardcoded hex/rgb color values that bypass an existing design-token or theme system, and inconsistent use of color for the same semantic meaning (e.g. two different reds both meaning 'error').",
+    "Typography: flag hardcoded font sizes/weights/line-heights that bypass an existing type scale, and inconsistent heading hierarchy.",
+    "Spacing & layout: flag hardcoded pixel margins/padding that bypass an existing spacing scale, and inconsistent spacing between visually similar elements.",
+    "Components & UX patterns: flag reinventing an existing shared component instead of reusing it, inconsistent button/link/form patterns versus the rest of the codebase, and missing loading/empty/error states for async UI.",
+    "Motion: flag animations with no reduced-motion fallback (prefers-reduced-motion) and unreasonably long or janky transition durations.",
+    "AI-generated UI antipatterns: flag common signs of unreviewed AI-generated UI such as inconsistent spacing units, mixed icon libraries, placeholder/lorem-ipsum text left in, and overly generic class names.",
+    "For each design issue found, suggest a concrete fix (e.g. 'use var(--color-error) instead of #ff0000') rather than just naming the problem.",
+    "If no UI/frontend files are present in the diff, emit no 'Design: ' entries at all rather than commenting on their absence.",
+    # --- Anti-AI-slop prose review (structural rules only; word choice is handled elsewhere) ---
+    "Also run a prose/copy review on any marketing copy, landing-page content, README text, docs, or UI copy in the diff (not code logic). Emit each finding as a `key_issues_to_review` entry whose `issue_header` starts with the literal prefix 'Prose: '. This checks structure only, not vocabulary — a separate system already blocks specific banned words/phrases, so do not flag individual word choices or synonyms in isolation.",
+    "Flag headings that brace the reader instead of stating something: a noun phrase followed by a hard stop, then a fragment that builds suspense instead of delivering information. Example to flag: 'Six objections. Guess before you read.' Suggested fix: 'The six objections we hear most.'",
+    "Flag closing lines reaching for a mic-drop: an aphorism or cute inversion used as the last line of a section or page. Example to flag: 'Argue with the numbers, not about them.'",
+    "Flag copy that instructs the reader to do something the interface itself already makes obvious (e.g. telling the reader to click, answer, or choose when buttons or controls on the same page already do that). Example to flag: 'Answer, then read the evidence' on a page that has buttons for exactly that.",
+    "Flag headings that frame a point (describing when, where, or how a decision gets made) instead of directly making the point as a claim. Example to flag: 'Water use is decided at the drawing board.' Suggested fix: 'Water use is a design choice.'",
+    "Apply the portability test to sentences and headlines: if a sentence could be moved unchanged to a different company's or product's page without becoming false, flag it as filler. Example to flag: 'A data centre matters for what runs on it' — this could describe any building, anywhere.",
+    "Flag synonym cycling: rotating between different words for the same referent purely for variety within a page (e.g. calling the same thing 'agent', then 'assistant', then 'tool') rather than using one consistent term.",
+    "Flag robotic rhythm: every section or paragraph on the page opening with the identical grammatical shape (e.g. every heading is a two-word imperative, or every section opens with 'Imagine...').",
+    "For every prose issue flagged, quote the exact offending line from the diff and give a specific suggested replacement — never just describe the problem in the abstract.",
+    "'Design: ' and 'Prose: ' findings are advisory. They must never raise `risk_level` and never move `merge_recommendation` away from what the code alone justifies; a PR whose only findings are design or prose ones is still `safe_to_merge`. Phrase them as suggestions, not required changes.",
+    "Rank real code defects above design findings, and design findings above prose findings, whenever the findings list is capped.",
+    "Do not flag quoted speech under any Prose Review rule — direct quotes attributed to a real person (e.g. a testimonial or interview quote) are exempt.",
+    "Do not flag parallel fragments where the parallelism itself is doing the argument's work (e.g. a fragment pair that lands a contrast through structure, such as 'Eighteen percent of the people. Under one percent of the compute.') — that kind of repetition is load-bearing, not decorative, and earns its structure. Only flag fragments/repeated shapes that add nothing beyond rhythm.",
+]
+
+[pr_code_suggestions]
+extra_instructions = [
+    "When suggesting code improvements for UI/frontend files, include design-system consistency fixes (tokens, spacing, typography, accessibility attributes) alongside logic fixes, following the same categories described in the reviewer's Design Review instructions.",
+]

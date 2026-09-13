@@ -3,6 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { AppNav } from "@/components/AppNav";
 import { api, type ExecutedNode, type PlanResult, type VerifiedClaim } from "@/lib/api";
+import { readField, type Tone } from "@/lib/field-scales";
+import { formatValue } from "@/lib/format";
+import { ClaimCompare, NodeReadout, SegmentBar, Track } from "@/components/MetricReadout";
 
 /**
  * Plan pipeline view.
@@ -29,31 +32,30 @@ const STATUS_DOT: Record<ExecutedNode["status"], string> = {
   skipped: "bg-on-ink-faint",
 };
 
-function formatValue(v: unknown): string {
-  if (v === null || v === undefined) return "—";
-  if (typeof v === "boolean") return v ? "yes" : "no";
-  if (typeof v === "number") {
-    if (!Number.isFinite(v)) return "—";
-    if (Math.abs(v) >= 1e9) return `${(v / 1e9).toFixed(2)}B`;
-    if (Math.abs(v) >= 1e6) return `${(v / 1e6).toFixed(2)}M`;
-    return Number.isInteger(v) ? String(v) : v.toFixed(2);
-  }
-  return String(v);
-}
-
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={`border border-ink-line bg-ink-raised ${className}`}>{children}</div>
   );
 }
 
-function SectionHeading({ children, hint }: { children: React.ReactNode; hint?: string }) {
+function SectionHeading({
+  children,
+  hint,
+  bar,
+}: {
+  children: React.ReactNode;
+  hint?: string;
+  bar?: { label: string; count: number; tone: Tone }[];
+}) {
   return (
-    <div className="mb-3 flex items-baseline justify-between gap-4">
+    <div className="mb-sm flex items-center justify-between gap-md">
       <h2 className="font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
         {children}
       </h2>
-      {hint && <span className="font-display text-label tabular text-on-ink-faint">{hint}</span>}
+      <div className="flex items-center gap-sm">
+        {hint && <span className="font-display text-label tabular text-on-ink-faint">{hint}</span>}
+        {bar && <SegmentBar segments={bar} />}
+      </div>
     </div>
   );
 }
@@ -76,58 +78,103 @@ function VerificationBadge({ v }: { v: NonNullable<PlanResult["verification"]> }
   );
 }
 
+const CLAIM_TONE: Record<VerifiedClaim["verdict"], Tone> = {
+  verified: "up",
+  mismatch: "down",
+  unverifiable: "neutral",
+};
+
+const CLAIM_RAIL: Record<Tone, string> = {
+  up: "border-l-verdigris",
+  down: "border-l-oxide",
+  warn: "border-l-cadmium",
+  neutral: "border-l-ink-line",
+};
+
+const CLAIM_TEXT: Record<Tone, string> = {
+  up: "text-verdigris",
+  down: "text-oxide",
+  warn: "text-cadmium",
+  neutral: "text-on-ink-faint",
+};
+
+/**
+ * One claim the prose made, and what the data says.
+ *
+ * The verdict word alone asks the reader to trust the checker. Showing the
+ * sentence that carried the claim, and — where they disagree — both numbers
+ * drawn to a shared scale, lets them see the disagreement instead.
+ */
 function ClaimRow({ c }: { c: VerifiedClaim }) {
-  const tone =
-    c.verdict === "verified"
-      ? "text-accent-green"
-      : c.verdict === "mismatch"
-        ? "text-accent-red"
-        : "text-gray-500";
+  const tone = CLAIM_TONE[c.verdict];
+  const disputed = c.verdict === "mismatch" && typeof c.actual === "number";
+
   return (
-    <li className="flex items-baseline gap-3 border-t border-border/60 px-5 py-3 first:border-t-0">
-      <span className={`font-mono text-label uppercase ${tone} w-24 shrink-0`}>{c.verdict}</span>
-      <span className="w-36 shrink-0 truncate font-mono text-xs text-gray-400">{c.metric}</span>
-      <span className="font-mono text-xs text-gray-300">
-        {formatValue(c.stated)}
-        {c.verdict === "mismatch" && (
-          <span className="text-gray-500"> vs {formatValue(c.actual)} in data</span>
+    <li
+      className={`border-l-2 border-t border-t-ink-line px-lg py-sm first:border-t-0 ${CLAIM_RAIL[tone]}`}
+    >
+      <div className="flex flex-wrap items-baseline gap-x-sm gap-y-2xs">
+        <span
+          className={`w-20 shrink-0 font-display text-label uppercase tracking-label ${CLAIM_TEXT[tone]}`}
+        >
+          {c.verdict}
+        </span>
+        <span className="w-36 shrink-0 truncate font-display text-label text-on-ink-soft">
+          {c.metric}
+        </span>
+        <span className="font-display text-label tabular text-on-ink">
+          {formatValue(c.stated)}
+          {c.unit ?? ""}
+        </span>
+        {disputed && (
+          <span className="font-display text-label tabular text-on-ink-faint">
+            vs {formatValue(c.actual)}
+            {c.unit ?? ""} computed
+            {typeof c.delta_pct === "number" && ` · off by ${formatValue(Math.abs(c.delta_pct))}%`}
+          </span>
         )}
-      </span>
-      {c.note && <span className="truncate text-xs text-gray-600">{c.note}</span>}
+        {c.note && <span className="truncate text-label text-on-ink-faint">{c.note}</span>}
+      </div>
+
+      {c.excerpt && (
+        <p className="mt-2xs line-clamp-2 text-xs italic leading-snug text-on-ink-faint">
+          “{c.excerpt}”
+        </p>
+      )}
+
+      {disputed && <ClaimCompare stated={c.stated} actual={c.actual as number} />}
     </li>
   );
 }
 
+/**
+ * One executed metric. The node's own name and reason stay small; what it
+ * computed is given the weight, because that is what the reader came for.
+ */
 function NodeRow({ n }: { n: ExecutedNode }) {
-  const entries = Object.entries(n.values).filter(([, v]) => v !== null && v !== undefined);
   return (
-    <li className="border-t border-border/60 px-5 py-4 first:border-t-0">
-      <div className="flex items-baseline gap-3">
+    <li className="border-t border-ink-line px-lg py-md first:border-t-0">
+      <div className="flex items-baseline gap-sm">
         <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${STATUS_DOT[n.status]}`} />
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+          <div className="flex flex-wrap items-baseline gap-x-sm gap-y-2xs">
             <span className="font-display text-[14px] text-bone">{n.node_id}</span>
-            <span className="font-display text-label uppercase tracking-[0.1em] text-on-ink-faint">{n.metric}</span>
+            <span className="font-display text-label uppercase tracking-label text-on-ink-faint">
+              {n.metric}
+            </span>
             {n.cached && (
-              <span className="rounded bg-surface-elevated px-1.5 py-0.5 text-label uppercase tracking-wide text-gray-500">
+              <span className="bg-ink-line px-1.5 py-0.5 font-display text-label uppercase tracking-wide text-on-ink-faint">
                 cached
               </span>
             )}
           </div>
-          {n.why && <p className="mt-1 text-xs italic text-gray-600">{n.why}</p>}
+          {n.why && <p className="mt-2xs text-xs italic text-on-ink-faint">{n.why}</p>}
 
           {n.status === "ok" ? (
-            <dl className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1.5">
-              {entries.map(([k, v]) => (
-                <div key={k} className="flex items-baseline gap-1.5">
-                  <dt className="text-[12px] text-on-ink-faint">{k}</dt>
-                  <dd className="font-display text-[12px] tabular text-cadmium">{formatValue(v)}</dd>
-                </div>
-              ))}
-            </dl>
+            <NodeReadout values={n.values} />
           ) : (
-            <p className="mt-2 text-xs text-gray-500">
-              <span className="text-accent-red/80">
+            <p className="mt-xs text-xs text-on-ink-faint">
+              <span className="text-oxide">
                 {n.status === "error" ? "did not compute" : "skipped"}
               </span>
               {n.error ? ` — ${n.error}` : ""}
@@ -168,15 +215,16 @@ export function PlanView() {
   const pending = result?.clarifications_pending ?? [];
   const verification = result?.verification;
   const overrides = result?.harness_overrides ?? [];
+  const convictionReading = readField("conviction_score", result?.conviction);
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-ink">
       <AppNav active="plan" />
 
       <main className="mx-auto max-w-5xl px-6 py-10">
         <header className="mb-8">
           <h1 className="font-display text-display-sm tracking-tight text-bone">Plan analysis</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-500">
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-on-ink-faint">
             The model chooses which metrics to compute and writes the conclusion. It does not
             produce any number — those come from Python, and every claim in the prose is checked
             against the data afterwards.
@@ -187,7 +235,7 @@ export function PlanView() {
         <Card className="p-5">
           <div className="grid gap-4 sm:grid-cols-[160px_1fr]">
             <label className="block">
-              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gray-500">
+              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-on-ink-faint">
                 Ticker
               </span>
               <input
@@ -195,48 +243,48 @@ export function PlanView() {
                 onChange={(e) => setTicker(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && submit()}
                 placeholder="AAPL"
-                className="w-full rounded-lg border border-border bg-surface px-3 py-2 font-mono text-sm uppercase text-white outline-none transition-colors placeholder:font-sans placeholder:normal-case placeholder:text-gray-600 focus:border-accent-blue"
+                className="w-full rounded-lg border border-ink-line bg-ink px-3 py-2 font-mono text-sm uppercase text-white outline-none transition-colors placeholder:font-sans placeholder:normal-case placeholder:text-on-ink-faint focus:border-cobalt"
               />
             </label>
             <label className="block">
-              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gray-500">
-                Question <span className="normal-case text-gray-600">(optional)</span>
+              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-on-ink-faint">
+                Question <span className="normal-case text-on-ink-faint">(optional)</span>
               </span>
               <input
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && submit()}
                 placeholder="Is this attractive at current levels?"
-                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-accent-blue"
+                className="w-full rounded-lg border border-ink-line bg-ink px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-on-ink-faint focus:border-cobalt"
               />
             </label>
           </div>
 
           <div className="mt-4 flex flex-wrap items-end gap-4">
             <label className="block min-w-[220px] flex-1">
-              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-gray-500">
-                Style <span className="normal-case text-gray-600">(optional)</span>
+              <span className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-on-ink-faint">
+                Style <span className="normal-case text-on-ink-faint">(optional)</span>
               </span>
               <input
                 value={style}
                 onChange={(e) => setStyle(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && submit()}
                 placeholder="deep value, quality at a reasonable price…"
-                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-accent-blue"
+                className="w-full rounded-lg border border-ink-line bg-ink px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-on-ink-faint focus:border-cobalt"
               />
             </label>
             <button
               type="button"
               onClick={() => submit()}
               disabled={!ticker.trim() || run.isPending}
-              className="rounded-lg bg-accent-blue px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:bg-surface-elevated disabled:text-gray-600"
+              className="rounded-lg bg-cobalt px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-cobalt/80 disabled:cursor-not-allowed disabled:bg-ink-line disabled:text-on-ink-faint"
             >
               {run.isPending ? "Computing…" : "Run plan"}
             </button>
           </div>
 
           {run.isPending && (
-            <p className="mt-4 text-xs text-gray-500">
+            <p className="mt-4 text-xs text-on-ink-faint">
               Planning, executing metrics, then writing. A local model typically takes 10–30
               seconds.
             </p>
@@ -244,18 +292,18 @@ export function PlanView() {
         </Card>
 
         {run.isError && (
-          <Card className="mt-5 border-accent-red/30 p-5">
-            <p className="text-sm text-accent-red">Request failed</p>
-            <p className="mt-1.5 text-xs leading-relaxed text-gray-400">
+          <Card className="mt-5 border-oxide/30 p-5">
+            <p className="text-sm text-oxide">Request failed</p>
+            <p className="mt-1.5 text-xs leading-relaxed text-on-ink-soft">
               {(run.error as Error).message}
             </p>
           </Card>
         )}
 
         {result?.ai_error && (
-          <Card className="mt-5 border-accent-red/30 p-5">
-            <p className="text-sm text-accent-red">{result.ai_error.error}</p>
-            <p className="mt-1.5 text-xs leading-relaxed text-gray-400">
+          <Card className="mt-5 border-oxide/30 p-5">
+            <p className="text-sm text-oxide">{result.ai_error.error}</p>
+            <p className="mt-1.5 text-xs leading-relaxed text-on-ink-soft">
               {result.ai_error.message}
             </p>
           </Card>
@@ -275,7 +323,19 @@ export function PlanView() {
                       {result.conviction ?? "—"}
                       <span className="ml-1 text-[20px] text-on-ink-faint">/100</span>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">conviction, computed by the plan</p>
+                    {convictionReading ? (
+                      <div className="mt-xs w-56">
+                        <Track r={convictionReading} tall />
+                        <div className="mt-2xs flex justify-between font-display text-label text-on-ink-faint">
+                          <span>{convictionReading.ends[0]}</span>
+                          <span>{convictionReading.ends[1]}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="mt-2xs text-xs text-on-ink-faint">
+                        conviction, computed by the plan
+                      </p>
+                    )}
                   </div>
                   {result.stance && (
                     <span
@@ -289,14 +349,14 @@ export function PlanView() {
                   {verification && <VerificationBadge v={verification} />}
                   {result.evaluation?.narrative_grounded === false &&
                     verification?.status === "no_claims" && (
-                      <span className="rounded-md border border-accent-yellow/30 bg-accent-yellow/10 px-2.5 py-1 text-xs font-medium text-accent-yellow">
+                      <span className="rounded-md border border-cadmium/30 bg-cadmium/10 px-2.5 py-1 text-xs font-medium text-cadmium">
                         prose cites none of the computed values
                       </span>
                     )}
                 </div>
 
                 {result.analysis && (
-                  <p className="mt-5 border-t border-border/60 pt-5 text-sm leading-relaxed text-gray-300">
+                  <p className="mt-5 border-t border-ink-line pt-5 text-sm leading-relaxed text-on-ink">
                     {result.analysis}
                   </p>
                 )}
@@ -304,7 +364,7 @@ export function PlanView() {
                 {!!result.evaluation?.notes?.length && (
                   <ul className="mt-4 space-y-1.5">
                     {result.evaluation.notes.map((n) => (
-                      <li key={n} className="text-xs text-accent-yellow/90">
+                      <li key={n} className="text-xs text-cadmium/90">
                         {n}
                       </li>
                     ))}
@@ -343,20 +403,20 @@ export function PlanView() {
               <section>
                 <SectionHeading>Harness overrides</SectionHeading>
                 <Card className="p-5">
-                  <p className="mb-3 text-xs leading-relaxed text-gray-500">
+                  <p className="mb-3 text-xs leading-relaxed text-on-ink-faint">
                     The model's value was discarded in favour of the computed one.
                   </p>
                   {overrides.map((o) => (
                     <div key={o.field} className="flex flex-wrap items-baseline gap-2 text-sm">
-                      <span className="font-mono text-gray-400">{o.field}</span>
-                      <span className="font-mono text-gray-600 line-through">
+                      <span className="font-mono text-on-ink-soft">{o.field}</span>
+                      <span className="font-mono text-on-ink-faint line-through">
                         {formatValue(o.model_said)}
                       </span>
-                      <span className="text-gray-600">→</span>
-                      <span className="font-mono text-accent-green">
+                      <span className="text-on-ink-faint">→</span>
+                      <span className="font-mono text-verdigris">
                         {formatValue(o.harness_used)}
                       </span>
-                      <span className="text-xs text-gray-600">from {o.source}</span>
+                      <span className="text-xs text-on-ink-faint">from {o.source}</span>
                     </div>
                   ))}
                 </Card>
@@ -368,14 +428,14 @@ export function PlanView() {
               <section>
                 <SectionHeading>Methodology decisions</SectionHeading>
                 <Card className="p-5">
-                  <p className="mb-4 text-xs leading-relaxed text-gray-500">
+                  <p className="mb-4 text-xs leading-relaxed text-on-ink-faint">
                     These were answered with the recommended default. Choosing differently
                     re-runs the plan.
                   </p>
                   <div className="space-y-5">
                     {pending.map((c) => (
                       <div key={c.id}>
-                        <p className="text-sm text-gray-300">{c.question}</p>
+                        <p className="text-sm text-on-ink">{c.question}</p>
                         <div className="mt-2.5 flex flex-wrap gap-2">
                           {c.options.map((opt) => {
                             const chosen = (answers[c.id] ?? c.effective) === opt;
@@ -390,13 +450,13 @@ export function PlanView() {
                                 }}
                                 className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${
                                   chosen
-                                    ? "border-accent-blue/40 bg-accent-blue/10 text-accent-blue"
-                                    : "border-border bg-surface text-gray-400 hover:border-border-light hover:text-gray-200"
+                                    ? "border-cobalt/40 bg-cobalt/10 text-cobalt"
+                                    : "border-ink-line bg-ink text-on-ink-soft hover:border-on-ink-faint hover:text-on-ink"
                                 }`}
                               >
                                 {opt}
                                 {opt === c.recommended && (
-                                  <span className="ml-1.5 text-label uppercase tracking-wide text-gray-600">
+                                  <span className="ml-1.5 text-label uppercase tracking-wide text-on-ink-faint">
                                     recommended
                                   </span>
                                 )}
@@ -416,6 +476,11 @@ export function PlanView() {
               <section>
                 <SectionHeading
                   hint={`${exec.ok_count} computed · ${exec.error_count} failed · ${exec.elapsed_ms}ms`}
+                  bar={[
+                    { label: "computed", count: exec.ok_count, tone: "up" },
+                    { label: "failed", count: exec.error_count, tone: "down" },
+                    { label: "skipped", count: exec.skipped_count, tone: "neutral" },
+                  ]}
                 >
                   The plan
                 </SectionHeading>
@@ -426,7 +491,7 @@ export function PlanView() {
                     ))}
                   </ul>
                 </Card>
-                <p className="mt-2.5 font-mono text-label text-gray-700">
+                <p className="mt-2.5 font-mono text-label text-on-ink-faint">
                   plan {exec.plan_hash.slice(0, 12)} · snapshot {exec.snapshot_sha256.slice(0, 12)}
                 </p>
               </section>
@@ -435,7 +500,14 @@ export function PlanView() {
             {/* Claims */}
             {verification && verification.claims.length > 0 && (
               <section>
-                <SectionHeading hint={`${verification.unverifiable} unverifiable`}>
+                <SectionHeading
+                  hint={`${verification.verified} verified · ${verification.mismatched} contradicted · ${verification.unverifiable} unverifiable`}
+                  bar={[
+                    { label: "verified", count: verification.verified, tone: "up" },
+                    { label: "mismatch", count: verification.mismatched, tone: "down" },
+                    { label: "unverifiable", count: verification.unverifiable, tone: "neutral" },
+                  ]}
+                >
                   Claim verification
                 </SectionHeading>
                 <Card>
@@ -453,22 +525,22 @@ export function PlanView() {
               <section>
                 <SectionHeading>Data sources</SectionHeading>
                 <Card className="p-5">
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-on-ink-soft">
                     Resolved from{" "}
-                    <span className="font-mono text-gray-300">
+                    <span className="font-mono text-on-ink">
                       {result.data_quality.providers_used.join(", ") || "no provider"}
                     </span>
                   </p>
                   {result.data_quality.warning_count > 0 ? (
                     <ul className="mt-3 space-y-1.5">
                       {result.data_quality.warnings.map((w) => (
-                        <li key={w} className="text-xs text-accent-yellow/90">
+                        <li key={w} className="text-xs text-cadmium/90">
                           {w}
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="mt-2 text-xs text-gray-600">
+                    <p className="mt-2 text-xs text-on-ink-faint">
                       No data-quality warnings on this snapshot.
                     </p>
                   )}

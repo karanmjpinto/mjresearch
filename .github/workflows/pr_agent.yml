@@ -1,0 +1,86 @@
+# Automatic PR-Agent code + design review on every pull request, powered by
+# a local qwen3:30b model via Ollama. Requires a SELF-HOSTED GitHub Actions
+# runner running on the same machine (or network) as your Ollama server —
+# GitHub's own cloud runners cannot reach a model on your laptop.
+#
+# Setup:
+#   1. On your Ollama machine: ollama pull qwen3:30b && ollama serve
+#   2. Register a self-hosted runner: repo Settings > Actions > Runners > New
+#   3. Commit THIS file to .github/workflows/pr_agent.yml, then enable it:
+#        gh variable set PR_AGENT_RUNNER --body true
+#   4. Also commit .pr_agent.toml (from this same folder) to your repo ROOT.
+#      PR-Agent auto-loads a repo-root .pr_agent.toml on every run — that's
+#      what carries the model settings AND the design-review instructions
+#      (accessibility, color, typography, spacing, motion, etc.), so you
+#      don't need to duplicate all of that into this YAML file.
+#
+# No API keys or secrets are required — everything routes to localhost:11434.
+#
+# SECURITY — this repo is PUBLIC. A self-hosted runner on a public repo lets an
+# outsider execute code on the runner machine (your laptop), which GitHub
+# documents as unsafe. The per-event guards below are the minimum mitigation,
+# and they are not a substitute for running the runner in a throwaway
+# VM/container if you ever accept outside contributions.
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+  issue_comment:
+
+jobs:
+  pr_agent_job:
+    # Two separate doors, because the events are not equally dangerous.
+    #
+    #   pull_request  — same-repo branches only: never check out and run fork
+    #                   code on a self-hosted runner.
+    #   issue_comment — anyone can comment on a public repo, and PR-Agent acts
+    #                   on commands it finds in comments (/review, /improve,
+    #                   /ask). Restricting by author association is what keeps a
+    #                   stranger's comment from starting a job on your laptop.
+    #
+    # A guard written as `event_name != 'pull_request' || <same-repo>` looks
+    # like it covers both and covers neither: on an issue_comment the first
+    # clause is true, the expression short-circuits, and every comment from
+    # every account runs.
+    #
+    # The `vars.PR_AGENT_RUNNER` switch is the third condition, and it is about
+    # noise rather than safety. `runs-on: self-hosted` with no runner
+    # registered does not fail and does not skip — it queues, so every pull
+    # request carries a check that stays pending forever and no `gh pr checks`
+    # ever settles. Dormant until you register a runner and set the repo
+    # variable PR_AGENT_RUNNER to "true":
+    #   gh variable set PR_AGENT_RUNNER --body true
+    if: >-
+      vars.PR_AGENT_RUNNER == 'true' &&
+      github.event.sender.type != 'Bot' &&
+      (
+        (github.event_name == 'pull_request' &&
+         github.event.pull_request.head.repo.full_name == github.repository) ||
+        (github.event_name == 'issue_comment' &&
+         contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'),
+                  github.event.comment.author_association))
+      )
+    runs-on: self-hosted
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: write
+    name: PR-Agent code + design review (local qwen3:30b via Ollama)
+    steps:
+      - name: PR Agent review
+        # Pinned to a commit, not @main. On a self-hosted runner the action's
+        # code runs on your machine, so a moving ref means whatever upstream
+        # pushed today runs on your laptop tonight. This is v0.45.0.
+        uses: qodo-ai/pr-agent@d24b6f36e7871829ad8f29e884b4577fb3902f16
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Belt-and-braces: these match .pr_agent.toml in case the repo-root
+          # file is ever missing on a branch. The repo-root .pr_agent.toml
+          # (with the design-review instructions) is still what actually runs.
+          config.model: "ollama/qwen3:30b"
+          config.fallback_models: '["ollama/qwen3:30b"]'
+          config.custom_model_max_tokens: "32000"
+          ollama.api_base: "http://localhost:11434"
+          github_action_config.auto_review: "true"
+          github_action_config.auto_describe: "true"
+          github_action_config.auto_improve: "true"
