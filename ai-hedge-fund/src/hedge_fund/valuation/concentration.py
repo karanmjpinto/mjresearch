@@ -14,13 +14,53 @@ takes the book you actually hold and reports the conviction you are implicitly
 claiming by holding it. Most people find the second number uncomfortable, which
 is the point of computing it.
 
-The bands are a stated policy, not a derivation. There is a temptation to reach
-for Kelly here and produce a number to three decimal places; Kelly needs an edge
-and a payoff you can actually estimate, and if you could estimate those you
-would not need the conviction chain in the first place. Dressing a judgment as
-arithmetic is the specific failure this whole module exists to catch, so the
-policy is written down, attributed, and adjustable rather than hidden inside a
-formula.
+The bands are a stated policy, not a derivation — but the reason is narrower
+than this docstring used to claim.
+
+It used to say Kelly was the wrong tool here, because Kelly needs an edge you
+cannot estimate. That is not what the Kelly literature concludes, and the claim
+has been withdrawn. Thorp's remedy for an uncertain edge is not to abandon the
+criterion; it is to bet a *fraction* of it. His conclusion is a qualified
+endorsement with a mandatory downward adjustment: "to the extent that future
+probabilities are uncertain, long term compounders should further limit their
+investment fraction enough to prevent a significant risk of overbetting"
+(p. 38). Citing him against Kelly was using his authority backwards.
+
+So the honest description is not "Kelly does not apply here". It is that the
+shading Thorp prescribes is the only part of the recipe this codebase has the
+inputs for. Full Kelly needs a drift and a variance per name; the conviction
+chain produces neither, and the single number it does produce is a judgment
+about three requisites. What survives without an estimate of f* is the
+*direction* of the adjustment and a ceiling — and Thorp applies both himself.
+
+Three of his results set the shape of the table below.
+
+  - An overestimated edge is not merely imprecise, it is fatal to growth.
+    Overestimate the drift by a factor of two, bet full Kelly on that estimate,
+    and the growth rate is exactly zero (p. 29). Overbet that by a further half
+    and g = -0.75, which is ruin. The conviction score here is a judgment, not
+    a measurement, so every band sits below what a confident reading of it
+    would justify.
+  - The error is biased upward. Estimates in the stock market "are more likely
+    to be too high than too low" (p. 29) — the process is non-stationary,
+    systems may be partly data-mined, and capital chasing a working system
+    competes the edge away. That last one is the same decay the constraint
+    chain's staleness rule exists to catch.
+  - Thorp declines his own model's output. Where the arithmetic said lever
+    Berkshire 6.22x he used 2.0, "because securities prices may change suddenly
+    and discontinuously" (p. 30); of an unrestricted-borrowing optimum he wrote
+    it "would be foolish to choose" (p. 34). He also layers a hard per-position
+    cap on top of the criterion, f <= min(f*, k·f0) (p. 16). A stated ceiling is
+    orthodox, not timid.
+
+One thing the paper does NOT support, so this module must not claim it: that
+overbetting costs more *growth* than underbetting. His Table 4.1 shows the
+growth rate is very nearly symmetric either side of f* (p. 14). The asymmetry
+is in ruin and drawdown, not in growth forgone — at full Kelly the probability
+of ever being halved is 1/2, against 1/8 at half Kelly (p. 32).
+
+Full citation, and why the paper is linked rather than vendored here:
+`third_party/ATTRIBUTION.md`.
 """
 
 from __future__ import annotations
@@ -37,6 +77,13 @@ from typing import Any
 #: requisites hold is a thesis about the future, and the history of
 #: concentrated investing is mostly people who were right about the business
 #: and wrong about the timing.
+#:
+#: Thorp reaches the same ceiling from the other direction and for a reason
+#: worth keeping in mind: prices gap. He cut his own Berkshire leverage from a
+#: computed 6.22x to 2.0 because "In the crash of October, 1987, the S&P 500
+#: index dropped 23% in a single day" (p. 30) — a move no continuously-adjusted
+#: model can trade through. A cap is what you hold instead of the assumption
+#: that you can get out.
 BANDS: tuple[tuple[float, float, str], ...] = (
     (
         0.50,
