@@ -165,3 +165,33 @@ def test_a_zero_score_still_sizes_rather_than_refusing() -> None:
     out = concentration({"available": True, "score": 0.0, "structure": {}})
     assert out["available"] is True
     assert out["band"]["max_weight_pct"] == 2.0
+
+
+# --- the ceiling is a policy, and holds for every input ----------------------
+#
+# Thorp's own practice is a hard per-position cap laid on top of the sizing
+# rule, f <= min(f*, k*f0) (p. 16), and he applies it to himself: a computed
+# 6.22x Berkshire leverage became 2.0 because prices gap (p. 30). These tests
+# exist so the cap cannot be raised by accident — only on purpose.
+
+
+def test_no_conviction_however_high_breaches_the_ceiling() -> None:
+    """The cap binds for every input, which is the point of a cap."""
+    ceiling = max(weight for _, weight, _ in BANDS)
+    for c in (0.0, 0.25, 0.5, 0.75, 1.0, 5.0, 1e9, float("inf")):
+        assert band_for(c).max_weight_pct <= ceiling
+
+
+def test_the_ceiling_is_the_top_band_not_some_middle_one() -> None:
+    assert BANDS[0][1] == max(weight for _, weight, _ in BANDS)
+
+
+def test_changing_the_ceiling_is_a_decision_someone_has_to_make() -> None:
+    """A deliberate tripwire, not a tautology.
+
+    15% is a stated policy with a written rationale in the module docstring. If
+    a future edit moves it, this test should fail and send the reader to that
+    rationale — an accidental ceiling is exactly what the docstring argues
+    against.
+    """
+    assert BANDS[0][1] == 15.0, "the ceiling moved; update the docstring's reasoning too"
