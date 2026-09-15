@@ -25,38 +25,85 @@
  * The excitement comes from the collision and the density, not from
  * saturation — which is why this palette stays earthy and still reads
  * loud. Values are OKLCH so lightness steps are perceptually even.
+ *
+ * TWO GROUNDS, ONE SET OF NAMES
+ *
+ * The app opens in daylight and can be switched to the studio dark. Both are
+ * the same paint on a warm ground; what changes is which way round the ground
+ * and the ink sit. Pollock's canvases are unbleached linen with enamel thrown
+ * at it, so daylight is the more faithful of the two — the dark is the studio
+ * at night, not the painting.
+ *
+ * Every value below is stored as OKLCH *channels* rather than a finished
+ * colour — `19% 0.012 60`, not `oklch(19% 0.012 60)`. That is what lets one
+ * name mean the right thing in both themes. `tailwind.config.ts` wraps each
+ * one as `oklch(var(--token) / <alpha-value>)`, so the opacity modifiers the
+ * components already use (`bg-cadmium/10`, `border-border/60`) keep composing;
+ * handing Tailwind a finished `var()` breaks them silently, which is the trap
+ * the config comment warns about.
+ *
+ * The consequence worth knowing: `bg-ink` is the page, and it follows the
+ * theme. `text-ink` used to mean "dark text on a bright accent", which is a
+ * different job — it has to read against the paint, not against the page — so
+ * that role moved to `text-on-accent` and `text-on-accent-light`.
  * ───────────────────────────────────────────────────────────── */
 :root {
-  /* Grounds */
-  --canvas: oklch(92.5% 0.018 82); /* raw linen, the landing ground */
-  --canvas-deep: oklch(88% 0.024 80); /* shadowed linen */
-  --ink: oklch(19% 0.012 60); /* enamel black, warm not blue */
-  --ink-raised: oklch(24% 0.014 62); /* lifted panel in the studio dark */
-  --ink-line: oklch(32% 0.016 64); /* hairline on dark */
+  color-scheme: light;
 
-  /* The thrown colours */
-  --oxide: oklch(52% 0.166 32); /* rust red */
-  --cadmium: oklch(78% 0.158 78); /* cadmium yellow */
-  --cobalt: oklch(52% 0.174 258); /* ultramarine */
-  --verdigris: oklch(58% 0.088 178); /* the occasional green */
-  --aluminium: oklch(72% 0.012 80); /* silver enamel */
-  --bone: oklch(96% 0.012 84); /* highlight white, never #fff */
+  /* ── Text on a coloured fill ─────────────────────────────────────────
+   * Not "fixed" — "chosen against the paint rather than against the page".
+   * `--on-accent-light` happens to be the same in both themes because oxide
+   * and cobalt are deep in both; `--on-accent` is not, and the note below
+   * says why. */
+  --c-enamel: 19% 0.012 60; /* enamel black, warm not blue */
+  --c-on-accent-light: 96% 0.012 84; /* on deep fills: oxide, cobalt */
 
-  /* Text on each ground. Never grey-on-colour — always a shade of ground.
+  /* `--on-accent` is the label on a bright fill, and it is the one token here
+   * that had to become theme-aware after the contrast was measured.
    *
-   * The two `faint` steps were measured and moved. They are used for 12px
-   * uppercase labels — the smallest type in the system, and the size with the
-   * least margin for error — and they were failing: on-ink-faint measured
-   * 3.65:1 on ink and 3.25:1 on a raised panel, and on-canvas-faint was worse
-   * at 2.93:1. Both now clear 4.5:1 on every ground they are used over, and
-   * both stay a clear step away from their `soft` neighbour, so the three-level
-   * hierarchy still reads as three levels. */
-  --on-canvas: oklch(26% 0.018 62);
-  --on-canvas-soft: oklch(46% 0.022 64);
-  --on-canvas-faint: oklch(51.5% 0.02 66); /* 4.52:1 on canvas */
-  --on-ink: oklch(92% 0.012 82);
-  --on-ink-soft: oklch(72% 0.014 76);
-  --on-ink-faint: oklch(62% 0.014 70); /* 5.07:1 on ink, 4.52:1 on ink-raised */
+   * The reason is arithmetic, not taste. In daylight the accents are deepened
+   * so that `text-cadmium` stays legible on a pale ground — that is 55 call
+   * sites and the dominant use. But a deepened verdigris carrying enamel text
+   * measures 2.38:1, and no single verdigris can satisfy both legs: clearing
+   * 4.5:1 against a 97.5% ground needs a luminance at or below 0.171, while
+   * clearing 4.5:1 against enamel text needs 0.194 or above. The two
+   * requirements do not overlap, so the label flips instead of the paint. */
+  --c-on-accent: var(--c-on-accent-light);
+
+  /* The landing page's deliberate linen band, which is light in both
+   * themes because it is depicting paper rather than following the UI. */
+  --c-canvas: 92.5% 0.018 82; /* raw linen */
+  --c-canvas-deep: 88% 0.024 80; /* shadowed linen */
+  --c-on-canvas: 26% 0.018 62;
+  --c-on-canvas-soft: 46% 0.022 64;
+  --c-on-canvas-faint: 51.5% 0.02 66; /* 4.52:1 on canvas */
+  --c-paper: 96% 0.012 84; /* a sheet laid on the ground, always pale */
+
+  /* ── Daylight ────────────────────────────────────────────────────────
+   * Warm off-white rather than #fff: a pure white page under a warm
+   * palette reads as an unstyled document, and the whole point of the
+   * ground is that someone chose it.
+   *
+   * The accents are *deeper* here than at night. This is the part that
+   * cannot be skipped: cadmium at its night value (78% lightness) measures
+   * about 1.5:1 as text on a pale ground, so the 55 places that use
+   * `text-cadmium` for emphasis would simply vanish in daylight. Deepening
+   * the hue keeps it legible as text and still leaves a fill dark enough to
+   * carry `text-on-accent`. */
+  --c-ground: 97.5% 0.006 84; /* the page */
+  --c-ground-raised: 94.5% 0.01 82; /* a card resting on it */
+  --c-ground-line: 86% 0.014 80; /* hairline */
+  --c-on-ground: 24% 0.014 60;
+  --c-on-ground-soft: 40% 0.016 62;
+  --c-on-ground-faint: 48% 0.016 64;
+  --c-strong: 15% 0.012 58; /* the strongest text the ground allows */
+  --c-scrim: 24% 0.014 60; /* tint for a recessed well */
+
+  --c-oxide: 47% 0.17 32; /* rust red */
+  --c-cadmium: 55% 0.125 72; /* cadmium, deepened for daylight */
+  --c-cobalt: 44% 0.175 258; /* ultramarine */
+  --c-verdigris: 43% 0.078 178; /* the occasional green */
+  --c-aluminium: 55% 0.01 80; /* silver enamel */
 
   /* ── One light, declared once ──────────────────────────────────────────
    *
@@ -80,11 +127,17 @@
   --light-y: -1;
   --light-throw: 1px; /* how far one elevation step casts */
 
-  /* Shadow on the dark ground has to be darker than `ink` itself, or a raised
-   * panel reads as a hole. Alpha rather than a fixed colour so it composites
-   * over whatever sits behind it. */
-  --light-shade: oklch(8% 0.01 60 / 0.55);
-  --light-sheen: oklch(96% 0.012 84 / 0.06); /* the lit top edge */
+  /* The shade has to be darker than the ground it falls on or a raised panel
+   * reads as a hole, so it is one of the few values that genuinely differs
+   * between the themes rather than just swapping ends: in daylight a soft warm
+   * grey at low alpha, at night something darker than `ink` itself. Alpha
+   * rather than a fixed colour so it composites over whatever sits behind it.
+   *
+   * The sheen inverts with it. A lit top edge is a white hairline on a dark
+   * panel and a faint dark one in daylight — on a pale ground a white sheen is
+   * invisible, and the elevation stops reading. */
+  --light-shade: oklch(40% 0.014 62 / 0.14);
+  --light-sheen: oklch(100% 0 0 / 0.7);
 
   /* Elevation 1 — a panel resting on the ground. The inset hairline on the
    * lit side is what sells it; the cast shadow alone reads as a drop shadow,
@@ -102,6 +155,52 @@
     calc(var(--light-x) * -2 * var(--light-throw))
       calc(var(--light-y) * -2 * var(--light-throw)) 6px -2px var(--light-shade);
 
+  /* ── The public palette ──────────────────────────────────────────────
+   * Everything above is channels, which is an implementation detail of
+   * having two themes: Tailwind needs `<alpha-value>` substitutable, and a
+   * finished colour is not. Nothing outside this file should have to know
+   * that. So each name is re-published here as an actual colour, derived
+   * from its own channels, and the components that set a colour inline —
+   * an SVG `stroke`, a `style` prop, a chart — keep using `var(--oxide)`
+   * and keep following the theme for free.
+   *
+   * Skipping this step is what broke the price chart and the conviction
+   * gauge: a bare `19% 0.012 60` is not a colour to any parser, and the
+   * charting library threw hard enough to take its whole view down. */
+  --canvas: oklch(var(--c-canvas));
+  --canvas-deep: oklch(var(--c-canvas-deep));
+  --on-canvas: oklch(var(--c-on-canvas));
+  --on-canvas-soft: oklch(var(--c-on-canvas-soft));
+  --on-canvas-faint: oklch(var(--c-on-canvas-faint));
+  --paper: oklch(var(--c-paper));
+  --enamel: oklch(var(--c-enamel));
+  --on-accent: oklch(var(--c-on-accent));
+  --on-accent-light: oklch(var(--c-on-accent-light));
+  --ground: oklch(var(--c-ground));
+  --ground-raised: oklch(var(--c-ground-raised));
+  --ground-line: oklch(var(--c-ground-line));
+  --on-ground: oklch(var(--c-on-ground));
+  --on-ground-soft: oklch(var(--c-on-ground-soft));
+  --on-ground-faint: oklch(var(--c-on-ground-faint));
+  --strong: oklch(var(--c-strong));
+  --scrim: oklch(var(--c-scrim));
+  --oxide: oklch(var(--c-oxide));
+  --cadmium: oklch(var(--c-cadmium));
+  --cobalt: oklch(var(--c-cobalt));
+  --verdigris: oklch(var(--c-verdigris));
+  --aluminium: oklch(var(--c-aluminium));
+
+  /* The ground tokens under their previous names. `ink` was the dark page
+   * before there was a light one; these keep three dozen call sites and any
+   * inline use working, and record what moved where. */
+  --ink: var(--ground);
+  --ink-raised: var(--ground-raised);
+  --ink-line: var(--ground-line);
+  --on-ink: var(--on-ground);
+  --on-ink-soft: var(--on-ground-soft);
+  --on-ink-faint: var(--on-ground-faint);
+  --bone: var(--strong);
+
   /* 4pt spacing scale, semantic */
   --space-2xs: 4px;
   --space-xs: 8px;
@@ -114,16 +213,97 @@
   --space-4xl: 96px;
 }
 
+/* ─────────────────────────────────────────────────────────────
+ * THE STUDIO DARK
+ *
+ * Only the values that actually differ are redefined; everything above —
+ * spacing, the light direction, the type scale, `--on-accent` — carries
+ * through, which is the whole reason for splitting the palette this way.
+ *
+ * Written twice on purpose, and the order matters:
+ *
+ *   [data-theme="dark"]  — the reader pressed the switch. Must win over a
+ *                          light OS preference, so it comes last.
+ *   prefers-color-scheme — the reader has not chosen, so follow the machine,
+ *                          but only while no explicit light choice is stamped.
+ *
+ * The app defaults to daylight rather than to the OS, because that is the
+ * decision that was made about how it should open. The media query only
+ * applies to someone who has never touched the switch and whose machine is
+ * already dark.
+ * ───────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+
+    --c-on-accent: var(--c-enamel);
+
+    --c-ground: 19% 0.012 60; /* enamel black, warm not blue */
+    --c-ground-raised: 24% 0.014 62;
+    --c-ground-line: 32% 0.016 64;
+    --c-on-ground: 92% 0.012 82;
+    --c-on-ground-soft: 72% 0.014 76;
+    --c-on-ground-faint: 62% 0.014 70; /* 5.07:1 on ground, 4.52:1 raised */
+    --c-strong: 96% 0.012 84;
+    --c-scrim: 8% 0.01 60;
+
+    --c-oxide: 62% 0.17 32;
+    --c-cadmium: 78% 0.158 78;
+    --c-cobalt: 58% 0.174 258;
+    --c-verdigris: 58% 0.088 178;
+    --c-aluminium: 72% 0.012 80;
+
+    --light-shade: oklch(8% 0.01 60 / 0.55);
+    --light-sheen: oklch(96% 0.012 84 / 0.06);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --c-on-accent: var(--c-enamel);
+
+  --c-ground: 19% 0.012 60;
+  --c-ground-raised: 24% 0.014 62;
+  --c-ground-line: 32% 0.016 64;
+  --c-on-ground: 92% 0.012 82;
+  --c-on-ground-soft: 72% 0.014 76;
+  --c-on-ground-faint: 62% 0.014 70;
+  --c-strong: 96% 0.012 84;
+  --c-scrim: 8% 0.01 60;
+
+  --c-oxide: 62% 0.17 32;
+  --c-cadmium: 78% 0.158 78;
+  --c-cobalt: 58% 0.174 258;
+  --c-verdigris: 58% 0.088 178;
+  --c-aluminium: 72% 0.012 80;
+
+  --light-shade: oklch(8% 0.01 60 / 0.55);
+  --light-sheen: oklch(96% 0.012 84 / 0.06);
+}
+
 html {
   -webkit-font-smoothing: antialiased;
+  /* Painted on the root as well as the body so an over-scroll bounce or a
+   * short page shows the theme's ground rather than the browser's white. */
+  background: oklch(var(--c-ground));
 }
 
 body {
   margin: 0;
   min-height: 100dvh;
   font-family: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
-  background: var(--ink);
-  color: var(--on-ink);
+  background: oklch(var(--c-ground));
+  color: oklch(var(--c-on-ground));
+}
+
+/* The switch repaints the whole page, so it gets a short crossfade rather than
+ * snapping — but only for the colour, and only for someone who has not asked
+ * for less motion (the reduced-motion block below already restricts which
+ * properties may transition). */
+html,
+body {
+  transition: background-color 180ms var(--ease-out-quart, ease);
 }
 
 /* Departure Mono is a bitmap face. Turn off smoothing so the pixels stay
@@ -140,8 +320,8 @@ body {
 }
 
 ::selection {
-  background: var(--cadmium);
-  color: var(--ink);
+  background: oklch(var(--c-cadmium));
+  color: oklch(var(--c-on-accent));
 }
 
 /* Scrollbar, studio dark */
@@ -150,23 +330,23 @@ body {
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--ink);
+  background: oklch(var(--c-ground));
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--ink-line);
-  border: 2px solid var(--ink);
+  background: oklch(var(--c-ground-line));
+  border: 2px solid oklch(var(--c-ground));
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--oxide);
+  background: oklch(var(--c-oxide));
 }
 
 /* Canvas-ground surfaces flip the scrollbar so it doesn't punch a hole. */
 .on-canvas ::-webkit-scrollbar-track {
-  background: var(--canvas);
+  background: oklch(var(--c-canvas));
 }
 .on-canvas ::-webkit-scrollbar-thumb {
-  background: var(--on-canvas-faint);
-  border: 2px solid var(--canvas);
+  background: oklch(var(--c-on-canvas-faint));
+  border: 2px solid oklch(var(--c-canvas));
 }
 
 /* The nav strip scrolls on narrow screens; its scrollbar would be noise. */
@@ -283,8 +463,8 @@ body {
   background-image: linear-gradient(
     to bottom,
     transparent 12%,
-    color-mix(in oklch, var(--cadmium) 62%, transparent) 12%,
-    color-mix(in oklch, var(--cadmium) 62%, transparent) 88%,
+    color-mix(in oklch, oklch(var(--c-cadmium)) 62%, transparent) 12%,
+    color-mix(in oklch, oklch(var(--c-cadmium)) 62%, transparent) 88%,
     transparent 88%
   );
   background-repeat: no-repeat;
@@ -296,7 +476,7 @@ body {
 
 /* The block behind a run of type that reads as a text selection. */
 .selected {
-  background: color-mix(in oklch, var(--on-canvas) 14%, transparent);
+  background: color-mix(in oklch, oklch(var(--c-on-canvas)) 14%, transparent);
   padding-inline: 0.35em;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
@@ -306,7 +486,7 @@ body {
 .punched {
   background-image: radial-gradient(
     circle at 11px 50%,
-    color-mix(in oklch, var(--on-canvas) 22%, transparent) 0 5px,
+    color-mix(in oklch, oklch(var(--c-on-canvas)) 22%, transparent) 0 5px,
     transparent 5.5px
   );
   background-size: 100% 34px;

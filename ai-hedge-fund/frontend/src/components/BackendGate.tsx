@@ -31,7 +31,7 @@ export function BackendGate({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-ink px-6">
         <div className="max-w-lg">
-          <span className="inline-block bg-cadmium px-sm py-2xs font-display text-label uppercase tracking-[0.18em] text-ink">
+          <span className="inline-block bg-cadmium px-sm py-2xs font-display text-label uppercase tracking-[0.18em] text-on-accent">
             Backend not reachable
           </span>
           <h1 className="mt-lg font-display text-display-sm leading-tight tracking-tight text-bone">
@@ -60,7 +60,7 @@ cd frontend && npm run dev`}
               href="https://github.com/karanmjpinto/mjresearch#quick-start"
               target="_blank"
               rel="noreferrer"
-              className="bg-oxide px-5 py-3 text-bone transition-colors hover:bg-cadmium hover:text-ink"
+              className="bg-oxide px-5 py-3 text-on-accent-light transition-colors hover:bg-cadmium hover:text-on-accent"
             >
               Setup guide
             </a>

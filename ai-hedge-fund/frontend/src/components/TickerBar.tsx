@@ -57,7 +57,7 @@ export function TickerBar() {
                 aria-label={`Stage ${s.num}: ${s.label}${planned ? " — not built yet" : ""}`}
                 title={s.question}
                 className={`shrink-0 px-3 py-1.5 font-display text-label uppercase tracking-label transition-colors ${
-                  on ? "bg-cobalt text-bone" : "text-on-ink-faint hover:bg-ink hover:text-on-ink"
+                  on ? "bg-cobalt text-on-accent-light" : "text-on-ink-faint hover:bg-ink hover:text-on-ink"
                 }`}
               >
                 <span className="mr-2xs text-on-ink-faint">{s.num}</span>

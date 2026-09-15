@@ -5,7 +5,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import App from "./app/App";
 import { TickerProvider } from "./lib/ticker-context";
+import { ThemeProvider, applyTheme, storedTheme } from "./lib/theme";
 import "./index.css";
+
+// Stamped before React mounts. Doing this in an effect would paint one
+// frame of the wrong ground first — the flash every themed site has to
+// design around, and it is avoidable for the cost of one call.
+applyTheme(storedTheme());
 
 if (import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
@@ -38,9 +44,11 @@ const root = (
     >
       <QueryClientProvider client={queryClient}>
         <BrowserRouter basename={import.meta.env.BASE_URL}>
-          <TickerProvider>
-            <App />
-          </TickerProvider>
+          <ThemeProvider>
+            <TickerProvider>
+              <App />
+            </TickerProvider>
+          </ThemeProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </Sentry.ErrorBoundary>

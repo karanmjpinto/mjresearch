@@ -314,7 +314,7 @@ export function Landing() {
     clsx(
       horizontal
         ? "flex h-full shrink-0 items-start gap-2xl px-[5vw] pt-[20vh]"
-        : "flex flex-col gap-xl border-t border-ink/15 px-6 py-3xl",
+        : "flex flex-col gap-xl border-t border-enamel/15 px-6 py-3xl",
       extra,
     );
 
@@ -368,7 +368,7 @@ export function Landing() {
                   {c.label}
                 </button>
               ))}
-              <Link to="/dashboard" className="bg-ink px-4 py-2 text-bone transition-colors hover:bg-oxide">
+              <Link to="/dashboard" className="bg-enamel px-4 py-2 text-on-accent-light transition-colors hover:bg-oxide">
                 Open&nbsp;→
               </Link>
             </div>
@@ -409,7 +409,7 @@ export function Landing() {
               >
                 <div className={clsx(horizontal ? "max-w-[46vw]" : "max-w-full")}>
                   <Marker hue="var(--oxide)">Local-first equity research</Marker>
-                  <h1 className="mt-lg font-display text-[clamp(38px,6vw,72px)] leading-[1.02] tracking-tight text-ink">
+                  <h1 className="mt-lg font-display text-[clamp(38px,6vw,72px)] leading-[1.02] tracking-tight text-enamel">
                     Numbers from code.
                     <br />
                     <span className="text-oxide">Not from the model.</span>
@@ -424,7 +424,7 @@ export function Landing() {
                   <div className="mt-2xl flex flex-wrap items-center gap-sm font-display text-label uppercase tracking-marker">
                     <Link
                       to="/dashboard"
-                      className="bg-ink px-6 py-3.5 text-bone transition-all duration-300 ease-out-expo hover:bg-oxide"
+                      className="bg-enamel px-6 py-3.5 text-on-accent-light transition-all duration-300 ease-out-expo hover:bg-oxide"
                     >
                       Open the app
                     </Link>
@@ -432,7 +432,7 @@ export function Landing() {
                       href="https://github.com/karanmjpinto/mjresearch"
                       target="_blank"
                       rel="noreferrer"
-                      className="border-2 border-ink px-6 py-3.5 text-ink transition-colors hover:bg-ink hover:text-bone"
+                      className="border-2 border-enamel px-6 py-3.5 text-enamel transition-colors hover:bg-enamel hover:text-on-accent-light"
                     >
                       Source
                     </a>
@@ -446,7 +446,7 @@ export function Landing() {
 
                 {/* Studio placard, deliberately off the main column. */}
                 <aside className={clsx("shrink-0", horizontal ? "w-[280px] self-end pb-[12vh]" : "max-w-[320px]")}>
-                  <div className="mb-sm h-[2px] w-full bg-ink" />
+                  <div className="mb-sm h-[2px] w-full bg-enamel" />
                   <Marker hue="var(--on-canvas-faint)">Runs where you are</Marker>
                   <p className="mt-sm text-body-xs text-on-canvas-soft">
                     Requires a local backend and{" "}
@@ -468,7 +468,7 @@ export function Landing() {
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
                   <div className="mb-md h-[3px] w-16 bg-cobalt" />
                   <Marker hue="var(--cobalt)">Chapter one</Marker>
-                  <h2 className="mt-sm font-display text-chapter tracking-tight text-ink">
+                  <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
                     What this is
                   </h2>
                 </div>
@@ -493,7 +493,7 @@ export function Landing() {
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
                   <div className="mb-md h-[3px] w-16 bg-oxide" />
                   <Marker hue="var(--oxide)">Chapter two</Marker>
-                  <h2 className="mt-sm font-display text-chapter tracking-tight text-ink">
+                  <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
                     What it does
                   </h2>
                   <p className="mt-lg max-w-[34ch] text-body-sm text-on-canvas-soft">
@@ -501,7 +501,7 @@ export function Landing() {
                     rest are what it takes to make them hold up in practice.
                   </p>
                 </div>
-                <div className={clsx(horizontal ? "flex gap-lg" : "grid gap-px bg-ink/15 sm:grid-cols-2")}>
+                <div className={clsx(horizontal ? "flex gap-lg" : "grid gap-px bg-enamel/15 sm:grid-cols-2")}>
                   {FEATURES.map((f) => (
                     <article
                       key={f.n}
@@ -520,7 +520,7 @@ export function Landing() {
                         </span>
                         <Marker hue="var(--on-canvas-faint)">{f.label}</Marker>
                       </div>
-                      <h3 className="mt-md text-title-sm font-semibold text-ink">{f.title}</h3>
+                      <h3 className="mt-md text-title-sm font-semibold text-enamel">{f.title}</h3>
                       <p className="mt-sm max-w-[52ch] text-body-sm text-on-canvas-soft">
                         {f.body}
                       </p>
@@ -534,7 +534,7 @@ export function Landing() {
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
                   <div className="mb-md h-[3px] w-16 bg-cadmium" />
                   <Marker hue="var(--cadmium)">Chapter three</Marker>
-                  <h2 className="mt-sm font-display text-chapter tracking-tight text-ink">
+                  <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
                     How a question
                     <br />
                     becomes an answer
@@ -554,8 +554,8 @@ export function Landing() {
                       key={p.step}
                       className={clsx(
                         horizontal
-                          ? "w-[210px] shrink-0 border-t-2 border-ink/25 pt-md"
-                          : "grid grid-cols-[auto_1fr] items-baseline gap-x-md gap-y-2xs border-b border-ink/12 py-md first:border-t first:border-ink/12 sm:grid-cols-[auto_140px_1fr]",
+                          ? "w-[210px] shrink-0 border-t-2 border-enamel/25 pt-md"
+                          : "grid grid-cols-[auto_1fr] items-baseline gap-x-md gap-y-2xs border-b border-enamel/12 py-md first:border-t first:border-enamel/12 sm:grid-cols-[auto_140px_1fr]",
                       )}
                     >
                       <span
@@ -566,7 +566,7 @@ export function Landing() {
                       </span>
                       <span
                         className={clsx(
-                          "font-display text-body-xs uppercase tracking-label text-ink",
+                          "font-display text-body-xs uppercase tracking-label text-enamel",
                           horizontal && "mt-2xs block pr-lg",
                         )}
                       >
@@ -591,7 +591,7 @@ export function Landing() {
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
                   <div className="mb-md h-[3px] w-16 bg-oxide" />
                   <Marker hue="var(--oxide)">Chapter four</Marker>
-                  <h2 className="mt-sm font-display text-chapter tracking-tight text-ink">
+                  <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
                     What it does not do
                   </h2>
                   <p className="mt-lg max-w-[34ch] text-body-sm text-on-canvas-soft">
@@ -608,7 +608,7 @@ export function Landing() {
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <div>
-                        <h3 className="text-title-xs font-semibold text-ink">{title}</h3>
+                        <h3 className="text-title-xs font-semibold text-enamel">{title}</h3>
                         <p className="mt-2xs max-w-[52ch] text-body-sm text-on-canvas-soft">
                           {body}
                         </p>
@@ -624,19 +624,19 @@ export function Landing() {
                 className={clsx(
                   horizontal
                     ? "relative flex h-full w-screen shrink-0 flex-col justify-center px-[5vw]"
-                    : "relative flex flex-col gap-xl border-t border-ink/15 px-6 py-3xl",
+                    : "relative flex flex-col gap-xl border-t border-enamel/15 px-6 py-3xl",
                 )}
               >
                 <RegistrationMark className="absolute left-[5vw] top-[12vh] text-on-canvas-faint/50" />
                 <RegistrationMark className="absolute right-[5vw] top-[12vh] text-on-canvas-faint/50" />
                 <Marker hue="var(--oxide)">End of the read</Marker>
-                <h2 className="mt-lg max-w-[18ch] font-display text-[clamp(30px,4.5vw,56px)] leading-[1.05] tracking-tight text-ink">
+                <h2 className="mt-lg max-w-[18ch] font-display text-[clamp(30px,4.5vw,56px)] leading-[1.05] tracking-tight text-enamel">
                   Now go and argue with it.
                 </h2>
                 <div className="mt-2xl flex flex-wrap items-center gap-sm font-display text-label uppercase tracking-marker">
                   <Link
                     to="/dashboard"
-                    className="bg-ink px-6 py-3.5 text-bone transition-all duration-300 ease-out-expo hover:bg-oxide"
+                    className="bg-enamel px-6 py-3.5 text-on-accent-light transition-all duration-300 ease-out-expo hover:bg-oxide"
                   >
                     Open the app
                   </Link>
@@ -644,7 +644,7 @@ export function Landing() {
                     href="https://github.com/karanmjpinto/mjresearch"
                     target="_blank"
                     rel="noreferrer"
-                    className="border-2 border-ink px-6 py-3.5 text-ink transition-colors hover:bg-ink hover:text-bone"
+                    className="border-2 border-enamel px-6 py-3.5 text-enamel transition-colors hover:bg-enamel hover:text-on-accent-light"
                   >
                     Source
                   </a>
@@ -663,7 +663,7 @@ export function Landing() {
                   >
                     Scroll →
                   </span>
-                  <div className="h-px flex-1 bg-ink/20">
+                  <div className="h-px flex-1 bg-enamel/20">
                     <div ref={railFillRef} className="h-px w-0 bg-oxide" />
                   </div>
                 </div>
@@ -672,7 +672,7 @@ export function Landing() {
           </div>
         </div>
 
-        <footer className="relative z-10 border-t border-ink/20 bg-canvas py-xl">
+        <footer className="relative z-10 border-t border-enamel/20 bg-canvas py-xl">
           <div className="mx-auto flex max-w-6xl flex-col gap-sm px-6 font-display text-label uppercase tracking-marker text-on-canvas-faint sm:flex-row sm:items-center sm:justify-between">
             <span>A personal research tool — not investment advice</span>
             <a

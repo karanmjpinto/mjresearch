@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from "react";
+import { useTheme } from "@/lib/theme";
 import { createChart, type IChartApi, ColorType } from "lightweight-charts";
 
 interface Props {
@@ -21,9 +22,17 @@ interface Props {
  * costs nothing once the palette stops using oklch.
  */
 function toChartColor(value: string): string {
-  const v = (value || "").trim();
+  let v = (value || "").trim();
   if (!v) return "";
   if (/^#|^rgb|^hsl/i.test(v)) return v;
+
+  /* Since the palette gained a second theme, the custom properties hold OKLCH
+   * *channels* — `19% 0.012 60` — rather than a finished colour, so that one
+   * token name can mean the right thing in daylight and at night. A bare
+   * triplet is not a colour to any parser, which is what took this chart and
+   * its whole view down: the library throws "Cannot parse color" and the error
+   * boundary swallows the page. Wrap it back up before converting. */
+  if (!/^[a-z]/i.test(v)) v = `oklch(${v})`;
 
   const probe = document.createElement("span");
   probe.style.color = `color-mix(in srgb, ${v} 100%, transparent)`;
@@ -36,13 +45,22 @@ function toChartColor(value: string): string {
   // `color(srgb ...)` reports 0–1 channels; `rgb(...)` reports 0–255.
   const isFraction = /^color\(/i.test(resolved);
   const to255 = (n: string) =>
-    Math.max(0, Math.min(255, Math.round(isFraction ? parseFloat(n) * 255 : parseFloat(n))));
+    Math.max(
+      0,
+      Math.min(
+        255,
+        Math.round(isFraction ? parseFloat(n) * 255 : parseFloat(n)),
+      ),
+    );
   const [r, g, b] = [to255(nums[0]!), to255(nums[1]!), to255(nums[2]!)];
   const a = nums.length > 3 ? parseFloat(nums[3]!) : 1;
   return a >= 1 ? `rgb(${r}, ${g}, ${b})` : `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
 export function PriceChart({ data, loading = false }: Props) {
+  // The canvas cannot inherit a CSS variable, so the chart is rebuilt when the
+  // theme changes rather than restyled.
+  const { resolved: theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
 
@@ -71,17 +89,18 @@ export function PriceChart({ data, loading = false }: Props) {
     // rest of the UI does — it needs resolved values. Read them off :root at
     // mount instead of hardcoding hex, so the chart moves with the palette.
     const root = getComputedStyle(document.documentElement);
-    const token = (name: string) => toChartColor(root.getPropertyValue(name).trim());
+    const token = (name: string) =>
+      toChartColor(root.getPropertyValue(name).trim());
 
     const chart = createChart(containerRef.current, {
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
-        textColor: token("--on-ink-faint"),
+        textColor: token("--on-ground-faint"),
         fontFamily: '"Departure Mono", ui-monospace, monospace',
       },
       grid: {
-        vertLines: { color: token("--ink-line") },
-        horzLines: { color: token("--ink-line") },
+        vertLines: { color: token("--ground-line") },
+        horzLines: { color: token("--ground-line") },
       },
       width: containerRef.current.clientWidth,
       height: containerRef.current.clientHeight,
@@ -90,10 +109,10 @@ export function PriceChart({ data, loading = false }: Props) {
         horzLine: { color: token("--cobalt"), width: 1, style: 2 },
       },
       rightPriceScale: {
-        borderColor: token("--ink-line"),
+        borderColor: token("--ground-line"),
       },
       timeScale: {
-        borderColor: token("--ink-line"),
+        borderColor: token("--ground-line"),
       },
     });
 
@@ -126,7 +145,7 @@ export function PriceChart({ data, loading = false }: Props) {
       ro.disconnect();
       chart.remove();
     };
-  }, [chartData]);
+  }, [chartData, theme]);
 
   if (chartData.length === 0) {
     return (

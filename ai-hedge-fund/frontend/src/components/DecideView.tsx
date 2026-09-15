@@ -21,10 +21,10 @@ import { useTicker } from "@/lib/ticker-context";
 const ACTIONS = ["buy", "watch", "hold", "sell", "pass"] as const;
 
 const ACTION_TONE: Record<string, string> = {
-  buy: "bg-verdigris text-ink",
-  sell: "bg-oxide text-bone",
-  hold: "bg-cadmium text-ink",
-  watch: "bg-cobalt text-bone",
+  buy: "bg-verdigris text-on-accent",
+  sell: "bg-oxide text-on-accent-light",
+  hold: "bg-cadmium text-on-accent",
+  watch: "bg-cobalt text-on-accent-light",
   pass: "bg-ink-line text-on-ink",
 };
 
@@ -337,7 +337,7 @@ export function DecideView() {
                 type="button"
                 onClick={() => size.mutate()}
                 disabled={!ticker.trim() || size.isPending}
-                className="bg-cobalt px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-bone transition-colors hover:bg-cadmium hover:text-ink disabled:bg-ink-line disabled:text-on-ink-faint"
+                className="bg-cobalt px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-on-accent-light transition-colors hover:bg-cadmium hover:text-on-accent disabled:bg-ink-line disabled:text-on-ink-faint"
               >
                 {size.isPending ? "Sizing…" : "Size against book"}
               </button>
@@ -399,7 +399,7 @@ export function DecideView() {
                   type="button"
                   onClick={() => decide.mutate()}
                   disabled={!rationale.trim() || decide.isPending}
-                  className="bg-verdigris px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-ink transition-colors hover:bg-cadmium disabled:bg-ink-line disabled:text-on-ink-faint"
+                  className="bg-verdigris px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-on-accent transition-colors hover:bg-cadmium disabled:bg-ink-line disabled:text-on-ink-faint"
                 >
                   {decide.isPending ? "Recording…" : "Record decision"}
                 </button>

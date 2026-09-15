@@ -86,7 +86,7 @@ export function Track({ r, tall = false }: { r: Reading; tall?: boolean }) {
       {/* The value ran off the domain; the cap says so rather than lying flat. */}
       {r.clamped && (
         <div
-          className={`absolute inset-y-0 w-1 bg-bone ${r.at > 0.5 ? "right-0" : "left-0"}`}
+          className={`absolute inset-y-0 w-1 bg-paper ${r.at > 0.5 ? "right-0" : "left-0"}`}
         />
       )}
     </div>

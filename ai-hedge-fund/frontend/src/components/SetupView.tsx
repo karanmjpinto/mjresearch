@@ -165,7 +165,7 @@ export function SetupView() {
                   type="button"
                   onClick={() => save.mutate()}
                   disabled={!pending || save.isPending}
-                  className="bg-cobalt px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-bone transition-colors hover:bg-cadmium hover:text-ink disabled:bg-ink-line disabled:text-on-ink-faint"
+                  className="bg-cobalt px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-on-accent-light transition-colors hover:bg-cadmium hover:text-on-accent disabled:bg-ink-line disabled:text-on-ink-faint"
                 >
                   {save.isPending ? "Saving…" : `Save ${pending || ""} key${pending === 1 ? "" : "s"}`}
                 </button>
