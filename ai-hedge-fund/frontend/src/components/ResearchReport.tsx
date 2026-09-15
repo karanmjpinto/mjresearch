@@ -304,8 +304,8 @@ export function ResearchReport() {
               title="Runs locally via Ollama — no API key needed."
               className={`px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] transition-colors ${
                 includeAi
-                  ? "bg-cadmium text-ink hover:bg-oxide hover:text-bone"
-                  : "bg-cobalt text-bone hover:bg-cadmium hover:text-ink"
+                  ? "bg-cadmium text-on-accent hover:bg-oxide hover:text-on-accent-light"
+                  : "bg-cobalt text-on-accent-light hover:bg-cadmium hover:text-on-accent"
               }`}
             >
               {includeAi ? "AI thesis on — turn off" : "Run AI thesis"}

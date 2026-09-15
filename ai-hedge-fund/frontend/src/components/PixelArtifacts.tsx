@@ -38,14 +38,14 @@ const PERFORATED: React.CSSProperties = {
 };
 
 function Rule() {
-  return <div aria-hidden className="my-xs border-t border-dashed border-ink/25" />;
+  return <div aria-hidden className="my-xs border-t border-dashed border-enamel/25" />;
 }
 
 function Row({ k, v, tone }: { k: string; v: string; tone?: string }) {
   return (
     <div className="flex items-baseline justify-between gap-md">
       <span className="text-on-canvas-faint">{k}</span>
-      <span className={clsx("tabular", tone ?? "text-ink")}>{v}</span>
+      <span className={clsx("tabular", tone ?? "text-enamel")}>{v}</span>
     </div>
   );
 }
@@ -62,12 +62,12 @@ export function RunTape({ className }: { className?: string }) {
   return (
     <div
       className={clsx(
-        "w-[210px] shrink-0 bg-bone px-md py-lg font-display text-label leading-[1.9] shadow-[3px_3px_0_0_rgba(31,27,23,0.16)]",
+        "w-[210px] shrink-0 bg-paper px-md py-lg font-display text-label leading-[1.9] shadow-[3px_3px_0_0_rgba(31,27,23,0.16)]",
         className,
       )}
       style={PERFORATED}
     >
-      <div className="text-center uppercase tracking-marker text-ink">MJ Research</div>
+      <div className="text-center uppercase tracking-marker text-enamel">MJ Research</div>
       <div className="text-center uppercase tracking-marker text-on-canvas-faint">Run record</div>
       <Rule />
       <Row k="TICKER" v="AAPL" />
@@ -100,18 +100,18 @@ export function DensityPlate({ className }: { className?: string }) {
     ["12", "dither-12"],
     ["25", "dither-25"],
     ["50", "dither-50"],
-    ["100", "bg-ink"],
+    ["100", "bg-enamel"],
   ];
   return (
     <div className={clsx("w-[168px] shrink-0", className)}>
       <div className="mb-2xs flex font-display text-label uppercase tracking-marker text-on-canvas-faint">
         <span>Density</span>
       </div>
-      <div className="flex border border-ink/30">
+      <div className="flex border border-enamel/30">
         {steps.map(([label, cls]) => (
-          <div key={label} className="flex-1 border-r border-ink/20 last:border-r-0">
-            <div className={clsx("h-10 text-ink", cls)} />
-            <div className="border-t border-ink/20 py-2xs text-center font-display text-label tabular text-on-canvas-faint">
+          <div key={label} className="flex-1 border-r border-enamel/20 last:border-r-0">
+            <div className={clsx("h-10 text-enamel", cls)} />
+            <div className="border-t border-enamel/20 py-2xs text-center font-display text-label tabular text-on-canvas-faint">
               {label}
             </div>
           </div>
@@ -161,8 +161,8 @@ export function GlyphPlate({ className }: { className?: string }) {
         <span>Specimen</span>
         <span className="tabular">12/72</span>
       </div>
-      <div className="border border-ink/25 bg-bone/70 p-md">
-        <div className="font-display text-specimen tracking-tight text-ink">
+      <div className="border border-enamel/25 bg-paper/70 p-md">
+        <div className="font-display text-specimen tracking-tight text-enamel">
           0123456789
         </div>
         <div className="mt-2xs font-display text-specimen tracking-tight text-oxide">

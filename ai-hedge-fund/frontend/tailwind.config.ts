@@ -10,57 +10,114 @@ export default {
   theme: {
     extend: {
       /**
-       * Literal OKLCH with the <alpha-value> placeholder, NOT `var(--token)`.
-       * Tailwind composes opacity modifiers (`bg-canvas/92`) by substituting
-       * that placeholder; given a bare `var()` it cannot, and silently emits an
-       * invalid colour — the utility then resolves to transparent with no error.
-       * The same values are mirrored as custom properties in src/index.css for
-       * inline styles and non-Tailwind rules.
+       * `oklch(var(--token) / <alpha-value>)`, where each custom property in
+       * src/index.css holds OKLCH *channels* rather than a finished colour.
+       *
+       * The <alpha-value> placeholder is what makes the opacity modifiers the
+       * components already use (`bg-cadmium/10`, `border-border/60`) compose;
+       * hand Tailwind a finished `var(--x)` and it cannot substitute, so it
+       * emits an invalid colour and the utility resolves to transparent with
+       * no error. Channels keep the placeholder AND let one name mean the
+       * right thing in daylight and at night, which literals could not.
+       *
+       * So the names below are roles, not hues. `ink` is "the page" and
+       * follows the theme; it is dark at night and near-white in daylight.
+       * The one role that must NOT follow the theme is text sitting on a
+       * coloured fill — a cadmium button is yellow in both themes — and that
+       * lives in `on-accent`.
        */
       colors: {
+        /* The landing page's linen band. Light in both themes, because it is
+         * depicting paper rather than following the UI. */
         canvas: {
-          DEFAULT: "oklch(92.5% 0.018 82 / <alpha-value>)",
-          deep: "oklch(88% 0.024 80 / <alpha-value>)",
+          DEFAULT: "oklch(var(--canvas) / <alpha-value>)",
+          deep: "oklch(var(--canvas-deep) / <alpha-value>)",
         },
-        ink: {
-          DEFAULT: "oklch(19% 0.012 60 / <alpha-value>)",
-          raised: "oklch(24% 0.014 62 / <alpha-value>)",
-          line: "oklch(32% 0.016 64 / <alpha-value>)",
-        },
-        oxide: "oklch(52% 0.166 32 / <alpha-value>)",
-        cadmium: "oklch(78% 0.158 78 / <alpha-value>)",
-        cobalt: "oklch(52% 0.174 258 / <alpha-value>)",
-        verdigris: "oklch(58% 0.088 178 / <alpha-value>)",
-        aluminium: "oklch(72% 0.012 80 / <alpha-value>)",
-        bone: "oklch(96% 0.012 84 / <alpha-value>)",
         "on-canvas": {
-          DEFAULT: "oklch(26% 0.018 62 / <alpha-value>)",
-          soft: "oklch(46% 0.022 64 / <alpha-value>)",
-          faint: "oklch(51.5% 0.020 66 / <alpha-value>)",
+          DEFAULT: "oklch(var(--on-canvas) / <alpha-value>)",
+          soft: "oklch(var(--on-canvas-soft) / <alpha-value>)",
+          faint: "oklch(var(--on-canvas-faint) / <alpha-value>)",
+        },
+        paper: "oklch(var(--paper) / <alpha-value>)",
+        /* The dark mark on that linen. Fixed, for the same reason `canvas` is:
+         * the landing page is a composition on paper, not a themed surface, so
+         * its rules and filled buttons stay enamel black in both themes. */
+        enamel: "oklch(var(--enamel) / <alpha-value>)",
+
+        /* The ground and the text on it. Both follow the theme. */
+        ink: {
+          DEFAULT: "oklch(var(--ground) / <alpha-value>)",
+          raised: "oklch(var(--ground-raised) / <alpha-value>)",
+          line: "oklch(var(--ground-line) / <alpha-value>)",
         },
         "on-ink": {
-          DEFAULT: "oklch(92% 0.012 82 / <alpha-value>)",
-          soft: "oklch(72% 0.014 76 / <alpha-value>)",
-          faint: "oklch(62% 0.014 70 / <alpha-value>)",
+          DEFAULT: "oklch(var(--on-ground) / <alpha-value>)",
+          soft: "oklch(var(--on-ground-soft) / <alpha-value>)",
+          faint: "oklch(var(--on-ground-faint) / <alpha-value>)",
+        },
+        /* `bone` was "highlight white". It now means the strongest text the
+         * ground allows, which is near-black in daylight. The name is
+         * historical; 86 call sites use it correctly as "the brightest text",
+         * and that reading still holds. */
+        bone: "oklch(var(--strong) / <alpha-value>)",
+
+        oxide: "oklch(var(--oxide) / <alpha-value>)",
+        cadmium: "oklch(var(--cadmium) / <alpha-value>)",
+        cobalt: "oklch(var(--cobalt) / <alpha-value>)",
+        verdigris: "oklch(var(--verdigris) / <alpha-value>)",
+        aluminium: "oklch(var(--aluminium) / <alpha-value>)",
+
+        /* Text on a coloured fill — fixed in both themes. `on-accent` for
+         * bright paint (cadmium, verdigris), `on-accent-light` for deep
+         * paint (oxide, cobalt). */
+        "on-accent": {
+          DEFAULT: "oklch(var(--on-accent) / <alpha-value>)",
+          light: "oklch(var(--on-accent-light) / <alpha-value>)",
         },
 
-        /* Legacy names kept so views not yet reworked stay coherent
-         * rather than falling back to Tailwind defaults. */
+        /* Legacy names kept so views not yet reworked stay coherent rather
+         * than falling back to Tailwind defaults. They point at the same
+         * theme-aware roles. */
         surface: {
-          DEFAULT: "oklch(19% 0.012 60 / <alpha-value>)",
-          card: "oklch(24% 0.014 62 / <alpha-value>)",
-          elevated: "oklch(32% 0.016 64 / <alpha-value>)",
+          DEFAULT: "oklch(var(--ground) / <alpha-value>)",
+          card: "oklch(var(--ground-raised) / <alpha-value>)",
+          elevated: "oklch(var(--ground-line) / <alpha-value>)",
         },
         border: {
-          DEFAULT: "oklch(32% 0.016 64 / <alpha-value>)",
-          light: "oklch(54% 0.014 70 / <alpha-value>)",
+          DEFAULT: "oklch(var(--ground-line) / <alpha-value>)",
+          light: "oklch(var(--on-ground-faint) / <alpha-value>)",
         },
         accent: {
-          blue: "oklch(52% 0.174 258 / <alpha-value>)",
-          green: "oklch(58% 0.088 178 / <alpha-value>)",
-          red: "oklch(52% 0.166 32 / <alpha-value>)",
-          yellow: "oklch(78% 0.158 78 / <alpha-value>)",
+          blue: "oklch(var(--cobalt) / <alpha-value>)",
+          green: "oklch(var(--verdigris) / <alpha-value>)",
+          red: "oklch(var(--oxide) / <alpha-value>)",
+          yellow: "oklch(var(--cadmium) / <alpha-value>)",
         },
+
+        /* Stock Tailwind neutrals, overridden rather than chased out of 15
+         * files one class at a time. `text-gray-500` appears 180 times and
+         * means "muted secondary text"; a fixed mid-grey means that in the
+         * dark and means nothing in daylight, so the scale is remapped onto
+         * the theme's own steps. The separate sweep converting these call
+         * sites to named tokens is still the right cleanup — this keeps them
+         * legible in both themes until it lands.
+         *
+         * `white` is remapped for the same reason: `text-white` (81 uses)
+         * means "the strongest text", not the colour white. */
+        gray: {
+          100: "oklch(var(--strong) / <alpha-value>)",
+          200: "oklch(var(--strong) / <alpha-value>)",
+          300: "oklch(var(--on-ground) / <alpha-value>)",
+          400: "oklch(var(--on-ground-soft) / <alpha-value>)",
+          500: "oklch(var(--on-ground-soft) / <alpha-value>)",
+          600: "oklch(var(--on-ground-faint) / <alpha-value>)",
+          700: "oklch(var(--ground-line) / <alpha-value>)",
+        },
+        white: "oklch(var(--strong) / <alpha-value>)",
+        /* `bg-black/20` is used as a recessed well, not as the colour black.
+         * At night that is a darker tint; in daylight a light one would
+         * disappear, so it stays a dark tint at low alpha either way. */
+        black: "oklch(var(--scrim) / <alpha-value>)",
       },
       fontFamily: {
         display: ['"Departure Mono"', "ui-monospace", "monospace"],

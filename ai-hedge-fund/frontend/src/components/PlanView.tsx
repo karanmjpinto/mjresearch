@@ -20,10 +20,10 @@ import { ClaimCompare, NodeReadout, SegmentBar, Track } from "@/components/Metri
 /* Stance is a decision, so it gets a solid painted block rather than a tinted
  * outline — it should be the first thing the eye lands on. */
 const STANCE_STYLE: Record<string, string> = {
-  BUY: "bg-verdigris text-ink",
-  HOLD: "bg-cadmium text-ink",
-  WATCH: "bg-cobalt text-bone",
-  SELL: "bg-oxide text-bone",
+  BUY: "bg-verdigris text-on-accent",
+  HOLD: "bg-cadmium text-on-accent",
+  WATCH: "bg-cobalt text-on-accent-light",
+  SELL: "bg-oxide text-on-accent-light",
 };
 
 const STATUS_DOT: Record<ExecutedNode["status"], string> = {
@@ -387,7 +387,7 @@ export function PlanView() {
                         },
                       })
                     }
-                    className="bg-verdigris px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-ink transition-colors hover:bg-cadmium"
+                    className="bg-verdigris px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-on-accent transition-colors hover:bg-cadmium"
                   >
                     Size this against my book →
                   </button>

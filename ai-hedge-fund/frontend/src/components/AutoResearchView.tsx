@@ -35,9 +35,9 @@ function ExperimentCard({ e }: { e: ExperimentRow }) {
   const verdictTone = e.is_baseline
     ? "bg-ink-line text-on-ink"
     : e.kept
-      ? "bg-verdigris text-ink"
+      ? "bg-verdigris text-on-accent"
       : e.verdict === "error"
-        ? "bg-oxide text-bone"
+        ? "bg-oxide text-on-accent-light"
         : "bg-ink-line text-on-ink-faint";
 
   return (
@@ -197,7 +197,7 @@ export function AutoResearchView() {
               type="button"
               onClick={() => start.mutate()}
               disabled={busy || !runTag.trim() || !tickers.trim() || start.isPending}
-              className="bg-cobalt px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-bone transition-colors hover:bg-cadmium hover:text-ink disabled:bg-ink-line disabled:text-on-ink-faint"
+              className="bg-cobalt px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-on-accent-light transition-colors hover:bg-cadmium hover:text-on-accent disabled:bg-ink-line disabled:text-on-ink-faint"
             >
               {busy ? "Running…" : "Start"}
             </button>

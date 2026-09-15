@@ -55,7 +55,7 @@ function Row({ band, extent }: { band: CompsBand; extent: Extent }) {
           />
           <div
             aria-hidden
-            className={`absolute inset-y-1 w-px ${off ? "bg-oxide" : "bg-bone"}`}
+            className={`absolute inset-y-1 w-px ${off ? "bg-oxide" : "bg-paper"}`}
             style={{ left: `${mid}%` }}
           />
         </div>
