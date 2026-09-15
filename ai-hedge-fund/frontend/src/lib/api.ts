@@ -742,6 +742,51 @@ export type Intrinsic =
       driver_notes: string[];
     };
 
+export type AppliedCriterion = {
+  text: string;
+  section: string | null;
+  /** met | missed | unmatched | judgment — the last two are different things. */
+  verdict: "met" | "missed" | "unmatched" | "judgment";
+  metric: string | null;
+  value: number | null;
+  display: string | null;
+  threshold: number | null;
+  comparison: string | null;
+  because: string;
+};
+
+export type AppliedFramework = {
+  title: string;
+  path: string;
+  criteria: AppliedCriterion[];
+  counts: Partial<Record<AppliedCriterion["verdict"], number>>;
+  /** Lines with a stated threshold and a figure in hand. */
+  answerable: number;
+  finding: string;
+};
+
+export type FrameworksApplied = {
+  ticker: string;
+  configured: boolean;
+  unreadable?: boolean;
+  frameworks: AppliedFramework[];
+  metrics_available?: number;
+  finding: string;
+};
+
+export type OnePager =
+  | { ticker: string; available: false; reason: string }
+  | {
+      ticker: string;
+      available: true;
+      title: string;
+      relative_path: string;
+      markdown: string;
+      /** The reader's own template, when one was found in the vault. */
+      template: string | null;
+      exists: boolean;
+    };
+
 export type ConcentrationRow = {
   ticker: string;
   weight_pct: number;
@@ -1116,6 +1161,23 @@ export const api = {
       `/valuation/intrinsic/${encodeURIComponent(ticker)}${q ? `?${q}` : ""}`,
     );
   },
+
+  getFrameworksApplied: (ticker: string) =>
+    fetchJSON<FrameworksApplied>(
+      `/knowledge/frameworks/${encodeURIComponent(ticker)}`,
+    ),
+
+  getOnePager: (ticker: string) =>
+    fetchJSON<OnePager>(`/knowledge/one-pager/${encodeURIComponent(ticker)}`),
+
+  /** Writes into the real vault. Refuses rather than replacing a note. */
+  writeOnePager: (ticker: string) =>
+    postJSON<{
+      ticker: string;
+      written: boolean;
+      relative_path: string;
+      bytes: number;
+    }>(`/knowledge/one-pager/${encodeURIComponent(ticker)}`, {}),
 
   getTechnicals: (ticker: string) =>
     fetchJSON<Record<string, unknown>>(`/data/technicals/${ticker}`),
