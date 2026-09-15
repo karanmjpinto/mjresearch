@@ -83,7 +83,7 @@ export const STAGES: readonly Stage[] = [
     label: "Value & risk",
     question: "What's it worth, and how sure can I be?",
     segment: "value",
-    status: "planned",
+    status: "live",
   },
   {
     key: "play",

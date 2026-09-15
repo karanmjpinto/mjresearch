@@ -706,6 +706,8 @@ export type Intrinsic =
       reason: string;
       /** Drivers that could not be derived and must be supplied. */
       missing: string[];
+      /** Whatever could be derived, so the form can prefill the rest. */
+      drivers?: Record<string, number | null>;
       cost_of_capital: CostOfCapital;
       notes?: string[];
     }
@@ -729,6 +731,10 @@ export type Intrinsic =
         price?: number;
         probability_value_above_price?: number;
         median_upside_pct?: number;
+        mean?: number;
+        base_case?: number;
+        /** The standard deviations the draws were taken with. */
+        spreads?: Record<string, number>;
         independence_note: string;
       };
       cost_of_capital: CostOfCapital;
