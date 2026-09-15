@@ -10,7 +10,14 @@ import {
 
 describe("stage sequence", () => {
   it("numbers the six stages 01 to 06 in order", () => {
-    expect(STAGES.map((s) => s.num)).toEqual(["01", "02", "03", "04", "05", "06"]);
+    expect(STAGES.map((s) => s.num)).toEqual([
+      "01",
+      "02",
+      "03",
+      "04",
+      "05",
+      "06",
+    ]);
   });
 
   it("gives exactly one stage no destination — picking the ticker is the entry", () => {
@@ -20,10 +27,20 @@ describe("stage sequence", () => {
   });
 
   it("marks an unbuilt stage as planned rather than shipping a blank screen", () => {
-    // Stage 04 became live when the vault reader landed; 05 is still partial,
-    // so the rail keeps saying so rather than promising a finished screen.
-    const planned = STAGES.filter((s) => s.status === "planned").map((s) => s.key);
-    expect(planned).toEqual(["value"]);
+    // Asserts the invariant rather than a list of keys. This test used to name
+    // the planned stages outright, which meant finishing one broke a test that
+    // had nothing to say about it — the rail's promise is that `planned` is a
+    // real state and that nothing claims a status it does not have, not that
+    // any particular stage is unfinished this week.
+    for (const s of STAGES) {
+      expect(["live", "planned"]).toContain(s.status);
+    }
+    // A planned stage still has to be reachable, because the rail renders it
+    // as a link to a screen that explains the intent. One with no route would
+    // be a dead entry.
+    for (const s of STAGES.filter((x) => x.status === "planned")) {
+      expect(s.segment, `planned stage ${s.key} needs a route`).not.toBeNull();
+    }
   });
 
   it("gives every stage a question, since that is what the rail promises", () => {

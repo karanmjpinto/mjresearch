@@ -6,6 +6,7 @@ import { DecideView } from "@/components/DecideView";
 import { Landing } from "@/components/Landing";
 import { OptimizeView } from "@/components/OptimizeView";
 import { AnalysisView } from "@/components/AnalysisView";
+import { ValueRiskView } from "@/components/ValueRiskView";
 import PortfolioView from "@/components/PortfolioView";
 import { ResearchReport } from "@/components/ResearchReport";
 import { ScreenersView } from "@/components/ScreenersView";
@@ -53,10 +54,7 @@ function AppRoutes() {
       <Route path="/optimize" element={<OptimizeView />} />
       <Route path="/constraints" element={<ConstraintsView />} />
       <Route path="/lens/:ticker?" element={<StageComingSoon stage="lens" />} />
-      <Route
-        path="/value/:ticker?"
-        element={<StageComingSoon stage="value" />}
-      />
+      <Route path="/value/:ticker?" element={<ValueRiskView />} />
       <Route path="/decide/:ticker?" element={<DecideView />} />
       <Route path="/autoresearch" element={<AutoResearchView />} />
       <Route path="/setup" element={<SetupView />} />
