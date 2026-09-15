@@ -7,11 +7,11 @@ import { Landing } from "@/components/Landing";
 import { OptimizeView } from "@/components/OptimizeView";
 import { AnalysisView } from "@/components/AnalysisView";
 import { ValueRiskView } from "@/components/ValueRiskView";
+import { YourLensView } from "@/components/YourLensView";
 import PortfolioView from "@/components/PortfolioView";
 import { ResearchReport } from "@/components/ResearchReport";
 import { ScreenersView } from "@/components/ScreenersView";
 import { ConstraintsView } from "@/components/ConstraintsView";
-import { StageComingSoon } from "@/components/StageComingSoon";
 import { SetupView } from "@/components/SetupView";
 import { DEFAULT_SCREENER_ID } from "@/config/screeners";
 
@@ -53,7 +53,7 @@ function AppRoutes() {
       <Route path="/screeners/:screenId" element={<ScreenersView />} />
       <Route path="/optimize" element={<OptimizeView />} />
       <Route path="/constraints" element={<ConstraintsView />} />
-      <Route path="/lens/:ticker?" element={<StageComingSoon stage="lens" />} />
+      <Route path="/lens/:ticker?" element={<YourLensView />} />
       <Route path="/value/:ticker?" element={<ValueRiskView />} />
       <Route path="/decide/:ticker?" element={<DecideView />} />
       <Route path="/autoresearch" element={<AutoResearchView />} />
