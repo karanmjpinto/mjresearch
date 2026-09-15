@@ -26,13 +26,17 @@ export function ConvictionGauge({ score, label }: Props) {
 
   return (
     <div className="bg-surface-card rounded-xl p-4 flex flex-col items-center gap-2">
-      <p className="text-label uppercase tracking-[0.14em] text-on-ink-soft">Conviction Score</p>
+      <p className="text-label uppercase tracking-[0.14em] text-on-ink-soft">
+        Conviction Score
+      </p>
 
       <div className="relative w-32 h-32">
         <svg viewBox="0 0 100 100" className="w-full h-full -rotate-[135deg]">
           {/* Background arc */}
           <circle
-            cx="50" cy="50" r="45"
+            cx="50"
+            cy="50"
+            r="45"
             fill="none"
             stroke="var(--ink-line)"
             strokeWidth="8"
@@ -42,7 +46,9 @@ export function ConvictionGauge({ score, label }: Props) {
           {/* Score arc */}
           {isActive && (
             <circle
-              cx="50" cy="50" r="45"
+              cx="50"
+              cy="50"
+              r="45"
               fill="none"
               stroke={getColor(displayScore)}
               strokeWidth="8"
@@ -59,7 +65,9 @@ export function ConvictionGauge({ score, label }: Props) {
           </span>
           <span
             className="text-xs font-semibold"
-            style={{ color: isActive ? getColor(displayScore) : "var(--on-ink-faint)" }}
+            style={{
+              color: isActive ? getColor(displayScore) : "var(--on-ink-faint)",
+            }}
           >
             {isActive ? getLabel(displayScore) : (label ?? "N/A")}
           </span>
@@ -67,8 +75,12 @@ export function ConvictionGauge({ score, label }: Props) {
       </div>
 
       {!isActive && (
-        <p className="text-label leading-relaxed text-on-ink-faint text-center">
-          Enable &quot;Run AI thesis&quot; — needs Ollama running with your model pulled
+        /* This used to read "Enable 'Run AI thesis'", which was a button on
+         * this screen. There is no button now — the analysis runs on its own
+         * at stage 03 — so the empty state points at where the score comes
+         * from rather than at a control that no longer exists. */
+        <p className="text-center text-label leading-relaxed text-on-ink-faint">
+          Scored at stage 03, Analysis. Needs a local model running.
         </p>
       )}
     </div>

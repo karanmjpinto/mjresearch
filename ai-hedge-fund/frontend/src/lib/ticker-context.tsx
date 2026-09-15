@@ -110,7 +110,7 @@ export function TickerProvider({ children }: { children: React.ReactNode }) {
   );
 
   const goTo = useCallback(
-    (t: string, stage: DestinationKey = "story") => {
+    (t: string, stage: DestinationKey = "data") => {
       const clean = t.trim().toUpperCase();
       if (!clean) return;
       setTicker(clean);

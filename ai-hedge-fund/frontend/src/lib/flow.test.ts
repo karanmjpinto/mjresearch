@@ -33,18 +33,18 @@ describe("stage sequence", () => {
 
 describe("stagePath", () => {
   it("keeps the legacy route spellings so inbound links stay alive", () => {
-    expect(stagePath("story", "AAPL")).toBe("/research/AAPL");
-    expect(stagePath("numbers", "AAPL")).toBe("/plan/AAPL");
+    expect(stagePath("data", "AAPL")).toBe("/research/AAPL");
+    expect(stagePath("analysis", "AAPL")).toBe("/plan/AAPL");
     expect(stagePath("play", "AAPL")).toBe("/decide/AAPL");
   });
 
   it("uppercases and trims what the user typed", () => {
-    expect(stagePath("story", "  aapl ")).toBe("/research/AAPL");
+    expect(stagePath("data", "  aapl ")).toBe("/research/AAPL");
   });
 
   it("encodes symbols that are not plain letters", () => {
-    expect(stagePath("story", "BRK.B")).toBe("/research/BRK.B");
-    expect(stagePath("story", "A/B")).toBe("/research/A%2FB");
+    expect(stagePath("data", "BRK.B")).toBe("/research/BRK.B");
+    expect(stagePath("data", "A/B")).toBe("/research/A%2FB");
   });
 
   it("falls back to the bare stage when there is no symbol yet", () => {
@@ -60,11 +60,11 @@ describe("stageFor", () => {
   });
 
   it("resolves a stage with no symbol attached", () => {
-    expect(stageFor("/plan")).toBe("numbers");
+    expect(stageFor("/plan")).toBe("analysis");
   });
 
   it("ignores case and trailing segments", () => {
-    expect(stageFor("/Research/AAPL/whatever")).toBe("story");
+    expect(stageFor("/Research/AAPL/whatever")).toBe("data");
   });
 
   it("returns null off the flow, so the rail stays hidden there", () => {
