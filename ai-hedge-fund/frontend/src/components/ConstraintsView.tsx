@@ -168,7 +168,7 @@ function Names({ id }: { id: string }) {
                   actually leaves the page. */}
               <button
                 type="button"
-                onClick={() => navigate(stagePath("story", n.ticker))}
+                onClick={() => navigate(stagePath("data", n.ticker))}
                 aria-label={`Research ${n.ticker}, ${n.name}`}
                 className="font-display text-mark text-cadmium underline-offset-4 transition-colors hover:text-bone hover:underline focus-visible:text-bone focus-visible:underline focus-visible:outline-none"
               >

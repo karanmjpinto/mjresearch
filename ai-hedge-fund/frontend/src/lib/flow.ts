@@ -11,10 +11,18 @@
  * spellings. Renaming them would break every inbound link in the dashboard,
  * the screeners and the compounder panels in exchange for nothing a reader can
  * see: the rail is what changes how this feels, not the URL.
+ *
+ * Stages 02 and 03 were "Story" and "Numbers", which described neither. The
+ * Story screen was charts, ownership and backtests — quantitative to the last
+ * row — while the numbers the model actually reasoned over sat on the next
+ * screen beside prose. The split is now by *kind of evidence*: stage 02 is
+ * everything measured, stage 03 is everything judged. That is a line a reader
+ * can hold, and it puts the investor views next to the analysis that weighs
+ * them rather than two clicks apart.
  */
 
 export type StageKey =
-  "ticker" | "story" | "numbers" | "lens" | "value" | "play";
+  "ticker" | "data" | "analysis" | "lens" | "value" | "play";
 
 /** Stages with a screen of their own — every key except the entry step. */
 export type DestinationKey = Exclude<StageKey, "ticker">;
@@ -46,18 +54,18 @@ export const STAGES: readonly Stage[] = [
     status: "live",
   },
   {
-    key: "story",
+    key: "data",
     num: "02",
-    label: "Story",
-    question: "What's the story, and does it hold?",
+    label: "Data",
+    question: "What does the data say?",
     segment: "research",
     status: "live",
   },
   {
-    key: "numbers",
+    key: "analysis",
     num: "03",
-    label: "Numbers",
-    question: "Do the numbers back the story?",
+    label: "Analysis",
+    question: "What do the model and the investors make of it?",
     segment: "plan",
     status: "live",
   },

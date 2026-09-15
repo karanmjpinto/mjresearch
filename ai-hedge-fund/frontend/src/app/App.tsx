@@ -5,7 +5,7 @@ import { Dashboard } from "@/components/Dashboard";
 import { DecideView } from "@/components/DecideView";
 import { Landing } from "@/components/Landing";
 import { OptimizeView } from "@/components/OptimizeView";
-import { PlanView } from "@/components/PlanView";
+import { AnalysisView } from "@/components/AnalysisView";
 import PortfolioView from "@/components/PortfolioView";
 import { ResearchReport } from "@/components/ResearchReport";
 import { ScreenersView } from "@/components/ScreenersView";
@@ -42,7 +42,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/plan/:ticker?" element={<PlanView />} />
+      <Route path="/plan/:ticker?" element={<AnalysisView />} />
       <Route path="/research/:ticker?" element={<ResearchReport />} />
       <Route path="/portfolio" element={<PortfolioView />} />
       <Route

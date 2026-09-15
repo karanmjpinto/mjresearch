@@ -28,7 +28,7 @@ export function TickerBar() {
 
   // Switching to a recent name keeps you on the stage you were reading, so the
   // comparison you were making carries across. Off the flow, start at the top.
-  const recentTarget: DestinationKey = current && current !== "ticker" ? current : "story";
+  const recentTarget: DestinationKey = current && current !== "ticker" ? current : "data";
 
   return (
     <div className="border-b border-ink-line bg-ink-raised">
