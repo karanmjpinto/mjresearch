@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { InfoTip } from "./InfoTip";
 import { api, type LensMatch, type LensView } from "@/lib/api";
 
 /**
@@ -108,7 +109,7 @@ function CoverageBar({ data }: { data: LensView }) {
       <div className="flex flex-wrap items-end justify-between gap-md">
         <div>
           <p className="font-display text-label uppercase tracking-label text-on-ink-soft">
-            Coverage in your own notes
+            Coverage in your own notes <InfoTip term="stage-lens" />
           </p>
           <p className="mt-2xs font-display text-display-sm capitalize text-bone">
             {label}

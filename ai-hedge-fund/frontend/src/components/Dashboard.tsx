@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
+import { InfoTip } from "./InfoTip";
+import type { GlossaryKey } from "@/lib/glossary";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
@@ -11,8 +13,15 @@ export function Dashboard() {
   const { recents } = useTicker();
   const [watchGroup, setWatchGroup] = useState<string>("default");
 
-  const watchlists = useQuery({ queryKey: ["watchlists"], queryFn: api.getWatchlists });
-  const portfolio = useQuery({ queryKey: ["portfolio"], queryFn: api.getPortfolio, retry: false });
+  const watchlists = useQuery({
+    queryKey: ["watchlists"],
+    queryFn: api.getWatchlists,
+  });
+  const portfolio = useQuery({
+    queryKey: ["portfolio"],
+    queryFn: api.getPortfolio,
+    retry: false,
+  });
   const sectors = useQuery({
     queryKey: ["sector-performance"],
     queryFn: api.getSectorPerformance,
@@ -47,7 +56,10 @@ export function Dashboard() {
   }, [groupKeys, watchGroup]);
 
   const handleSearch = (query: string) => {
-    const ticker = query.replace(/^check\s+/i, "").trim().toUpperCase();
+    const ticker = query
+      .replace(/^check\s+/i, "")
+      .trim()
+      .toUpperCase();
     if (ticker) navigate(`/research/${ticker}`);
   };
 
@@ -71,7 +83,8 @@ export function Dashboard() {
   const sectorData = chosen?.rows ?? [];
   const sectorLabel = chosen?.label ?? "";
 
-  const activeProviders = providers.data?.providers.filter((p) => p.available).length ?? 0;
+  const activeProviders =
+    providers.data?.providers.filter((p) => p.available).length ?? 0;
   const totalProviders = providers.data?.providers.length ?? 0;
   const tickers = watchlists.data?.[watchGroup] ?? [];
 
@@ -87,12 +100,15 @@ export function Dashboard() {
               What are you looking at?
             </h1>
             <p className="max-w-2xl text-[15px] leading-relaxed text-on-ink-soft">
-              Research a name, form a view over numbers the model did not produce, size it
-              against the book you already hold, and record the call. Everything runs on this
-              machine.
+              Research a name, form a view over numbers the model did not
+              produce, size it against the book you already hold, and record the
+              call. Everything runs on this machine.
             </p>
             <div className="mt-2xs max-w-xl">
-              <ChatInput onSubmit={handleSearch} placeholder="Research a ticker (e.g. AAPL, NVDA, 7203.T)" />
+              <ChatInput
+                onSubmit={handleSearch}
+                placeholder="Research a ticker (e.g. AAPL, NVDA, 7203.T)"
+              />
             </div>
             {recents.length > 0 && (
               <div className="mt-2xs flex flex-wrap items-center gap-2xs">
@@ -117,6 +133,7 @@ export function Dashboard() {
           <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <SnapshotCard
               label="Book value"
+              info="book-value"
               value={
                 portfolio.data
                   ? `$${portfolio.data.total_value.toLocaleString()}`
@@ -128,6 +145,7 @@ export function Dashboard() {
             />
             <SnapshotCard
               label="Data providers"
+              info="data-providers"
               value={`${activeProviders} / ${totalProviders}`}
               sub="Active / configured"
               href="#providers"
@@ -135,6 +153,7 @@ export function Dashboard() {
             />
             <SnapshotCard
               label={`Sector drift (${sectorLabel.toLowerCase()})`}
+              info="sector-drift"
               value={
                 sectors.isPending
                   ? "—"
@@ -162,7 +181,7 @@ export function Dashboard() {
             <div className="border border-ink-line bg-ink-raised">
               <div className="flex items-baseline justify-between border-b border-ink-line px-lg py-sm">
                 <h2 className="font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
-                  Recent research
+                  Recent research <InfoTip term="recent-research" />
                 </h2>
                 <span className="font-display text-label uppercase tracking-[0.14em] text-on-ink-faint">
                   {recentRuns.data?.count ?? 0} runs
@@ -170,8 +189,8 @@ export function Dashboard() {
               </div>
               {(recentRuns.data?.runs ?? []).length === 0 ? (
                 <p className="px-lg py-lg text-[13px] leading-relaxed text-on-ink-faint">
-                  Nothing yet. Research a name and the run is recorded here, so you can come
-                  back and see what you concluded and why.
+                  Nothing yet. Research a name and the run is recorded here, so
+                  you can come back and see what you concluded and why.
                 </p>
               ) : (
                 recentRuns.data?.runs.map((r) => (
@@ -181,7 +200,9 @@ export function Dashboard() {
                     onClick={() => navigate(`/plan/${r.ticker}`)}
                     className="flex w-full items-baseline gap-sm border-t border-ink-line px-lg py-sm text-left transition-colors first:border-t-0 hover:bg-ink"
                   >
-                    <span className="font-display text-[13px] text-bone">{r.ticker}</span>
+                    <span className="font-display text-[13px] text-bone">
+                      {r.ticker}
+                    </span>
                     <span className="font-display text-label uppercase tracking-[0.12em] text-on-ink-faint">
                       {r.mode}
                     </span>
@@ -201,7 +222,7 @@ export function Dashboard() {
             <div className="border border-ink-line bg-ink-raised">
               <div className="flex items-baseline justify-between border-b border-ink-line px-lg py-sm">
                 <h2 className="font-display text-label uppercase tracking-[0.18em] text-on-ink-faint">
-                  Recent decisions
+                  Recent decisions <InfoTip term="decision-log" />
                 </h2>
                 <button
                   type="button"
@@ -213,8 +234,9 @@ export function Dashboard() {
               </div>
               {(recentDecisions.data?.decisions ?? []).length === 0 ? (
                 <p className="px-lg py-lg text-[13px] leading-relaxed text-on-ink-faint">
-                  No calls recorded. Once you record one it appears here with the move since —
-                  the point being to check whether the reasoning held, not just the price.
+                  No calls recorded. Once you record one it appears here with
+                  the move since — the point being to check whether the
+                  reasoning held, not just the price.
                 </p>
               ) : (
                 recentDecisions.data?.decisions.map((d) => (
@@ -227,11 +249,15 @@ export function Dashboard() {
                     <span className="font-display text-label uppercase tracking-[0.12em] text-on-ink">
                       {d.action}
                     </span>
-                    <span className="font-display text-[13px] text-bone">{d.ticker}</span>
+                    <span className="font-display text-[13px] text-bone">
+                      {d.ticker}
+                    </span>
                     {d.outcome?.scored && (
                       <span
                         className={`font-display text-label tabular ${
-                          (d.outcome.in_your_favour_pct ?? 0) >= 0 ? "text-verdigris" : "text-oxide"
+                          (d.outcome.in_your_favour_pct ?? 0) >= 0
+                            ? "text-verdigris"
+                            : "text-oxide"
                         }`}
                       >
                         {(d.outcome.in_your_favour_pct ?? 0) >= 0 ? "+" : ""}
@@ -247,13 +273,17 @@ export function Dashboard() {
             </div>
           </section>
 
-
           {/* Watchlist + sector + providers — the working widgets, compact */}
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="bg-surface-card rounded-xl p-4 border border-border/60">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Watchlists</p>
+              <p className="mb-2 flex items-center gap-xs text-xs uppercase tracking-wider text-gray-500">
+                Watchlists <InfoTip term="watchlists" />
+              </p>
               <p className="text-label text-gray-600 mb-3">
-                Edit <span className="font-mono text-gray-500">config/watchlists.json</span>
+                Edit{" "}
+                <span className="font-mono text-gray-500">
+                  config/watchlists.json
+                </span>
               </p>
               {groupKeys.length > 0 ? (
                 <select
@@ -284,28 +314,40 @@ export function Dashboard() {
               </div>
             </div>
 
-            <div id="sectors" className="bg-surface-card rounded-xl p-4 border border-border/60">
+            <div
+              id="sectors"
+              className="bg-surface-card rounded-xl p-4 border border-border/60"
+            >
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-gray-500 uppercase tracking-wider">Sector drift</p>
+                <p className="flex items-center gap-xs text-xs uppercase tracking-wider text-gray-500">
+                  Sector drift <InfoTip term="sector-drift" />
+                </p>
                 {/* No window chosen means no data; an empty span would still
-                  * take its place in the flex row and push the heading off
-                  * centre for no reason. */}
+                 * take its place in the flex row and push the heading off
+                 * centre for no reason. */}
                 {sectorLabel && (
-                  <span className="text-label text-gray-600">{sectorLabel}</span>
+                  <span className="text-label text-gray-600">
+                    {sectorLabel}
+                  </span>
                 )}
               </div>
               {/* Every sector, not the top eight. A ranking exists to show
-                * both ends — the sector being sold is as much of a finding as
-                * the one being bought, and a silent slice put the bottom three
-                * out of reach with nothing to say they were missing. Eleven
-                * rows of 12px cost less vertical space than the truncation
-                * cost in information. */}
+               * both ends — the sector being sold is as much of a finding as
+               * the one being bought, and a silent slice put the bottom three
+               * out of reach with nothing to say they were missing. Eleven
+               * rows of 12px cost less vertical space than the truncation
+               * cost in information. */}
               {sectorData.length > 0 ? (
                 [...sectorData]
                   .sort((a, b) => b.change_pct - a.change_pct)
                   .map((s) => (
-                    <div key={s.sector} className="flex justify-between py-0.5 text-label">
-                      <span className="text-gray-400 truncate mr-2">{s.sector}</span>
+                    <div
+                      key={s.sector}
+                      className="flex justify-between py-0.5 text-label"
+                    >
+                      <span className="text-gray-400 truncate mr-2">
+                        {s.sector}
+                      </span>
                       <span
                         className={`font-mono ${
                           s.change_pct > 0
@@ -333,9 +375,9 @@ export function Dashboard() {
                 </p>
               )}
               {/* The basis, not just the source name. "Sector performance"
-                * names at least two different statistics in common use, and
-                * they differ by more than a factor of two on the same sector
-                * over the same year — so the panel says which one this is. */}
+               * names at least two different statistics in common use, and
+               * they differ by more than a factor of two on the same sector
+               * over the same year — so the panel says which one this is. */}
               {sectors.data?.basis && (
                 <p className="text-label text-gray-600 mt-2 leading-snug">
                   {sectors.data.basis}
@@ -343,11 +385,19 @@ export function Dashboard() {
               )}
             </div>
 
-            <div id="providers" className="bg-surface-card rounded-xl p-4 border border-border/60">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Data providers</p>
+            <div
+              id="providers"
+              className="bg-surface-card rounded-xl p-4 border border-border/60"
+            >
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">
+                Data providers
+              </p>
               {providers.data ? (
                 providers.data.providers.map((p) => (
-                  <div key={p.name} className="flex items-center justify-between py-0.5 text-label">
+                  <div
+                    key={p.name}
+                    className="flex items-center justify-between py-0.5 text-label"
+                  >
                     <span className="text-gray-400 capitalize truncate mr-2">
                       {p.name}
                     </span>
@@ -374,7 +424,7 @@ export function Dashboard() {
               Run it locally
             </h3>
             <pre className="overflow-x-auto border border-ink-line bg-ink p-md font-display text-[12px] leading-relaxed text-cadmium">
-{`cd ai-hedge-fund
+              {`cd ai-hedge-fund
 ./start.sh                       # API on :8000, UI on :5173
 ./start.sh --api-port 8010 --ui-port 5174   # if those ports are taken`}
             </pre>
@@ -389,8 +439,10 @@ export function Dashboard() {
                 Ollama
               </a>{" "}
               running with a model pulled —{" "}
-              <span className="font-display text-on-ink-soft">ollama pull qwen3:30b</span>.
-              Optional extras and API keys live on the{" "}
+              <span className="font-display text-on-ink-soft">
+                ollama pull qwen3:30b
+              </span>
+              . Optional extras and API keys live on the{" "}
               <button
                 type="button"
                 onClick={() => navigate("/setup")}
@@ -417,16 +469,24 @@ function SnapshotCard({
   sub,
   href,
   cta,
+  info,
 }: {
   label: string;
   value: string;
   sub: string;
   href: string;
   cta: string;
+  /** Glossary term for the marker beside the label. */
+  info?: GlossaryKey;
 }) {
   return (
     <div className="bg-surface-card rounded-xl p-4 border border-border/60">
-      <p className="text-label text-gray-500 uppercase tracking-wider mb-1">{label}</p>
+      {/* The marker sits with the label rather than the value: it explains the
+       * thing being measured, not the particular figure. */}
+      <p className="text-label mb-1 flex items-center gap-xs uppercase tracking-wider text-gray-500">
+        {label}
+        {info && <InfoTip term={info} />}
+      </p>
       <p className="text-xl font-bold font-mono text-white">{value}</p>
       <p className="text-label text-gray-500 mt-1">{sub}</p>
       {cta && (
@@ -440,4 +500,3 @@ function SnapshotCard({
     </div>
   );
 }
-

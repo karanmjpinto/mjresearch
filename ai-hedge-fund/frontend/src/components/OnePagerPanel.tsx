@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { InfoTip } from "./InfoTip";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, type OnePager } from "@/lib/api";
 
@@ -51,8 +52,9 @@ export function OnePagerPanel({ ticker }: { ticker: string }) {
   return (
     <section className="flex flex-col gap-sm" aria-label="One pager">
       <div>
-        <h2 className="font-display text-label uppercase tracking-label text-on-ink-faint">
+        <h2 className="flex items-center gap-xs font-display text-label uppercase tracking-label text-on-ink-faint">
           A page for this name
+          <InfoTip term="one-pager" />
         </h2>
         <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
           Nothing written about {ticker} yet? This drafts one in your own

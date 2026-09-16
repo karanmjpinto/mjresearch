@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { InfoTip } from "./InfoTip";
 import { useQuery } from "@tanstack/react-query";
 import { api, type ConcentrationView } from "@/lib/api";
 
@@ -63,8 +64,9 @@ export function ConcentrationPanel({ ticker }: { ticker: string }) {
       aria-label={`Concentration for ${ticker}`}
     >
       <div>
-        <h2 className="font-display text-label uppercase tracking-label text-on-ink-faint">
+        <h2 className="flex items-center gap-xs font-display text-label uppercase tracking-label text-on-ink-faint">
           How big, and does the book agree?
+          <InfoTip term="position-size" />
         </h2>
         <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
           A diversified book is an admission that you do not have conviction —
@@ -87,7 +89,7 @@ export function ConcentrationPanel({ ticker }: { ticker: string }) {
       >
         <label className="flex flex-col gap-2xs">
           <span className="font-display text-label uppercase tracking-label text-on-ink-faint">
-            Conviction (0–1)
+            Conviction (0–1) <InfoTip term="conviction" />
           </span>
           <input
             value={score}
@@ -194,8 +196,9 @@ export function ConcentrationPanel({ ticker }: { ticker: string }) {
 
       {d?.book && (
         <div>
-          <h3 className="font-display text-label uppercase tracking-label text-verdigris">
+          <h3 className="flex items-center gap-xs font-display text-label uppercase tracking-label text-verdigris">
             What your book already claims
+            <InfoTip term="implied-conviction" />
           </h3>
           <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
             {d.book.finding}

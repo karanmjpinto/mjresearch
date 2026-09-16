@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { headlineField, isSigned, readField, unitFor, wordTone } from "./field-scales";
+import {
+  headlineField,
+  isSigned,
+  readField,
+  unitFor,
+  wordTone,
+} from "./field-scales";
 
 /**
  * A scale decides where a value is drawn between two stated endpoints. Get the
@@ -39,7 +45,10 @@ describe("readField", () => {
     });
 
     it("carries the endpoint labels the harness declared", () => {
-      expect(readField("valuation_score", 50)?.ends).toEqual(["very expensive", "very cheap"]);
+      expect(readField("valuation_score", 50)?.ends).toEqual([
+        "very expensive",
+        "very cheap",
+      ]);
     });
   });
 
@@ -147,11 +156,15 @@ describe("unitFor / isSigned", () => {
 
 describe("headlineField", () => {
   it("picks the first field that has a scale", () => {
-    expect(headlineField({ unknown_thing: 1, momentum_pct: 12 })).toBe("momentum_pct");
+    expect(headlineField({ unknown_thing: 1, momentum_pct: 12 })).toBe(
+      "momentum_pct",
+    );
   });
 
   it("skips fields whose value cannot be placed", () => {
-    expect(headlineField({ momentum_pct: null, conviction_score: 80 })).toBe("conviction_score");
+    expect(headlineField({ momentum_pct: null, conviction_score: 80 })).toBe(
+      "conviction_score",
+    );
   });
 
   it("returns null when nothing can be placed", () => {

@@ -1,5 +1,10 @@
 import { useLocation } from "react-router-dom";
-import { DESTINATIONS, STAGES, stageFor, type DestinationKey } from "@/lib/flow";
+import {
+  DESTINATIONS,
+  STAGES,
+  stageFor,
+  type DestinationKey,
+} from "@/lib/flow";
 import { useTicker } from "@/lib/ticker-context";
 
 /**
@@ -28,7 +33,8 @@ export function TickerBar() {
 
   // Switching to a recent name keeps you on the stage you were reading, so the
   // comparison you were making carries across. Off the flow, start at the top.
-  const recentTarget: DestinationKey = current && current !== "ticker" ? current : "data";
+  const recentTarget: DestinationKey =
+    current && current !== "ticker" ? current : "data";
 
   return (
     <div className="border-b border-ink-line bg-ink-raised">
@@ -40,7 +46,10 @@ export function TickerBar() {
           <span className="font-display text-mark text-cadmium">{ticker}</span>
         </div>
 
-        <nav className="scrollbar-none flex min-w-0 items-center gap-2xs overflow-x-auto" aria-label="Stages">
+        <nav
+          className="scrollbar-none flex min-w-0 items-center gap-2xs overflow-x-auto"
+          aria-label="Stages"
+        >
           {DESTINATIONS.map((s) => {
             const on = current === s.key;
             const planned = s.status === "planned";
@@ -57,7 +66,9 @@ export function TickerBar() {
                 aria-label={`Stage ${s.num}: ${s.label}${planned ? " — not built yet" : ""}`}
                 title={s.question}
                 className={`shrink-0 px-3 py-1.5 font-display text-label uppercase tracking-label transition-colors ${
-                  on ? "bg-cobalt text-on-accent-light" : "text-on-ink-faint hover:bg-ink hover:text-on-ink"
+                  on
+                    ? "bg-cobalt text-on-accent-light"
+                    : "text-on-ink-faint hover:bg-ink hover:text-on-ink"
                 }`}
               >
                 <span className="mr-2xs text-on-ink-faint">{s.num}</span>

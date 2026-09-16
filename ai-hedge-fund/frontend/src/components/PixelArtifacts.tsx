@@ -38,7 +38,12 @@ const PERFORATED: React.CSSProperties = {
 };
 
 function Rule() {
-  return <div aria-hidden className="my-xs border-t border-dashed border-enamel/25" />;
+  return (
+    <div
+      aria-hidden
+      className="my-xs border-t border-dashed border-enamel/25"
+    />
+  );
 }
 
 function Row({ k, v, tone }: { k: string; v: string; tone?: string }) {
@@ -67,8 +72,12 @@ export function RunTape({ className }: { className?: string }) {
       )}
       style={PERFORATED}
     >
-      <div className="text-center uppercase tracking-marker text-enamel">MJ Research</div>
-      <div className="text-center uppercase tracking-marker text-on-canvas-faint">Run record</div>
+      <div className="text-center uppercase tracking-marker text-enamel">
+        MJ Research
+      </div>
+      <div className="text-center uppercase tracking-marker text-on-canvas-faint">
+        Run record
+      </div>
       <Rule />
       <Row k="TICKER" v="AAPL" />
       <Row k="SNAPSHOT" v="3f9a2c" />
@@ -109,7 +118,10 @@ export function DensityPlate({ className }: { className?: string }) {
       </div>
       <div className="flex border border-enamel/30">
         {steps.map(([label, cls]) => (
-          <div key={label} className="flex-1 border-r border-enamel/20 last:border-r-0">
+          <div
+            key={label}
+            className="flex-1 border-r border-enamel/20 last:border-r-0"
+          >
             <div className={clsx("h-10 text-enamel", cls)} />
             <div className="border-t border-enamel/20 py-2xs text-center font-display text-label tabular text-on-canvas-faint">
               {label}

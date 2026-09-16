@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { InfoTip } from "./InfoTip";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AppNav } from "./AppNav";
 import { ErrorBoundary } from "./ErrorBoundary";
@@ -171,8 +172,9 @@ export function AnalysisView() {
               );
             })}
           </div>
-          <p className="mt-xs max-w-[72ch] text-body-xs text-on-ink-faint">
+          <p className="mt-xs flex max-w-[72ch] items-center gap-xs text-body-xs text-on-ink-faint">
             {TABS.find((t) => t.id === tab)?.blurb}
+            <InfoTip term={tab === "views" ? "investor-views" : "evaluation"} />
           </p>
         </div>
 

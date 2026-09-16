@@ -38,13 +38,14 @@ export function BackendGate({ children }: { children: React.ReactNode }) {
             This part runs on your machine
           </h1>
           <p className="mt-md text-[15px] leading-relaxed text-on-ink-soft">
-            The app needs the local API, your SQLite portfolio and Ollama — none of which are
-            hosted. Nothing about your book or your model leaves your computer, which is the
-            point, but it does mean the published site can only show the overview.
+            The app needs the local API, your SQLite portfolio and Ollama — none
+            of which are hosted. Nothing about your book or your model leaves
+            your computer, which is the point, but it does mean the published
+            site can only show the overview.
           </p>
           <div className="mt-lg overflow-x-auto border border-ink-line bg-ink-raised p-md text-left">
             <pre className="font-display text-[12px] leading-relaxed text-cadmium">
-{`cd ai-hedge-fund
+              {`cd ai-hedge-fund
 uv run uvicorn hedge_fund.api.main:app --reload
 cd frontend && npm run dev`}
             </pre>

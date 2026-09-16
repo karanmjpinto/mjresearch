@@ -29,7 +29,7 @@ export function formatValue(v: unknown): string {
  */
 export function formatNumber(
   v: number,
-  { unit, signed = false }: { unit?: string; signed?: boolean } = {}
+  { unit, signed = false }: { unit?: string; signed?: boolean } = {},
 ): string {
   const body = formatValue(v);
   const sign = signed && v > 0 ? "+" : "";

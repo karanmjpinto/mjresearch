@@ -43,6 +43,8 @@ export type DriverInputProps = {
   invalid?: boolean;
   hint?: string;
   step?: string;
+  /** The guidance marker, rendered beside the label. */
+  help?: React.ReactNode;
 };
 
 export function DriverInput({
@@ -57,6 +59,7 @@ export function DriverInput({
   invalid = false,
   hint,
   step = "any",
+  help,
 }: DriverInputProps) {
   const id = useId();
   const describedBy = `${id}-note`;
@@ -70,6 +73,7 @@ export function DriverInput({
         className="flex items-baseline gap-xs font-display text-label uppercase tracking-label text-on-ink-soft"
       >
         {label}
+        {help}
         {required && (
           <span
             className="text-oxide"

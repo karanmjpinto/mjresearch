@@ -62,7 +62,10 @@ export function Track({ r, tall = false }: { r: Reading; tall?: boolean }) {
       {r.band && (
         <div
           className="absolute inset-y-0 bg-on-ink-faint/30"
-          style={{ left: `${r.band[0] * 100}%`, width: `${(r.band[1] - r.band[0]) * 100}%` }}
+          style={{
+            left: `${r.band[0] * 100}%`,
+            width: `${(r.band[1] - r.band[0]) * 100}%`,
+          }}
         />
       )}
 
@@ -74,13 +77,19 @@ export function Track({ r, tall = false }: { r: Reading; tall?: boolean }) {
       ) : (
         <div
           className={`absolute inset-y-0 ${TONE_FILL[r.tone]}`}
-          style={{ left: `${from * 100}%`, width: `${Math.max((to - from) * 100, 1)}%` }}
+          style={{
+            left: `${from * 100}%`,
+            width: `${Math.max((to - from) * 100, 1)}%`,
+          }}
         />
       )}
 
       {/* Zero on a signed scale is a landmark, so it stays visible under the fill. */}
       {r.kind === "signed" && r.origin > 0.02 && r.origin < 0.98 && (
-        <div className="absolute inset-y-0 w-px bg-ink" style={{ left: `${r.origin * 100}%` }} />
+        <div
+          className="absolute inset-y-0 w-px bg-ink"
+          style={{ left: `${r.origin * 100}%` }}
+        />
       )}
 
       {/* The value ran off the domain; the cap says so rather than lying flat. */}
@@ -94,14 +103,22 @@ export function Track({ r, tall = false }: { r: Reading; tall?: boolean }) {
 }
 
 /** The one number a node is about, sized so the eye lands on it first. */
-export function HeadlineReading({ name, value }: { name: string; value: number }) {
+export function HeadlineReading({
+  name,
+  value,
+}: {
+  name: string;
+  value: number;
+}) {
   const r = readField(name, value);
   if (!r) return null;
 
   return (
     <div className={`mt-sm border-l-2 pl-sm ${TONE_BORDER[r.tone]}`}>
       <div className="flex flex-wrap items-baseline gap-x-sm gap-y-2xs">
-        <span className={`font-display text-display-sm tabular ${TONE_TEXT[r.tone]}`}>
+        <span
+          className={`font-display text-display-sm tabular ${TONE_TEXT[r.tone]}`}
+        >
           {formatNumber(value, { unit: r.unit, signed: r.kind === "signed" })}
         </span>
         <span className="font-display text-label uppercase tracking-label text-on-ink-faint">
@@ -113,7 +130,9 @@ export function HeadlineReading({ name, value }: { name: string; value: number }
         <Track r={r} tall />
         <div className="mt-2xs flex items-baseline justify-between gap-sm font-display text-label text-on-ink-faint">
           <span>{r.ends[0]}</span>
-          {r.bandLabel && <span className="text-on-ink-soft">{r.bandLabel}</span>}
+          {r.bandLabel && (
+            <span className="text-on-ink-soft">{r.bandLabel}</span>
+          )}
           <span>{r.ends[1]}</span>
         </div>
       </div>
@@ -171,12 +190,14 @@ function FieldRow({ name, value }: { name: string; value: unknown }) {
   return (
     <div>
       <div className="flex items-baseline justify-between gap-sm">
-        <dt className="min-w-0 break-words text-label text-on-ink-faint">{name}</dt>
+        <dt className="min-w-0 break-words text-label text-on-ink-faint">
+          {name}
+        </dt>
         <dd
           className={`shrink-0 whitespace-nowrap font-display text-label tabular ${valueTone(
             name,
             value,
-            r
+            r,
           )}`}
         >
           {rendered}
@@ -212,7 +233,9 @@ function RangeStrip({ values }: { values: Record<string, unknown> }) {
   return (
     <div className="mt-sm border-l-2 border-ink-line pl-sm">
       <div className="flex flex-wrap items-baseline gap-x-sm gap-y-2xs">
-        <span className={`font-display text-display-sm tabular ${rose ? "text-verdigris" : "text-oxide"}`}>
+        <span
+          className={`font-display text-display-sm tabular ${rose ? "text-verdigris" : "text-oxide"}`}
+        >
           {formatValue(last)}
         </span>
         <span className="font-display text-label uppercase tracking-label text-on-ink-faint">
@@ -266,7 +289,10 @@ function FlagList({ flags }: { flags: string }) {
   return (
     <ul className="mt-sm space-y-2xs">
       {items.map((f) => (
-        <li key={f} className="border-l-2 border-oxide pl-sm text-sm leading-snug text-on-ink-soft">
+        <li
+          key={f}
+          className="border-l-2 border-oxide pl-sm text-sm leading-snug text-on-ink-soft"
+        >
           {f}
         </li>
       ))}
@@ -279,7 +305,9 @@ function FlagList({ flags }: { flags: string }) {
  * one, then the remainder as a scanned grid.
  */
 export function NodeReadout({ values }: { values: Record<string, unknown> }) {
-  const entries = Object.entries(values).filter(([, v]) => v !== null && v !== undefined);
+  const entries = Object.entries(values).filter(
+    ([, v]) => v !== null && v !== undefined,
+  );
   if (entries.length === 0) return null;
 
   const flags = typeof values.flags === "string" ? values.flags : null;
@@ -287,21 +315,24 @@ export function NodeReadout({ values }: { values: Record<string, unknown> }) {
   /* A price window's four closes are one figure, not four, so the strip
    * replaces the headline rather than sitting beside it. */
   const isWindow = ["low", "high", "first_close", "last_close"].every(
-    (k) => typeof values[k] === "number"
+    (k) => typeof values[k] === "number",
   );
 
   const headline = isWindow || flags ? null : headlineField(values);
   /* Whatever the headline or the strip already drew does not get repeated in
    * the grid — a figure shown twice reads as two figures. */
   const shown = new Set<string>(["flags", headline ?? ""]);
-  if (isWindow) ["low", "high", "first_close", "last_close"].forEach((k) => shown.add(k));
+  if (isWindow)
+    ["low", "high", "first_close", "last_close"].forEach((k) => shown.add(k));
   const rest = entries.filter(([k]) => !shown.has(k));
 
   return (
     <>
       {isWindow && <RangeStrip values={values} />}
       {flags && <FlagList flags={flags} />}
-      {headline && <HeadlineReading name={headline} value={values[headline] as number} />}
+      {headline && (
+        <HeadlineReading name={headline} value={values[headline] as number} />
+      )}
 
       {rest.length > 0 && (
         <dl className="mt-sm grid gap-x-lg gap-y-sm sm:grid-cols-2 xl:grid-cols-3">
@@ -331,7 +362,10 @@ export function SegmentBar({
     /* Hidden from assistive tech on purpose: every segment's count is already
      * in the heading text this bar sits beside, so announcing it again would
      * read the same figures twice. */
-    <div className="flex h-1.5 w-32 overflow-hidden bg-ink-line" aria-hidden="true">
+    <div
+      className="flex h-1.5 w-32 overflow-hidden bg-ink-line"
+      aria-hidden="true"
+    >
       {segments
         .filter((s) => s.count > 0)
         .map((s) => (
@@ -349,7 +383,13 @@ export function SegmentBar({
  * A claim against the data behind it. Two bars to a shared scale is the whole
  * argument of the verifier: the prose said one length, the snapshot is another.
  */
-export function ClaimCompare({ stated, actual }: { stated: number; actual: number }) {
+export function ClaimCompare({
+  stated,
+  actual,
+}: {
+  stated: number;
+  actual: number;
+}) {
   const peak = Math.max(Math.abs(stated), Math.abs(actual)) || 1;
   const rows: { label: string; value: number; tone: Tone }[] = [
     /* The claim is the thing in question; the snapshot is the reference it is
@@ -368,7 +408,9 @@ export function ClaimCompare({ stated, actual }: { stated: number; actual: numbe
           <div className="h-1.5 flex-1 bg-ink-line">
             <div
               className={`h-full ${TONE_FILL[row.tone]}`}
-              style={{ width: `${Math.max((Math.abs(row.value) / peak) * 100, 1)}%` }}
+              style={{
+                width: `${Math.max((Math.abs(row.value) / peak) * 100, 1)}%`,
+              }}
             />
           </div>
           <span className="w-16 shrink-0 text-right font-display text-label tabular text-on-ink">

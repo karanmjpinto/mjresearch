@@ -17,7 +17,13 @@ import { compsExtent, compsPct, type Extent } from "@/lib/comps-scale";
 
 const TRACK = "relative h-6 rounded bg-ink";
 
-function Labelled({ label, children }: { label: string; children: React.ReactNode }) {
+function Labelled({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-2xs">
       <span className="font-display text-label uppercase tracking-label text-on-ink-faint">
@@ -41,7 +47,8 @@ function Row({ band, extent }: { band: CompsBand; extent: Extent }) {
           {band.label}
         </span>
         <span className="font-display text-label text-on-ink-soft tabular">
-          {band.peer_count} peers · {band.peer_multiple.low}–{band.peer_multiple.high}×
+          {band.peer_count} peers · {band.peer_multiple.low}–
+          {band.peer_multiple.high}×
         </span>
       </div>
 
@@ -49,7 +56,9 @@ function Row({ band, extent }: { band: CompsBand; extent: Extent }) {
         <div className={TRACK}>
           <div
             className={`absolute inset-y-0 rounded border ${
-              off ? "border-dashed border-oxide bg-oxide/10" : "border-cobalt bg-cobalt/25"
+              off
+                ? "border-dashed border-oxide bg-oxide/10"
+                : "border-cobalt bg-cobalt/25"
             }`}
             style={{ left: `${left}%`, width: `${width}%` }}
           />
@@ -61,10 +70,21 @@ function Row({ band, extent }: { band: CompsBand; extent: Extent }) {
         </div>
         <p className="mt-2xs font-display text-label text-on-ink-soft tabular">
           {band.low.toFixed(2)} – {band.high.toFixed(2)}
-          <span className="text-on-ink-faint"> · mid {band.mid.toFixed(2)}</span>
-          {off && <span className="ml-xs uppercase tracking-label text-oxide">excluded</span>}
+          <span className="text-on-ink-faint">
+            {" "}
+            · mid {band.mid.toFixed(2)}
+          </span>
+          {off && (
+            <span className="ml-xs uppercase tracking-label text-oxide">
+              excluded
+            </span>
+          )}
         </p>
-        {band.note && <p className="mt-2xs max-w-[68ch] text-body-xs text-oxide">{band.note}</p>}
+        {band.note && (
+          <p className="mt-2xs max-w-[68ch] text-body-xs text-oxide">
+            {band.note}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -88,7 +108,8 @@ export function CompsField({ ticker }: { ticker: string }) {
     return (
       <div className="flex flex-wrap items-center gap-sm">
         <p className="text-body-sm text-oxide">
-          The comparable range could not be computed — the peers or the price were unavailable.
+          The comparable range could not be computed — the peers or the price
+          were unavailable.
         </p>
         <button
           type="button"
@@ -107,7 +128,10 @@ export function CompsField({ ticker }: { ticker: string }) {
 
   // One scale for every mark, price included, so the bars are comparable to
   // each other and to what you would pay today.
-  const extent = compsExtent([...d.bands.flatMap((b) => [b.low, b.high]), price]);
+  const extent = compsExtent([
+    ...d.bands.flatMap((b) => [b.low, b.high]),
+    price,
+  ]);
   const pricePct = compsPct(price, extent);
 
   return (
@@ -123,13 +147,17 @@ export function CompsField({ ticker }: { ticker: string }) {
                 <span className="tabular text-on-ink">
                   {s.low?.toFixed(2)} – {s.high?.toFixed(2)}
                 </span>{" "}
-                against a price of <span className="tabular text-cadmium">{price.toFixed(2)}</span>,
-                which is <span className="text-on-ink">{s.position}</span>
+                against a price of{" "}
+                <span className="tabular text-cadmium">{price.toFixed(2)}</span>
+                , which is <span className="text-on-ink">{s.position}</span>
                 {typeof s.upside_to_mid_pct === "number" && (
                   <>
                     {" "}
-                    (<span className="tabular">{s.upside_to_mid_pct.toFixed(1)}%</span> to the
-                    midpoint)
+                    (
+                    <span className="tabular">
+                      {s.upside_to_mid_pct.toFixed(1)}%
+                    </span>{" "}
+                    to the midpoint)
                   </>
                 )}
               </>
@@ -140,9 +168,15 @@ export function CompsField({ ticker }: { ticker: string }) {
         </Labelled>
         <span
           className={`shrink-0 rounded border px-xs py-2xs font-display text-label uppercase tracking-label ${
-            d.vetted ? "border-verdigris text-verdigris" : "border-ink-line text-on-ink-faint"
+            d.vetted
+              ? "border-verdigris text-verdigris"
+              : "border-ink-line text-on-ink-faint"
           }`}
-          title={d.vetted ? "Peers hand-picked in config/comps.json" : "Peers inherited from SIC"}
+          title={
+            d.vetted
+              ? "Peers hand-picked in config/comps.json"
+              : "Peers inherited from SIC"
+          }
         >
           {d.vetted ? "Curated peers" : "Unvetted peers"}
         </span>
@@ -157,7 +191,9 @@ export function CompsField({ ticker }: { ticker: string }) {
           <div
             aria-hidden
             className="pointer-events-none absolute inset-y-0 border-l border-dashed border-oxide"
-            style={{ left: `calc(120px + ${(pricePct / 100).toFixed(4)} * (100% - 120px))` }}
+            style={{
+              left: `calc(120px + ${(pricePct / 100).toFixed(4)} * (100% - 120px))`,
+            }}
           />
         </div>
       ) : (
@@ -182,8 +218,9 @@ export function CompsField({ ticker }: { ticker: string }) {
       )}
 
       <p className="max-w-[72ch] text-body-xs text-on-ink-faint">
-        Each bar is the peer quartile range applied to the per-share figure recovered from this
-        company&apos;s own multiple. Peers: {d.peers.join(", ") || "none"}
+        Each bar is the peer quartile range applied to the per-share figure
+        recovered from this company&apos;s own multiple. Peers:{" "}
+        {d.peers.join(", ") || "none"}
         {d.as_of && <> · set {d.as_of}</>}.
       </p>
     </section>

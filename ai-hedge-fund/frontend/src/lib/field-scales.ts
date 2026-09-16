@@ -77,7 +77,12 @@ const SCALES: Record<string, Scale> = {
   },
   /* Drawdowns are reported as a decline, so the domain sits below zero and the
    * bar grows leftwards from the peak rather than up from nothing. */
-  max_drawdown_pct: { kind: "signed", domain: [-80, 0], unit: PCT, ends: ["−80%", "at peak"] },
+  max_drawdown_pct: {
+    kind: "signed",
+    domain: [-80, 0],
+    unit: PCT,
+    ends: ["−80%", "at peak"],
+  },
   current_drawdown_pct: {
     kind: "signed",
     domain: [-80, 0],
@@ -89,21 +94,65 @@ const SCALES: Record<string, Scale> = {
   annualized_volatility_pct: { kind: "level", domain: [0, 100], unit: PCT },
   recent_volatility_pct: { kind: "level", domain: [0, 100], unit: PCT },
   baseline_volatility_pct: { kind: "level", domain: [0, 100], unit: PCT },
-  positive_day_pct: { kind: "level", domain: [0, 100], unit: PCT, ends: ["never up", "always up"] },
-  range_position_pct: { kind: "level", domain: [0, 100], unit: PCT, ends: ["52w low", "52w high"] },
+  positive_day_pct: {
+    kind: "level",
+    domain: [0, 100],
+    unit: PCT,
+    ends: ["never up", "always up"],
+  },
+  range_position_pct: {
+    kind: "level",
+    domain: [0, 100],
+    unit: PCT,
+    ends: ["52w low", "52w high"],
+  },
   pct_below_52w_high: { kind: "level", domain: [0, 60], unit: PCT },
   pct_above_52w_low: { kind: "level", domain: [0, 150], unit: PCT },
 
   /* Read against a conventional band. */
-  pe_ratio: { kind: "multiple", domain: [4, 120], band: [10, 25], log: true, unit: X },
-  forward_pe: { kind: "multiple", domain: [4, 100], band: [10, 20], log: true, unit: X },
-  price_to_book: { kind: "multiple", domain: [0.3, 20], band: [1, 3], log: true, unit: X },
-  peg_ratio: { kind: "multiple", domain: [0.2, 5], band: [0.8, 1.5], log: true, unit: X },
-  beta: { kind: "multiple", domain: [0, 2.5], band: [0.8, 1.2], ends: ["unmoved", "2.5× market"] },
+  pe_ratio: {
+    kind: "multiple",
+    domain: [4, 120],
+    band: [10, 25],
+    log: true,
+    unit: X,
+  },
+  forward_pe: {
+    kind: "multiple",
+    domain: [4, 100],
+    band: [10, 20],
+    log: true,
+    unit: X,
+  },
+  price_to_book: {
+    kind: "multiple",
+    domain: [0.3, 20],
+    band: [1, 3],
+    log: true,
+    unit: X,
+  },
+  peg_ratio: {
+    kind: "multiple",
+    domain: [0.2, 5],
+    band: [0.8, 1.5],
+    log: true,
+    unit: X,
+  },
+  beta: {
+    kind: "multiple",
+    domain: [0, 2.5],
+    band: [0.8, 1.2],
+    ends: ["unmoved", "2.5× market"],
+  },
   sharpe_ratio: { kind: "multiple", domain: [-1, 3], band: [1, 3] },
   sortino_ratio: { kind: "multiple", domain: [-1, 4], band: [1, 4] },
   volatility_ratio: { kind: "multiple", domain: [0, 3], band: [0.8, 1.25] },
-  rsi_14: { kind: "multiple", domain: [0, 100], band: [30, 70], ends: ["oversold", "overbought"] },
+  rsi_14: {
+    kind: "multiple",
+    domain: [0, 100],
+    band: [30, 70],
+    ends: ["oversold", "overbought"],
+  },
 };
 
 /** A value placed on its scale. All positions are fractions of the track, 0–1. */
@@ -175,7 +224,9 @@ export function readField(name: string, value: unknown): Reading | null {
     origin,
     clamped: raw < 0 || raw > 1,
     tone: toneFor(value, s),
-    band: s.band ? [clamp01(place(s.band[0], s)), clamp01(place(s.band[1], s))] : undefined,
+    band: s.band
+      ? [clamp01(place(s.band[0], s)), clamp01(place(s.band[1], s))]
+      : undefined,
     ends: s.ends ?? [endLabel(s.domain[0], s), endLabel(s.domain[1], s)],
     bandLabel: bandLabel(s),
     unit: s.unit,

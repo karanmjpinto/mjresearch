@@ -14,6 +14,7 @@ from hedge_fund.valuation import implied_bands, summarise
 from hedge_fund.valuation.concentration import concentration
 from hedge_fund.valuation.cost_of_capital import COMPANY_TYPES, CostOfCapitalError, build
 from hedge_fund.valuation.dcf import DCFError, Drivers, sensitivity, simulate, value
+from hedge_fund.valuation.implied import implied_set
 from hedge_fund.valuation.conviction import (
     EDGE_SOURCES,
     ConvictionError,
@@ -494,3 +495,188 @@ async def concentration_policy(
             "than mixed into one weight."
         )
     return out
+
+
+# ------------------------------------------------------------------
+# What to put in the boxes
+# ------------------------------------------------------------------
+
+#: How to think about each driver, in the reader's language rather than the
+#: model's. Written here rather than in the component so the explanation and
+#: the arithmetic that needs it cannot drift apart.
+#:
+#: Each entry answers three questions in order: what the number is, what moves
+#: it, and what would make it indefensible. The last one is the useful part —
+#: knowing a margin cannot exceed what the industry has ever earned is worth
+#: more than a definition.
+DRIVER_HELP: dict[str, dict[str, str]] = {
+    "revenue_growth": {
+        "label": "Revenue growth",
+        "what": "How fast sales grow each year, for the ten years the model forecasts.",
+        "moves": (
+            "Volume, price, and new markets. Past growth is the usual starting point, "
+            "but a big company cannot keep a small company's rate — the base it grows "
+            "from is larger every year."
+        ),
+        "bound": (
+            "Nothing grows faster than its market forever. Compare against the implied "
+            "figure below: that is the rate today's price is already paying for."
+        ),
+    },
+    "target_operating_margin": {
+        "label": "Target operating margin",
+        "what": (
+            "Operating profit as a share of sales, at the END of the forecast — not "
+            "today's. The model walks from the current margin to this one."
+        ),
+        "moves": (
+            "Scale, mix, and competition. Software drifts up as fixed costs spread; "
+            "hardware and retail rarely do."
+        ),
+        "bound": (
+            "The ceiling is what the best company in the industry has actually earned. "
+            "A margin above anything the sector has ever posted is a claim that this "
+            "business is a different kind of business."
+        ),
+    },
+    "sales_to_capital": {
+        "label": "Sales to capital",
+        "what": (
+            "Dollars of revenue each dollar of invested capital produces — so how "
+            "much the growth above has to be paid for."
+        ),
+        "moves": (
+            "Asset intensity. A fab or an airline sits near 1; a software or brand "
+            "business can be 3 or more. Higher means growth is cheaper."
+        ),
+        "bound": (
+            "Below about 0.5 growth consumes more cash than it brings in. The figure "
+            "derived here is the company's own: revenue over debt plus book equity."
+        ),
+    },
+    "terminal_growth": {
+        "label": "Terminal growth",
+        "what": "The rate assumed forever, after the forecast ends.",
+        "moves": (
+            "Almost nothing you control. It is a statement about the economy, not "
+            "about the company."
+        ),
+        "bound": (
+            "Hard ceiling: the risk-free rate. A business growing faster than that "
+            "forever eventually becomes the whole economy, so the model refuses it."
+        ),
+    },
+    "failure_probability": {
+        "label": "Chance it fails",
+        "what": (
+            "The probability the business does not survive to deliver any of this, "
+            "in which case the equity pays nothing."
+        ),
+        "moves": (
+            "Debt load, cash burn, and whether it depends on refinancing. A profitable "
+            "large-cap with net cash is near zero; a pre-revenue company carrying debt "
+            "is not."
+        ),
+        "bound": (
+            "No table is vendored here, so this is a judgment rather than a sourced "
+            "figure — which is why it defaults to zero and says so rather than "
+            "pretending to a number."
+        ),
+    },
+}
+
+
+@router.get("/driver-guidance/{ticker}")
+async def driver_guidance(
+    ticker: str, tax_rate: float = Query(0.25, ge=0.0, lt=1.0)
+) -> dict[str, Any]:
+    """For each driver: the company's own figure, and what the price implies.
+
+    The second one is the point. Explaining what revenue growth *means* does
+    not tell anyone whether 6% is bold or timid for this company; the rate
+    already baked into the price does, because it converts a blank box into a
+    position — above it you are the optimist, below it the sceptic.
+    """
+    t = ticker.strip().upper()
+    f = _ds.get_fundamentals(t)
+    if not f or f.get("error"):
+        raise HTTPException(404, f"No fundamentals for {t}")
+
+    price = _last_close(t)
+    rf, rf_source = _live_riskfree()
+
+    try:
+        coc_build = build(
+            beta=f.get("beta"),
+            riskfree=rf,
+            riskfree_source=rf_source if rf is not None else None,
+            tax_rate=tax_rate,
+            equity_value=f.get("market_cap"),
+            debt_value=f.get("total_debt"),
+        )
+    except (ReferenceMissing, CostOfCapitalError) as exc:
+        raise HTTPException(503, str(exc)) from exc
+
+    coc = coc_build.wacc or coc_build.cost_of_equity
+    derived, notes = _derive_drivers(f, price, coc)
+
+    # The implied solve needs a complete driver set. Where a driver could not be
+    # derived, a neutral stand-in is used *only* to hold the others steady while
+    # solving — it is never reported as this company's figure.
+    probe = Drivers(
+        revenue=derived.get("revenue") or 0.0,
+        revenue_growth=derived.get("revenue_growth") or 0.05,
+        target_operating_margin=(
+            derived.get("target_operating_margin") or derived.get("current_operating_margin") or 0.1
+        ),
+        current_operating_margin=derived.get("current_operating_margin"),
+        sales_to_capital=derived.get("sales_to_capital") or 2.0,
+        cost_of_capital=coc,
+        tax_rate=tax_rate,
+        terminal_growth=min(0.025, rf or 0.025),
+        net_debt=derived.get("net_debt") or 0.0,
+        shares=derived.get("shares") or 0.0,
+        years=10,
+    )
+
+    implied: dict[str, Any] = {"drivers": {}, "note": ""}
+    if price and probe.revenue > 0 and probe.shares > 0:
+        try:
+            implied = implied_set(probe, price, riskfree=rf)
+        except Exception as exc:  # noqa: BLE001 - guidance must never 500
+            logger.warning("implied solve failed for %s (%s)", t, exc)
+
+    def own(key: str) -> float | None:
+        v = derived.get(key)
+        return round(float(v), 6) if isinstance(v, (int, float)) else None
+
+    guidance = []
+    for key, help_text in DRIVER_HELP.items():
+        entry: dict[str, Any] = {"key": key, **help_text}
+        if key == "terminal_growth":
+            entry["yours"] = round(min(0.025, rf or 0.025), 6)
+            entry["ceiling"] = round(rf, 6) if rf is not None else None
+            entry["ceiling_source"] = rf_source
+        elif key == "failure_probability":
+            entry["yours"] = 0.0
+            entry["sourced"] = False
+        else:
+            entry["yours"] = (
+                own(key)
+                if key != "target_operating_margin"
+                else (own("target_operating_margin") or own("current_operating_margin"))
+            )
+        if key in implied.get("drivers", {}):
+            entry["market_implied"] = implied["drivers"][key]
+        guidance.append(entry)
+
+    return {
+        "ticker": t,
+        "price": round(price, 2) if price else None,
+        "sector": f.get("sector"),
+        "industry": f.get("industry"),
+        "cost_of_capital_pct": round(coc * 100, 3),
+        "guidance": guidance,
+        "implied_note": implied.get("note", ""),
+        "derivation_notes": notes,
+    }

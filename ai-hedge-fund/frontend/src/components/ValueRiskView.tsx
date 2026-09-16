@@ -6,8 +6,11 @@ import { AppNav } from "./AppNav";
 import { ChatInput } from "./ChatInput";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { DriverInput } from "./DriverInput";
+import { DriverHelp } from "./DriverHelp";
+import { InfoTip } from "./InfoTip";
 import { ValueDistribution } from "./ValueDistribution";
 import { useTicker } from "@/lib/ticker-context";
+import type { GlossaryKey } from "@/lib/glossary";
 
 /**
  * Stage 05 — what it is worth, and how sure anyone can be.
@@ -55,11 +58,13 @@ function Section({
   num,
   title,
   blurb,
+  info,
   children,
 }: {
   num: string;
   title: string;
   blurb: string;
+  info?: GlossaryKey;
   children: React.ReactNode;
 }) {
   return (
@@ -68,6 +73,7 @@ function Section({
         <h2 className="flex items-baseline gap-sm font-display text-label uppercase tracking-label text-on-ink-faint">
           <span className="tabular text-cadmium">{num}</span>
           {title}
+          {info && <InfoTip term={info} />}
         </h2>
         <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
           {blurb}
@@ -138,6 +144,16 @@ export function ValueRiskView() {
     [applied],
   );
 
+  // Separate from the valuation: guidance depends only on the ticker, so it is
+  // not refetched every time a driver is changed and revalued.
+  const guide = useQuery({
+    queryKey: ["driver-guidance", ticker],
+    queryFn: () => api.getDriverGuidance(ticker),
+    enabled: Boolean(ticker),
+    retry: false,
+    staleTime: 10 * 60_000,
+  });
+
   const q = useQuery({
     queryKey: ["intrinsic", ticker, applied],
     queryFn: () => api.getIntrinsic(ticker, params),
@@ -195,6 +211,11 @@ export function ValueRiskView() {
   // defensible starting point; this one has none, and the valuation waits.
   const mustSupply = new Set(d && !d.available ? d.missing : []);
 
+  const helpFor = (key: string) => {
+    const entry = guide.data?.guidance.find((g) => g.key === key);
+    return entry ? <DriverHelp entry={entry} /> : null;
+  };
+
   const revalue = () => setApplied((n) => n + 1);
 
   return (
@@ -240,6 +261,7 @@ export function ValueRiskView() {
           <Section
             num="01"
             title="What the drivers imply"
+            info="value-per-share"
             blurb="The base case from the numbers in section 02, against what the market is asking today."
           >
             <div className="grid gap-lg border border-ink-line bg-ink-raised p-md shadow-elev-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -290,6 +312,7 @@ export function ValueRiskView() {
           <div className="grid gap-lg border border-ink-line bg-ink-raised p-md shadow-elev-1 md:grid-cols-2 xl:grid-cols-3">
             <DriverInput
               label="Revenue growth"
+              help={helpFor("revenue_growth")}
               unit="%"
               value={growth}
               onChange={setGrowth}
@@ -309,6 +332,7 @@ export function ValueRiskView() {
             />
             <DriverInput
               label="Target operating margin"
+              help={helpFor("target_operating_margin")}
               unit="%"
               value={margin}
               onChange={setMargin}
@@ -324,6 +348,7 @@ export function ValueRiskView() {
             />
             <DriverInput
               label="Sales to capital"
+              help={helpFor("sales_to_capital")}
               unit="x"
               value={salesToCapital}
               onChange={setSalesToCapital}
@@ -339,6 +364,7 @@ export function ValueRiskView() {
             />
             <DriverInput
               label="Terminal growth"
+              help={helpFor("terminal_growth")}
               unit="%"
               value={terminal}
               onChange={setTerminal}
@@ -352,6 +378,7 @@ export function ValueRiskView() {
             />
             <DriverInput
               label="Chance it fails"
+              help={helpFor("failure_probability")}
               unit="%"
               value={failure}
               onChange={setFailure}
@@ -408,6 +435,7 @@ export function ValueRiskView() {
           <Section
             num="03"
             title="What the money costs"
+            info="cost-of-capital"
             blurb="Built up from the risk-free rate rather than asserted, so each step can be argued with separately."
           >
             <div className="border border-ink-line bg-ink-raised p-md shadow-elev-1">
@@ -480,6 +508,7 @@ export function ValueRiskView() {
           <Section
             num="04"
             title="The range, not the number"
+            info="the-range"
             blurb="Each driver is drawn repeatedly within a spread, and the model is run again every time. The width is the answer."
           >
             <div className="border border-ink-line bg-ink-raised p-md shadow-elev-1">

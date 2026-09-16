@@ -5,12 +5,32 @@ import { AppNav } from "./AppNav";
 
 export default function PortfolioView() {
   const qc = useQueryClient();
-  const portfolio = useQuery({ queryKey: ["portfolio"], queryFn: api.getPortfolio });
-  const risk = useQuery({ queryKey: ["risk"], queryFn: api.getRisk, retry: false });
-  const txns = useQuery({ queryKey: ["transactions"], queryFn: () => api.getTransactions(80) });
+  const portfolio = useQuery({
+    queryKey: ["portfolio"],
+    queryFn: api.getPortfolio,
+  });
+  const risk = useQuery({
+    queryKey: ["risk"],
+    queryFn: api.getRisk,
+    retry: false,
+  });
+  const txns = useQuery({
+    queryKey: ["transactions"],
+    queryFn: () => api.getTransactions(80),
+  });
 
-  const [buy, setBuy] = useState({ ticker: "", shares: "", price: "", fee: "0" });
-  const [sell, setSell] = useState({ ticker: "", shares: "", price: "", fee: "0" });
+  const [buy, setBuy] = useState({
+    ticker: "",
+    shares: "",
+    price: "",
+    fee: "0",
+  });
+  const [sell, setSell] = useState({
+    ticker: "",
+    shares: "",
+    price: "",
+    fee: "0",
+  });
   const [cash, setCash] = useState({ amount: "", deposit: true });
   const [split, setSplit] = useState({ ticker: "", ratio: "" });
   const [div, setDiv] = useState({ ticker: "", perShare: "" });
@@ -107,14 +127,21 @@ export default function PortfolioView() {
         <div>
           <h1 className="text-2xl font-bold text-white">Portfolio</h1>
           <p className="text-gray-500 text-sm">
-            SQLite-backed book — trades, cash, splits, and dividends. Risk uses value-weighted returns.
+            SQLite-backed book — trades, cash, splits, and dividends. Risk uses
+            value-weighted returns.
           </p>
         </div>
 
         {p && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Stat label="Total value" value={`$${p.total_value.toLocaleString()}`} />
-            <Stat label="Cash" value={`$${p.cash.toLocaleString()} (${p.cash_pct.toFixed(1)}%)`} />
+            <Stat
+              label="Total value"
+              value={`$${p.total_value.toLocaleString()}`}
+            />
+            <Stat
+              label="Cash"
+              value={`$${p.cash.toLocaleString()} (${p.cash_pct.toFixed(1)}%)`}
+            />
             <Stat label="Benchmark" value={p.benchmark ?? "—"} />
             <Stat label="Positions" value={String(p.holdings.length)} />
           </div>
@@ -122,17 +149,26 @@ export default function PortfolioView() {
 
         {risk.data && !("error" in risk.data) && (
           <div className="bg-surface-card rounded-xl p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Stat label="VaR 95% (daily)" value={`${risk.data.var_95_daily}%`} />
+            <Stat
+              label="VaR 95% (daily)"
+              value={`${risk.data.var_95_daily}%`}
+            />
             <Stat label="CVaR 95%" value={`${risk.data.cvar_95_daily}%`} />
             <Stat label="Sharpe" value={String(risk.data.sharpe_ratio)} />
-            <Stat label="Max drawdown" value={`${risk.data.max_drawdown_pct}%`} />
+            <Stat
+              label="Max drawdown"
+              value={`${risk.data.max_drawdown_pct}%`}
+            />
             <p className="col-span-full text-xs text-gray-600">
-              {String(risk.data.method ?? "")} · {String(risk.data.observations ?? "")} days
+              {String(risk.data.method ?? "")} ·{" "}
+              {String(risk.data.observations ?? "")} days
             </p>
           </div>
         )}
         {"error" in (risk.data ?? {}) && (
-          <p className="text-sm text-amber-500">{(risk.data as { error: string }).error}</p>
+          <p className="text-sm text-amber-500">
+            {(risk.data as { error: string }).error}
+          </p>
         )}
 
         <div className="bg-surface-card rounded-xl p-4 overflow-x-auto">
@@ -155,8 +191,12 @@ export default function PortfolioView() {
                   <td className="py-2 text-white font-medium">{h.ticker}</td>
                   <td className="py-2 text-right font-mono">{h.shares}</td>
                   <td className="py-2 text-right font-mono">{h.avg_cost}</td>
-                  <td className="py-2 text-right font-mono">{h.current_price}</td>
-                  <td className="py-2 text-right font-mono">{h.market_value.toLocaleString()}</td>
+                  <td className="py-2 text-right font-mono">
+                    {h.current_price}
+                  </td>
+                  <td className="py-2 text-right font-mono">
+                    {h.market_value.toLocaleString()}
+                  </td>
                   <td
                     className={`py-2 text-right font-mono ${
                       h.pnl_pct >= 0 ? "text-accent-green" : "text-accent-red"
@@ -165,7 +205,9 @@ export default function PortfolioView() {
                     {h.pnl_pct >= 0 ? "+" : ""}
                     {h.pnl_pct}%
                   </td>
-                  <td className="py-2 text-right font-mono text-gray-400">{h.weight_pct}%</td>
+                  <td className="py-2 text-right font-mono text-gray-400">
+                    {h.weight_pct}%
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -207,7 +249,9 @@ export default function PortfolioView() {
               Buy
             </button>
             {mBuy.isError && (
-              <p className="text-xs text-red-400 mt-1">{(mBuy.error as Error).message}</p>
+              <p className="text-xs text-red-400 mt-1">
+                {(mBuy.error as Error).message}
+              </p>
             )}
           </FormCard>
 
@@ -245,7 +289,9 @@ export default function PortfolioView() {
               Sell
             </button>
             {mSell.isError && (
-              <p className="text-xs text-red-400 mt-1">{(mSell.error as Error).message}</p>
+              <p className="text-xs text-red-400 mt-1">
+                {(mSell.error as Error).message}
+              </p>
             )}
           </FormCard>
 
@@ -254,7 +300,9 @@ export default function PortfolioView() {
               <input
                 type="checkbox"
                 checked={cash.deposit}
-                onChange={(e) => setCash({ ...cash, deposit: e.target.checked })}
+                onChange={(e) =>
+                  setCash({ ...cash, deposit: e.target.checked })
+                }
               />
               Deposit (unchecked = withdraw)
             </label>
@@ -273,12 +321,16 @@ export default function PortfolioView() {
               Apply
             </button>
             {mCash.isError && (
-              <p className="text-xs text-red-400 mt-1">{(mCash.error as Error).message}</p>
+              <p className="text-xs text-red-400 mt-1">
+                {(mCash.error as Error).message}
+              </p>
             )}
           </FormCard>
 
           <FormCard title="Stock split (forward ratio)">
-            <p className="text-xs text-gray-600 mb-2">e.g. 4 for a 4:1 split — multiplies shares, divides avg cost.</p>
+            <p className="text-xs text-gray-600 mb-2">
+              e.g. 4 for a 4:1 split — multiplies shares, divides avg cost.
+            </p>
             <input
               className="w-full bg-surface-elevated border border-border rounded px-2 py-1 text-sm mb-2"
               placeholder="Ticker"
@@ -300,7 +352,9 @@ export default function PortfolioView() {
               Apply split
             </button>
             {mSplit.isError && (
-              <p className="text-xs text-red-400 mt-1">{(mSplit.error as Error).message}</p>
+              <p className="text-xs text-red-400 mt-1">
+                {(mSplit.error as Error).message}
+              </p>
             )}
           </FormCard>
 
@@ -326,7 +380,9 @@ export default function PortfolioView() {
               Record dividend
             </button>
             {mDiv.isError && (
-              <p className="text-xs text-red-400 mt-1">{(mDiv.error as Error).message}</p>
+              <p className="text-xs text-red-400 mt-1">
+                {(mDiv.error as Error).message}
+              </p>
             )}
           </FormCard>
 
@@ -358,7 +414,9 @@ export default function PortfolioView() {
               Patch
             </button>
             {mPatch.isError && (
-              <p className="text-xs text-red-400 mt-1">{(mPatch.error as Error).message}</p>
+              <p className="text-xs text-red-400 mt-1">
+                {(mPatch.error as Error).message}
+              </p>
             )}
           </FormCard>
         </div>
@@ -367,11 +425,18 @@ export default function PortfolioView() {
           <h2 className="text-white font-semibold mb-3">Recent transactions</h2>
           <div className="max-h-64 overflow-y-auto text-xs font-mono space-y-1">
             {(txns.data?.transactions ?? []).map((t) => (
-              <div key={t.id} className="flex justify-between border-b border-border/50 py-1">
+              <div
+                key={t.id}
+                className="flex justify-between border-b border-border/50 py-1"
+              >
                 <span className="text-gray-400">
                   {t.executed_at.slice(0, 19)} {t.txn_type} {t.ticker ?? ""}
                 </span>
-                <span className={t.cash_delta >= 0 ? "text-accent-green" : "text-accent-red"}>
+                <span
+                  className={
+                    t.cash_delta >= 0 ? "text-accent-green" : "text-accent-red"
+                  }
+                >
                   {t.cash_delta >= 0 ? "+" : ""}
                   {t.cash_delta.toFixed(2)}
                 </span>
