@@ -42,7 +42,10 @@ function PlayRow({
       <tr className="border-b border-border/50 text-sm">
         <td className="py-3 pr-4 font-mono font-semibold text-white">
           {canFetch ? (
-            <Link to={`/research/${p.ticker.toUpperCase()}`} className="text-blue-400 hover:underline">
+            <Link
+              to={`/research/${p.ticker.toUpperCase()}`}
+              className="text-blue-400 hover:underline"
+            >
               {p.ticker}
             </Link>
           ) : (
@@ -55,9 +58,15 @@ function PlayRow({
         <td className="py-3 pr-4 text-gray-400 font-mono">{p.target ?? "—"}</td>
         <td className="py-3 pr-4 text-gray-300">
           {p.sizePct != null ? `${p.sizePct.toFixed(1)}% book` : "—"}
-          {p.sizeNotes ? <span className="block text-xs text-gray-500 mt-0.5">{p.sizeNotes}</span> : null}
+          {p.sizeNotes ? (
+            <span className="block text-xs text-gray-500 mt-0.5">
+              {p.sizeNotes}
+            </span>
+          ) : null}
         </td>
-        <td className="py-3 pr-4 text-gray-500 text-xs max-w-[14rem]">{p.notes ?? "—"}</td>
+        <td className="py-3 pr-4 text-gray-500 text-xs max-w-[14rem]">
+          {p.notes ?? "—"}
+        </td>
         <td className="py-3 pr-2 text-right align-top">
           <button
             type="button"
@@ -70,7 +79,11 @@ function PlayRow({
                   : "bg-surface-elevated text-gray-400 border-border hover:text-gray-200"
                 : "opacity-40 cursor-not-allowed border-border text-gray-600"
             }`}
-            title={canFetch ? "Load committee AI views (Ollama)" : "Set a valid ticker to load views"}
+            title={
+              canFetch
+                ? "Load committee AI views (Ollama)"
+                : "Set a valid ticker to load views"
+            }
           >
             {expanded ? "Hide views" : "Investor views"}
           </button>
@@ -80,38 +93,50 @@ function PlayRow({
         <tr className="border-b border-border/60 bg-black/20">
           <td colSpan={8} className="px-5 py-4">
             {!canFetch && (
-              <p className="text-sm text-gray-500">Add a valid ticker symbol to load named investor opinions.</p>
+              <p className="text-sm text-gray-500">
+                Add a valid ticker symbol to load named investor opinions.
+              </p>
             )}
             {canFetch && views.isLoading && (
-              <p className="text-sm text-gray-400">Running committee analysis… (Ollama — may take a minute)</p>
+              <p className="text-sm text-gray-400">
+                Running committee analysis… (Ollama — may take a minute)
+              </p>
             )}
             {canFetch && views.isError && (
-              <p className="text-sm text-red-400">{(views.error as Error).message}</p>
+              <p className="text-sm text-red-400">
+                {(views.error as Error).message}
+              </p>
             )}
             {canFetch && views.data?.ai_error && (
               <p className="text-sm text-amber-200">
-                AI: {(views.data.ai_error as { message?: string }).message ?? views.data.ai_error.error}
+                AI:{" "}
+                {(views.data.ai_error as { message?: string }).message ??
+                  views.data.ai_error.error}
               </p>
             )}
-            {canFetch && views.data?.committee && views.data.committee.length > 0 && (
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-wrap gap-1.5 text-label">
-                  {views.data.committee.map((c, i) => (
-                    <span key={i} className="text-gray-500">
-                      {humanizePersonaId(c.persona_id)}:{" "}
-                      <span className="text-gray-300">{c.analysis?.stance ?? "—"}</span>
-                    </span>
-                  ))}
+            {canFetch &&
+              views.data?.committee &&
+              views.data.committee.length > 0 && (
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-wrap gap-1.5 text-label">
+                    {views.data.committee.map((c, i) => (
+                      <span key={i} className="text-gray-500">
+                        {humanizePersonaId(c.persona_id)}:{" "}
+                        <span className="text-gray-300">
+                          {c.analysis?.stance ?? "—"}
+                        </span>
+                      </span>
+                    ))}
+                  </div>
+                  <PersonaOpinionGrid
+                    committee={views.data.committee}
+                    committeeRound1={views.data.committee_round1 ?? null}
+                    synthesisAnalysis={views.data.ai_full ?? undefined}
+                    showSynthesisFirst
+                    compact
+                  />
                 </div>
-                <PersonaOpinionGrid
-                  committee={views.data.committee}
-                  committeeRound1={views.data.committee_round1 ?? null}
-                  synthesisAnalysis={views.data.ai_full ?? undefined}
-                  showSynthesisFirst
-                  compact
-                />
-              </div>
-            )}
+              )}
           </td>
         </tr>
       )}
@@ -130,16 +155,15 @@ export function ScreenersView() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <AppNav
-        active="screeners"
-      />
+      <AppNav active="screeners" />
 
       <div className="p-6 max-w-7xl mx-auto w-full flex flex-col gap-6 grow">
         <div>
           <h1 className="text-2xl font-bold text-white">Screeners</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Fundamental screeners powered by yfinance. Each model applies hard filters and a weighted scoring
-            framework — results link directly to research for AI committee analysis.
+            Fundamental screeners powered by yfinance. Each model applies hard
+            filters and a weighted scoring framework — results link directly to
+            research for AI committee analysis.
           </p>
         </div>
 
@@ -164,12 +188,16 @@ export function ScreenersView() {
           <p className="text-gray-400 text-sm mt-1">{active.description}</p>
 
           <div className="mt-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Screening criteria</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">
+              Screening criteria
+            </p>
             {active.criteriaSections && active.criteriaSections.length > 0 ? (
               <div className="space-y-5">
                 {active.criteriaSections.map((sec) => (
                   <div key={sec.title}>
-                    <p className="text-sm font-medium text-gray-200 mb-2">{sec.title}</p>
+                    <p className="text-sm font-medium text-gray-200 mb-2">
+                      {sec.title}
+                    </p>
                     <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
                       {sec.items.map((c, i) => (
                         <li key={`${sec.title}-${i}`}>{c}</li>
@@ -196,7 +224,9 @@ export function ScreenersView() {
           <div className="bg-surface-card rounded-xl border border-border/60 overflow-hidden">
             <div className="px-5 py-3 border-b border-border/60 flex items-center justify-between">
               <span className="text-sm font-medium text-gray-300">Plays</span>
-              <span className="text-xs text-gray-600">{active.plays.length} row(s)</span>
+              <span className="text-xs text-gray-600">
+                {active.plays.length} row(s)
+              </span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[720px]">
@@ -209,15 +239,23 @@ export function ScreenersView() {
                     <th className="py-3 pr-4 font-medium">Target</th>
                     <th className="py-3 pr-4 font-medium">Sizing</th>
                     <th className="py-3 pr-4 font-medium">Notes</th>
-                    <th className="py-3 pr-2 font-medium text-right w-[7rem]">AI</th>
+                    <th className="py-3 pr-2 font-medium text-right w-[7rem]">
+                      AI
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {active.plays.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-10 text-center text-gray-500 text-sm">
+                      <td
+                        colSpan={8}
+                        className="py-10 text-center text-gray-500 text-sm"
+                      >
                         No plays yet for this view. Add rows in{" "}
-                        <code className="text-gray-400">config/screeners.ts</code> or connect a screener API.
+                        <code className="text-gray-400">
+                          config/screeners.ts
+                        </code>{" "}
+                        or connect a screener API.
                       </td>
                     </tr>
                   ) : (
@@ -227,7 +265,9 @@ export function ScreenersView() {
                         p={p}
                         expanded={viewsForTicker === p.ticker}
                         onToggleViews={() =>
-                          setViewsForTicker((cur) => (cur === p.ticker ? null : p.ticker))
+                          setViewsForTicker((cur) =>
+                            cur === p.ticker ? null : p.ticker,
+                          )
                         }
                       />
                     ))

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { InfoTip } from "./InfoTip";
 import { useQuery } from "@tanstack/react-query";
 import { api, type ResearchCheckResponse } from "@/lib/api";
 import {
@@ -152,8 +153,9 @@ export function InvestorViews({ ticker }: { ticker: string }) {
     <div className="flex flex-col gap-md">
       <div className="flex flex-wrap items-start justify-between gap-md">
         <div>
-          <h2 className="font-display text-label uppercase tracking-label text-on-ink-faint">
+          <h2 className="flex items-center gap-xs font-display text-label uppercase tracking-label text-on-ink-faint">
             Investor lens
+            <InfoTip term="investor-views" />
           </h2>
           <div className="mt-xs flex flex-wrap gap-xs">
             {MODES.map(([id, label]) => (
@@ -262,7 +264,6 @@ export function InvestorViews({ ticker }: { ticker: string }) {
         <div className="max-w-3xl">
           <PersonaCard
             entry={{ persona_id: d?.persona_id ?? personaId, analysis: ai }}
-            accentIndex={0}
           />
         </div>
       )}

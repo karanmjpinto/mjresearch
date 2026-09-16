@@ -1,9 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import {
-  api,
-  type OptimizeResult,
-} from "@/lib/api";
+import { api, type OptimizeResult } from "@/lib/api";
 import { AppNav } from "./AppNav";
 import {
   ResponsiveContainer,
@@ -22,7 +19,18 @@ import {
 const DEFAULT_TICKERS = "AAPL, MSFT, NVDA, GOOGL, META, AMZN";
 
 // Palette from DESIGN.md — primary blue + semantic + info + muted neutral
-const WEIGHT_COLORS = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#38bdf8", "#a1a1aa", "#60a5fa", "#a3e635", "#fbbf24", "#f87171"];
+const WEIGHT_COLORS = [
+  "#3b82f6",
+  "#22c55e",
+  "#f59e0b",
+  "#ef4444",
+  "#38bdf8",
+  "#a1a1aa",
+  "#60a5fa",
+  "#a3e635",
+  "#fbbf24",
+  "#f87171",
+];
 
 export function OptimizeView() {
   const [tickersText, setTickersText] = useState(DEFAULT_TICKERS);
@@ -37,7 +45,10 @@ export function OptimizeView() {
     queryFn: () => api.listOptimizeMethods(),
     staleTime: 60_000 * 60,
   });
-  const watchlists = useQuery({ queryKey: ["watchlists"], queryFn: api.getWatchlists });
+  const watchlists = useQuery({
+    queryKey: ["watchlists"],
+    queryFn: api.getWatchlists,
+  });
 
   const tickers = useMemo(
     () =>
@@ -111,18 +122,19 @@ export function OptimizeView() {
 
   return (
     <div className="flex flex-col h-screen">
-      <AppNav
-        active="optimize"
-      />
+      <AppNav active="optimize" />
 
       <div className="grow overflow-y-auto p-6">
         <div className="max-w-6xl mx-auto flex flex-col gap-5">
           <div>
-            <h1 className="text-2xl font-bold text-white mb-1">Portfolio construction</h1>
+            <h1 className="text-2xl font-bold text-white mb-1">
+              Portfolio construction
+            </h1>
             <p className="text-gray-500 text-sm">
-              Given a basket and (optionally) AI conviction scores, compute weights via
-              risk parity, Markowitz, or signal-driven methods. Returns are aligned on
-              common dates; daily-rebalance metrics assume no slippage.
+              Given a basket and (optionally) AI conviction scores, compute
+              weights via risk parity, Markowitz, or signal-driven methods.
+              Returns are aligned on common dates; daily-rebalance metrics
+              assume no slippage.
             </p>
           </div>
 
@@ -141,7 +153,9 @@ export function OptimizeView() {
                   placeholder="AAPL, MSFT, NVDA, ..."
                 />
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-label text-gray-600">Load watchlist:</span>
+                  <span className="text-label text-gray-600">
+                    Load watchlist:
+                  </span>
                   <select
                     value={watchlistGroup}
                     onChange={(e) => applyWatchlist(e.target.value)}
@@ -234,7 +248,9 @@ export function OptimizeView() {
                       key={t}
                       ticker={t}
                       value={convictions[t] ?? 50}
-                      onChange={(v) => setConvictions((prev) => ({ ...prev, [t]: v }))}
+                      onChange={(v) =>
+                        setConvictions((prev) => ({ ...prev, [t]: v }))
+                      }
                     />
                   ))}
                 </div>
@@ -335,7 +351,8 @@ export function OptimizeView() {
                     </ResponsiveContainer>
                   </div>
                   <p className="text-label text-gray-600 mt-1 text-center">
-                    {pieData.length} of {data.assets.length} assets have non-zero weight
+                    {pieData.length} of {data.assets.length} assets have
+                    non-zero weight
                   </p>
                 </div>
 
@@ -359,28 +376,36 @@ export function OptimizeView() {
                       </thead>
                       <tbody>
                         {data.assets.map((a) => (
-                          <tr key={a.ticker} className="border-b border-border/50">
+                          <tr
+                            key={a.ticker}
+                            className="border-b border-border/50"
+                          >
                             <td className="py-1.5">
                               <span
                                 className="inline-block w-2.5 h-2.5 rounded-full"
                                 style={{
                                   background:
                                     a.weight > 0.001
-                                      ? WEIGHT_COLORS[
-                                          pieData.findIndex((p) => p.name === a.ticker) %
-                                            WEIGHT_COLORS.length
-                                        ] ?? "#52525b"
+                                      ? (WEIGHT_COLORS[
+                                          pieData.findIndex(
+                                            (p) => p.name === a.ticker,
+                                          ) % WEIGHT_COLORS.length
+                                        ] ?? "#52525b")
                                       : "#27272a",
                                 }}
                               />
                             </td>
-                            <td className="py-1.5 font-mono text-gray-200">{a.ticker}</td>
+                            <td className="py-1.5 font-mono text-gray-200">
+                              {a.ticker}
+                            </td>
                             <td className="text-right py-1.5 font-mono text-white font-semibold">
                               {(a.weight * 100).toFixed(2)}%
                             </td>
                             <td
                               className={`text-right py-1.5 font-mono ${
-                                a.expected_return >= 0 ? "text-accent-green" : "text-accent-red"
+                                a.expected_return >= 0
+                                  ? "text-accent-green"
+                                  : "text-accent-red"
                               }`}
                             >
                               {(a.expected_return * 100).toFixed(1)}%
@@ -390,7 +415,9 @@ export function OptimizeView() {
                             </td>
                             {useConviction && convictionSupported && (
                               <td className="text-right py-1.5 font-mono text-gray-300">
-                                {a.conviction != null ? a.conviction.toFixed(0) : "—"}
+                                {a.conviction != null
+                                  ? a.conviction.toFixed(0)
+                                  : "—"}
                               </td>
                             )}
                           </tr>
@@ -400,7 +427,8 @@ export function OptimizeView() {
                   </div>
                   {data.excluded_tickers.length > 0 && (
                     <p className="text-label text-amber-300 mt-2">
-                      Excluded (no price history): {data.excluded_tickers.join(", ")}
+                      Excluded (no price history):{" "}
+                      {data.excluded_tickers.join(", ")}
                     </p>
                   )}
                 </div>
@@ -418,7 +446,10 @@ export function OptimizeView() {
                 </div>
                 <div className="h-72">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={equityChart} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
+                    <LineChart
+                      data={equityChart}
+                      margin={{ top: 6, right: 8, left: 0, bottom: 0 }}
+                    >
                       <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
                       <XAxis
                         dataKey="date"
@@ -439,13 +470,17 @@ export function OptimizeView() {
                         labelStyle={{ color: "#a1a1aa" }}
                         formatter={(v: number, name: string) => [
                           `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`,
-                          name === "strategy" ? data.method_name : "Equal weight",
+                          name === "strategy"
+                            ? data.method_name
+                            : "Equal weight",
                         ]}
                       />
                       <Legend
                         wrapperStyle={{ fontSize: 11 }}
                         iconType="plainline"
-                        formatter={(v) => (v === "strategy" ? data.method_name : "Equal weight")}
+                        formatter={(v) =>
+                          v === "strategy" ? data.method_name : "Equal weight"
+                        }
                       />
                       <Line
                         type="monotone"
@@ -472,8 +507,14 @@ export function OptimizeView() {
                   label="Total return"
                   value={`${(data.metrics.total_return * 100).toFixed(1)}%`}
                 />
-                <SmallStat label="Sortino" value={data.metrics.sortino.toFixed(2)} />
-                <SmallStat label="Calmar" value={data.metrics.calmar.toFixed(2)} />
+                <SmallStat
+                  label="Sortino"
+                  value={data.metrics.sortino.toFixed(2)}
+                />
+                <SmallStat
+                  label="Calmar"
+                  value={data.metrics.calmar.toFixed(2)}
+                />
                 <SmallStat
                   label="Diversification ratio"
                   value={data.metrics.diversification_ratio.toFixed(2)}
@@ -495,8 +536,8 @@ export function OptimizeView() {
           {!data && !run.isPending && (
             <div className="bg-surface-card rounded-xl p-10 text-center border border-dashed border-border/60">
               <p className="text-gray-500 text-sm">
-                Pick tickers, a method, and optionally attach AI convictions — then{" "}
-                <strong className="text-gray-300">Build portfolio</strong>.
+                Pick tickers, a method, and optionally attach AI convictions —
+                then <strong className="text-gray-300">Build portfolio</strong>.
               </p>
             </div>
           )}
@@ -519,10 +560,19 @@ function ConvictionRow({
   value: number;
   onChange: (v: number) => void;
 }) {
-  const tier = value >= 70 ? "text-emerald-400" : value >= 50 ? "text-gray-300" : value >= 40 ? "text-amber-300" : "text-red-400";
+  const tier =
+    value >= 70
+      ? "text-emerald-400"
+      : value >= 50
+        ? "text-gray-300"
+        : value >= 40
+          ? "text-amber-300"
+          : "text-red-400";
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs font-mono text-gray-400 w-14 shrink-0">{ticker}</span>
+      <span className="text-xs font-mono text-gray-400 w-14 shrink-0">
+        {ticker}
+      </span>
       <input
         type="range"
         min={0}
@@ -531,7 +581,9 @@ function ConvictionRow({
         onChange={(e) => onChange(+e.target.value)}
         className="flex-1 accent-blue-500"
       />
-      <span className={`text-xs font-mono w-8 text-right ${tier}`}>{value}</span>
+      <span className={`text-xs font-mono w-8 text-right ${tier}`}>
+        {value}
+      </span>
     </div>
   );
 }
@@ -559,8 +611,12 @@ function MetricCard({
   const beats = higherIsBetter ? strategy > benchmark : strategy < benchmark;
   return (
     <div className="bg-surface-card rounded-xl p-3 border border-border/60">
-      <p className="text-label text-gray-500 uppercase tracking-wider">{label}</p>
-      <p className="text-lg font-bold font-mono mt-1 text-white">{fmtVal(strategy)}</p>
+      <p className="text-label text-gray-500 uppercase tracking-wider">
+        {label}
+      </p>
+      <p className="text-lg font-bold font-mono mt-1 text-white">
+        {fmtVal(strategy)}
+      </p>
       <div className="flex items-center justify-between text-label mt-1">
         <span className="text-gray-600">vs 1/N</span>
         <span className="font-mono text-gray-500">{fmtVal(benchmark)}</span>
@@ -579,7 +635,9 @@ function MetricCard({
 function SmallStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-surface-card rounded-lg p-2.5 border border-border/40">
-      <p className="text-label text-gray-500 uppercase tracking-wider">{label}</p>
+      <p className="text-label text-gray-500 uppercase tracking-wider">
+        {label}
+      </p>
       <p className="text-sm text-white font-mono mt-0.5">{value}</p>
     </div>
   );

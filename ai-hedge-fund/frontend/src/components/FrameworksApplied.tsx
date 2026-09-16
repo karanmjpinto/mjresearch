@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { InfoTip } from "./InfoTip";
 import { useQuery } from "@tanstack/react-query";
 import { api, type AppliedCriterion, type AppliedFramework } from "@/lib/api";
 
@@ -148,8 +149,9 @@ export function FrameworksApplied({ ticker }: { ticker: string }) {
       aria-label="Your frameworks, applied"
     >
       <div>
-        <h2 className="font-display text-label uppercase tracking-label text-on-ink-faint">
+        <h2 className="flex items-center gap-xs font-display text-label uppercase tracking-label text-on-ink-faint">
           Your frameworks, run
+          <InfoTip term="frameworks-run" />
         </h2>
         <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
           Not a list of which checklists are relevant — each line with this

@@ -787,6 +787,34 @@ export type OnePager =
       exists: boolean;
     };
 
+export type DriverGuidanceEntry = {
+  key: string;
+  label: string;
+  what: string;
+  moves: string;
+  bound: string;
+  /** The figure derived from the filings, where one could be. */
+  yours: number | null;
+  /** What today's price implies this driver would have to be. */
+  market_implied?: number | null;
+  /** Hard ceiling, where one exists (terminal growth). */
+  ceiling?: number | null;
+  ceiling_source?: string;
+  /** False where no table is vendored and the number is a judgment. */
+  sourced?: boolean;
+};
+
+export type DriverGuidance = {
+  ticker: string;
+  price: number | null;
+  sector: string | null;
+  industry: string | null;
+  cost_of_capital_pct: number;
+  guidance: DriverGuidanceEntry[];
+  implied_note: string;
+  derivation_notes: string[];
+};
+
 export type ConcentrationRow = {
   ticker: string;
   weight_pct: number;
@@ -1178,6 +1206,11 @@ export const api = {
       relative_path: string;
       bytes: number;
     }>(`/knowledge/one-pager/${encodeURIComponent(ticker)}`, {}),
+
+  getDriverGuidance: (ticker: string) =>
+    fetchJSON<DriverGuidance>(
+      `/valuation/driver-guidance/${encodeURIComponent(ticker)}`,
+    ),
 
   getTechnicals: (ticker: string) =>
     fetchJSON<Record<string, unknown>>(`/data/technicals/${ticker}`),

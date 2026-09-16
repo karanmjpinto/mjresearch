@@ -18,10 +18,22 @@ import { api, type ExperimentRow } from "@/lib/api";
 const num = (v: number | null | undefined, dp = 2) =>
   v === null || v === undefined || !Number.isFinite(v) ? "—" : v.toFixed(dp);
 
-function Metric({ label, value, tone }: { label: string; value: string; tone?: string }) {
+function Metric({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: string;
+}) {
   return (
     <div>
-      <div className={`font-display text-[16px] tabular ${tone ?? "text-on-ink"}`}>{value}</div>
+      <div
+        className={`font-display text-[16px] tabular ${tone ?? "text-on-ink"}`}
+      >
+        {value}
+      </div>
       <div className="font-display text-label uppercase tracking-[0.12em] text-on-ink-faint">
         {label}
       </div>
@@ -46,7 +58,9 @@ function ExperimentCard({ e }: { e: ExperimentRow }) {
         <span className="font-display text-label tabular text-on-ink-faint">
           #{String(e.seq).padStart(2, "0")}
         </span>
-        <span className={`px-2 py-0.5 font-display text-label uppercase tracking-[0.12em] ${verdictTone}`}>
+        <span
+          className={`px-2 py-0.5 font-display text-label uppercase tracking-[0.12em] ${verdictTone}`}
+        >
           {e.is_baseline ? "baseline" : e.verdict}
         </span>
         <span className="font-display text-[14px] text-bone">{e.ticker}</span>
@@ -55,7 +69,9 @@ function ExperimentCard({ e }: { e: ExperimentRow }) {
         </span>
         {e.params && Object.keys(e.params).length > 0 && (
           <span className="font-display text-label text-cadmium">
-            {Object.entries(e.params).map(([k, v]) => `${k}=${v}`).join(" ")}
+            {Object.entries(e.params)
+              .map(([k, v]) => `${k}=${v}`)
+              .join(" ")}
           </span>
         )}
         {e.overfit_flag && (
@@ -86,8 +102,14 @@ function ExperimentCard({ e }: { e: ExperimentRow }) {
             value={num(e.hurdle)}
             tone="text-cadmium"
           />
-          <Metric label="oos return" value={`${num(oos?.total_return_pct, 1)}%`} />
-          <Metric label="max drawdown" value={`${num(oos?.max_drawdown_pct, 1)}%`} />
+          <Metric
+            label="oos return"
+            value={`${num(oos?.total_return_pct, 1)}%`}
+          />
+          <Metric
+            label="max drawdown"
+            value={`${num(oos?.max_drawdown_pct, 1)}%`}
+          />
         </div>
       )}
 
@@ -128,7 +150,10 @@ export function AutoResearchView() {
     mutationFn: () =>
       api.startLoop({
         run_tag: runTag.trim(),
-        tickers: tickers.split(/[,\s]+/).map((t) => t.trim().toUpperCase()).filter(Boolean),
+        tickers: tickers
+          .split(/[,\s]+/)
+          .map((t) => t.trim().toUpperCase())
+          .filter(Boolean),
         experiments: count,
       }),
     onSuccess: () => {
@@ -137,7 +162,9 @@ export function AutoResearchView() {
     },
   });
 
-  const rows = [...(experiments.data?.experiments ?? [])].sort((a, b) => b.seq - a.seq);
+  const rows = [...(experiments.data?.experiments ?? [])].sort(
+    (a, b) => b.seq - a.seq,
+  );
   const trials = rows.filter((r) => !r.is_baseline && r.verdict !== "error");
   const kept = trials.filter((r) => r.kept);
 
@@ -147,11 +174,14 @@ export function AutoResearchView() {
 
       <main className="mx-auto max-w-5xl px-lg py-xl">
         <header className="mb-lg">
-          <h1 className="font-display text-display-sm tracking-tight text-bone">Autoresearch</h1>
+          <h1 className="font-display text-display-sm tracking-tight text-bone">
+            Autoresearch
+          </h1>
           <p className="mt-sm max-w-[72ch] text-[15px] leading-relaxed text-on-ink-soft">
-            Proposes one strategy at a time, evaluates it on rules it cannot change, and keeps
-            it only if it beats the bar on data it was never fitted to. Discarded runs stay on
-            the list — how many things were tried is part of what the survivor means.
+            Proposes one strategy at a time, evaluates it on rules it cannot
+            change, and keeps it only if it beats the bar on data it was never
+            fitted to. Discarded runs stay on the list — how many things were
+            tried is part of what the survivor means.
           </p>
         </header>
 
@@ -196,14 +226,18 @@ export function AutoResearchView() {
             <button
               type="button"
               onClick={() => start.mutate()}
-              disabled={busy || !runTag.trim() || !tickers.trim() || start.isPending}
+              disabled={
+                busy || !runTag.trim() || !tickers.trim() || start.isPending
+              }
               className="bg-cobalt px-5 py-2.5 font-display text-label uppercase tracking-[0.14em] text-on-accent-light transition-colors hover:bg-cadmium hover:text-on-accent disabled:bg-ink-line disabled:text-on-ink-faint"
             >
               {busy ? "Running…" : "Start"}
             </button>
           </div>
           {start.isError && (
-            <p className="mt-sm text-[12px] text-oxide">{(start.error as Error).message}</p>
+            <p className="mt-sm text-[12px] text-oxide">
+              {(start.error as Error).message}
+            </p>
           )}
           {busy && (
             <p className="mt-sm font-display text-label uppercase tracking-[0.12em] text-cadmium">
@@ -216,9 +250,17 @@ export function AutoResearchView() {
         {rows.length > 0 && (
           <div className="mt-lg grid gap-px bg-ink-line sm:grid-cols-4">
             {[
-              { n: String(trials.length), l: "hypotheses tried", tone: "text-on-ink" },
+              {
+                n: String(trials.length),
+                l: "hypotheses tried",
+                tone: "text-on-ink",
+              },
               { n: String(kept.length), l: "survived", tone: "text-verdigris" },
-              { n: String(trials.length - kept.length), l: "discarded", tone: "text-on-ink-faint" },
+              {
+                n: String(trials.length - kept.length),
+                l: "discarded",
+                tone: "text-on-ink-faint",
+              },
               {
                 n: num(kept[0]?.out_of_sample?.sharpe_ratio ?? null),
                 l: "best out-of-sample sharpe",
@@ -226,7 +268,9 @@ export function AutoResearchView() {
               },
             ].map((s) => (
               <div key={s.l} className="bg-ink-raised px-lg py-md">
-                <div className={`font-display text-[24px] tabular ${s.tone}`}>{s.n}</div>
+                <div className={`font-display text-[24px] tabular ${s.tone}`}>
+                  {s.n}
+                </div>
                 <div className="mt-2xs font-display text-label uppercase tracking-[0.14em] text-on-ink-faint">
                   {s.l}
                 </div>
@@ -242,14 +286,16 @@ export function AutoResearchView() {
               Experiment log
             </h2>
             {activeTag && (
-              <span className="font-display text-label text-on-ink-faint">run {activeTag}</span>
+              <span className="font-display text-label text-on-ink-faint">
+                run {activeTag}
+              </span>
             )}
           </div>
           {rows.length === 0 ? (
             <p className="px-lg py-xl text-[13px] leading-relaxed text-on-ink-faint">
-              No experiments yet. Give the run a tag, list a few tickers, and start — the
-              baseline for each name is measured first, and every hypothesis after it is
-              judged against that.
+              No experiments yet. Give the run a tag, list a few tickers, and
+              start — the baseline for each name is measured first, and every
+              hypothesis after it is judged against that.
             </p>
           ) : (
             rows.map((e) => <ExperimentCard key={e.id} e={e} />)

@@ -85,7 +85,9 @@ function Histogram({
       <div className="mt-2xs flex justify-between font-display text-label text-on-ink-faint tabular">
         <span>{lo.toFixed(0)}</span>
         {!inside && price !== null && (
-          <span className="text-oxide">price {price.toFixed(0)} — off the chart</span>
+          <span className="text-oxide">
+            price {price.toFixed(0)} — off the chart
+          </span>
         )}
         <span>{hi.toFixed(0)}</span>
       </div>
@@ -146,7 +148,10 @@ export function IntrinsicValue({ ticker }: { ticker: string }) {
   const d: Intrinsic | undefined = q.data;
 
   return (
-    <section className="flex flex-col gap-md" aria-label={`Intrinsic value for ${ticker}`}>
+    <section
+      className="flex flex-col gap-md"
+      aria-label={`Intrinsic value for ${ticker}`}
+    >
       <div className="flex flex-col gap-2xs">
         <span className="font-display text-label uppercase tracking-label text-on-ink-faint">
           Intrinsic value · $ per share
@@ -161,14 +166,17 @@ export function IntrinsicValue({ ticker }: { ticker: string }) {
       )}
 
       {q.isError && (
-        <p className="text-body-sm text-oxide">The model could not be run for this name.</p>
+        <p className="text-body-sm text-oxide">
+          The model could not be run for this name.
+        </p>
       )}
 
       {d && !d.available && (
         <div className="flex flex-col gap-xs">
           <p className="text-body-sm text-on-ink-soft">{d.reason}.</p>
           <p className="text-body-sm text-cadmium">
-            Waiting on: {d.missing.join(", ")}. Fill the boxes above and press Value it.
+            Waiting on: {d.missing.join(", ")}. Fill the boxes above and press
+            Value it.
           </p>
           {d.cost_of_capital.wacc_pct !== null && (
             <p className="text-body-xs text-on-ink-faint tabular">
@@ -186,18 +194,26 @@ export function IntrinsicValue({ ticker }: { ticker: string }) {
               {d.distribution.percentiles.p90?.toFixed(2)}
             </span>{" "}
             across {d.distribution.runs.toLocaleString()} runs, base case{" "}
-            <span className="tabular text-on-ink">{d.base_case.value_per_share.toFixed(2)}</span>
+            <span className="tabular text-on-ink">
+              {d.base_case.value_per_share.toFixed(2)}
+            </span>
             {d.price !== null && (
               <>
                 , against a price of{" "}
-                <span className="tabular text-cadmium">{d.price.toFixed(2)}</span>
+                <span className="tabular text-cadmium">
+                  {d.price.toFixed(2)}
+                </span>
               </>
             )}
-            {typeof d.distribution.probability_value_above_price === "number" && (
+            {typeof d.distribution.probability_value_above_price ===
+              "number" && (
               <>
                 . Chance the value beats the price:{" "}
                 <span className="tabular text-on-ink">
-                  {(d.distribution.probability_value_above_price * 100).toFixed(0)}%
+                  {(d.distribution.probability_value_above_price * 100).toFixed(
+                    0,
+                  )}
+                  %
                 </span>
               </>
             )}
@@ -207,39 +223,50 @@ export function IntrinsicValue({ ticker }: { ticker: string }) {
 
           {d.base_case.terminal_share_of_value > 0.6 && (
             <p className="max-w-[72ch] border-l-2 border-cadmium pl-sm text-body-xs text-on-ink-soft">
-              {(d.base_case.terminal_share_of_value * 100).toFixed(0)}% of this value sits in the
-              terminal year, so the answer is mostly a statement about growth in perpetuity rather
-              than about the next decade.
+              {(d.base_case.terminal_share_of_value * 100).toFixed(0)}% of this
+              value sits in the terminal year, so the answer is mostly a
+              statement about growth in perpetuity rather than about the next
+              decade.
             </p>
           )}
 
           <div className="flex flex-col gap-2xs">
             <span className="font-display text-label uppercase tracking-label text-on-ink-faint">
-              Cost of capital · {d.cost_of_capital.wacc_pct ?? d.cost_of_capital.cost_of_equity_pct}%
+              Cost of capital ·{" "}
+              {d.cost_of_capital.wacc_pct ??
+                d.cost_of_capital.cost_of_equity_pct}
+              %
             </span>
             <ul className="flex flex-col gap-2xs">
               {d.cost_of_capital.steps.map((s) => (
-                <li key={s} className="font-display text-label text-on-ink-soft tabular">
+                <li
+                  key={s}
+                  className="font-display text-label text-on-ink-soft tabular"
+                >
                   {s}
                 </li>
               ))}
             </ul>
           </div>
 
-          {(d.driver_notes.length > 0 || d.cost_of_capital.missing.length > 0) && (
+          {(d.driver_notes.length > 0 ||
+            d.cost_of_capital.missing.length > 0) && (
             <div className="flex flex-col gap-2xs">
               <span className="font-display text-label uppercase tracking-label text-on-ink-faint">
                 What this rests on
               </span>
               <ul className="flex flex-col gap-2xs">
                 {[...d.cost_of_capital.missing, ...d.driver_notes].map((n) => (
-                  <li key={n} className="max-w-[72ch] text-body-xs text-on-ink-faint">
+                  <li
+                    key={n}
+                    className="max-w-[72ch] text-body-xs text-on-ink-faint"
+                  >
                     {n}
                   </li>
                 ))}
                 <li className="max-w-[72ch] text-body-xs text-on-ink-faint">
-                  {d.distribution.independence_note}; seed {d.distribution.seed}, so the same
-                  inputs give the same range.
+                  {d.distribution.independence_note}; seed {d.distribution.seed}
+                  , so the same inputs give the same range.
                 </li>
               </ul>
             </div>

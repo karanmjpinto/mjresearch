@@ -12,7 +12,12 @@ const FALLBACK_UNIVERSES: ScreenerUniverseMeta[] = [
   { id: "sp500", label: "S&P 500", description: "", approx_count: 503 },
   { id: "nasdaq100", label: "NASDAQ-100", description: "", approx_count: 100 },
   { id: "dow", label: "Dow Jones 30", description: "", approx_count: 30 },
-  { id: "russell2000", label: "Russell 2000 (IWM)", description: "", approx_count: 2000 },
+  {
+    id: "russell2000",
+    label: "Russell 2000 (IWM)",
+    description: "",
+    approx_count: 2000,
+  },
 ];
 
 function tierLabel(tier: string | null): string {
@@ -69,13 +74,21 @@ function downloadYartsevaJson(data: YartsevaScreenerResponse) {
 }
 
 export function YartsevaPanel() {
-  const watchlists = useQuery({ queryKey: ["watchlists"], queryFn: api.getWatchlists });
-  const universes = useQuery({ queryKey: ["screener-universes"], queryFn: api.getScreenerUniverses });
+  const watchlists = useQuery({
+    queryKey: ["watchlists"],
+    queryFn: api.getWatchlists,
+  });
+  const universes = useQuery({
+    queryKey: ["screener-universes"],
+    queryFn: api.getScreenerUniverses,
+  });
   const groups = useMemo(
     () => (watchlists.data ? Object.keys(watchlists.data) : []),
     [watchlists.data],
   );
-  const indexList = universes.data?.universes?.length ? universes.data.universes : FALLBACK_UNIVERSES;
+  const indexList = universes.data?.universes?.length
+    ? universes.data.universes
+    : FALLBACK_UNIVERSES;
   /** wl:<name> or u:<universeId> */
   const [selection, setSelection] = useState("wl:default");
   const [maxSymbols, setMaxSymbols] = useState(500);
@@ -130,7 +143,10 @@ export function YartsevaPanel() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-[18rem]">
-          <label htmlFor="yartseva-universe" className="block text-xs text-gray-500 mb-1">
+          <label
+            htmlFor="yartseva-universe"
+            className="block text-xs text-gray-500 mb-1"
+          >
             Universe
           </label>
           <select
@@ -159,7 +175,10 @@ export function YartsevaPanel() {
         </div>
         {selection.startsWith("u:") && !custom.trim() && (
           <div>
-            <label htmlFor="yartseva-max-symbols" className="block text-xs text-gray-500 mb-1">
+            <label
+              htmlFor="yartseva-max-symbols"
+              className="block text-xs text-gray-500 mb-1"
+            >
               Max symbols (cap)
             </label>
             <input
@@ -174,7 +193,8 @@ export function YartsevaPanel() {
               aria-label="Maximum symbols to screen from index"
             />
             <p className="text-label text-gray-600 mt-1 max-w-[14rem]">
-              Large runs are slow (one API call per ticker). Raise to cover full S&amp;P 500 or Russell.
+              Large runs are slow (one API call per ticker). Raise to cover full
+              S&amp;P 500 or Russell.
             </p>
           </div>
         )}
@@ -206,7 +226,9 @@ export function YartsevaPanel() {
 
       {last && (
         <div className="rounded-xl border border-border/60 bg-surface-card/50 p-4 text-sm text-gray-400">
-          <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Macro regime (portfolio-level)</p>
+          <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">
+            Macro regime (portfolio-level)
+          </p>
           <p>{last.macro_regime_note}</p>
         </div>
       )}
@@ -218,13 +240,19 @@ export function YartsevaPanel() {
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-xs text-gray-600">
                 {last.count} ticker(s)
-                {last.watchlist_group != null ? ` · watchlist: ${last.watchlist_group}` : ""}
+                {last.watchlist_group != null
+                  ? ` · watchlist: ${last.watchlist_group}`
+                  : ""}
                 {last.universe != null ? (
                   <>
                     {" "}
                     · index: {last.universe}
-                    {last.universe_total != null ? ` (${last.tickers.length} of ${last.universe_total})` : ""}
-                    {last.universe_truncated ? " — truncated to max_symbols" : ""}
+                    {last.universe_total != null
+                      ? ` (${last.tickers.length} of ${last.universe_total})`
+                      : ""}
+                    {last.universe_truncated
+                      ? " — truncated to max_symbols"
+                      : ""}
                   </>
                 ) : null}
               </span>
@@ -241,7 +269,10 @@ export function YartsevaPanel() {
             <table className="w-full text-left border-collapse min-w-[960px]">
               <thead>
                 <tr className="text-gray-500 text-xs uppercase tracking-wider border-b border-border">
-                  <th className="py-3 pl-2 pr-1 w-8 font-medium" aria-label="Expand" />
+                  <th
+                    className="py-3 pl-2 pr-1 w-8 font-medium"
+                    aria-label="Expand"
+                  />
                   <th className="py-3 px-5 font-medium">Ticker</th>
                   <th className="py-3 pr-3 font-medium">Stage 1</th>
                   <th className="py-3 pr-3 font-medium">Composite</th>
@@ -261,13 +292,20 @@ export function YartsevaPanel() {
                           onClick={() => toggleExpand(r.ticker)}
                           className="text-gray-500 hover:text-gray-300 text-xs px-1"
                           aria-expanded={expanded.has(r.ticker)}
-                          title={expanded.has(r.ticker) ? "Hide details" : "Show details"}
+                          title={
+                            expanded.has(r.ticker)
+                              ? "Hide details"
+                              : "Show details"
+                          }
                         >
                           {expanded.has(r.ticker) ? "▼" : "▶"}
                         </button>
                       </td>
                       <td className="py-3 px-4 font-mono font-semibold">
-                        <Link to={`/research/${r.ticker}`} className="text-blue-400 hover:underline">
+                        <Link
+                          to={`/research/${r.ticker}`}
+                          className="text-blue-400 hover:underline"
+                        >
                           {r.ticker}
                         </Link>
                       </td>
@@ -281,16 +319,24 @@ export function YartsevaPanel() {
                       <td className="py-3 pr-3 font-mono text-white">
                         {r.composite != null ? r.composite.toFixed(2) : "—"}
                       </td>
-                      <td className={`py-3 pr-3 ${tierClass(r.tier)}`}>{tierLabel(r.tier)}</td>
+                      <td className={`py-3 pr-3 ${tierClass(r.tier)}`}>
+                        {tierLabel(r.tier)}
+                      </td>
                       <td className="py-3 pr-3">
-                        {r.short_sell_flag ? <span className="text-amber-300">Yes</span> : "—"}
+                        {r.short_sell_flag ? (
+                          <span className="text-amber-300">Yes</span>
+                        ) : (
+                          "—"
+                        )}
                       </td>
                       <td className="py-3 pr-4 text-xs text-gray-400 font-mono max-w-[22rem]">
                         {r.stage1_passed ? (
                           <>
-                            FCF {r.fcf_yield_score?.toFixed(0) ?? "—"} · V {r.value_score?.toFixed(0) ?? "—"} · P{" "}
+                            FCF {r.fcf_yield_score?.toFixed(0) ?? "—"} · V{" "}
+                            {r.value_score?.toFixed(0) ?? "—"} · P{" "}
                             {r.profitability_score?.toFixed(0) ?? "—"} · IQ{" "}
-                            {r.investment_quality_score?.toFixed(0) ?? "—"} · Sz {r.size_score?.toFixed(0) ?? "—"} · En{" "}
+                            {r.investment_quality_score?.toFixed(0) ?? "—"} · Sz{" "}
+                            {r.size_score?.toFixed(0) ?? "—"} · En{" "}
                             {r.entry_timing_score?.toFixed(0) ?? "—"}
                           </>
                         ) : (
@@ -298,8 +344,12 @@ export function YartsevaPanel() {
                         )}
                       </td>
                       <td className="py-3 pr-4 text-xs text-gray-500 max-w-xs">
-                        {r.error && <span className="text-amber-200">{r.error} · </span>}
-                        {r.stage1_failures?.length ? r.stage1_failures.join(", ") : "—"}
+                        {r.error && (
+                          <span className="text-amber-200">{r.error} · </span>
+                        )}
+                        {r.stage1_failures?.length
+                          ? r.stage1_failures.join(", ")
+                          : "—"}
                       </td>
                     </tr>
                     {expanded.has(r.ticker) && (
@@ -307,44 +357,92 @@ export function YartsevaPanel() {
                         <td colSpan={8} className="px-5 py-4">
                           <div className="grid gap-4 md:grid-cols-2">
                             <div>
-                              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Stage 2 scores (0–100)</p>
+                              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">
+                                Stage 2 scores (0–100)
+                              </p>
                               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-                                <dt className="text-gray-500">FCF yield (30%)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.fcf_yield_score, 1)}</dd>
+                                <dt className="text-gray-500">
+                                  FCF yield (30%)
+                                </dt>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.fcf_yield_score, 1)}
+                                </dd>
                                 <dt className="text-gray-500">Value (25%)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.value_score, 1)}</dd>
-                                <dt className="text-gray-500">Profitability (15%)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.profitability_score, 1)}</dd>
-                                <dt className="text-gray-500">Investment quality (15%)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.investment_quality_score, 1)}</dd>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.value_score, 1)}
+                                </dd>
+                                <dt className="text-gray-500">
+                                  Profitability (15%)
+                                </dt>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.profitability_score, 1)}
+                                </dd>
+                                <dt className="text-gray-500">
+                                  Investment quality (15%)
+                                </dt>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.investment_quality_score, 1)}
+                                </dd>
                                 <dt className="text-gray-500">Size (10%)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.size_score, 1)}</dd>
-                                <dt className="text-gray-500">Entry timing (5%)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.entry_timing_score, 1)}</dd>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.size_score, 1)}
+                                </dd>
+                                <dt className="text-gray-500">
+                                  Entry timing (5%)
+                                </dt>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.entry_timing_score, 1)}
+                                </dd>
                               </dl>
                             </div>
                             <div>
-                              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Drivers & ratios</p>
+                              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">
+                                Drivers & ratios
+                              </p>
                               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
                                 <dt className="text-gray-500">FCF yield %</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.fcf_yield_pct, 2)}</dd>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.fcf_yield_pct, 2)}
+                                </dd>
                                 <dt className="text-gray-500">Book / market</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.book_to_market, 3)}</dd>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.book_to_market, 3)}
+                                </dd>
                                 <dt className="text-gray-500">ROA %</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.roa_pct, 2)}</dd>
-                                <dt className="text-gray-500">Asset growth % (YoY)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.asset_growth_pct, 2)}</dd>
-                                <dt className="text-gray-500">EBITDA growth % (TTM vs prior)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.ebitda_growth_pct, 2)}</dd>
-                                <dt className="text-gray-500">Inv excess (pp)</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.inv_excess_pp, 2)}</dd>
-                                <dt className="text-gray-500">52w range position %</dt>
-                                <dd className="font-mono text-gray-200">{fmtNum(r.entry_range_pct, 2)}</dd>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.roa_pct, 2)}
+                                </dd>
+                                <dt className="text-gray-500">
+                                  Asset growth % (YoY)
+                                </dt>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.asset_growth_pct, 2)}
+                                </dd>
+                                <dt className="text-gray-500">
+                                  EBITDA growth % (TTM vs prior)
+                                </dt>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.ebitda_growth_pct, 2)}
+                                </dd>
+                                <dt className="text-gray-500">
+                                  Inv excess (pp)
+                                </dt>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.inv_excess_pp, 2)}
+                                </dd>
+                                <dt className="text-gray-500">
+                                  52w range position %
+                                </dt>
+                                <dd className="font-mono text-gray-200">
+                                  {fmtNum(r.entry_range_pct, 2)}
+                                </dd>
                               </dl>
                             </div>
                           </div>
                           <div className="mt-4">
-                            <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Raw snapshot (yfinance)</p>
+                            <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">
+                              Raw snapshot (yfinance)
+                            </p>
                             <pre className="text-xs font-mono text-gray-400 bg-black/50 rounded-lg p-3 overflow-x-auto max-h-64 overflow-y-auto border border-border/60">
                               {JSON.stringify(r.snapshot ?? {}, null, 2)}
                             </pre>
@@ -362,8 +460,8 @@ export function YartsevaPanel() {
 
       {!last && !run.isPending && (
         <p className="text-sm text-gray-500">
-          Choose a watchlist or enter tickers, then run. Large lists may take a while (one yfinance fetch per
-          symbol).
+          Choose a watchlist or enter tickers, then run. Large lists may take a
+          while (one yfinance fetch per symbol).
         </p>
       )}
     </div>
