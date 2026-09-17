@@ -3,22 +3,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import {
   api,
-  type ScreenerUniverseMeta,
   type YartsevaResultRow,
   type YartsevaScreenerResponse,
 } from "@/lib/api";
-
-const FALLBACK_UNIVERSES: ScreenerUniverseMeta[] = [
-  { id: "sp500", label: "S&P 500", description: "", approx_count: 503 },
-  { id: "nasdaq100", label: "NASDAQ-100", description: "", approx_count: 100 },
-  { id: "dow", label: "Dow Jones 30", description: "", approx_count: 30 },
-  {
-    id: "russell2000",
-    label: "Russell 2000 (IWM)",
-    description: "",
-    approx_count: 2000,
-  },
-];
+import { FALLBACK_UNIVERSES } from "@/lib/universes";
 
 function tierLabel(tier: string | null): string {
   switch (tier) {

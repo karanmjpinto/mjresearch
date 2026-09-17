@@ -68,7 +68,7 @@ export function ConcentrationPanel({ ticker }: { ticker: string }) {
           How big, and does the book agree?
           <InfoTip term="position-size" />
         </h2>
-        <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
+        <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
           A diversified book is an admission that you do not have conviction —
           which is the right answer when you do not. What does not hold together
           is claiming conviction and not sizing for it, or sizing for it without
@@ -131,7 +131,7 @@ export function ConcentrationPanel({ ticker }: { ticker: string }) {
           <p className="font-display text-label uppercase tracking-label text-cadmium">
             Could not size it
           </p>
-          <p className="mt-xs max-w-[72ch] text-body-sm text-on-ink-soft">
+          <p className="mt-xs max-w-measure text-body-sm text-on-ink-soft">
             {q.error instanceof Error ? q.error.message : "unknown error"}
           </p>
           <button
@@ -150,13 +150,13 @@ export function ConcentrationPanel({ ticker }: { ticker: string }) {
           <p className="font-display text-label uppercase tracking-label text-cadmium">
             No size yet
           </p>
-          <p className="mt-xs max-w-[72ch] text-body-sm text-on-ink-soft">
+          <p className="mt-xs max-w-measure text-body-sm text-on-ink-soft">
             {d.reason}
           </p>
           {(d.open_questions ?? []).map((question) => (
             <p
               key={question}
-              className="mt-2xs max-w-[72ch] text-body-xs text-on-ink-faint"
+              className="mt-2xs max-w-measure text-body-xs text-on-ink-faint"
             >
               {question}
             </p>
@@ -175,10 +175,10 @@ export function ConcentrationPanel({ ticker }: { ticker: string }) {
             label="Which implies a book of about"
             value={`${d.band.implied_names} names`}
           />
-          <p className="mt-sm max-w-[72ch] text-body-sm text-on-ink-soft">
+          <p className="mt-sm max-w-measure text-body-sm text-on-ink-soft">
             {d.band.because}
           </p>
-          <p className="mt-xs max-w-[72ch] text-body-xs text-on-ink-faint">
+          <p className="mt-xs max-w-measure text-body-xs text-on-ink-faint">
             {d.band.implied_names_note}
           </p>
           {/* Repeated from the chain on purpose: the weakest leg decides HOW
@@ -200,7 +200,7 @@ export function ConcentrationPanel({ ticker }: { ticker: string }) {
             What your book already claims
             <InfoTip term="implied-conviction" />
           </h3>
-          <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
+          <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
             {d.book.finding}
           </p>
           <ul className="mt-sm">
@@ -230,7 +230,7 @@ export function ConcentrationPanel({ ticker }: { ticker: string }) {
                     : `claims ≥ ${r.claims_at_least?.toFixed(2)}`}
                 </span>
                 {r.gap_note && (
-                  <p className="col-span-full max-w-[72ch] text-body-xs text-oxide">
+                  <p className="col-span-full max-w-measure text-body-xs text-oxide">
                     {r.gap_note}
                   </p>
                 )}
@@ -242,7 +242,7 @@ export function ConcentrationPanel({ ticker }: { ticker: string }) {
               a third of the holdings is worse than none, because it looks
               complete. */}
           {d.book_excluded && d.book_excluded.length > 0 && (
-            <p className="mt-sm max-w-[72ch] text-body-xs text-on-ink-faint">
+            <p className="mt-sm max-w-measure text-body-xs text-on-ink-faint">
               Not counted: {d.book_excluded.join(", ")}. {d.book_excluded_note}
             </p>
           )}
@@ -250,7 +250,7 @@ export function ConcentrationPanel({ ticker }: { ticker: string }) {
       )}
 
       {d?.book_note && (
-        <p className="max-w-[72ch] text-body-xs text-on-ink-faint">
+        <p className="max-w-measure text-body-xs text-on-ink-faint">
           {d.book_note}
         </p>
       )}

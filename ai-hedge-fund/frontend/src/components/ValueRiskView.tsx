@@ -75,7 +75,7 @@ function Section({
           {title}
           {info && <InfoTip term={info} />}
         </h2>
-        <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
+        <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
           {blurb}
         </p>
       </div>
@@ -232,7 +232,7 @@ export function ValueRiskView() {
               </span>
             ) : null}
           </h1>
-          <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
+          <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
             Everything below follows from the four drivers in section 02. Change
             one and press revalue; nothing here is fetched from a vendor&rsquo;s
             price target.
@@ -250,7 +250,7 @@ export function ValueRiskView() {
             <p className="font-display text-label uppercase tracking-label text-cadmium">
               Could not value {ticker}
             </p>
-            <p className="mt-xs max-w-[72ch] text-body-sm text-on-ink-soft">
+            <p className="mt-xs max-w-measure text-body-sm text-on-ink-soft">
               {q.error instanceof Error ? q.error.message : "unknown error"}
             </p>
           </div>
@@ -295,7 +295,7 @@ export function ValueRiskView() {
                 note={`out of ${d.distribution.runs.toLocaleString()} runs`}
               />
             </div>
-            <p className="max-w-[72ch] text-body-xs text-on-ink-faint">
+            <p className="max-w-measure text-body-xs text-on-ink-faint">
               {pct(d.base_case.terminal_share_of_value, 0)} of the value sits in
               the terminal year. A high share there is not an error, but it does
               mean the answer is mostly a claim about the far future.
@@ -403,7 +403,7 @@ export function ValueRiskView() {
               <p className="font-display text-label uppercase tracking-label text-cadmium">
                 No value yet
               </p>
-              <p className="mt-xs max-w-[72ch] text-body-sm text-on-ink-soft">
+              <p className="mt-xs max-w-measure text-body-sm text-on-ink-soft">
                 {d.reason}. Supply {d.missing.map(humanise).join(", ")} above
                 and press revalue. Assuming a number here would produce a
                 valuation that looks derived and is not.
@@ -538,11 +538,11 @@ export function ValueRiskView() {
                * independently understates the spread, and the endpoint says
                * so — printing the percentiles without it would be quoting the
                * precise half of an imprecise answer. */}
-              <p className="mt-sm max-w-[72ch] border-t border-ink-line pt-sm text-body-xs text-on-ink-faint">
+              <p className="mt-sm max-w-measure border-t border-ink-line pt-sm text-body-xs text-on-ink-faint">
                 {d.distribution.independence_note}
               </p>
               {d.distribution.rejected > 0 && (
-                <p className="mt-2xs max-w-[72ch] text-body-xs text-on-ink-faint">
+                <p className="mt-2xs max-w-measure text-body-xs text-on-ink-faint">
                   {d.distribution.rejected.toLocaleString()} draws were
                   discarded as unusable rather than clamped into range.
                 </p>

@@ -21,6 +21,31 @@ Rules:
 # persona_id -> short system preamble (style only; rules appended)
 _PERSONA_PREAMBLES: dict[str, str] = {
     "default": "You are a disciplined buy-side research analyst AI for a hedge fund.",
+    "anthony_bolton": (
+        "You are a contrarian special-situations analyst in the spirit of Anthony Bolton. You "
+        "are looking for a company the market has given up on where something specific is about "
+        "to change its story. Work in that order, and refuse to skip the second half: cheap on "
+        "its own history and against its peers (low P/E, price-to-book under ~1.5, EV/EBITDA "
+        "under ~7, price-to-free-cash-flow under ~15); unloved — near 52-week lows, thin analyst "
+        "coverage or fresh downgrades, institutions selling, heavy short interest, or a spin-off "
+        "dumped by index funds; and then a reason to re-rate — a restructuring, an asset or a "
+        "subsidiary worth more than the whole, a legal overhang about to lift, an earnings "
+        "inflection still priced as decline. Cheapness on its own is a value trap and you should "
+        "call it one by name. Check it can survive the wait: debt-to-equity under ~1, interest "
+        "cover above 3x, operating cash flow running ahead of reported profit, insiders buying "
+        "rather than selling. Finish by stating the strongest bear argument and saying whether it "
+        "is overblown or correct — if you cannot name the catalyst, say there isn't one yet."
+    ),
+    "norbert_lou": (
+        "You are an analyst in the spirit of Norbert Lou of Punch Card Capital: a lifetime's "
+        "worth of decisions is twenty punches, so almost everything is a pass and you should say "
+        "so quickly and without hedging. When you do engage, go far deeper than a screen — one "
+        "business, understood well enough to be indifferent to the next three years of quotes, "
+        "bought when the market is treating a temporary problem as permanent. Prefer the "
+        "unglamorous and the ignored; be suspicious of anything you would have to check weekly. "
+        "Most of your answers should be 'this does not need to be owned', and a thin thesis is a "
+        "pass, never a small position."
+    ),
     "aswath_damodaran": (
         "You are a valuation-focused analyst in the spirit of Aswath Damodaran: emphasize "
         "story, intrinsic value, cost of capital, and narrative–numbers consistency. "
@@ -44,6 +69,12 @@ _PERSONA_PREAMBLES: dict[str, str] = {
     "charlie_munger": (
         "You are an analyst in the spirit of Charlie Munger: invert the problem, favor simple "
         "moats and management quality, and avoid overcomplicating when data is sparse."
+    ),
+    "li_lu": (
+        "You are an analyst in the spirit of Li Lu: concentrate in a handful of businesses you "
+        "understand deeply enough to hold through a halving, with a strong bias to founder-led "
+        "companies compounding in a growing domestic economy. Insist on both a durable franchise "
+        "and a price that already assumes disappointment; say so plainly when only one is present."
     ),
     "michael_burry": (
         "You are a contrarian, deep-value analyst in the spirit of Michael Burry: look for "
@@ -75,11 +106,35 @@ _PERSONA_PREAMBLES: dict[str, str] = {
     ),
 }
 
+#: Who speaks unless you pick someone.
+#:
+#: Seven, chosen so each one can disagree with the others for a *different*
+#: reason — a committee of near-duplicates produces a confident consensus that
+#: only reflects one way of looking:
+#:
+#:   buffett        business quality at a fair price
+#:   graham        statistical cheapness and downside protection
+#:   wood          disruption and long-duration growth
+#:   burry         the bear case, and crowded consensus
+#:   bolton        unloved, with a specific catalyst
+#:   druckenmiller macro regime and liquidity
+#:   damodaran     whether the price's own assumptions are consistent
+#:
+#: The first four were the original committee and covered value, growth and the
+#: bear. Nobody asked what the regime was doing, nobody hunted the unloved, and
+#: nobody checked whether the multiple implied anything possible. Each addition
+#: fills one of those holes rather than adding another value voice.
+#:
+#: Cost is the reason this is not simply everyone: each member is a separate
+#: model call, so the run time scales with the list.
 DEFAULT_COMMITTEE_PERSONAS: tuple[str, ...] = (
     "warren_buffett",
     "ben_graham",
     "cathie_wood",
     "michael_burry",
+    "anthony_bolton",
+    "stanley_druckenmiller",
+    "aswath_damodaran",
 )
 
 ALL_PERSONA_IDS: tuple[str, ...] = tuple(sorted(_PERSONA_PREAMBLES.keys()))
@@ -94,11 +149,45 @@ def is_valid_persona(persona_id: str) -> bool:
 
 
 def get_persona_system_prompt(persona_id: str) -> str:
-    """Full system prompt for one persona (JSON rules + style)."""
+    """Full system prompt for one persona (JSON rules + style).
+
+    The original single-message form: style first, rules after. Kept because
+    it is what `llm_shared_prefix = False` restores, and because the rebuttal
+    and synthesis paths still use one-shot prompts where prefix reuse buys
+    nothing.
+    """
     key = persona_id.strip().lower()
     if key not in _PERSONA_PREAMBLES:
         raise ValueError(f"unknown persona: {persona_id!r}")
     return f"{_PERSONA_PREAMBLES[key].strip()}\n{_JSON_RULES.strip()}"
+
+
+#: The half of the prompt every persona shares, byte for byte.
+#:
+#: Split out so a committee run can put it — and the market bundle after it —
+#: in front of the part that differs. A prefix cache can only reuse a *prefix*,
+#: and with the investor's style in the system message the varying text sat in
+#: front of six thousand identical tokens: measured on an M4 Max, seven
+#: personas each paid a full ~22-second prefill for the same bundle. Moving the
+#: style to the end of the user message turned calls two through seven into
+#: ~0.17 s cache hits.
+SHARED_ANALYST_SYSTEM = (
+    f"You are a disciplined buy-side research analyst AI for a hedge fund.\n{_JSON_RULES.strip()}"
+)
+
+
+def get_persona_lens(persona_id: str) -> str:
+    """Just the investor's style, with no rules attached.
+
+    Goes *after* the data in the user message. The instruction is therefore the
+    last thing the model reads before answering, which is also where an
+    instruction is most likely to be followed — but that is a claim to verify
+    per model, not to assume: see `tests/test_shared_prefix.py`.
+    """
+    key = persona_id.strip().lower()
+    if key not in _PERSONA_PREAMBLES:
+        raise ValueError(f"unknown persona: {persona_id!r}")
+    return _PERSONA_PREAMBLES[key].strip()
 
 
 SYNTHESIS_SYSTEM = """You are the portfolio manager synthesizing multiple analyst opinions into one decision.

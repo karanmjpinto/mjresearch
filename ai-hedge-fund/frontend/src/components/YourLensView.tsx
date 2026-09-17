@@ -86,7 +86,7 @@ export function YourLensView() {
           <h1 className="font-display text-display-sm tracking-tight text-bone">
             {ticker}
           </h1>
-          <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
+          <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
             Everything on this page comes from your own vault. Nothing here
             leaves the machine, and nothing is written to it without a press.
           </p>

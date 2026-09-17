@@ -1,4 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
+import { LookbackTimeline } from "./LookbackTimeline";
+import { InfoTip } from "./InfoTip";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { api, type OptimizeResult } from "@/lib/api";
 import { AppNav } from "./AppNav";
@@ -436,13 +438,24 @@ export function OptimizeView() {
 
               {/* Equity curve */}
               <div className="bg-surface-card rounded-xl p-4">
+                {/* The window, before the curve it produced. Every figure on
+                  * this page is measured backwards over it, and that used to
+                  * be the least visible thing on the screen — which is how a
+                  * backtest gets read as a forecast. */}
+                <div className="mb-4 border-b border-border pb-4">
+                  <LookbackTimeline
+                    start={data.start_date}
+                    end={data.end_date}
+                    bars={data.n_bars}
+                    requestedDays={days}
+                    purpose="Weights, expected returns, volatility and the curve below are all measured over this window, looking backwards. Nothing here is a forecast."
+                  />
+                </div>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs text-gray-500 uppercase tracking-wider">
+                  <h3 className="flex items-center gap-xs text-xs uppercase tracking-wider text-gray-500">
                     Simulated performance (daily rebalance)
+                    <InfoTip term="lookback-window" />
                   </h3>
-                  <span className="text-label text-gray-600 font-mono">
-                    {data.start_date} → {data.end_date} · {data.n_bars} bars
-                  </span>
                 </div>
                 <div className="h-72">
                   <ResponsiveContainer width="100%" height="100%">

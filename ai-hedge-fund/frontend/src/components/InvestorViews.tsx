@@ -225,7 +225,7 @@ export function InvestorViews({ ticker }: { ticker: string }) {
         !aiError &&
         !ai &&
         (d?.committee?.length ?? 0) === 0 && (
-          <p className="max-w-[72ch] text-body-sm text-on-ink-soft">
+          <p className="max-w-measure text-body-sm text-on-ink-soft">
             The model returned no view for {ticker}. That is usually a model
             that is not running rather than a company it had nothing to say
             about.

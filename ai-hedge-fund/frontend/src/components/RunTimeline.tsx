@@ -154,7 +154,7 @@ export function RunTimeline({
         <span className="sr-only">{status}</span>
       </div>
 
-      <p className="mt-2xs max-w-[72ch] text-body-xs text-on-ink-faint">
+      <p className="mt-2xs max-w-measure text-body-xs text-on-ink-faint">
         {error
           ? error
           : running

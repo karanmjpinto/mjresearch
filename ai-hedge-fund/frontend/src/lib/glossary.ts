@@ -181,6 +181,55 @@ export const GLOSSARY = {
       "Solved one driver at a time, so these do not hold together as a set — any growth rate can be made to fit by moving the margin. And it is a statement about the price, not a forecast of the business.",
   },
 
+  "lookback-window": {
+    term: "The lookback window",
+    what: "The stretch of past trading days every figure on this page was measured over.",
+    why: "Weights, expected returns, volatility and the equity curve all come from this window and nothing outside it.",
+    careful:
+      "It looks backwards, so it is a record and not a forecast. A window that happens to contain one long bull market will make almost any portfolio look good, and a different two years would give different weights from the same method.",
+  },
+  "screen-yartseva": {
+    term: "Yartseva multibagger screen",
+    what: "A two-stage screen: hard filters on growth, cash generation and valuation, then a composite score out of 100 for the names that clear them.",
+    why: "It is looking for companies early in a long run rather than cheap ones — growth that is already showing up in EBITDA and free cash flow, at a price that has not caught up.",
+    careful:
+      "Deliberately narrow, so most of the index fails and that is the intended behaviour. Figures come from yfinance quarterly data, which is a proxy for the filings, not the filings.",
+  },
+  "screen-acquisition": {
+    term: "Acquisition compounder screen",
+    what: "Hard filters on growth, return on capital, cash conversion, leverage, margins and dilution, then a nine-factor score out of 45.",
+    why: "It looks for businesses that grow by buying others and actually earn a return on what they pay — the pattern works rarely and fails expensively, so the filters are strict about leverage and share issuance.",
+    careful:
+      "Organic growth here is a revenue proxy, not a reported figure, so a company growing purely by acquisition can look organic. Check the segment disclosures before believing the growth split.",
+  },
+  "screen-bolton": {
+    term: "Bolton contrarian screen",
+    what: "Anthony Bolton's special-situations framework, automated as far as it honestly goes: cheap on at least one multiple, sitting low in its own 52-week range, and generating enough cash to survive the wait. Scored out of 100 across valuation, neglect, balance sheet, insider buying and whether the fall has stopped.",
+    why: "Bolton compounded at around 20% a year for 28 years by buying what the market had given up on. The measurable part of that — cheap, unloved, solvent — is exactly what a screen is good for.",
+    careful:
+      "This list is not a list of buys, and the gap is the whole point. Bolton's framework has a fifth section — the catalyst — and he says cheap without one is a value trap. Restructurings, spin-offs, hidden assets and legal overhangs lifting cannot be read from a data feed, so the screen does not score them and does not pretend to. Open a name and ask the Bolton persona what changes it; if there is no answer, that is your answer.",
+  },
+  "screen-universe": {
+    term: "Universe",
+    what: "The list of companies a screen was run against — by default the S&P 500.",
+    why: "A screen is only as broad as its universe: nothing outside it can ever appear, however well it would have scored.",
+    careful:
+      "Other markets are available but not pre-computed, because each name costs several seconds to fetch and a five-hundred-name run takes minutes. The Dow and NASDAQ-100 loaders are currently broken upstream.",
+  },
+  "autoresearch-decay": {
+    term: "Fitted versus tested",
+    what: "Each rule is fitted on an older slice of history, then tested on a more recent slice it never saw. The chart runs from the first to the second.",
+    why: "A rule that looks good on the data it was built from has proven nothing — that is what fitting does. The only evidence is what it did on data it had no access to.",
+    careful:
+      "Leftward movement means the rule was partly fitting noise, and almost all of them move left. The dashed line is buy-and-hold on the same window after fees: a rule landing left of it lost to doing nothing, which is the real bar, not zero.",
+  },
+  "autoresearch-loop": {
+    term: "Auto research",
+    what: "A loop that proposes a trading rule, backtests it, tests it on data it has not seen, and keeps it only if it beat buy-and-hold out of sample.",
+    why: "Its main output is rejection. Trying a hundred rules and keeping the best one finds noise; a loop that records every attempt and raises the bar as the count grows is the only way a survivor means anything.",
+    careful:
+      "The bar rises with the number of experiments, because trying more things makes a lucky result more likely. A rule kept after eight attempts is weaker evidence than the same rule kept after two.",
+  },
   // ── Play it ────────────────────────────────────────────────────────────
   "position-size": {
     term: "Largest position this justifies",
@@ -198,80 +247,12 @@ export const GLOSSARY = {
 
 export type GlossaryKey = keyof typeof GLOSSARY;
 
-/**
- * The investor styles, and who they belong to.
+/*
+ * PERSONA_NOTES used to live here: a hand-written description of each investor,
+ * separate from the prompt that actually governs their verdict. It drifted, and
+ * the drift was invisible — the panel explaining how an investor judges could
+ * disagree with the instruction the model was given.
  *
- * Separate from the glossary because these are keyed by the backend's persona
- * ids and are looked up dynamically, not referenced by name in the source.
- *
- * Written as what the style *looks for*, because that is what changes the
- * verdict. "Value investor" is a label; "wants to pay less than the assets are
- * worth and distrusts forecasts" tells you why this one said sell.
+ * It now comes from `agents/profiles.py` via GET /research/personas, which is
+ * the same object used to build the preamble. See api.ts `InvestorProfile`.
  */
-export const PERSONA_NOTES: Record<string, { who: string; looks: string }> = {
-  warren_buffett: {
-    who: "Berkshire Hathaway. Built the best long-run record in public markets by buying whole businesses and holding them.",
-    looks:
-      "A durable advantage he can describe in a sentence, honest management, and a price that leaves room to be wrong. Passes on anything he cannot explain.",
-  },
-  ben_graham: {
-    who: "The founder of security analysis, and Buffett's teacher.",
-    looks:
-      "Assets on the balance sheet worth more than the price. Distrusts forecasts entirely and wants a margin of safety in numbers that already exist.",
-  },
-  charlie_munger: {
-    who: "Buffett's partner for four decades.",
-    looks:
-      "Quality over cheapness — a great business at a fair price rather than the reverse — and the incentives facing the people running it.",
-  },
-  cathie_wood: {
-    who: "ARK Invest. Concentrated bets on technology platforms.",
-    looks:
-      "A market that could be far larger than it is today, and a cost curve falling fast enough to create one. Tolerates a high price for that.",
-  },
-  michael_burry: {
-    who: "Scion Capital. Best known for being early and alone on the 2008 housing short.",
-    looks:
-      "What everyone else has stopped checking. Reads the filings for the thing that breaks the consensus, and is comfortable being the only seller.",
-  },
-  bill_ackman: {
-    who: "Pershing Square. Concentrated activist positions.",
-    looks:
-      "A good business being run badly, where a change he can push for closes the gap. Few names, held loudly.",
-  },
-  peter_lynch: {
-    who: "Ran Fidelity Magellan through its best years.",
-    looks:
-      "Growth you can see in ordinary life, at a price that has not caught up to it. Compares the growth rate directly against the multiple.",
-  },
-  phil_fisher: {
-    who: "Wrote Common Stocks and Uncommon Profits; the growth half of Buffett's thinking.",
-    looks:
-      "Research depth, sales organisation, and management that keeps reinvesting well. Willing to hold for decades.",
-  },
-  mohnish_pabrai: {
-    who: "Pabrai Funds. Openly copies Buffett's method.",
-    looks:
-      "Few bets, big bets, infrequent bets — low downside first, and a business simple enough that little can go wrong.",
-  },
-  stanley_druckenmiller: {
-    who: "Duquesne. Decades without a losing year.",
-    looks:
-      "Where the macro cycle and liquidity are heading, then the companies geared to it. Changes his mind fast and sizes hard when convinced.",
-  },
-  rakesh_jhunjhunwala: {
-    who: "The best-known investor in Indian public markets.",
-    looks:
-      "Long-run domestic growth compounding through founder-led businesses, held through volatility others will not sit through.",
-  },
-  aswath_damodaran: {
-    who: "NYU valuation professor, whose published data this app's cost of capital is built from.",
-    looks:
-      "A story that survives being turned into numbers. Insists the narrative and the spreadsheet be the same argument.",
-  },
-  default: {
-    who: "No house style — a plain read of the same data.",
-    looks:
-      "The figures on their own terms, without a school of thought pushing the conclusion.",
-  },
-};

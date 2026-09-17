@@ -19,8 +19,18 @@ def test_list_includes_default_and_styles():
     assert len(ids) >= 8
 
 
-def test_default_committee_four():
-    assert len(DEFAULT_COMMITTEE_PERSONAS) == 4
+def test_default_committee_is_several_distinct_voices():
+    """Was pinned at exactly four; the count is not the property that matters.
+
+    What matters is that the committee is plural, has no duplicates, and stays
+    small enough to run — every member is a separate model call, so the list
+    length is the run time. The reasoning about *which* voices, and the ceiling
+    the endpoint enforces, are covered in test_persona_ui_coverage.py.
+    """
+    ids = DEFAULT_COMMITTEE_PERSONAS
+    assert 4 <= len(ids) <= 8
+    assert len(set(ids)) == len(ids)
+    assert "default" not in ids, "the unstyled analyst is not a committee voice"
 
 
 def test_is_valid_persona():

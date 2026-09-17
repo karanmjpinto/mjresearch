@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { DecayChart } from "./DecayChart";
+import { InfoTip } from "./InfoTip";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppNav } from "@/components/AppNav";
 import { api, type ExperimentRow } from "@/lib/api";
@@ -177,7 +179,7 @@ export function AutoResearchView() {
           <h1 className="font-display text-display-sm tracking-tight text-bone">
             Autoresearch
           </h1>
-          <p className="mt-sm max-w-[72ch] text-[15px] leading-relaxed text-on-ink-soft">
+          <p className="mt-sm max-w-measure text-[15px] leading-relaxed text-on-ink-soft">
             Proposes one strategy at a time, evaluates it on rules it cannot
             change, and keeps it only if it beats the bar on data it was never
             fitted to. Discarded runs stay on the list — how many things were
@@ -277,6 +279,26 @@ export function AutoResearchView() {
               </div>
             ))}
           </div>
+        )}
+
+        {/* What the tally actually means, drawn. Eight experiments times six
+          * metrics times two windows is ninety-six numbers, and the finding
+          * in all of them is one shape. */}
+        {rows.length > 0 && (
+          <section className="mt-lg border border-ink-line bg-ink-raised p-lg shadow-elev-1">
+            <div className="mb-md">
+              <h2 className="flex items-center gap-xs font-display text-label uppercase tracking-label text-on-ink-faint">
+                What happened when they left the data
+                <InfoTip term="autoresearch-decay" />
+              </h2>
+              <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
+                The searcher only ever sees the fitted window. The tested window
+                decides, and it is not shown to the thing proposing rules —
+                which is why most of these get worse when they reach it.
+              </p>
+            </div>
+            <DecayChart experiments={rows} />
+          </section>
         )}
 
         {/* Log */}

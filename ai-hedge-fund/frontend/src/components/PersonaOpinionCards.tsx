@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { AiAnalysisBlock, CommitteeEntry } from "@/lib/api";
-import { PERSONA_NOTES } from "@/lib/glossary";
+import { useQuery } from "@tanstack/react-query";
+import { api, type AiAnalysisBlock, type CommitteeEntry } from "@/lib/api";
 import { Popover } from "./Popover";
 
 /** Map persona_id to short display label */
@@ -11,6 +11,9 @@ export function humanizePersonaId(id: string): string {
     ben_graham: "Ben Graham",
     bill_ackman: "Bill Ackman",
     cathie_wood: "Cathie Wood",
+    anthony_bolton: "Anthony Bolton",
+    norbert_lou: "Norbert Lou",
+    li_lu: "Li Lu",
     charlie_munger: "Charlie Munger",
     michael_burry: "Michael Burry",
     mohnish_pabrai: "Mohnish Pabrai",
@@ -56,22 +59,64 @@ function stanceRail(stance: string | undefined): string {
   return "border-l-ink-line";
 }
 
-/** Who this is, one press away. Styles, not endorsements. */
+/**
+ * Who this is, how they think, and what they actually check.
+ *
+ * The third part is the reason this panel exists. A verdict from "Anthony
+ * Bolton" means nothing unless you can see the standard being applied — and
+ * once you can, a SELL on a great company stops looking like an error and
+ * starts looking like the lens working. So the concrete tests are listed, not
+ * summarised.
+ *
+ * All of it comes from the persona endpoint, which serves the same profile
+ * that builds the prompt. A copy kept in the frontend drifted from the
+ * instruction the model was given, which made this panel confidently wrong
+ * about the very thing it exists to explain.
+ */
 function PersonaNote({ personaId, name }: { personaId: string; name: string }) {
-  const note = PERSONA_NOTES[personaId];
-  if (!note) return null;
+  const personas = useQuery({
+    queryKey: ["personas"],
+    queryFn: api.getPersonas,
+    staleTime: Infinity,
+  });
+  const p = personas.data?.personas.find((x) => x.id === personaId);
+  if (!p?.who) return null;
   return (
-    <Popover label={`Who is ${name}?`} width={22}>
+    <Popover label={`Who is ${name}, and how do they judge?`} width={26}>
       <span className="block font-display text-label uppercase tracking-label text-cadmium">
         {name}
       </span>
-      <span className="block text-body-xs leading-relaxed text-on-ink">
-        {note.who}
-      </span>
-      <span className="block border-t border-ink-line pt-xs text-body-xs leading-relaxed text-on-ink-soft">
-        <span className="text-on-ink-faint">Looks for: </span>
-        {note.looks}
-      </span>
+      {p.essence && (
+        <span className="block text-body-xs italic leading-relaxed text-on-ink">
+          {p.essence}
+        </span>
+      )}
+      <span className="block text-body-xs leading-relaxed text-on-ink-soft">{p.who}</span>
+      {p.style && (
+        <span className="block border-t border-ink-line pt-xs text-body-xs leading-relaxed text-on-ink-soft">
+          {p.style}
+        </span>
+      )}
+      {p.tests && p.tests.length > 0 && (
+        <span className="block border-t border-ink-line pt-xs">
+          <span className="mb-2xs block font-display text-label uppercase tracking-label text-on-ink-faint">
+            What they check
+          </span>
+          <ul className="flex flex-col gap-2xs">
+            {p.tests.map((t) => (
+              <li
+                key={t}
+                className="flex gap-xs text-body-xs leading-relaxed text-on-ink-soft"
+              >
+                <span aria-hidden="true" className="text-cobalt">
+                  ·
+                </span>
+                <span>{t}</span>
+              </li>
+            ))}
+          </ul>
+        </span>
+      )}
     </Popover>
   );
 }

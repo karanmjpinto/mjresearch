@@ -1,8 +1,22 @@
 """
-Liquid index / exchange universes for screeners (ticker lists).
+Liquid index universes for screeners (ticker lists).
 
-Sources: public CSVs (S&P 500), Wikipedia tables (NASDAQ-100, Dow 30),
-iShares IWM holdings CSV (Russell 2000 proxy). Symbols normalized for Yahoo Finance.
+The three S&P size bands, which between them cover most of the investable US
+market: 500 large caps, 400 mid, 600 small. Symbols normalised for Yahoo.
+
+Four sources were tried and three of them are gone, which is worth recording
+so the next person does not rebuild them:
+
+  NASDAQ-100, Dow 30   Wikipedia stopped rendering the constituent tables into
+                       the article HTML; `read_html` now finds only navboxes
+                       and the price-history tables on both pages.
+  Russell 2000 (IWM)   iShares serves an HTML page from the holdings-CSV
+                       endpoint, so the parse got a web page, not a fund.
+
+A loader that always raises is worse than an absent one — it puts a choice in
+the UI that can only fail — so they are not listed. The S&P 600 replaces the
+Russell 2000 as the small-cap universe: a real index rather than one fund's
+holdings, and the band the multi-bagger screen actually needs.
 """
 
 from __future__ import annotations
@@ -28,22 +42,20 @@ UNIVERSE_META: list[dict[str, Any]] = [
         "approx_count": 503,
     },
     {
-        "id": "nasdaq100",
-        "label": "NASDAQ-100",
-        "description": "NASDAQ-100 index (Wikipedia). Not the full NASDAQ Composite.",
-        "approx_count": 100,
+        "id": "sp400",
+        "label": "S&P MidCap 400",
+        "description": "Mid-caps, roughly $7bn to $20bn. Below the 500, above the 600.",
+        "approx_count": 400,
     },
     {
-        "id": "dow",
-        "label": "Dow Jones 30",
-        "description": "Dow Jones Industrial Average (Wikipedia).",
-        "approx_count": 30,
-    },
-    {
-        "id": "russell2000",
-        "label": "Russell 2000 (IWM)",
-        "description": "iShares Russell 2000 ETF holdings — practical proxy for the small-cap index (~2k names).",
-        "approx_count": 2000,
+        "id": "sp600",
+        "label": "S&P SmallCap 600",
+        "description": (
+            "Small-caps, roughly $1bn to $7bn — where a company can still "
+            "multiply several times over. The universe the multi-bagger screen "
+            "is built for; it can pass nothing in the S&P 500."
+        ),
+        "approx_count": 600,
     },
 ]
 
@@ -86,75 +98,60 @@ def fetch_sp500() -> list[str]:
     return [normalize_yahoo_symbol(x) for x in df["Symbol"].tolist() if pd.notna(x)]
 
 
-def fetch_nasdaq100() -> list[str]:
-    html = _fetch_url_text("https://en.wikipedia.org/wiki/Nasdaq-100")
-    tables = pd.read_html(io.StringIO(html))
+def _fetch_sp_list(page: str, expected: int) -> list[str]:
+    """Constituents from a Wikipedia "List of S&P N companies" article.
+
+    These list articles still render a real constituents table into the page
+    HTML, unlike the index articles. The table is picked by shape rather than
+    position — the first one carrying a Symbol column and roughly the expected
+    number of rows — so a new table appearing above it does not silently
+    return a changelog of additions and removals instead of the index.
+    """
+    tables = pd.read_html(io.StringIO(_fetch_url_text(page)))
     for t in tables:
-        if "Ticker" in t.columns:
-            syms = [normalize_yahoo_symbol(x) for x in t["Ticker"].tolist() if pd.notna(x)]
-            # Dedupe while preserving order
-            seen: set[str] = set()
-            out: list[str] = []
-            for s in syms:
-                if s not in seen:
-                    seen.add(s)
-                    out.append(s)
-            return out
-    raise ValueError("Could not parse NASDAQ-100 table from Wikipedia")
+        cols = [str(c) for c in t.columns]
+        if "Symbol" in cols and len(t) >= expected * 0.8:
+            syms = [normalize_yahoo_symbol(x) for x in t["Symbol"].tolist() if pd.notna(x)]
+            return _dedupe(syms)
+    raise ValueError(f"could not find a constituents table at {page}")
 
 
-def fetch_dow() -> list[str]:
-    html = _fetch_url_text("https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average")
-    tables = pd.read_html(io.StringIO(html))
-    for t in tables:
-        if "Symbol" in t.columns and len(t) >= 25:
-            return [normalize_yahoo_symbol(x) for x in t["Symbol"].tolist() if pd.notna(x)]
-    raise ValueError("Could not parse Dow 30 table from Wikipedia")
-
-
-def fetch_russell2000_iwm() -> list[str]:
-    """Russell 2000 via iShares IWM holdings CSV (full replication, ~2k lines)."""
-
-    url = (
-        "https://www.ishares.com/us/products/239710/"
-        "ishares-russell-2000-etf/1467271812596.ajax"
-        "?fileType=csv&fileName=IWM_holdings&dataType=fund"
-    )
-    req = urllib.request.Request(url, headers={"User-Agent": _WIKI_UA})
-    with urllib.request.urlopen(req, timeout=120) as r:
-        raw = r.read().decode("utf-8", errors="replace")
-    # Skip preamble until header row
-    lines = raw.splitlines()
-    start = 0
-    for i, line in enumerate(lines):
-        if line.startswith("Ticker,") or line.startswith('"Ticker"'):
-            start = i
-            break
-    df = pd.read_csv(io.StringIO("\n".join(lines[start:])))
-    col = "Ticker" if "Ticker" in df.columns else None
-    if col is None:
-        raise ValueError("IWM CSV missing Ticker column")
-    syms = [normalize_yahoo_symbol(x) for x in df[col].tolist() if pd.notna(x) and str(x).strip()]
+def _dedupe(syms: list[str]) -> list[str]:
     seen: set[str] = set()
     out: list[str] = []
     for s in syms:
-        if s not in seen:
+        if s and s not in seen:
             seen.add(s)
             out.append(s)
     return out
 
 
+def fetch_sp400() -> list[str]:
+    return _fetch_sp_list("https://en.wikipedia.org/wiki/List_of_S%26P_400_companies", 400)
+
+
+def fetch_sp600() -> list[str]:
+    return _fetch_sp_list("https://en.wikipedia.org/wiki/List_of_S%26P_600_companies", 600)
+
+
+#: Module-level rather than built inside `load_universe`, so that the one
+#: invariant that actually broke here is testable: every universe advertised in
+#: UNIVERSE_META must have a loader, and every loader must be advertised. The
+#: UI builds its dropdown from the metadata, so a listed universe with no
+#: working loader is a choice that can only fail — which is exactly what the
+#: NASDAQ-100, Dow and Russell 2000 entries were for months.
+LOADERS: dict[str, Any] = {
+    "sp500": fetch_sp500,
+    "sp400": fetch_sp400,
+    "sp600": fetch_sp600,
+}
+
+
 def load_universe(universe_id: str) -> list[str]:
     uid = universe_id.strip().lower()
-    loaders = {
-        "sp500": lambda: _cached("sp500", fetch_sp500),
-        "nasdaq100": lambda: _cached("nasdaq100", fetch_nasdaq100),
-        "dow": lambda: _cached("dow", fetch_dow),
-        "russell2000": lambda: _cached("russell2000", fetch_russell2000_iwm),
-    }
-    if uid not in loaders:
+    if uid not in LOADERS:
         raise ValueError(f"unknown universe: {universe_id!r}")
-    return loaders[uid]()
+    return _cached(uid, LOADERS[uid])
 
 
 def list_universe_meta() -> list[dict[str, Any]]:

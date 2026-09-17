@@ -222,7 +222,7 @@ export function IntrinsicValue({ ticker }: { ticker: string }) {
           <Histogram bins={d.distribution.histogram} price={d.price} />
 
           {d.base_case.terminal_share_of_value > 0.6 && (
-            <p className="max-w-[72ch] border-l-2 border-cadmium pl-sm text-body-xs text-on-ink-soft">
+            <p className="max-w-measure border-l-2 border-cadmium pl-sm text-body-xs text-on-ink-soft">
               {(d.base_case.terminal_share_of_value * 100).toFixed(0)}% of this
               value sits in the terminal year, so the answer is mostly a
               statement about growth in perpetuity rather than about the next
@@ -259,12 +259,12 @@ export function IntrinsicValue({ ticker }: { ticker: string }) {
                 {[...d.cost_of_capital.missing, ...d.driver_notes].map((n) => (
                   <li
                     key={n}
-                    className="max-w-[72ch] text-body-xs text-on-ink-faint"
+                    className="max-w-measure text-body-xs text-on-ink-faint"
                   >
                     {n}
                   </li>
                 ))}
-                <li className="max-w-[72ch] text-body-xs text-on-ink-faint">
+                <li className="max-w-measure text-body-xs text-on-ink-faint">
                   {d.distribution.independence_note}; seed {d.distribution.seed}
                   , so the same inputs give the same range.
                 </li>

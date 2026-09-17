@@ -66,7 +66,7 @@ function CriterionRow({ c }: { c: AppliedCriterion }) {
             </span>
           )}
         </div>
-        <p className="mt-2xs max-w-[72ch] text-body-xs text-on-ink-faint">
+        <p className="mt-2xs max-w-measure text-body-xs text-on-ink-faint">
           {c.because}
         </p>
       </div>
@@ -94,7 +94,7 @@ function FrameworkCard({ fw }: { fw: AppliedFramework }) {
           <span className="block font-display text-mark text-bone">
             {fw.title}
           </span>
-          <span className="mt-2xs block max-w-[72ch] text-body-xs text-on-ink-soft">
+          <span className="mt-2xs block max-w-measure text-body-xs text-on-ink-soft">
             {fw.finding}
           </span>
         </span>
@@ -153,7 +153,7 @@ export function FrameworksApplied({ ticker }: { ticker: string }) {
           Your frameworks, run
           <InfoTip term="frameworks-run" />
         </h2>
-        <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
+        <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
           Not a list of which checklists are relevant — each line with this
           company&rsquo;s figure beside it, where there is one.
         </p>
@@ -177,7 +177,7 @@ export function FrameworksApplied({ ticker }: { ticker: string }) {
 
       {d && (
         <>
-          <p className="max-w-[72ch] text-body-sm text-on-ink-soft">
+          <p className="max-w-measure text-body-sm text-on-ink-soft">
             {d.finding}
           </p>
           <div className="flex flex-col gap-sm">
@@ -189,7 +189,7 @@ export function FrameworksApplied({ ticker }: { ticker: string }) {
           {/* The honest note when a vault's frameworks are conceptual rather
            * than financial. Better said out loud than left looking broken. */}
           {d.configured && d.frameworks.length > 0 && (
-            <p className="max-w-[72ch] text-body-xs text-on-ink-faint">
+            <p className="max-w-measure text-body-xs text-on-ink-faint">
               Lines are matched to figures by the language they use — margins,
               returns, leverage, multiples. A framework written in concepts
               rather than in numbers will come back all &ldquo;your call&rdquo;,

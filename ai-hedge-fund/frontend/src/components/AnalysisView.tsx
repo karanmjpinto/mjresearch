@@ -124,7 +124,7 @@ export function AnalysisView() {
           <h1 className="font-display text-display-sm tracking-tight text-bone">
             {ticker}
           </h1>
-          <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
+          <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
             The model chooses which metrics to compute and writes the
             conclusion. It produces no number itself — those come from Python,
             and every claim in the prose is checked against them afterwards.
@@ -172,7 +172,7 @@ export function AnalysisView() {
               );
             })}
           </div>
-          <p className="mt-xs flex max-w-[72ch] items-center gap-xs text-body-xs text-on-ink-faint">
+          <p className="mt-xs flex max-w-measure items-center gap-xs text-body-xs text-on-ink-faint">
             {TABS.find((t) => t.id === tab)?.blurb}
             <InfoTip term={tab === "views" ? "investor-views" : "evaluation"} />
           </p>

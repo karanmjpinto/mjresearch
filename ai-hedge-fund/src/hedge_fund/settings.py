@@ -38,6 +38,35 @@ class Settings(BaseSettings):
     llm_max_output_tokens: int = 2500
     research_max_context_chars: int = 24_000
 
+    #: Put the shared market bundle in front of the per-persona instruction.
+    #:
+    #: Off by default, and the reason is a measurement that contradicted the
+    #: one that motivated building it.
+    #:
+    #: The promise: a prefix cache can only reuse a prefix, and with the
+    #: investor's style in the system message the text that differs sat in
+    #: front of ~11k identical tokens. Measured in isolation on an M4 Max,
+    #: reordering turned a second 22-second prefill into 0.17 s — a 130x
+    #: saving on that component.
+    #:
+    #: What it was actually worth end to end: **1.28x** (93.3 s -> 73.1 s on a
+    #: seven-member committee). The microbenchmark measured prefill alone; a
+    #: real run is dominated by generation, which does not cache, and includes
+    #: a rebuttal round whose prompts differ anyway.
+    #:
+    #: What it cost: the verdicts moved materially. On the same KSS snapshot
+    #: Burry went SELL 15 -> BUY 75, Buffett BUY 100 -> HOLD 50, and the
+    #: conviction spread narrowed from 85 to 55. Moving an instruction to the
+    #: end of an 11k-token prompt changes how well it is followed, and for a
+    #: tool whose whole claim is "read the spread, not the average", twenty
+    #: seconds is not worth a bear that turns bullish.
+    #:
+    #: Which ordering is *better* is not knowable from one snapshot and cannot
+    #: be settled without a golden set — so the default stays where the
+    #: behaviour is known. Turn it on for a bulk re-scoring job where speed
+    #: matters more than spread, or once an eval exists to judge the trade.
+    llm_shared_prefix: bool = False
+
     # Determinism. Sampling is greedy and seeded by default: without reproducible
     # runs there is nothing to diff, so no evals, no regression tests on research
     # quality, and no way to tell a real change of view from sampling noise.

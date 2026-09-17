@@ -65,6 +65,15 @@ export default {
         cadmium: "oklch(var(--c-cadmium) / <alpha-value>)",
         cobalt: "oklch(var(--c-cobalt) / <alpha-value>)",
         verdigris: "oklch(var(--c-verdigris) / <alpha-value>)",
+
+        /* Accents for the linen ground, which stays light in both themes.
+         * See the note in index.css: the theme-following accents above go
+         * lighter for dark and lose their contrast against paper. Any page
+         * built on `bg-canvas` wants these. */
+        "oxide-paper": "oklch(var(--c-oxide-paper) / <alpha-value>)",
+        "cadmium-paper": "oklch(var(--c-cadmium-paper) / <alpha-value>)",
+        "cobalt-paper": "oklch(var(--c-cobalt-paper) / <alpha-value>)",
+        "verdigris-paper": "oklch(var(--c-verdigris-paper) / <alpha-value>)",
         aluminium: "oklch(var(--c-aluminium) / <alpha-value>)",
 
         /* Text on a coloured fill — fixed in both themes. `on-accent` for
@@ -129,6 +138,19 @@ export default {
           "sans-serif",
         ],
       },
+      /* Line length, named.
+       *
+       * `max-w-[72ch]` appeared thirty-six times across ten files — the
+       * app's measure for running text, re-decided by hand at every call
+       * site. One token means changing the measure is one line, and a
+       * narrower variant exists for the places that need it (a table cell
+       * carrying a sentence cannot take the full measure without swallowing
+       * the table's slack and out-running every paragraph beside it). */
+      maxWidth: {
+        measure: "72ch",
+        "measure-sm": "52ch",
+      },
+
       fontSize: {
         /* Whole pixels: the display face is a bitmap and blurs off-grid. */
         "display-xl": [
