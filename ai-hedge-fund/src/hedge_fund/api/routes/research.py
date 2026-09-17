@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
@@ -10,6 +12,7 @@ from hedge_fund.agents.personas import (
     is_valid_persona,
     list_persona_ids,
 )
+from hedge_fund.agents.profiles import PROFILES
 from hedge_fund.agents.plan_agent import DEFAULT_QUESTION, run_plan_analysis
 from hedge_fund.agents.research_agent import (
     run_committee_analysis,
@@ -43,15 +46,39 @@ class CheckRequest(BaseModel):
     )
     committee_personas: list[str] | None = Field(
         default=None,
-        description=f"Override committee list (max {COMMITTEE_MAX}); default is a fixed set of four styles",
+        description=(
+            f"Override committee list (max {COMMITTEE_MAX}); default is "
+            f"{len(DEFAULT_COMMITTEE_PERSONAS)} styles chosen to disagree for different reasons"
+        ),
     )
 
 
 @router.get("/personas")
 async def get_personas():
-    """Ids available for `persona` and `committee_personas`."""
+    """Ids available for `persona` and `committee_personas`, with their profiles.
+
+    The profile travels with the id deliberately. The frontend used to keep its
+    own hand-written description of each investor, which meant the app could
+    tell the reader an investor weighs one thing while the model had been
+    instructed to weigh another — and the reader would judge the verdict
+    against a description that did not govern it. Now both come from
+    `agents/profiles.py`, next to the prompt itself.
+    """
+    out = []
+    for pid in list_persona_ids():
+        p = PROFILES.get(pid)
+        row: dict[str, Any] = {"id": pid}
+        if p is not None:
+            row |= {
+                "name": p.name,
+                "who": p.who,
+                "style": p.style,
+                "tests": list(p.tests),
+                "essence": p.essence,
+            }
+        out.append(row)
     return {
-        "personas": [{"id": pid} for pid in list_persona_ids()],
+        "personas": out,
         "default_committee": list(DEFAULT_COMMITTEE_PERSONAS),
     }
 

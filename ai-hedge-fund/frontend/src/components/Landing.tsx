@@ -34,63 +34,77 @@ import {
 const FEATURES = [
   {
     n: "01",
-    hue: "var(--oxide)",
+    hue: "var(--oxide-paper)",
     label: "Deterministic numbers",
     title: "The model picks the metrics. It never computes them.",
     body: "A question compiles into a typed plan — a DAG of registered Python metrics. The planner chooses what to measure and never sees a value. The executor computes. A second pass writes prose over results it did not produce.",
   },
   {
     n: "02",
-    hue: "var(--cobalt)",
+    hue: "var(--cobalt-paper)",
     label: "Verification",
     title: "Every number in the prose is checked.",
     body: "A deterministic pass re-reads the finished thesis, extracts each numeric claim and compares it against the snapshot. Claims it cannot map are reported unverifiable — never as passing.",
   },
   {
     n: "03",
-    hue: "var(--cadmium)",
+    hue: "var(--cadmium-paper)",
     label: "Reproducibility",
     title: "Runs are recorded and diffable.",
     body: "Each analysis persists its snapshot, prompts, model parameters and output. Two runs with identical inputs should agree; when they do not, the divergence is surfaced rather than averaged away.",
   },
   {
     n: "04",
-    hue: "var(--verdigris)",
+    hue: "var(--verdigris-paper)",
     label: "Provenance",
     title: "You can see which source answered.",
     body: "Providers disagree on split adjustment, fiscal alignment and currency. Every fetch records who answered, whether it came from cache, and how the payload verified — frequency, coverage, units.",
   },
   {
     n: "05",
-    hue: "var(--oxide)",
+    hue: "var(--oxide-paper)",
     label: "Sized against your book",
     title: "Whether to own it depends on what you already hold.",
     body: "A candidate is sized against the existing portfolio, not in isolation: resulting weight, correlation to what you hold, concentration, and the effect on portfolio volatility. A volatile name can lower total risk if it moves differently.",
   },
   {
     n: "06",
-    hue: "var(--cadmium)",
+    hue: "var(--cadmium-paper)",
     label: "Decisions on the record",
     title: "The call is kept with the book it was made against.",
     body: "Weights and correlations move, so a decision reviewed a year later is judged against the portfolio as it stood — not against today's, which would mark every past call using information nobody had.",
   },
   {
     n: "07",
-    hue: "var(--verdigris)",
+    hue: "var(--cadmium-paper)",
+    label: "Screens you consult",
+    title: "Three screens, already run.",
+    body: "A screen is a list you consult, not a job you commission. Results for the multibagger, compounder and Bolton contrarian screens are computed ahead of time and shown on open, dated — because a screen built on quarterly fundamentals is wrong the moment a company reports.",
+  },
+  {
+    n: "08",
+    hue: "var(--cobalt-paper)",
+    label: "Fifteen investors",
+    title: "You can see the standard being applied.",
+    body: "Each investor carries the concrete tests they are known for, shown next to their verdict and drawn from the same profile that builds their prompt. Seven speak by default, picked to disagree for different reasons. Read the spread, not the average.",
+  },
+  {
+    n: "09",
+    hue: "var(--verdigris-paper)",
     label: "Autoresearch",
     title: "Overnight experiments that are hard on themselves.",
     body: "Proposes one strategy at a time and judges it on a window it never saw, with the bar rising as more things are tried — because searching enough variants against one price history will always turn something up. Discarded runs stay on the log.",
   },
   {
-    n: "08",
-    hue: "var(--oxide)",
+    n: "10",
+    hue: "var(--oxide-paper)",
     label: "Methodology memory",
     title: "Corrections of method, not of answers.",
     body: "Teach it how to approach a problem and later runs apply it. Notes containing prices or scores are rejected — a stored number would be replayed onto runs where it is no longer true.",
   },
   {
-    n: "09",
-    hue: "var(--cobalt)",
+    n: "11",
+    hue: "var(--cobalt-paper)",
     label: "Local first",
     title: "Runs on your machine. No API keys.",
     body: "Ollama serves the model locally, market data comes from keyless providers by default, and the portfolio lives in a SQLite file you own. Optional keys add coverage; none are required.",
@@ -106,22 +120,22 @@ const PIPELINE = [
   {
     step: "Planner",
     detail: "Chooses metrics from a fixed catalog — sees no values",
-    hue: "var(--cobalt)",
+    hue: "var(--cobalt-paper)",
   },
   {
     step: "Executor",
     detail: "Plain Python computes every figure",
-    hue: "var(--cadmium)",
+    hue: "var(--cadmium-paper)",
   },
   {
     step: "Narrator",
     detail: "Writes prose over computed results only",
-    hue: "var(--cobalt)",
+    hue: "var(--cobalt-paper)",
   },
   {
     step: "Harness",
     detail: "Validates, verifies claims, overrides the conviction score",
-    hue: "var(--oxide)",
+    hue: "var(--oxide-paper)",
   },
   {
     step: "Record",
@@ -131,12 +145,12 @@ const PIPELINE = [
   {
     step: "Size",
     detail: "Weighted against the book you already hold",
-    hue: "var(--oxide)",
+    hue: "var(--oxide-paper)",
   },
   {
     step: "Decide",
     detail: "The call kept with the portfolio context behind it",
-    hue: "var(--cadmium)",
+    hue: "var(--cadmium-paper)",
   },
 ];
 
@@ -160,6 +174,10 @@ const LIMITATIONS = [
   [
     "Data quality is inherited",
     "Fundamentals come from third-party providers that disagree with each other and are sometimes stale. Provenance tells you which source answered; it cannot tell you that source was right.",
+  ],
+  [
+    "No screen checks a catalyst",
+    "A passing name is a candidate for a question, not an answer to one. The Bolton screen is explicit about it — his framework's catalyst section cannot be read from a data feed, so it is not scored and every row says so.",
   ],
   [
     "Committee mode is not audited",
@@ -452,14 +470,22 @@ export function Landing() {
                   key={c.id}
                   type="button"
                   onClick={() => goTo(c.id)}
-                  className="hidden text-on-canvas transition-colors hover:text-oxide sm:block"
+                  className="hidden text-on-canvas transition-colors hover:text-oxide-paper sm:block"
                 >
                   {c.label}
                 </button>
               ))}
+              {/* A real route, not a chapter — the others scroll this page,
+                * this one leaves it, so it does not sit in CHAPTERS. */}
+              <Link
+                to="/docs"
+                className="text-on-canvas transition-colors hover:text-oxide-paper"
+              >
+                Reference
+              </Link>
               <Link
                 to="/dashboard"
-                className="bg-enamel px-4 py-2 text-on-accent-light transition-colors hover:bg-oxide"
+                className="bg-enamel px-4 py-2 text-on-accent-light transition-colors hover:bg-oxide-paper"
               >
                 Open&nbsp;→
               </Link>
@@ -510,13 +536,13 @@ export function Landing() {
                 <div
                   className={clsx(horizontal ? "max-w-[46vw]" : "max-w-full")}
                 >
-                  <Marker hue="var(--oxide)">
+                  <Marker hue="var(--oxide-paper)">
                     Local-first equity research
                   </Marker>
                   <h1 className="mt-lg font-display text-[clamp(38px,6vw,72px)] leading-[1.02] tracking-tight text-enamel">
                     Numbers from code.
                     <br />
-                    <span className="text-oxide">Not from the model.</span>
+                    <span className="text-oxide-paper">Not from the model.</span>
                   </h1>
                   <p className="mt-xl max-w-[58ch] text-body-lg text-on-canvas-soft">
                     Most AI research tools hand a language model a pile of data
@@ -532,7 +558,7 @@ export function Landing() {
                   <div className="mt-2xl flex flex-wrap items-center gap-sm font-display text-label uppercase tracking-marker">
                     <Link
                       to="/dashboard"
-                      className="bg-enamel px-6 py-3.5 text-on-accent-light transition-all duration-300 ease-out-expo hover:bg-oxide"
+                      className="bg-enamel px-6 py-3.5 text-on-accent-light transition-all duration-300 ease-out-expo hover:bg-oxide-paper"
                     >
                       Open the app
                     </Link>
@@ -571,7 +597,7 @@ export function Landing() {
                       href="https://ollama.com"
                       target="_blank"
                       rel="noreferrer"
-                      className="text-oxide underline decoration-oxide/40 underline-offset-4 transition-colors hover:decoration-oxide"
+                      className="text-oxide-paper underline decoration-oxide-paper/40 underline-offset-4 transition-colors hover:decoration-oxide-paper"
                     >
                       Ollama
                     </a>
@@ -584,8 +610,8 @@ export function Landing() {
               {/* About */}
               <section id="about" className={band()}>
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
-                  <div className="mb-md h-[3px] w-16 bg-cobalt" />
-                  <Marker hue="var(--cobalt)">Chapter one</Marker>
+                  <div className="mb-md h-[3px] w-16 bg-cobalt-paper" />
+                  <Marker hue="var(--cobalt-paper)">Chapter one</Marker>
                   <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
                     What this is
                   </h2>
@@ -618,15 +644,15 @@ export function Landing() {
               {/* Features */}
               <section id="features" className={band()}>
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
-                  <div className="mb-md h-[3px] w-16 bg-oxide" />
-                  <Marker hue="var(--oxide)">Chapter two</Marker>
+                  <div className="mb-md h-[3px] w-16 bg-oxide-paper" />
+                  <Marker hue="var(--oxide-paper)">Chapter two</Marker>
                   <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
                     What it does
                   </h2>
                   <p className="mt-lg max-w-[34ch] text-body-sm text-on-canvas-soft">
-                    Nine things, in the order they matter. The first two are the
-                    whole argument; the rest are what it takes to make them hold
-                    up in practice.
+                    Eleven things, in the order they matter. The first two are
+                    the whole argument; the rest are what it takes to make them
+                    hold up in practice.
                   </p>
                 </div>
                 <div
@@ -668,8 +694,8 @@ export function Landing() {
               {/* Architecture */}
               <section id="architecture" className={band()}>
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
-                  <div className="mb-md h-[3px] w-16 bg-cadmium" />
-                  <Marker hue="var(--cadmium)">Chapter three</Marker>
+                  <div className="mb-md h-[3px] w-16 bg-cadmium-paper" />
+                  <Marker hue="var(--cadmium-paper)">Chapter three</Marker>
                   <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
                     How a question
                     <br />
@@ -732,8 +758,8 @@ export function Landing() {
               {/* Limitations */}
               <section id="limitations" className={band()}>
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
-                  <div className="mb-md h-[3px] w-16 bg-oxide" />
-                  <Marker hue="var(--oxide)">Chapter four</Marker>
+                  <div className="mb-md h-[3px] w-16 bg-oxide-paper" />
+                  <Marker hue="var(--oxide-paper)">Chapter four</Marker>
                   <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
                     What it does not do
                   </h2>
@@ -757,7 +783,7 @@ export function Landing() {
                         horizontal && "w-[300px] shrink-0",
                       )}
                     >
-                      <span className="font-display text-label tabular text-oxide">
+                      <span className="font-display text-label tabular text-oxide-paper">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <div>
@@ -784,16 +810,22 @@ export function Landing() {
               >
                 <RegistrationMark className="absolute left-[5vw] top-[12vh] text-on-canvas-faint/50" />
                 <RegistrationMark className="absolute right-[5vw] top-[12vh] text-on-canvas-faint/50" />
-                <Marker hue="var(--oxide)">End of the read</Marker>
+                <Marker hue="var(--oxide-paper)">End of the read</Marker>
                 <h2 className="mt-lg max-w-[18ch] font-display text-[clamp(30px,4.5vw,56px)] leading-[1.05] tracking-tight text-enamel">
                   Now go and argue with it.
                 </h2>
                 <div className="mt-2xl flex flex-wrap items-center gap-sm font-display text-label uppercase tracking-marker">
                   <Link
                     to="/dashboard"
-                    className="bg-enamel px-6 py-3.5 text-on-accent-light transition-all duration-300 ease-out-expo hover:bg-oxide"
+                    className="bg-enamel px-6 py-3.5 text-on-accent-light transition-all duration-300 ease-out-expo hover:bg-oxide-paper"
                   >
                     Open the app
+                  </Link>
+                  <Link
+                    to="/docs"
+                    className="border-2 border-enamel px-6 py-3.5 text-enamel transition-colors hover:bg-enamel hover:text-on-accent-light"
+                  >
+                    Read the reference
                   </Link>
                   <a
                     href="https://github.com/karanmjpinto/mjresearch"
@@ -819,7 +851,7 @@ export function Landing() {
                     Scroll →
                   </span>
                   <div className="h-px flex-1 bg-enamel/20">
-                    <div ref={railFillRef} className="h-px w-0 bg-oxide" />
+                    <div ref={railFillRef} className="h-px w-0 bg-oxide-paper" />
                   </div>
                 </div>
               </div>
@@ -834,7 +866,7 @@ export function Landing() {
               href="https://github.com/karanmjpinto/mjresearch"
               target="_blank"
               rel="noreferrer"
-              className="transition-colors hover:text-oxide"
+              className="transition-colors hover:text-oxide-paper"
             >
               github.com/karanmjpinto
             </a>

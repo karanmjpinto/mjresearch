@@ -103,6 +103,26 @@
   --c-cadmium: 55% 0.125 72; /* cadmium, deepened for daylight */
   --c-cobalt: 44% 0.175 258; /* ultramarine */
   --c-verdigris: 43% 0.078 178; /* the occasional green */
+
+  /* The same four accents, pinned to their daylight values for use on the
+   * linen ground.
+   *
+   * `--c-canvas` is deliberately never redefined for dark — it depicts paper,
+   * and paper does not turn black when the lights go off. But the accents
+   * above *are* redefined lighter for the dark ground, and the two rules
+   * collide on any page that stays linen: in dark mode a light accent lands
+   * on a light ground and the contrast collapses. Measured on `--c-canvas`,
+   * the four dark values come out at 3.28, 3.48, 1.62 and 3.15 to one — the
+   * cadmium chip was effectively invisible.
+   *
+   * So a page on linen uses these instead, and they hold in both themes.
+   * Cadmium is deepened a further 3% beyond its daylight value because 55%
+   * measures 3.98:1 on this ground — it failed AA in daylight too, which the
+   * dark-mode break was hiding. */
+  --c-oxide-paper: 47% 0.17 32; /* 5.92:1 on linen */
+  --c-cadmium-paper: 52% 0.125 72; /* 4.51:1 — 55% was 3.98:1 */
+  --c-cobalt-paper: 44% 0.175 258; /* 6.37:1 */
+  --c-verdigris-paper: 43% 0.078 178; /* 6.25:1 */
   --c-aluminium: 55% 0.01 80; /* silver enamel */
 
   /* ── One light, declared once ──────────────────────────────────────────
@@ -189,6 +209,10 @@
   --cobalt: oklch(var(--c-cobalt));
   --verdigris: oklch(var(--c-verdigris));
   --aluminium: oklch(var(--c-aluminium));
+  --oxide-paper: oklch(var(--c-oxide-paper));
+  --cadmium-paper: oklch(var(--c-cadmium-paper));
+  --cobalt-paper: oklch(var(--c-cobalt-paper));
+  --verdigris-paper: oklch(var(--c-verdigris-paper));
 
   /* The ground tokens under their previous names. `ink` was the dark page
    * before there was a light one; these keep three dozen call sites and any

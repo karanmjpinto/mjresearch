@@ -217,7 +217,7 @@ export function CompsField({ ticker }: { ticker: string }) {
         </Labelled>
       )}
 
-      <p className="max-w-[72ch] text-body-xs text-on-ink-faint">
+      <p className="max-w-measure text-body-xs text-on-ink-faint">
         Each bar is the peer quartile range applied to the per-share figure
         recovered from this company&apos;s own multiple. Peers:{" "}
         {d.peers.join(", ") || "none"}

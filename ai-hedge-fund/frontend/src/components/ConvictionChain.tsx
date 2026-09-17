@@ -88,7 +88,7 @@ export function ConvictionChain({ ticker }: { ticker: string }) {
         <span className="font-display text-label uppercase tracking-label text-on-ink-faint">
           Conviction · three claims, multiplied
         </span>
-        <p className="max-w-[72ch] text-body-xs text-on-ink-faint">
+        <p className="max-w-measure text-body-xs text-on-ink-faint">
           Your price is right, and the market corrects, and it corrects while
           you can still be holding. One weak link caps the result, which is the
           point of multiplying rather than averaging.
@@ -257,12 +257,12 @@ export function ConvictionChain({ ticker }: { ticker: string }) {
                 <p className="mt-2xs text-body-sm text-on-ink">
                   {d.structure.allowed}
                 </p>
-                <p className="mt-2xs max-w-[72ch] text-body-xs text-on-ink-faint">
+                <p className="mt-2xs max-w-measure text-body-xs text-on-ink-faint">
                   {d.structure.because}
                 </p>
               </div>
               {d.humility.haircut > 0 && (
-                <p className="max-w-[72ch] text-body-xs text-oxide">
+                <p className="max-w-measure text-body-xs text-oxide">
                   {d.humility.note}
                 </p>
               )}

@@ -274,7 +274,7 @@ export function DecideView() {
           <h1 className="font-display text-display-sm tracking-tight text-bone">
             Decide
           </h1>
-          <p className="mt-sm max-w-[72ch] text-[15px] leading-relaxed text-on-ink-soft">
+          <p className="mt-sm max-w-measure text-[15px] leading-relaxed text-on-ink-soft">
             A conviction score tells you whether a name is good. Whether you
             should own it depends on what you already hold — so this sizes the
             position against your book, and records the call with that context

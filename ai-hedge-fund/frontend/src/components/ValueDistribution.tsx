@@ -179,7 +179,7 @@ export function ValueDistribution({
           </text>
         </svg>
       </div>
-      <figcaption className="max-w-[72ch] text-body-xs text-on-ink-faint">
+      <figcaption className="max-w-measure text-body-xs text-on-ink-faint">
         Value per share across the simulated draws. {label}
       </figcaption>
     </figure>

@@ -49,6 +49,33 @@ def _sum_q(df: pd.DataFrame | None, row: str, start: int, end: int) -> float | N
     return float(pd.to_numeric(chunk, errors="coerce").fillna(0).sum())
 
 
+def _annual_yoy(df: pd.DataFrame | None, row: str) -> float | None:
+    """Year-over-year growth in percent from the two most recent fiscal years.
+
+    Exists because the prior-year TTM cannot be summed from quarterly data.
+    `_sum_q` needs all eight quarters and refuses a short window — correctly,
+    since a three-quarter "TTM" understates — but yfinance returns four to
+    seven quarters, so the prior TTM was `None` for every company ever
+    screened. EBITDA growth was therefore always unknown, which made the
+    investment-quality penalty always zero: a designed check that had never
+    once fired, on a screen that reported its scores as if it had.
+
+    The annual statement goes back four years, so the comparison is made
+    there instead. Both sides are full fiscal years, which is the part that
+    matters — a TTM measured against an annual figure would fold up to three
+    quarters of drift into the growth rate.
+    """
+    if df is None or df.empty or row not in df.index:
+        return None
+    r = pd.to_numeric(df.loc[row], errors="coerce").dropna()
+    if len(r) < 2:
+        return None
+    cur, prev = float(r.iloc[0]), float(r.iloc[1])
+    if abs(prev) < 1e-6:
+        return None
+    return (cur - prev) / abs(prev) * 100
+
+
 @dataclass
 class YartsevaSnapshot:
     ticker: str
@@ -61,6 +88,8 @@ class YartsevaSnapshot:
     revenue_ttm: float | None = None
     ebitda_ttm: float | None = None
     ebitda_prior_ttm: float | None = None
+    #: Fiscal-year EBITDA growth, used when the prior TTM cannot be summed.
+    ebitda_growth_pct_annual: float | None = None
     operating_income_ttm: float | None = None
     net_income_ttm: float | None = None
     free_cash_flow_ttm: float | None = None
@@ -96,6 +125,7 @@ def fetch_yartseva_snapshot(ticker: str) -> YartsevaSnapshot:
         snap.peg_ratio = _f(info.get("pegRatio"))
 
         q_inc = t.quarterly_income_stmt
+        a_inc = t.income_stmt
         q_bs = t.quarterly_balance_sheet
         q_cf = t.quarterly_cashflow
 
@@ -105,6 +135,10 @@ def fetch_yartseva_snapshot(ticker: str) -> YartsevaSnapshot:
         ebitda_ttm = _sum_q(q_inc, "EBITDA", 0, 4)
         ni_ttm = _sum_q(q_inc, "Net Income", 0, 4)
         ebitda_prior = _sum_q(q_inc, "EBITDA", 4, 8)
+
+        # Quarterly first; the annual statement is the fallback that actually
+        # fires, since yfinance rarely returns the eight quarters needed.
+        snap.ebitda_growth_pct_annual = _annual_yoy(a_inc, "EBITDA")
 
         snap.revenue_ttm = rev_ttm
         snap.ebitda_ttm = ebitda_ttm
@@ -412,6 +446,10 @@ def score_yartseva(snap: YartsevaSnapshot) -> YartsevaResult:
     eg_pct = None
     if e_cur is not None and e_prev is not None and abs(e_prev) > 1e-6:
         eg_pct = (e_cur - e_prev) / abs(e_prev) * 100
+    elif snap.ebitda_growth_pct_annual is not None:
+        # The path that is actually taken. See _annual_yoy: the quarterly one
+        # needs eight quarters and yfinance returns four to seven.
+        eg_pct = snap.ebitda_growth_pct_annual
     r.ebitda_growth_pct = eg_pct
     inv_excess = None
     if eg_pct is not None:

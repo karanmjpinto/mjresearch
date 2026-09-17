@@ -12,6 +12,7 @@ import { AppNav } from "./AppNav";
 import { PersonaOpinionGrid, humanizePersonaId } from "./PersonaOpinionCards";
 import { YartsevaPanel } from "./YartsevaPanel";
 import { AcquisitionCompounderPanel } from "./AcquisitionCompounderPanel";
+import { ScreenResults } from "./ScreenResults";
 
 function tickerLooksValid(t: string): boolean {
   const s = t.trim();
@@ -183,22 +184,38 @@ export function ScreenersView() {
           ))}
         </div>
 
-        <div className="bg-surface-card rounded-xl p-5 border border-border/60">
-          <h2 className="text-lg font-semibold text-white">{active.label}</h2>
-          <p className="text-gray-400 text-sm mt-1">{active.description}</p>
+        {active.usesApi && active.screenId && (
+          <ScreenResults
+            screen={active.screenId}
+            title={active.resultsTitle ?? active.label}
+            blurb={active.resultsBlurb ?? active.description}
+            info={active.infoTerm}
+            scoreMax={active.scoreMax ?? 100}
+          />
+        )}
 
-          <div className="mt-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">
-              Screening criteria
-            </p>
+        <div>
+          <h2 className="font-display text-title-xs text-bone">{active.label}</h2>
+          <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
+            {active.description}
+          </p>
+        </div>
+
+        {/* The recipe, folded away. It was above the results and three
+          * screenfuls long, so the answer was always below the fold. */}
+        <details className="border border-ink-line bg-ink-raised">
+          <summary className="cursor-pointer list-none px-md py-sm font-display text-label uppercase tracking-label text-on-ink-soft transition-colors hover:text-bone [&::-webkit-details-marker]:hidden">
+            What this screen tests ▾
+          </summary>
+          <div className="border-t border-ink-line px-md py-sm">
             {active.criteriaSections && active.criteriaSections.length > 0 ? (
               <div className="space-y-5">
                 {active.criteriaSections.map((sec) => (
                   <div key={sec.title}>
-                    <p className="text-sm font-medium text-gray-200 mb-2">
+                    <p className="mb-2 font-display text-label uppercase tracking-label text-on-ink-faint">
                       {sec.title}
                     </p>
-                    <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
+                    <ul className="list-inside list-disc space-y-1 text-body-xs text-on-ink-soft">
                       {sec.items.map((c, i) => (
                         <li key={`${sec.title}-${i}`}>{c}</li>
                       ))}
@@ -207,20 +224,45 @@ export function ScreenersView() {
                 ))}
               </div>
             ) : (
-              <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
+              <ul className="list-inside list-disc space-y-1 text-body-xs text-on-ink-soft">
                 {active.criteria.map((c) => (
                   <li key={c}>{c}</li>
                 ))}
               </ul>
             )}
           </div>
-        </div>
+        </details>
 
-        {active.usesApi && active.id === "yartseva" ? (
-          <YartsevaPanel />
-        ) : active.usesApi && active.id === "acquisition_compounder" ? (
-          <AcquisitionCompounderPanel />
-        ) : (
+        {/* Run it somewhere else. Optional, and precise about what "another
+          * market" means here, because the two kinds behave nothing alike:
+          * the three S&P bands are whole indices, several hundred names and
+          * ten-plus minutes each, while Japan, Korea, Europe and the rest are
+          * curated watchlists of roughly twenty large caps that finish in
+          * about a minute. Offering them as one undifferentiated list invites
+          * someone to start a quarter-hour run expecting the short one. */}
+        {active.usesApi && (
+          <details className="border border-ink-line bg-ink-raised">
+            <summary className="cursor-pointer list-none px-md py-sm font-display text-label uppercase tracking-label text-on-ink-soft transition-colors hover:text-bone [&::-webkit-details-marker]:hidden">
+              Run it on another market — Japan, Korea, Europe — or a full index ▾
+            </summary>
+            <div className="border-t border-ink-line p-md">
+              <p className="mb-md max-w-measure text-body-xs text-on-ink-faint">
+                These run live, one company at a time. The market watchlists —
+                Japan, Korea, Europe, India, Brazil and a dozen more — are
+                around twenty large caps each and take about a minute. A full
+                S&P band is several hundred names and takes ten minutes or
+                more, so cap it if you only want a look.
+              </p>
+              {active.id === "yartseva" ? (
+                <YartsevaPanel />
+              ) : (
+                <AcquisitionCompounderPanel />
+              )}
+            </div>
+          </details>
+        )}
+
+        {!active.usesApi && (
           <div className="bg-surface-card rounded-xl border border-border/60 overflow-hidden">
             <div className="px-5 py-3 border-b border-border/60 flex items-center justify-between">
               <span className="text-sm font-medium text-gray-300">Plays</span>

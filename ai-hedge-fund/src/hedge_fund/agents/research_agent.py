@@ -32,9 +32,11 @@ from hedge_fund.agents.llm import (
     model_for_role,
 )
 from hedge_fund.agents.personas import (
+    SHARED_ANALYST_SYSTEM,
     SYNTHESIS_SYSTEM,
     build_pm_synthesis_user_prompt,
     build_rebuttal_user_prompt,
+    get_persona_lens,
     get_persona_system_prompt,
     get_rebuttal_system_prompt,
 )
@@ -116,9 +118,31 @@ async def _analyze(
     role: str = "single",
 ) -> dict[str, Any]:
     """One analysis call: prompt assembly, invocation, parsing, checking."""
-    system, notes = _assemble_system_prompt(system_base, ticker=ticker, persona_id=persona_id)
     bundle, truncation = truncate_context_with_manifest(snapshot)
-    user_msg = build_user_prompt(ticker.upper(), bundle)
+
+    if settings.llm_shared_prefix and persona_id:
+        # Shared bytes first, the part that differs last. Every persona in a
+        # committee run therefore sends an identical prefix — system rules plus
+        # the same market bundle — and only the tail changes, so the provider's
+        # prefix cache can serve calls two onward instead of re-reading the
+        # bundle seven times. The methodology notes are per-persona too, so
+        # they move with the lens rather than staying in the system message.
+        system, notes = _assemble_system_prompt(
+            SHARED_ANALYST_SYSTEM, ticker=ticker, persona_id=None
+        )
+        lens_notes = memory.retrieve(ticker=ticker, persona=persona_id)
+        notes = notes + [n for n in lens_notes if n not in notes]
+        tail = memory.render_for_prompt(lens_notes)
+        user_msg = (
+            build_user_prompt(ticker.upper(), bundle)
+            + "\n\nAdopt the following lens for this assessment, and follow it "
+            "in preference to any general guidance above:\n"
+            + get_persona_lens(persona_id)
+            + (tail or "")
+        )
+    else:
+        system, notes = _assemble_system_prompt(system_base, ticker=ticker, persona_id=persona_id)
+        user_msg = build_user_prompt(ticker.upper(), bundle)
 
     try:
         result = await call_json(system, user_msg, ANALYSIS_SCHEMA, **_model_kwargs(role))

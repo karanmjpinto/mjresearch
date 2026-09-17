@@ -68,7 +68,7 @@ function LegRow({ leg }: { leg: LegView }) {
         )}
       </div>
       {leg.open_questions.map((q) => (
-        <p key={q} className="max-w-[72ch] text-body-xs text-on-ink-soft">
+        <p key={q} className="max-w-measure text-body-xs text-on-ink-soft">
           {q}
         </p>
       ))}
@@ -100,13 +100,13 @@ function Validation({ v }: { v: ValidationView }) {
       </div>
 
       {v.available ? (
-        <p className="mt-xs max-w-[72ch] text-body-sm text-on-ink-soft">
+        <p className="mt-xs max-w-measure text-body-sm text-on-ink-soft">
           Weakest link: <span className="text-bone">{v.weakest_leg}</span>. So{" "}
           <span className="text-cadmium">{v.structure?.allowed}</span> —{" "}
           {v.structure?.because}
         </p>
       ) : (
-        <p className="mt-xs max-w-[72ch] text-body-sm text-on-ink-soft">
+        <p className="mt-xs max-w-measure text-body-sm text-on-ink-soft">
           {v.reason}
         </p>
       )}
@@ -124,7 +124,7 @@ function Validation({ v }: { v: ValidationView }) {
       {legs.length === 0 && (
         <ul className="mt-sm flex flex-col gap-xs">
           {(v.open_questions ?? []).map((q) => (
-            <li key={q} className="max-w-[72ch] text-body-xs text-on-ink-soft">
+            <li key={q} className="max-w-measure text-body-xs text-on-ink-soft">
               {q}
             </li>
           ))}
@@ -183,10 +183,10 @@ function Names({ id }: { id: string }) {
               </span>
             </div>
             <p className="mt-2xs text-body-sm text-on-ink">{n.name}</p>
-            <p className="mt-2xs max-w-[72ch] text-body-xs text-on-ink-soft">
+            <p className="mt-2xs max-w-measure text-body-xs text-on-ink-soft">
               {n.exposure}
             </p>
-            <p className="mt-2xs max-w-[72ch] text-body-xs text-on-ink-faint">
+            <p className="mt-2xs max-w-measure text-body-xs text-on-ink-faint">
               {n.band_means}
             </p>
           </li>
@@ -212,7 +212,7 @@ function CuratedCard({ c }: { c: ConstraintSummary }) {
       <p className="mt-2xs font-display text-label text-verdigris">
         {c.scarce_object}
       </p>
-      <p className="mt-xs max-w-[72ch] text-body-sm text-on-ink-soft">
+      <p className="mt-xs max-w-measure text-body-sm text-on-ink-soft">
         {c.why}
       </p>
 
@@ -249,13 +249,13 @@ function DerivedCard({ c }: { c: ConstraintSummary }) {
           {c.flagged_count}/{c.note_count} notes
         </span>
       </div>
-      <p className="mt-xs max-w-[72ch] text-body-sm text-on-ink-soft">
+      <p className="mt-xs max-w-measure text-body-sm text-on-ink-soft">
         {c.why}
       </p>
 
       {quotes.length > 0 && (
         <blockquote className="mt-sm border-l-2 border-verdigris pl-sm">
-          <p className="max-w-[72ch] text-body-xs italic text-on-ink-soft">
+          <p className="max-w-measure text-body-xs italic text-on-ink-soft">
             {quotes[0].quote}
           </p>
           <cite className="mt-2xs block font-display text-label not-italic text-on-ink-faint">
@@ -430,7 +430,7 @@ export function ConstraintsView() {
                   {dismissed.length}
                 </span>
               </summary>
-              <p className="mt-xs max-w-[72ch] text-body-xs text-on-ink-faint">
+              <p className="mt-xs max-w-measure text-body-xs text-on-ink-faint">
                 {d?.checked_and_rejected?.note}
               </p>
               <ul className="mt-sm flex flex-col gap-sm">
@@ -439,7 +439,7 @@ export function ConstraintsView() {
                     <h3 className="font-display text-body-sm text-on-ink">
                       {c.name}
                     </h3>
-                    <p className="mt-2xs max-w-[72ch] text-body-xs text-on-ink-soft">
+                    <p className="mt-2xs max-w-measure text-body-xs text-on-ink-soft">
                       {c.rejected_because}
                     </p>
                   </li>

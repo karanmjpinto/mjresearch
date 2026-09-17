@@ -56,7 +56,7 @@ export function OnePagerPanel({ ticker }: { ticker: string }) {
           A page for this name
           <InfoTip term="one-pager" />
         </h2>
-        <p className="mt-2xs max-w-[72ch] text-body-sm text-on-ink-soft">
+        <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
           Nothing written about {ticker} yet? This drafts one in your own
           template, pre-linked to the notes that matched, and puts it in the
           vault where you will find it again.
@@ -74,7 +74,7 @@ export function OnePagerPanel({ ticker }: { ticker: string }) {
           <p className="font-display text-label uppercase tracking-label text-cadmium">
             Nothing to write to
           </p>
-          <p className="mt-xs max-w-[72ch] text-body-sm text-on-ink-soft">
+          <p className="mt-xs max-w-measure text-body-sm text-on-ink-soft">
             {d.reason}
           </p>
         </div>
@@ -122,7 +122,7 @@ export function OnePagerPanel({ ticker }: { ticker: string }) {
           </div>
 
           {d.exists && !save.isSuccess && (
-            <p className="mt-sm border-t border-ink-line pt-sm max-w-[72ch] text-body-xs text-cadmium">
+            <p className="mt-sm border-t border-ink-line pt-sm max-w-measure text-body-xs text-cadmium">
               A page already exists at that path. It will not be replaced —
               rename or move it if you want a fresh one, since anything you
               added by hand only exists there.
@@ -130,7 +130,7 @@ export function OnePagerPanel({ ticker }: { ticker: string }) {
           )}
 
           {save.error && (
-            <p className="mt-sm border-t border-ink-line pt-sm max-w-[72ch] text-body-xs text-oxide">
+            <p className="mt-sm border-t border-ink-line pt-sm max-w-measure text-body-xs text-oxide">
               {save.error instanceof Error
                 ? save.error.message
                 : "Could not write the note."}
@@ -138,7 +138,7 @@ export function OnePagerPanel({ ticker }: { ticker: string }) {
           )}
 
           {save.isSuccess && (
-            <p className="mt-sm border-t border-ink-line pt-sm max-w-[72ch] text-body-xs text-verdigris">
+            <p className="mt-sm border-t border-ink-line pt-sm max-w-measure text-body-xs text-verdigris">
               Written to {d.relative_path}. Open your vault and it will be
               there, linked to the notes that matched.
             </p>

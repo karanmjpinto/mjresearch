@@ -140,6 +140,27 @@ def optimize(req: OptimizeRequest) -> dict[str, Any]:
     }
 
 
+def _calendar_days(idx: pd.DatetimeIndex) -> pd.DatetimeIndex:
+    """One bar per trading day, with no timezone and no time of day.
+
+    The baskets here are assembled from whichever provider answered for each
+    name, and the providers do not agree on what a date is: yfinance returns a
+    tz-aware index in the exchange's zone, OpenBB a naive one, and some paths
+    carry a market-open time rather than midnight. Concatenating a tz-aware
+    series with a naive one raises outright, which is how a six-name basket
+    became a 500. Flooring to the day is the quieter half of the fix — two
+    series stamped 09:30 and 00:00 on the same day would otherwise join to an
+    empty frame and read as "these tickers never traded together".
+
+    Local calendar day, not UTC: an index already in US/Eastern must keep the
+    session it belongs to, and converting to UTC first would move a 20:00
+    close onto the following date.
+    """
+    if idx.tz is not None:
+        idx = idx.tz_localize(None)
+    return idx.normalize()
+
+
 def _normalize_prices(df: pd.DataFrame) -> pd.DataFrame | None:
     if isinstance(df, list):
         df = pd.DataFrame(df)
@@ -158,6 +179,7 @@ def _normalize_prices(df: pd.DataFrame) -> pd.DataFrame | None:
         df = df.set_index(pd.to_datetime(df["date"])).drop(columns=["date"])
     elif not isinstance(df.index, pd.DatetimeIndex):
         df.index = pd.to_datetime(df.index)
+    df.index = _calendar_days(df.index)
     df = df.sort_index()
     df["close"] = pd.to_numeric(df["close"], errors="coerce")
     df = df.dropna(subset=["close"])

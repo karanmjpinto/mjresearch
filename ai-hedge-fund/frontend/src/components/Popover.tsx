@@ -37,20 +37,53 @@ type Props = {
   children: React.ReactNode;
 };
 
+/** Gap between the marker and the panel — `top-6` / `bottom-6`, in px. */
+const OFFSET = 24;
+/** Breathing room kept against the window edge. */
+const MARGIN = 16;
+/** Below this, opening downward is not worth it; look up instead. */
+const MIN_USABLE = 200;
+
 export function Popover({ label, width = 20, children }: Props) {
   const [open, setOpen] = useState(false);
   const [side, setSide] = useState<"start" | "end">("start");
+  const [place, setPlace] = useState<"below" | "above">("below");
+  const [maxH, setMaxH] = useState<number | null>(null);
   const wrap = useRef<HTMLSpanElement>(null);
   const panelId = useId();
 
   useEffect(() => {
     if (!open) return;
 
-    const rect = wrap.current?.getBoundingClientRect();
-    if (rect) {
+    const fit = () => {
+      const rect = wrap.current?.getBoundingClientRect();
+      if (!rect) return;
       const px = Math.min(window.innerWidth - 32, width * 16);
       setSide(rect.left + px > window.innerWidth - 16 ? "end" : "start");
-    }
+
+      /* Vertical fit, which this did not do and needed to.
+       *
+       * Panels used to be three short lines, so anywhere below the marker was
+       * fine. Then the investor panel started listing what each investor
+       * checks and grew to about 680px — taller than the room under a marker
+       * halfway down the page — and ran clean off the bottom of the window
+       * with no way to reach the rest. The browser will not scroll to it
+       * either: the panel is absolutely positioned, so it adds no height to
+       * the document.
+       *
+       * Two moves, in order: open upward when there is more room up there,
+       * then cap the height to whatever room the chosen direction actually
+       * has and let the panel scroll inside itself. The cap is what makes
+       * this safe at any trigger position, so it applies in both directions
+       * rather than only the one that overflowed. */
+      const below = window.innerHeight - rect.bottom - OFFSET - MARGIN;
+      const above = rect.top - OFFSET - MARGIN;
+      const up = below < MIN_USABLE && above > below;
+      setPlace(up ? "above" : "below");
+      setMaxH(Math.max(MIN_USABLE, up ? above : below));
+    };
+
+    fit();
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
@@ -63,9 +96,18 @@ export function Popover({ label, width = 20, children }: Props) {
 
     document.addEventListener("keydown", onKey);
     document.addEventListener("mousedown", onDown);
+    /* Re-measured while open, because the measurement goes stale the moment
+     * anything moves. The panel is absolutely positioned and so adds no
+     * height to the document: a cap computed for the old scroll position
+     * leaves the panel hanging off the window again, with nothing to scroll
+     * to it. Passive, since neither handler blocks the gesture. */
+    window.addEventListener("scroll", fit, { passive: true, capture: true });
+    window.addEventListener("resize", fit, { passive: true });
     return () => {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("mousedown", onDown);
+      window.removeEventListener("scroll", fit, { capture: true });
+      window.removeEventListener("resize", fit);
     };
   }, [open, width]);
 
@@ -93,10 +135,13 @@ export function Popover({ label, width = 20, children }: Props) {
           /* A `span` with block children throughout: this renders inside
            * headings, labels, paragraphs and table cells, and a `div` in a
            * `p` is invalid markup that browsers silently reflow. */
-          className={`absolute top-6 z-50 flex flex-col gap-xs border border-ink-line bg-ink-raised p-sm font-sans normal-case tracking-normal shadow-elev-2 ${
+          className={`absolute z-50 flex flex-col gap-xs overflow-y-auto overscroll-contain border border-ink-line bg-ink-raised p-sm font-sans normal-case tracking-normal shadow-elev-2 ${
             side === "end" ? "right-0" : "left-0"
-          }`}
-          style={{ width: `min(${width}rem, calc(100vw - 2rem))` }}
+          } ${place === "above" ? "bottom-6" : "top-6"}`}
+          style={{
+            width: `min(${width}rem, calc(100vw - 2rem))`,
+            maxHeight: maxH != null ? `${maxH}px` : undefined,
+          }}
         >
           {children}
         </span>

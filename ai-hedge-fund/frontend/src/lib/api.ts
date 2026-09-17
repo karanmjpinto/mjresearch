@@ -95,6 +95,25 @@ export interface AcquisitionCompounderScreenerResponse {
   results: AcquisitionCompounderResultRow[];
 }
 
+/**
+ * An investor's identity and method, as the backend defines it.
+ *
+ * Served with the persona list rather than written here, because the same
+ * fields also build the prompt the model receives. A description kept on this
+ * side could tell the reader an investor weighs one thing while the model was
+ * told to weigh another — and they would then judge the verdict against a
+ * description that does not govern it.
+ */
+export interface InvestorProfile {
+  id: string;
+  name?: string;
+  who?: string;
+  style?: string;
+  /** The concrete checks, specific enough to hold a verdict up against. */
+  tests?: string[];
+  essence?: string;
+}
+
 export interface ScreenerUniverseMeta {
   id: string;
   label: string;
@@ -815,6 +834,59 @@ export type DriverGuidance = {
   derivation_notes: string[];
 };
 
+export type ScreenRow = Record<string, unknown> & {
+  ticker?: string;
+  error?: string;
+  stage1_passed?: boolean;
+  composite?: number | null;
+  scores?: { total?: number | null } & Record<string, unknown>;
+  snapshot?: Record<string, unknown>;
+};
+
+export type ScreenResults =
+  | {
+      screen: string;
+      universe: string;
+      available: false;
+      reason: string;
+      refresh_command: string;
+    }
+  | {
+      screen: string;
+      universe: string;
+      available: true;
+      built_at: string;
+      age_days: number | null;
+      stale: boolean;
+      stale_after_days: number;
+      /** Names in the universe that were asked for. */
+      requested: number;
+      /** Names that returned usable data. */
+      checked: number;
+      /** Names that cleared the hard filters. */
+      passing: number;
+      shown: number;
+      /** Names whose data could not be fetched — not the same as failing. */
+      errored: number;
+      duration_s: number;
+      score_key: string;
+      /** Why the non-passing names failed, most common first. */
+      top_failures: { reason: string; count: number }[];
+      results: ScreenRow[];
+      refresh_command: string;
+    };
+
+export type CachedScreenMeta = {
+  screen: string;
+  universe: string;
+  built_at: string;
+  age_days: number | null;
+  stale: boolean;
+  count: number;
+  errors: number;
+  requested: number;
+};
+
 export type ConcentrationRow = {
   ticker: string;
   weight_pct: number;
@@ -1212,6 +1284,26 @@ export const api = {
       `/valuation/driver-guidance/${encodeURIComponent(ticker)}`,
     ),
 
+  getScreenResults: (
+    screen: string,
+    opts: { universe?: string; limit?: number; passingOnly?: boolean } = {},
+  ) => {
+    const q = new URLSearchParams();
+    if (opts.universe) q.set("universe", opts.universe);
+    if (opts.limit != null) q.set("limit", String(opts.limit));
+    if (opts.passingOnly != null) q.set("passing_only", String(opts.passingOnly));
+    return fetchJSON<ScreenResults>(
+      `/screeners/${encodeURIComponent(screen)}/results?${q}`,
+    );
+  },
+
+  getCachedScreens: () =>
+    fetchJSON<{
+      screens: CachedScreenMeta[];
+      default_universe: string;
+      refresh_command: string;
+    }>("/screeners/cached"),
+
   getTechnicals: (ticker: string) =>
     fetchJSON<Record<string, unknown>>(`/data/technicals/${ticker}`),
 
@@ -1324,14 +1416,14 @@ export const api = {
       body,
     ),
 
-  /** Index universes (S&P 500, NASDAQ-100, …) for screeners. */
+  /** Index universes for screeners. */
   getScreenerUniverses: () =>
     fetchJSON<{ universes: ScreenerUniverseMeta[] }>("/screeners/universes"),
 
   // --- Research ---
 
   getPersonas: () =>
-    fetchJSON<{ personas: { id: string }[]; default_committee: string[] }>(
+    fetchJSON<{ personas: InvestorProfile[]; default_committee: string[] }>(
       "/research/personas",
     ),
 
