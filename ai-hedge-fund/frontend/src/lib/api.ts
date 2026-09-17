@@ -555,6 +555,10 @@ export interface SetupInfo {
     temperature: number;
     seed: number;
     thinking_disabled: boolean;
+    /** False on a deployment that refuses model analysis (see api/guards.py). */
+    endpoints_enabled: boolean;
+    access_key_required: boolean;
+    rate_limit_per_hour: number;
   };
   env_path: string;
 }
