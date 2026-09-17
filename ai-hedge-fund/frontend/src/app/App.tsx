@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AutoResearchView } from "@/components/AutoResearchView";
 import { BackendGate } from "@/components/BackendGate";
+import { DeploymentLimits } from "@/components/DeploymentLimits";
 import { Dashboard } from "@/components/Dashboard";
 import { DocsView } from "@/components/DocsView";
 import { DecideView } from "@/components/DecideView";
@@ -37,6 +38,10 @@ export default function App() {
           path="*"
           element={
             <BackendGate>
+              {/* Above the routes rather than inside each one: the limits are a
+                  property of the deployment, not of the screen you happen to
+                  be on, and it renders nothing when nothing is limited. */}
+              <DeploymentLimits />
               <AppRoutes />
             </BackendGate>
           }
