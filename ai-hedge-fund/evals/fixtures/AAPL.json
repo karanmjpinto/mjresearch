@@ -1,0 +1,213 @@
+{
+ "ticker": "AAPL",
+ "price": {
+  "current": 336.9200134277344,
+  "change_30d_pct": 8.67,
+  "high_30d": 336.9200134277344,
+  "low_30d": 309.3500061035156,
+  "price_window_days": 30,
+  "observations": 22,
+  "window_start": "2026-08-18",
+  "window_end": "2026-09-17"
+ },
+ "fundamentals": {
+  "ticker": "AAPL",
+  "name": "Apple Inc.",
+  "sector": "Technology",
+  "industry": "Consumer Electronics",
+  "market_cap": 4917727592448,
+  "pe_ratio": 38.68714,
+  "forward_pe": 35.14225,
+  "peg_ratio": 2.6691,
+  "price_to_book": 45.783287,
+  "dividend_yield": 0.32,
+  "beta": 1.085,
+  "currency": "USD",
+  "exchange": "NMS",
+  "source": "openbb+yfinance_enhanced",
+  "52w_high": 344.57,
+  "52w_low": 236.65,
+  "avg_volume": 53710996,
+  "total_assets": 359241000000.0,
+  "total_debt": 98657000000.0,
+  "total_equity": 73733000000.0,
+  "revenue": 416161000000.0,
+  "net_income": 112010000000.0,
+  "ebitda": 144748000000.0,
+  "free_cash_flow": 98767000000.0,
+  "operating_cash_flow": 111482000000.0,
+  "field_sources": {
+   "ticker": "openbb",
+   "name": "openbb",
+   "sector": "openbb",
+   "industry": "openbb",
+   "market_cap": "openbb",
+   "pe_ratio": "openbb",
+   "forward_pe": "openbb",
+   "peg_ratio": "openbb",
+   "price_to_book": "openbb",
+   "dividend_yield": "openbb",
+   "beta": "openbb",
+   "currency": "openbb",
+   "exchange": "openbb",
+   "source": "openbb",
+   "52w_high": "yfinance_enhanced",
+   "52w_low": "yfinance_enhanced",
+   "avg_volume": "yfinance_enhanced",
+   "total_assets": "yfinance_enhanced",
+   "total_debt": "yfinance_enhanced",
+   "total_equity": "yfinance_enhanced",
+   "revenue": "yfinance_enhanced",
+   "net_income": "yfinance_enhanced",
+   "ebitda": "yfinance_enhanced",
+   "free_cash_flow": "yfinance_enhanced",
+   "operating_cash_flow": "yfinance_enhanced"
+  }
+ },
+ "technicals": {
+  "ticker": "AAPL",
+  "price": 336.9049987792969,
+  "rsi_14": 69.38,
+  "macd": {
+   "line": 5.19,
+   "signal": 3.51,
+   "histogram": 1.68,
+   "trend": "bullish"
+  },
+  "bollinger": {
+   "upper": 339.26,
+   "middle": 321.39,
+   "lower": 303.53,
+   "width": 11.11
+  },
+  "sma_50": 319.74,
+  "sma_200": 286.08,
+  "atr_14": 7.74,
+  "above_sma50": true,
+  "above_sma200": true,
+  "volume_avg_20": 40378015.0,
+  "source": "openbb"
+ },
+ "news": [
+  {
+   "title": "Top strategist thinks the Federal Reserve interest rate hike won't fix this huge earnings risk",
+   "date": "2026-09-17 12:16:19+00:00"
+  },
+  {
+   "title": "Who's really going to buy Snap's Specs",
+   "date": "2026-09-17 15:22:00+00:00"
+  },
+  {
+   "title": "GOOGL Down 7% in the Past 3 Months: Buy, Sell or Hold the Stock?",
+   "date": "2026-09-17 15:34:00+00:00"
+  },
+  {
+   "title": "Apple raises iPhone prices. Why carriers could cushion the blow?",
+   "date": "2026-09-17 16:35:48+00:00"
+  },
+  {
+   "title": "Apple (AAPL) Faces a $2.7 Billion UK Lawsuit over its App Tracking Rules",
+   "date": "2026-09-17 16:44:12+00:00"
+  }
+ ],
+ "news_sentiment": {
+  "enabled": false,
+  "reason": "transformers_not_installed",
+  "model": null,
+  "aggregate": {
+   "article_count": 0,
+   "mean_signed": null,
+   "positive_ratio": null,
+   "negative_ratio": null,
+   "neutral_ratio": null
+  }
+ },
+ "provenance": {
+  "slots": {
+   "fundamentals:AAPL": {
+    "category": "fundamentals",
+    "key": "AAPL",
+    "provider": "openbb+yfinance_enhanced",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:09:18+00:00",
+    "attempted": [
+     "openbb",
+     "yfinance_enhanced"
+    ]
+   },
+   "technicals:AAPL": {
+    "category": "technicals",
+    "key": "AAPL",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:09:20+00:00",
+    "params": {
+     "days": "365"
+    },
+    "checks": {
+     "row_count": 12,
+     "columns": [
+      "above_sma200",
+      "above_sma50",
+      "atr_14",
+      "bollinger",
+      "macd",
+      "price",
+      "rsi_14",
+      "sma_200",
+      "sma_50",
+      "source",
+      "ticker",
+      "volume_avg_20"
+     ]
+    }
+   },
+   "price:AAPL": {
+    "category": "price",
+    "key": "AAPL",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:09:22+00:00",
+    "params": {
+     "days": "30",
+     "interval": "1d"
+    },
+    "checks": {
+     "row_count": 22,
+     "start_date": "2026-08-18",
+     "end_date": "2026-09-17",
+     "frequency": "daily",
+     "gap_days_max": 4,
+     "columns": [
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume"
+     ],
+     "non_finite_values": 0
+    }
+   },
+   "news:AAPL": {
+    "category": "news",
+    "key": "AAPL",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:09:23+00:00",
+    "params": {
+     "limit": "5"
+    },
+    "checks": {
+     "row_count": 5
+    }
+   }
+  },
+  "providers_used": [
+   "openbb+yfinance_enhanced",
+   "openbb"
+  ],
+  "warnings": [],
+  "fetch_count": 4,
+  "cache_hits": 0
+ }
+}

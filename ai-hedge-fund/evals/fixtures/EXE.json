@@ -1,0 +1,213 @@
+{
+ "ticker": "EXE",
+ "price": {
+  "current": 88.6500015258789,
+  "change_30d_pct": -7.12,
+  "high_30d": 99.9800033569336,
+  "low_30d": 88.6500015258789,
+  "price_window_days": 30,
+  "observations": 22,
+  "window_start": "2026-08-18",
+  "window_end": "2026-09-17"
+ },
+ "fundamentals": {
+  "ticker": "EXE",
+  "name": "Expand Energy Corporation",
+  "sector": "Energy",
+  "industry": "Oil & Gas E&P",
+  "market_cap": 20522811392,
+  "pe_ratio": 7.6422415,
+  "forward_pe": 10.188262,
+  "peg_ratio": 0.8358,
+  "price_to_book": 1.0703291,
+  "dividend_yield": 2.59,
+  "beta": 0.323,
+  "currency": "USD",
+  "exchange": "NMS",
+  "source": "openbb+yfinance_enhanced",
+  "52w_high": 126.621,
+  "52w_low": 84.985,
+  "avg_volume": 3423988,
+  "total_assets": 28287000000.0,
+  "total_debt": 5060000000.0,
+  "total_equity": 18578000000.0,
+  "revenue": 12189000000.0,
+  "net_income": 1819000000.0,
+  "ebitda": 5497000000.0,
+  "free_cash_flow": 1644000000.0,
+  "operating_cash_flow": 4575000000.0,
+  "field_sources": {
+   "ticker": "openbb",
+   "name": "openbb",
+   "sector": "openbb",
+   "industry": "openbb",
+   "market_cap": "openbb",
+   "pe_ratio": "openbb",
+   "forward_pe": "openbb",
+   "peg_ratio": "openbb",
+   "price_to_book": "openbb",
+   "dividend_yield": "openbb",
+   "beta": "openbb",
+   "currency": "openbb",
+   "exchange": "openbb",
+   "source": "openbb",
+   "52w_high": "yfinance_enhanced",
+   "52w_low": "yfinance_enhanced",
+   "avg_volume": "yfinance_enhanced",
+   "total_assets": "yfinance_enhanced",
+   "total_debt": "yfinance_enhanced",
+   "total_equity": "yfinance_enhanced",
+   "revenue": "yfinance_enhanced",
+   "net_income": "yfinance_enhanced",
+   "ebitda": "yfinance_enhanced",
+   "free_cash_flow": "yfinance_enhanced",
+   "operating_cash_flow": "yfinance_enhanced"
+  }
+ },
+ "technicals": {
+  "ticker": "EXE",
+  "price": 88.6500015258789,
+  "rsi_14": 20.84,
+  "macd": {
+   "line": -0.77,
+   "signal": 0.46,
+   "histogram": -1.23,
+   "trend": "bearish"
+  },
+  "bollinger": {
+   "upper": 102.23,
+   "middle": 96.09,
+   "lower": 89.95,
+   "width": 12.78
+  },
+  "sma_50": 93.55,
+  "sma_200": 100.15,
+  "atr_14": 2.49,
+  "above_sma50": false,
+  "above_sma200": false,
+  "volume_avg_20": 2650415.0,
+  "source": "openbb"
+ },
+ "news": [
+  {
+   "title": "1 of Wall Street\u2019s Favorite Stocks with Impressive Fundamentals and 2 That Underwhelm",
+   "date": "2026-08-17 17:58:20+00:00"
+  },
+  {
+   "title": "2 Growth Stocks to Add to Your Roster and 1 We Avoid",
+   "date": "2026-08-25 12:06:44+00:00"
+  },
+  {
+   "title": "Expand Energy Stock Outlook: Is Wall Street Bullish or Bearish?",
+   "date": "2026-08-25 14:05:07+00:00"
+  },
+  {
+   "title": "Expand Energy (EXE) is Building a Natural Gas Powerhouse. But is the Growth Story at Risk?",
+   "date": "2026-08-26 00:40:51+00:00"
+  },
+  {
+   "title": "Why Is Expand Energy (EXE) Up 4.5% Since Last Earnings Report?",
+   "date": "2026-08-27 15:30:12+00:00"
+  }
+ ],
+ "news_sentiment": {
+  "enabled": false,
+  "reason": "transformers_not_installed",
+  "model": null,
+  "aggregate": {
+   "article_count": 0,
+   "mean_signed": null,
+   "positive_ratio": null,
+   "negative_ratio": null,
+   "neutral_ratio": null
+  }
+ },
+ "provenance": {
+  "slots": {
+   "fundamentals:EXE": {
+    "category": "fundamentals",
+    "key": "EXE",
+    "provider": "openbb+yfinance_enhanced",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:08:20+00:00",
+    "attempted": [
+     "openbb",
+     "yfinance_enhanced"
+    ]
+   },
+   "technicals:EXE": {
+    "category": "technicals",
+    "key": "EXE",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:08:21+00:00",
+    "params": {
+     "days": "365"
+    },
+    "checks": {
+     "row_count": 12,
+     "columns": [
+      "above_sma200",
+      "above_sma50",
+      "atr_14",
+      "bollinger",
+      "macd",
+      "price",
+      "rsi_14",
+      "sma_200",
+      "sma_50",
+      "source",
+      "ticker",
+      "volume_avg_20"
+     ]
+    }
+   },
+   "price:EXE": {
+    "category": "price",
+    "key": "EXE",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:08:22+00:00",
+    "params": {
+     "days": "30",
+     "interval": "1d"
+    },
+    "checks": {
+     "row_count": 22,
+     "start_date": "2026-08-18",
+     "end_date": "2026-09-17",
+     "frequency": "daily",
+     "gap_days_max": 4,
+     "columns": [
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume"
+     ],
+     "non_finite_values": 0
+    }
+   },
+   "news:EXE": {
+    "category": "news",
+    "key": "EXE",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:08:23+00:00",
+    "params": {
+     "limit": "5"
+    },
+    "checks": {
+     "row_count": 5
+    }
+   }
+  },
+  "providers_used": [
+   "openbb+yfinance_enhanced",
+   "openbb"
+  ],
+  "warnings": [],
+  "fetch_count": 4,
+  "cache_hits": 0
+ }
+}

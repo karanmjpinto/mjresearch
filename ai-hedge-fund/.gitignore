@@ -19,3 +19,9 @@ coverage.xml
 htmlcov/
 frontend/coverage/
 .hypothesis/
+
+# Eval run records. One file per run, timestamped, and the model's wording moves
+# between runs — tracking them would be churn with no reviewable diff. The
+# fixtures they score (evals/fixtures/) ARE tracked, because a moving input
+# makes two runs incomparable, which is the whole point of freezing them.
+evals/results/
