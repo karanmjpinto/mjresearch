@@ -7,6 +7,7 @@ from datetime import date
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from hedge_fund.api.guards import LLM_ACCESS
 from hedge_fund.agents.personas import (
     DEFAULT_COMMITTEE_PERSONAS,
     is_valid_persona,
@@ -42,7 +43,7 @@ class BacktestRequest(BaseModel):
     committee_personas: list[str] | None = None
 
 
-@router.post("/backtest")
+@router.post("/backtest", dependencies=[LLM_ACCESS])
 async def simulation_backtest(req: BacktestRequest):
     """Build a research snapshot with price history ending on ``as_of_date``; optional AI.
 
