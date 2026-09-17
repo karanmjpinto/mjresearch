@@ -249,6 +249,10 @@ export const GAPS: [string, string][] = [
     "Investor analyses run with full freedom rather than as weightings over computed dimensions. Their conviction scores will move between runs. The plan pipeline's will not.",
   ],
   [
+    "The published site does not run the model",
+    "Four things here invoke a language model: researching a ticker, the plan pipeline, the backtest, and the autoresearch loop. Those run on your own machine against your own Ollama, which is why they are free and why nothing about your book leaves your computer. The published site deliberately refuses them rather than running them for you on a paid gateway — it can show the screens, the methodology and this reference, and it will tell you plainly when you ask it for analysis it cannot do.",
+  ],
+  [
     "Only the single-investor path is measured",
     "Twenty cases with pass/fail rules score one investor at a time against frozen company snapshots: whether the answer is well-formed, whether its figures come from the data it was given, and whether the investor's own framework actually applied. The committee — where investors read each other and can revise — is not covered, and it is the path where a prompt change turned the designated bear from a strong sell into a strong buy. Treat a passing score as evidence about one analysis, not about the committee's spread.",
   ],

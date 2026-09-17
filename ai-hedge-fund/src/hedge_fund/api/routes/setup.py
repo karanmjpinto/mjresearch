@@ -185,11 +185,24 @@ async def get_setup() -> dict[str, Any]:
             "model": settings.ollama_model
             if settings.llm_provider == "ollama"
             else settings.llm_model,
-            "base_url": settings.ollama_base_url,
+            # Report the endpoint that is actually being called. This used to
+            # print ollama_base_url unconditionally, so a deployment running
+            # against a paid gateway described itself as local — misleading in
+            # exactly the situation where you most want the truth. When the
+            # provider is openai and no base URL is set, the SDK's own default
+            # is OpenAI itself; say so rather than showing null.
+            "base_url": settings.ollama_base_url
+            if settings.llm_provider == "ollama"
+            else (settings.openai_base_url or "https://api.openai.com/v1"),
             "num_ctx": settings.ollama_num_ctx,
             "temperature": settings.llm_temperature,
             "seed": settings.llm_seed,
             "thinking_disabled": settings.ollama_think is False,
+            # Whether this deployment will spend money for a stranger. Never
+            # the key itself — only whether one is required.
+            "endpoints_enabled": settings.llm_endpoints_enabled,
+            "access_key_required": bool(settings.llm_access_key),
+            "rate_limit_per_hour": settings.llm_rate_limit_per_hour,
         },
         "env_path": str(ENV_PATH),
     }

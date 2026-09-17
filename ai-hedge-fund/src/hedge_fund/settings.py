@@ -21,6 +21,29 @@ class Settings(BaseSettings):
     ollama_model: str = "qwen3:30b"
     ollama_timeout_s: float = 600.0
 
+    # --- who is allowed to spend money on this deployment ------------------
+    #
+    # Only four routes invoke a model (see api/guards.py). Locally they are
+    # free, because the default provider is Ollama on this machine. Hosted with
+    # `llm_provider=openai` they bill a real account, and a public deployment
+    # with all three of these left at their defaults is an anonymous LLM proxy
+    # paid for by whoever deployed it.
+    #
+    # Defaults are deliberately the permissive ones so a local checkout is
+    # unchanged; it is the hosted environment that has to say otherwise.
+
+    #: Set False on a public deployment that should not run models at all —
+    #: the honest setting when the site already tells visitors the analysis
+    #: runs on their own machine. Checked before the key, so it cannot be
+    #: bypassed with one.
+    llm_endpoints_enabled: bool = True
+    #: Shared secret required on the model routes when set. Compared in
+    #: constant time.
+    llm_access_key: str | None = None
+    #: Model runs allowed per client per hour. 0 disables the limit. Bounds the
+    #: damage from a leaked key, which a key alone does nothing about.
+    llm_rate_limit_per_hour: int = 0
+
     openai_api_key: str | None = None
     # Any OpenAI-compatible endpoint: OpenRouter, Together, a self-hosted vLLM.
     # Left unset the SDK talks to api.openai.com. Set it and the same client
