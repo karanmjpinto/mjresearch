@@ -1,0 +1,212 @@
+{
+ "ticker": "TAP",
+ "price": {
+  "current": 39.154998779296875,
+  "change_30d_pct": -4.8,
+  "high_30d": 42.9900016784668,
+  "low_30d": 38.439998626708984,
+  "price_window_days": 30,
+  "observations": 22,
+  "window_start": "2026-08-18",
+  "window_end": "2026-09-17"
+ },
+ "fundamentals": {
+  "ticker": "TAP",
+  "name": "Molson Coors Beverage Company",
+  "sector": "Consumer Defensive",
+  "industry": "Beverages - Brewers",
+  "market_cap": 7299672064,
+  "forward_pe": 7.9959807,
+  "peg_ratio": 3.9244,
+  "price_to_book": 0.7230718,
+  "dividend_yield": 4.91,
+  "beta": 0.42,
+  "currency": "USD",
+  "exchange": "NYQ",
+  "source": "openbb+yfinance_enhanced",
+  "52w_high": 54.82,
+  "52w_low": 37.76,
+  "avg_volume": 3047008,
+  "total_assets": 22738400000.0,
+  "total_debt": 6352300000.0,
+  "total_equity": 10230300000.0,
+  "revenue": 11140800000.0,
+  "net_income": -2139600000.0,
+  "ebitda": -1544400000.0,
+  "free_cash_flow": 1067800000.0,
+  "operating_cash_flow": 1784400000.0,
+  "field_sources": {
+   "ticker": "openbb",
+   "name": "openbb",
+   "sector": "openbb",
+   "industry": "openbb",
+   "market_cap": "openbb",
+   "forward_pe": "openbb",
+   "peg_ratio": "openbb",
+   "price_to_book": "openbb",
+   "dividend_yield": "openbb",
+   "beta": "openbb",
+   "currency": "openbb",
+   "exchange": "openbb",
+   "source": "openbb",
+   "52w_high": "yfinance_enhanced",
+   "52w_low": "yfinance_enhanced",
+   "avg_volume": "yfinance_enhanced",
+   "total_assets": "yfinance_enhanced",
+   "total_debt": "yfinance_enhanced",
+   "total_equity": "yfinance_enhanced",
+   "revenue": "yfinance_enhanced",
+   "net_income": "yfinance_enhanced",
+   "ebitda": "yfinance_enhanced",
+   "free_cash_flow": "yfinance_enhanced",
+   "operating_cash_flow": "yfinance_enhanced"
+  }
+ },
+ "technicals": {
+  "ticker": "TAP",
+  "price": 39.154998779296875,
+  "rsi_14": 28.68,
+  "macd": {
+   "line": -0.7,
+   "signal": -0.58,
+   "histogram": -0.12,
+   "trend": "bearish"
+  },
+  "bollinger": {
+   "upper": 43.5,
+   "middle": 40.41,
+   "lower": 37.32,
+   "width": 15.31
+  },
+  "sma_50": 40.97,
+  "sma_200": 43.79,
+  "atr_14": 1.03,
+  "above_sma50": false,
+  "above_sma200": false,
+  "volume_avg_20": 2772006.0,
+  "source": "openbb"
+ },
+ "news": [
+  {
+   "title": "Why SNDK, DELL, PANW Stocks Are Rallying Overnight Ahead Of Fresh Trading Week",
+   "date": "2026-09-08 02:03:01+00:00"
+  },
+  {
+   "title": "Bloom Energy Joins the S&P 500 as The Trade Desk Leaves",
+   "date": "2026-09-08 12:16:04+00:00"
+  },
+  {
+   "title": "Bloom Energy Stock Rallies on News of S&P 500 Addition",
+   "date": "2026-09-08 15:48:10+00:00"
+  },
+  {
+   "title": "3 Stocks Soon Joining the S&P 500",
+   "date": "2026-09-09 00:38:00+00:00"
+  },
+  {
+   "title": "Dear Everpure Stock Fans, Mark Your Calendars for September 21",
+   "date": "2026-09-09 14:10:43+00:00"
+  }
+ ],
+ "news_sentiment": {
+  "enabled": false,
+  "reason": "transformers_not_installed",
+  "model": null,
+  "aggregate": {
+   "article_count": 0,
+   "mean_signed": null,
+   "positive_ratio": null,
+   "negative_ratio": null,
+   "neutral_ratio": null
+  }
+ },
+ "provenance": {
+  "slots": {
+   "fundamentals:TAP": {
+    "category": "fundamentals",
+    "key": "TAP",
+    "provider": "openbb+yfinance_enhanced",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:08:32+00:00",
+    "attempted": [
+     "openbb",
+     "yfinance_enhanced"
+    ]
+   },
+   "technicals:TAP": {
+    "category": "technicals",
+    "key": "TAP",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:08:33+00:00",
+    "params": {
+     "days": "365"
+    },
+    "checks": {
+     "row_count": 12,
+     "columns": [
+      "above_sma200",
+      "above_sma50",
+      "atr_14",
+      "bollinger",
+      "macd",
+      "price",
+      "rsi_14",
+      "sma_200",
+      "sma_50",
+      "source",
+      "ticker",
+      "volume_avg_20"
+     ]
+    }
+   },
+   "price:TAP": {
+    "category": "price",
+    "key": "TAP",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:08:34+00:00",
+    "params": {
+     "days": "30",
+     "interval": "1d"
+    },
+    "checks": {
+     "row_count": 22,
+     "start_date": "2026-08-18",
+     "end_date": "2026-09-17",
+     "frequency": "daily",
+     "gap_days_max": 4,
+     "columns": [
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume",
+      "dividend"
+     ],
+     "non_finite_values": 0
+    }
+   },
+   "news:TAP": {
+    "category": "news",
+    "key": "TAP",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:08:36+00:00",
+    "params": {
+     "limit": "5"
+    },
+    "checks": {
+     "row_count": 5
+    }
+   }
+  },
+  "providers_used": [
+   "openbb+yfinance_enhanced",
+   "openbb"
+  ],
+  "warnings": [],
+  "fetch_count": 4,
+  "cache_hits": 0
+ }
+}

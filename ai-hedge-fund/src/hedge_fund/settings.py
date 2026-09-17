@@ -61,10 +61,21 @@ class Settings(BaseSettings):
     #: tool whose whole claim is "read the spread, not the average", twenty
     #: seconds is not worth a bear that turns bullish.
     #:
-    #: Which ordering is *better* is not knowable from one snapshot and cannot
-    #: be settled without a golden set — so the default stays where the
-    #: behaviour is known. Turn it on for a bulk re-scoring job where speed
-    #: matters more than spread, or once an eval exists to judge the trade.
+    #: Settled with the golden set (`scripts/run_eval.py`), and the answer is
+    #: no. Scored over 20 cases on the shipped path, the reorder moved **11 of
+    #: 20 verdicts** — Buffett on KSS BUY 100 -> HOLD 50, reproducing the
+    #: observation above; Burry on LULU SELL 15 -> BUY 75; Buffett on LULU BUY
+    #: 100 -> SELL 35 — and pulled eight separate cases onto the identical
+    #: answer, "BUY 75". Concentration on one verdict rose 25% -> 40%.
+    #:
+    #: The trap worth recording: the reorder **scored better**, 20/20 against
+    #: the baseline's 19/20, because every per-case grader sees a well-formed
+    #: answer and none of them can see homogenisation across cases. That is
+    #: what `MAX_VERDICT_SHARE` in the runner now exists to catch. A score is
+    #: not the goal; the spread is the product.
+    #:
+    #: Leave it off. Turn it on only for a bulk re-scoring job where nothing
+    #: downstream reads the disagreement.
     llm_shared_prefix: bool = False
 
     # Determinism. Sampling is greedy and seeded by default: without reproducible

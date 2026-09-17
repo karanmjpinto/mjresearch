@@ -249,6 +249,10 @@ export const GAPS: [string, string][] = [
     "Investor analyses run with full freedom rather than as weightings over computed dimensions. Their conviction scores will move between runs. The plan pipeline's will not.",
   ],
   [
+    "Only the single-investor path is measured",
+    "Twenty cases with pass/fail rules score one investor at a time against frozen company snapshots: whether the answer is well-formed, whether its figures come from the data it was given, and whether the investor's own framework actually applied. The committee — where investors read each other and can revise — is not covered, and it is the path where a prompt change turned the designated bear from a strong sell into a strong buy. Treat a passing score as evidence about one analysis, not about the committee's spread.",
+  ],
+  [
     "Verification has real gaps",
     "Numeric claims are only checked for metrics the verifier knows about. Anything outside that set counts as unverifiable, not verified, and qualitative claims are not checked at all.",
   ],

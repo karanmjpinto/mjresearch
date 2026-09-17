@@ -1,0 +1,214 @@
+{
+ "ticker": "KSS",
+ "price": {
+  "current": 17.040000915527344,
+  "change_30d_pct": -8.88,
+  "high_30d": 19.440000534057617,
+  "low_30d": 16.360000610351562,
+  "price_window_days": 30,
+  "observations": 22,
+  "window_start": "2026-08-18",
+  "window_end": "2026-09-17"
+ },
+ "fundamentals": {
+  "ticker": "KSS",
+  "name": "Kohl's Corporation",
+  "sector": "Consumer Cyclical",
+  "industry": "Department Stores",
+  "market_cap": 1931934720,
+  "pe_ratio": 7.3133054,
+  "forward_pe": 10.882061,
+  "peg_ratio": 1.2152,
+  "price_to_book": 0.46197647,
+  "dividend_yield": 3.04,
+  "beta": 1.404,
+  "currency": "USD",
+  "exchange": "NYQ",
+  "source": "openbb+yfinance_enhanced",
+  "52w_high": 25.22,
+  "52w_low": 11.38,
+  "avg_volume": 4137541,
+  "total_assets": 13362000000.0,
+  "total_debt": 6630000000.0,
+  "total_equity": 4048000000.0,
+  "revenue": 15527000000.0,
+  "net_income": 272000000.0,
+  "ebitda": 1324000000.0,
+  "free_cash_flow": 1008000000.0,
+  "operating_cash_flow": 1380000000.0,
+  "field_sources": {
+   "ticker": "openbb",
+   "name": "openbb",
+   "sector": "openbb",
+   "industry": "openbb",
+   "market_cap": "openbb",
+   "pe_ratio": "openbb",
+   "forward_pe": "openbb",
+   "peg_ratio": "openbb",
+   "price_to_book": "openbb",
+   "dividend_yield": "openbb",
+   "beta": "openbb",
+   "currency": "openbb",
+   "exchange": "openbb",
+   "source": "openbb",
+   "52w_high": "yfinance_enhanced",
+   "52w_low": "yfinance_enhanced",
+   "avg_volume": "yfinance_enhanced",
+   "total_assets": "yfinance_enhanced",
+   "total_debt": "yfinance_enhanced",
+   "total_equity": "yfinance_enhanced",
+   "revenue": "yfinance_enhanced",
+   "net_income": "yfinance_enhanced",
+   "ebitda": "yfinance_enhanced",
+   "free_cash_flow": "yfinance_enhanced",
+   "operating_cash_flow": "yfinance_enhanced"
+  }
+ },
+ "technicals": {
+  "ticker": "KSS",
+  "price": 17.040000915527344,
+  "rsi_14": 42.32,
+  "macd": {
+   "line": -0.42,
+   "signal": -0.24,
+   "histogram": -0.18,
+   "trend": "bearish"
+  },
+  "bollinger": {
+   "upper": 19.53,
+   "middle": 17.77,
+   "lower": 16.01,
+   "width": 19.81
+  },
+  "sma_50": 18.19,
+  "sma_200": 17.2,
+  "atr_14": 0.93,
+  "above_sma50": false,
+  "above_sma200": false,
+  "volume_avg_20": 4772293.0,
+  "source": "openbb"
+ },
+ "news": [
+  {
+   "title": "Macy's Raises Full-Year Outlook Following Fiscal Second-Quarter Beat",
+   "date": "2026-09-10 13:17:42+00:00"
+  },
+  {
+   "title": "Macy\u2019s Sinks 5% Despite Raised Full-Year Outlook, Kohl\u2019s and TJX Barely Budge",
+   "date": "2026-09-10 13:18:32+00:00"
+  },
+  {
+   "title": "Urban Outfitters, Tilly's, and Kohl's Shares Skyrocket and Plummet, What You Need To Know",
+   "date": "2026-09-11 01:29:04+00:00"
+  },
+  {
+   "title": "Macy's Stock Down 5% Despite Q2 Earnings Beat, FY'26 View Raised",
+   "date": "2026-09-11 12:43:00+00:00"
+  },
+  {
+   "title": "Kohl\u2019s expands in-store partnership as customers look elsewhere",
+   "date": "2026-09-12 13:03:00+00:00"
+  }
+ ],
+ "news_sentiment": {
+  "enabled": false,
+  "reason": "transformers_not_installed",
+  "model": null,
+  "aggregate": {
+   "article_count": 0,
+   "mean_signed": null,
+   "positive_ratio": null,
+   "negative_ratio": null,
+   "neutral_ratio": null
+  }
+ },
+ "provenance": {
+  "slots": {
+   "fundamentals:KSS": {
+    "category": "fundamentals",
+    "key": "KSS",
+    "provider": "openbb+yfinance_enhanced",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:09:00+00:00",
+    "attempted": [
+     "openbb",
+     "yfinance_enhanced"
+    ]
+   },
+   "technicals:KSS": {
+    "category": "technicals",
+    "key": "KSS",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:09:02+00:00",
+    "params": {
+     "days": "365"
+    },
+    "checks": {
+     "row_count": 12,
+     "columns": [
+      "above_sma200",
+      "above_sma50",
+      "atr_14",
+      "bollinger",
+      "macd",
+      "price",
+      "rsi_14",
+      "sma_200",
+      "sma_50",
+      "source",
+      "ticker",
+      "volume_avg_20"
+     ]
+    }
+   },
+   "price:KSS": {
+    "category": "price",
+    "key": "KSS",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:09:03+00:00",
+    "params": {
+     "days": "30",
+     "interval": "1d"
+    },
+    "checks": {
+     "row_count": 22,
+     "start_date": "2026-08-18",
+     "end_date": "2026-09-17",
+     "frequency": "daily",
+     "gap_days_max": 4,
+     "columns": [
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume",
+      "dividend"
+     ],
+     "non_finite_values": 0
+    }
+   },
+   "news:KSS": {
+    "category": "news",
+    "key": "KSS",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:09:05+00:00",
+    "params": {
+     "limit": "5"
+    },
+    "checks": {
+     "row_count": 5
+    }
+   }
+  },
+  "providers_used": [
+   "openbb+yfinance_enhanced",
+   "openbb"
+  ],
+  "warnings": [],
+  "fetch_count": 4,
+  "cache_hits": 0
+ }
+}

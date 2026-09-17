@@ -1,0 +1,211 @@
+{
+ "ticker": "LULU",
+ "price": {
+  "current": 99.48999786376953,
+  "change_30d_pct": -16.4,
+  "high_30d": 122.77999877929688,
+  "low_30d": 95.9800033569336,
+  "price_window_days": 30,
+  "observations": 22,
+  "window_start": "2026-08-18",
+  "window_end": "2026-09-17"
+ },
+ "fundamentals": {
+  "ticker": "LULU",
+  "name": "lululemon athletica inc.",
+  "sector": "Consumer Cyclical",
+  "industry": "Apparel Retail",
+  "market_cap": 11014540288,
+  "pe_ratio": 8.1884775,
+  "forward_pe": 11.325359,
+  "peg_ratio": 1.0459,
+  "price_to_book": 2.319114,
+  "beta": 0.864,
+  "currency": "USD",
+  "exchange": "NMS",
+  "source": "openbb+yfinance_enhanced",
+  "52w_high": 225.98,
+  "52w_low": 95.35,
+  "avg_volume": 4381406,
+  "total_assets": 8456743000.0,
+  "total_debt": 1798441000.0,
+  "total_equity": 4961840000.0,
+  "revenue": 11102600000.0,
+  "net_income": 1579183000.0,
+  "ebitda": 2706843000.0,
+  "free_cash_flow": 921675000.0,
+  "operating_cash_flow": 1602477000.0,
+  "field_sources": {
+   "ticker": "openbb",
+   "name": "openbb",
+   "sector": "openbb",
+   "industry": "openbb",
+   "market_cap": "openbb",
+   "pe_ratio": "openbb",
+   "forward_pe": "openbb",
+   "peg_ratio": "openbb",
+   "price_to_book": "openbb",
+   "beta": "openbb",
+   "currency": "openbb",
+   "exchange": "openbb",
+   "source": "openbb",
+   "52w_high": "yfinance_enhanced",
+   "52w_low": "yfinance_enhanced",
+   "avg_volume": "yfinance_enhanced",
+   "total_assets": "yfinance_enhanced",
+   "total_debt": "yfinance_enhanced",
+   "total_equity": "yfinance_enhanced",
+   "revenue": "yfinance_enhanced",
+   "net_income": "yfinance_enhanced",
+   "ebitda": "yfinance_enhanced",
+   "free_cash_flow": "yfinance_enhanced",
+   "operating_cash_flow": "yfinance_enhanced"
+  }
+ },
+ "technicals": {
+  "ticker": "LULU",
+  "price": 99.48999786376953,
+  "rsi_14": 35.56,
+  "macd": {
+   "line": -5.87,
+   "signal": -4.43,
+   "histogram": -1.44,
+   "trend": "bearish"
+  },
+  "bollinger": {
+   "upper": 130.95,
+   "middle": 110.18,
+   "lower": 89.41,
+   "width": 37.7
+  },
+  "sma_50": 115.76,
+  "sma_200": 149.85,
+  "atr_14": 5.74,
+  "above_sma50": false,
+  "above_sma200": false,
+  "volume_avg_20": 7541157.0,
+  "source": "openbb"
+ },
+ "news": [
+  {
+   "title": "No Prenup, $930 Million on the Line: Lululemon Founder Chip Wilson's Divorce Could Reshape His Stake in the Company",
+   "date": "2026-09-15 06:09:36+00:00"
+  },
+  {
+   "title": "Jim Cramer Says Lululemon (LULU) is in \u201cNo Man\u2019s Land\u201d After Another Brutal Quarter",
+   "date": "2026-09-15 09:37:02+00:00"
+  },
+  {
+   "title": "Lululemon receives a warning as customers turn to rivals",
+   "date": "2026-09-15 12:03:00+00:00"
+  },
+  {
+   "title": "Lululemon Athletica (LULU) Resets Leadership, Is The Stock A Bargain?",
+   "date": "2026-09-15 12:12:46+00:00"
+  },
+  {
+   "title": "MarketBeat's Most Downgraded Stocks in Q3: 2 Look Cheap, 1 Looks Risky",
+   "date": "2026-09-15 16:50:00+00:00"
+  }
+ ],
+ "news_sentiment": {
+  "enabled": false,
+  "reason": "transformers_not_installed",
+  "model": null,
+  "aggregate": {
+   "article_count": 0,
+   "mean_signed": null,
+   "positive_ratio": null,
+   "negative_ratio": null,
+   "neutral_ratio": null
+  }
+ },
+ "provenance": {
+  "slots": {
+   "fundamentals:LULU": {
+    "category": "fundamentals",
+    "key": "LULU",
+    "provider": "openbb+yfinance_enhanced",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:08:46+00:00",
+    "attempted": [
+     "openbb",
+     "yfinance_enhanced"
+    ]
+   },
+   "technicals:LULU": {
+    "category": "technicals",
+    "key": "LULU",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:08:47+00:00",
+    "params": {
+     "days": "365"
+    },
+    "checks": {
+     "row_count": 12,
+     "columns": [
+      "above_sma200",
+      "above_sma50",
+      "atr_14",
+      "bollinger",
+      "macd",
+      "price",
+      "rsi_14",
+      "sma_200",
+      "sma_50",
+      "source",
+      "ticker",
+      "volume_avg_20"
+     ]
+    }
+   },
+   "price:LULU": {
+    "category": "price",
+    "key": "LULU",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:08:48+00:00",
+    "params": {
+     "days": "30",
+     "interval": "1d"
+    },
+    "checks": {
+     "row_count": 22,
+     "start_date": "2026-08-18",
+     "end_date": "2026-09-17",
+     "frequency": "daily",
+     "gap_days_max": 4,
+     "columns": [
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume"
+     ],
+     "non_finite_values": 0
+    }
+   },
+   "news:LULU": {
+    "category": "news",
+    "key": "LULU",
+    "provider": "openbb",
+    "from_cache": false,
+    "fetched_at": "2026-09-17T19:08:49+00:00",
+    "params": {
+     "limit": "5"
+    },
+    "checks": {
+     "row_count": 5
+    }
+   }
+  },
+  "providers_used": [
+   "openbb+yfinance_enhanced",
+   "openbb"
+  ],
+  "warnings": [],
+  "fetch_count": 4,
+  "cache_hits": 0
+ }
+}
