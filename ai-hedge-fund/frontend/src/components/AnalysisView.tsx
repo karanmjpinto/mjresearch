@@ -3,6 +3,7 @@ import { InfoTip } from "./InfoTip";
 import { useParams, useSearchParams } from "react-router-dom";
 import { AppNav } from "./AppNav";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { FactorsPanel } from "./FactorsPanel";
 import { InvestorViews } from "./InvestorViews";
 import { PlanView } from "./PlanView";
 import { ChatInput } from "./ChatInput";
@@ -26,6 +27,12 @@ import { useTicker } from "@/lib/ticker-context";
  *
  * Investor views is the default because it is the part someone came to read.
  * Evaluation is how you check it, which is the second question, not the first.
+ *
+ * Factors is the exception to "everything judged", and deliberately so. No
+ * model touches it: it places the company on the JKP factor themes and shows
+ * what each theme has paid. It lives here because its job is interpretive —
+ * it names what kind of company the investors are arguing about — and because
+ * it answers instantly while the committee is still thinking.
  */
 
 const TABS = [
@@ -39,6 +46,12 @@ const TABS = [
     label: "Evaluation",
     blurb:
       "Which metrics were computed, and whether the prose agrees with them.",
+  },
+  {
+    id: "factors",
+    label: "Factors",
+    blurb:
+      "Where the company sits on the thirteen JKP factor themes, and what each has paid since 1926.",
   },
 ] as const;
 
@@ -63,6 +76,11 @@ export function AnalysisView() {
   const [seenEvaluation, setSeenEvaluation] = useState(tab === "evaluation");
   useEffect(() => {
     if (tab === "evaluation") setSeenEvaluation(true);
+  }, [tab]);
+
+  const [seenFactors, setSeenFactors] = useState(tab === "factors");
+  useEffect(() => {
+    if (tab === "factors") setSeenFactors(true);
   }, [tab]);
 
   const setTab = (next: TabId) =>
@@ -174,7 +192,15 @@ export function AnalysisView() {
           </div>
           <p className="mt-xs flex max-w-measure items-center gap-xs text-body-xs text-on-ink-faint">
             {TABS.find((t) => t.id === tab)?.blurb}
-            <InfoTip term={tab === "views" ? "investor-views" : "evaluation"} />
+            <InfoTip
+              term={
+                tab === "views"
+                  ? "investor-views"
+                  : tab === "evaluation"
+                    ? "evaluation"
+                    : "factors"
+              }
+            />
           </p>
         </div>
 
@@ -201,6 +227,21 @@ export function AnalysisView() {
           <ErrorBoundary>
             <PlanView embedded autoRun={seenEvaluation} />
           </ErrorBoundary>
+        </div>
+
+        {/* Mounted only once opened: it runs no model, so there is no long
+         * result to preserve, and the profile may fetch a name live. */}
+        <div
+          role="tabpanel"
+          id="analysis-panel-factors"
+          aria-labelledby="analysis-tab-factors"
+          hidden={tab !== "factors"}
+        >
+          {seenFactors && (
+            <ErrorBoundary>
+              <FactorsPanel ticker={ticker} />
+            </ErrorBoundary>
+          )}
         </div>
       </main>
     </div>

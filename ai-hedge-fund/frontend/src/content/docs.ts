@@ -104,6 +104,12 @@ export const SECTIONS: DocSection[] = [
           "Every filter and every score is arithmetic over fetched fundamentals. No model reads a screen or ranks it. Results are computed ahead of time and served from a dated cache, so what you see is a list, not a request.",
       },
       {
+        name: "Factors — JKP theme returns and where a company sits on them",
+        trust: "computed",
+        detail:
+          "The theme and factor returns are Jensen, Kelly and Pedersen's published US series from jkpfactors.com, stored as a dated file; the Sharpe ratios and the in-sample/after-sample split are plain arithmetic over them. The company's tilt is a percentile rank against the cached screen universes. No model reads or writes any of it.",
+      },
+      {
         name: "Backtests and the out-of-sample test",
         trust: "computed",
         detail:
@@ -208,6 +214,17 @@ export const SECTIONS: DocSection[] = [
     ],
   },
   {
+    id: "factors",
+    title: "Factors, and whether they survived being published",
+    standfirst:
+      "A century of factor returns from the replication-crisis paper, and one company placed on them.",
+    body: [
+      "The Factors tab under Analysis draws the thirteen themes of the Jensen–Kelly–Pedersen dataset — value, momentum, quality, profitability, investment, low risk, low leverage, size, accruals, debt issuance, profit growth, short-term reversal and seasonality — from their US, monthly, capped value-weighted long-short portfolios back to 1926. The returns are theirs, reshaped by scripts/refresh_jkp.py into a committed file that records the last month it covers, so the tab works offline and never silently changes between two page loads.",
+      "Pick a theme and every factor inside it is split around the years its original paper studied: a Sharpe ratio inside that sample, and one after it ended. That is the paper's own question — does a published anomaly keep working once it is known — asked factor by factor. Most shrink; the bar is whether the return stayed positive, not whether it stayed the same size.",
+      "The company's tilt is this app's own measurement, not JKP's. Each characteristic it can compute from the fetched fundamentals is ranked against the roughly eleven hundred names in the cached screens, flipped where JKP buy the low end so that above 50 always means the side the factor buys, and averaged into its theme. Approximations are marked where they differ from JKP's definition, and a theme with nothing measurable is left blank rather than shown as a neutral 50.",
+    ],
+  },
+  {
     id: "autoresearch",
     title: "Autoresearch, and why almost everything is discarded",
     standfirst:
@@ -255,6 +272,14 @@ export const GAPS: [string, string][] = [
   [
     "Only the single-investor path is measured",
     "Twenty cases with pass/fail rules score one investor at a time against frozen company snapshots: whether the answer is well-formed, whether its figures come from the data it was given, and whether the investor's own framework actually applied. The committee — where investors read each other and can revise — is not covered, and it is the path where a prompt change turned the designated bear from a strong sell into a strong buy. Treat a passing score as evidence about one analysis, not about the committee's spread.",
+  ],
+  [
+    "The factor tilt measures less than JKP do",
+    "JKP sort on 153 characteristics from CRSP and Compustat. The tilt uses about twenty that the screen caches can supply, some approximated (a six-month return that does not skip the latest month, a five-year sales growth standing in for three), and four themes — low risk, debt issuance, profit growth and seasonality — cannot be measured at all. Peers are the S&P 500 and SmallCap 600 caches, not JKP's full sample, and on the hosted site there are no caches, so there is no tilt. Accounting ratios also mean something different for banks and insurers, which sit in the same ranking.",
+  ],
+  [
+    "Factor returns end where the authors' last update does",
+    "The JKP file runs to the month printed on the tab, currently December 2024. \"Last 12 months\" means the last twelve in that file, not the twelve before today.",
   ],
   [
     "Verification has real gaps",

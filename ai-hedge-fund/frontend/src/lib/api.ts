@@ -1090,6 +1090,105 @@ export type ConvictionChain = {
     }
 );
 
+// --- Factors (JKP) -------------------------------------------------------
+
+/** Annualised statistics over a window of monthly long-short returns. */
+export interface FactorStats {
+  months: number;
+  ann_return: number;
+  ann_vol: number;
+  sharpe: number | null;
+  t_stat: number | null;
+}
+
+export interface FactorCoverage {
+  source: { name: string; url: string; paper: string; files: string[] };
+  region: string;
+  frequency: string;
+  weighting: string;
+  built_at: string;
+  first_month: string;
+  last_month: string;
+}
+
+export interface FactorTheme {
+  id: string;
+  name: string;
+  n_factors: number;
+  /** Index into `months` of the first return. */
+  start: number;
+  /** Monthly returns; null is a missing month, never zero. */
+  returns: (number | null)[];
+  stats: {
+    full: FactorStats | null;
+    since_2000: FactorStats | null;
+    last_10y: FactorStats | null;
+    last_12m_return: number | null;
+  };
+}
+
+export interface FactorThemesResponse extends FactorCoverage {
+  months: string[];
+  themes: FactorTheme[];
+}
+
+export interface FactorRow {
+  id: string;
+  name: string;
+  cite: string | null;
+  in_sample_years: [number, number] | null;
+  original_t: number | null;
+  direction: 1 | -1;
+  full: FactorStats | null;
+  in_sample: FactorStats | null;
+  post_sample: FactorStats | null;
+}
+
+export interface ThemeFactorsResponse extends FactorCoverage {
+  theme: { id: string; name: string };
+  factors: FactorRow[];
+}
+
+export interface CharacteristicExposure {
+  id: string;
+  label: string;
+  formula: string;
+  approximation: string | null;
+  theme: string | null;
+  jkp_name: string | null;
+  direction: 1 | -1;
+  value: number | null;
+  percentile: number | null;
+  /** Percentile signed to JKP's long leg: above 50 is where the factor buys. */
+  score: number | null;
+  peers: number;
+}
+
+export interface ThemeExposure {
+  id: string;
+  name: string;
+  /** null when nothing in the theme could be measured — unknown, not neutral. */
+  score: number | null;
+  measured: number;
+  measurable: number;
+  jkp_factors: number | null;
+}
+
+export interface FactorProfile {
+  ticker: string;
+  in_reference: boolean;
+  source: "cache" | "live";
+  sector: string | null;
+  reference: {
+    names: number;
+    caches: { screen: string; universe: string; built_at: string; count: number }[];
+  };
+  min_peers: number;
+  characteristics: CharacteristicExposure[];
+  themes: ThemeExposure[];
+}
+
+
 export const api = {
   health: () => fetchJSON<{ status: string }>("/health"),
 
@@ -1300,6 +1399,16 @@ export const api = {
       `/screeners/${encodeURIComponent(screen)}/results?${q}`,
     );
   },
+
+  getFactorThemes: () => fetchJSON<FactorThemesResponse>("/factors/themes"),
+
+  getThemeFactors: (theme: string) =>
+    fetchJSON<ThemeFactorsResponse>(
+      `/factors/themes/${encodeURIComponent(theme)}`,
+    ),
+
+  getFactorProfile: (ticker: string) =>
+    fetchJSON<FactorProfile>(`/factors/profile/${encodeURIComponent(ticker)}`),
 
   getCachedScreens: () =>
     fetchJSON<{

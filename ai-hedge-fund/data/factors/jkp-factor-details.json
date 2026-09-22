@@ -1,0 +1,1550 @@
+{
+ "source": "https://raw.githubusercontent.com/bkelly-lab/ReplicationCrisis/master/GlobalFactors/Factor%20Details.xlsx",
+ "themes": {
+  "accruals": "Accruals",
+  "debt_issuance": "Debt Issuance",
+  "investment": "Investment",
+  "low_leverage": "Low Leverage",
+  "low_risk": "Low Risk",
+  "momentum": "Momentum",
+  "profit_growth": "Profit Growth",
+  "profitability": "Profitability",
+  "quality": "Quality",
+  "seasonality": "Seasonality",
+  "short_term_reversal": "Short-Term Reversal",
+  "size": "Size",
+  "value": "Value"
+ },
+ "factors": {
+  "niq_su": {
+   "name": "Standardized earnings surprise",
+   "theme": "profit_growth",
+   "cite": "Foster Olsen and Shevlin (1984)",
+   "in_sample": [
+    1974,
+    1981
+   ],
+   "original_t": 9.11
+  },
+  "ret_6_1": {
+   "name": "Price momentum t-6 to t-1",
+   "theme": "momentum",
+   "cite": "Jegadeesh and Titman (1993)",
+   "in_sample": [
+    1965,
+    1989
+   ],
+   "original_t": 2.29
+  },
+  "ret_12_1": {
+   "name": "Price momentum t-12 to t-1",
+   "theme": "momentum",
+   "cite": "Jegadeesh and Titman (1993)",
+   "in_sample": [
+    1965,
+    1989
+   ],
+   "original_t": null
+  },
+  "saleq_su": {
+   "name": "Standardized Revenue surprise",
+   "theme": "profit_growth",
+   "cite": "Jegadeesh and Livnat (2006)",
+   "in_sample": [
+    1987,
+    2003
+   ],
+   "original_t": null
+  },
+  "tax_gr1a": {
+   "name": "Tax expense surprise",
+   "theme": "profit_growth",
+   "cite": "Thomas and Zhang (2011)",
+   "in_sample": [
+    1977,
+    2006
+   ],
+   "original_t": 6.42
+  },
+  "ni_inc8q": {
+   "name": "Number of consecutive quarters with earnings increases",
+   "theme": "quality",
+   "cite": "Barth Elliott and Finn (1999)",
+   "in_sample": [
+    1982,
+    1992
+   ],
+   "original_t": null
+  },
+  "prc_highprc_252d": {
+   "name": "Current price to high price over last year",
+   "theme": "momentum",
+   "cite": "George and Hwang (2004)",
+   "in_sample": [
+    1963,
+    2001
+   ],
+   "original_t": null
+  },
+  "resff3_6_1": {
+   "name": "Residual momentum t-6 to t-1",
+   "theme": "momentum",
+   "cite": "Blitz Huij and Martens (2011)",
+   "in_sample": [
+    1930,
+    2009
+   ],
+   "original_t": null
+  },
+  "resff3_12_1": {
+   "name": "Residual momentum t-12 to t-1",
+   "theme": "momentum",
+   "cite": "Blitz Huij and Martens (2011)",
+   "in_sample": [
+    1930,
+    2009
+   ],
+   "original_t": null
+  },
+  "be_me": {
+   "name": "Book-to-market equity",
+   "theme": "value",
+   "cite": "Rosenberg Reid and Lanstein (1985)",
+   "in_sample": [
+    1973,
+    1984
+   ],
+   "original_t": null
+  },
+  "debt_me": {
+   "name": "Debt-to-market",
+   "theme": "value",
+   "cite": "Bhandari (1988)",
+   "in_sample": [
+    1948,
+    1979
+   ],
+   "original_t": 3.93
+  },
+  "at_me": {
+   "name": "Assets-to-market",
+   "theme": "value",
+   "cite": "Fama and French (1992)",
+   "in_sample": [
+    1963,
+    1990
+   ],
+   "original_t": 4.28
+  },
+  "ret_60_12": {
+   "name": "Long-term reversal",
+   "theme": "investment",
+   "cite": "De Bondt and Thaler (1985)",
+   "in_sample": [
+    1926,
+    1982
+   ],
+   "original_t": null
+  },
+  "ni_me": {
+   "name": "Earnings-to-price",
+   "theme": "value",
+   "cite": "Basu (1983)",
+   "in_sample": [
+    1963,
+    1979
+   ],
+   "original_t": null
+  },
+  "fcf_me": {
+   "name": "Free cash flow-to-price",
+   "theme": "value",
+   "cite": "Lakonishok Shleifer and Vishny (1994)",
+   "in_sample": [
+    1963,
+    1990
+   ],
+   "original_t": null
+  },
+  "div12m_me": {
+   "name": "Dividend yield",
+   "theme": "value",
+   "cite": "Litzenberger and Ramaswamy (1979)",
+   "in_sample": [
+    1940,
+    1980
+   ],
+   "original_t": 8.79
+  },
+  "eqpo_me": {
+   "name": "Payout yield",
+   "theme": "value",
+   "cite": "Boudoukh et al. (2007)",
+   "in_sample": [
+    1984,
+    2003
+   ],
+   "original_t": 2.24
+  },
+  "eqnpo_me": {
+   "name": "Net payout yield",
+   "theme": "value",
+   "cite": "Boudoukh et al. (2007)",
+   "in_sample": [
+    1984,
+    2003
+   ],
+   "original_t": 4.14
+  },
+  "sale_gr3": {
+   "name": "Sales Growth (3 years)",
+   "theme": "investment",
+   "cite": "Lakonishok Shleifer and Vishny (1994)",
+   "in_sample": [
+    1968,
+    1989
+   ],
+   "original_t": -2.125
+  },
+  "sale_gr1": {
+   "name": "Sales Growth (1 year)",
+   "theme": "investment",
+   "cite": "Lakonishok Shleifer and Vishny (1994)",
+   "in_sample": [
+    1968,
+    1989
+   ],
+   "original_t": null
+  },
+  "ebitda_mev": {
+   "name": "Ebitda-to-market enterprise value",
+   "theme": "value",
+   "cite": "Loughran and Wellman (2011)",
+   "in_sample": [
+    1963,
+    2009
+   ],
+   "original_t": 3.08
+  },
+  "sale_me": {
+   "name": "Sales-to-market",
+   "theme": "value",
+   "cite": "Barbee Mukherji and Raines (1996)",
+   "in_sample": [
+    1979,
+    1991
+   ],
+   "original_t": 2.21
+  },
+  "ocf_me": {
+   "name": "Operating cash flow-to-market",
+   "theme": "value",
+   "cite": "Desai Rajgopal and Venkatachalam (2004)",
+   "in_sample": [
+    1973,
+    1997
+   ],
+   "original_t": 8.36
+  },
+  "ival_me": {
+   "name": "Intrinsic value-to-market",
+   "theme": "value",
+   "cite": "Frankel and Lee (1998)",
+   "in_sample": [
+    1975,
+    1993
+   ],
+   "original_t": null
+  },
+  "bev_mev": {
+   "name": "Book-to-market enterprise value",
+   "theme": "value",
+   "cite": "Penman Richardson and Tuna (2007)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": 4.2
+  },
+  "netdebt_me": {
+   "name": "Net debt-to-price",
+   "theme": "low_leverage",
+   "cite": "Penman Richardson and Tuna (2007)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": -3.12
+  },
+  "eq_dur": {
+   "name": "Equity duration",
+   "theme": "value",
+   "cite": "Dechow Sloan and Soliman (2004)",
+   "in_sample": [
+    1962,
+    1998
+   ],
+   "original_t": 4.63
+  },
+  "capex_abn": {
+   "name": "Abnormal corporate investment",
+   "theme": "debt_issuance",
+   "cite": "Titman Wei and Xie (2004)",
+   "in_sample": [
+    1973,
+    1996
+   ],
+   "original_t": -2.76
+  },
+  "at_gr1": {
+   "name": "Asset Growth",
+   "theme": "investment",
+   "cite": "Cooper Gulen and Schill (2008)",
+   "in_sample": [
+    1968,
+    2003
+   ],
+   "original_t": -5.04
+  },
+  "ppeinv_gr1a": {
+   "name": "Change PPE and Inventory",
+   "theme": "investment",
+   "cite": "Lyandres Sun and Zhang (2008)",
+   "in_sample": [
+    1970,
+    2005
+   ],
+   "original_t": null
+  },
+  "noa_at": {
+   "name": "Net operating assets",
+   "theme": "debt_issuance",
+   "cite": "Hirshleifer et al. (2004)",
+   "in_sample": [
+    1964,
+    2002
+   ],
+   "original_t": -4.04
+  },
+  "noa_gr1a": {
+   "name": "Change in net operating assets",
+   "theme": "investment",
+   "cite": "Hirshleifer et al. (2004)",
+   "in_sample": [
+    1964,
+    2002
+   ],
+   "original_t": 0.17
+  },
+  "lnoa_gr1a": {
+   "name": "Change in long-term net operating assets",
+   "theme": "investment",
+   "cite": "Fairfield Whisenant and Yohn (2003)",
+   "in_sample": [
+    1964,
+    1993
+   ],
+   "original_t": null
+  },
+  "capx_gr1": {
+   "name": "CAPEX growth (1 year)",
+   "theme": "investment",
+   "cite": "Xie (2001)",
+   "in_sample": [
+    1971,
+    1992
+   ],
+   "original_t": null
+  },
+  "capx_gr2": {
+   "name": "CAPEX growth (2 years)",
+   "theme": "investment",
+   "cite": "Anderson and Garcia-Feijoo (2006)",
+   "in_sample": [
+    1976,
+    1998
+   ],
+   "original_t": -5.51
+  },
+  "capx_gr3": {
+   "name": "CAPEX growth (3 years)",
+   "theme": "investment",
+   "cite": "Anderson and Garcia-Feijoo (2006)",
+   "in_sample": [
+    1976,
+    1998
+   ],
+   "original_t": -5.34
+  },
+  "chcsho_12m": {
+   "name": "Net stock issues",
+   "theme": "value",
+   "cite": "Pontiff and Woodgate (2008)",
+   "in_sample": [
+    1970,
+    2003
+   ],
+   "original_t": -6.72
+  },
+  "eqnpo_12m": {
+   "name": "Equity net payout",
+   "theme": "value",
+   "cite": "Daniel and Titman (2006)",
+   "in_sample": [
+    1968,
+    2003
+   ],
+   "original_t": -4.16
+  },
+  "debt_gr3": {
+   "name": "Growth in book debt (3 years)",
+   "theme": "debt_issuance",
+   "cite": "Lyandres Sun and Zhang (2008)",
+   "in_sample": [
+    1970,
+    2005
+   ],
+   "original_t": -5.91
+  },
+  "inv_gr1": {
+   "name": "Inventory growth",
+   "theme": "investment",
+   "cite": "Belo and Lin (2011)",
+   "in_sample": [
+    1965,
+    2009
+   ],
+   "original_t": 6.64
+  },
+  "inv_gr1a": {
+   "name": "Inventory change",
+   "theme": "investment",
+   "cite": "Thomas and Zhang (2002)",
+   "in_sample": [
+    1970,
+    1997
+   ],
+   "original_t": null
+  },
+  "oaccruals_at": {
+   "name": "Operating accruals",
+   "theme": "accruals",
+   "cite": "Sloan (1996)",
+   "in_sample": [
+    1962,
+    1991
+   ],
+   "original_t": -6.15
+  },
+  "taccruals_at": {
+   "name": "Total accruals",
+   "theme": "accruals",
+   "cite": "Richardson et al. (2005)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": -6.38
+  },
+  "cowc_gr1a": {
+   "name": "Change in current operating working capital",
+   "theme": "accruals",
+   "cite": "Richardson et al. (2005)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": -8.72
+  },
+  "coa_gr1a": {
+   "name": "Change in current operating assets",
+   "theme": "investment",
+   "cite": "Richardson et al. (2005)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": -8.71
+  },
+  "col_gr1a": {
+   "name": "Change in current operating liabilities",
+   "theme": "investment",
+   "cite": "Richardson et al. (2005)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": -4.49
+  },
+  "nncoa_gr1a": {
+   "name": "Change in net noncurrent operating assets",
+   "theme": "investment",
+   "cite": "Richardson et al. (2005)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": -8.76
+  },
+  "ncoa_gr1a": {
+   "name": "Change in noncurrent operating assets",
+   "theme": "investment",
+   "cite": "Richardson et al. (2005)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": -8.44
+  },
+  "ncol_gr1a": {
+   "name": "Change in noncurrent operating liabilities",
+   "theme": "debt_issuance",
+   "cite": "Richardson et al. (2005)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": -0.65
+  },
+  "nfna_gr1a": {
+   "name": "Change in net financial assets",
+   "theme": "debt_issuance",
+   "cite": "Richardson et al. (2005)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": 5.85
+  },
+  "sti_gr1a": {
+   "name": "Change in short-term investments",
+   "theme": "seasonality",
+   "cite": "Richardson et al. (2005)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": 0.43
+  },
+  "lti_gr1a": {
+   "name": "Change in long-term investments",
+   "theme": "seasonality",
+   "cite": "Richardson et al. (2005)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": -3.38
+  },
+  "fnl_gr1a": {
+   "name": "Change in financial liabilities",
+   "theme": "debt_issuance",
+   "cite": "Richardson et al. (2005)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": -8.01
+  },
+  "be_gr1a": {
+   "name": "Change in common equity",
+   "theme": "investment",
+   "cite": "Richardson et al. (2005)",
+   "in_sample": [
+    1962,
+    2001
+   ],
+   "original_t": -6.25
+  },
+  "oaccruals_ni": {
+   "name": "Percent operating accruals",
+   "theme": "accruals",
+   "cite": "Hafzalla Lundholm and Van Winkle (2011)",
+   "in_sample": [
+    1989,
+    2008
+   ],
+   "original_t": null
+  },
+  "taccruals_ni": {
+   "name": "Percent total accruals",
+   "theme": "accruals",
+   "cite": "Hafzalla Lundholm and Van Winkle (2011)",
+   "in_sample": [
+    1989,
+    2008
+   ],
+   "original_t": null
+  },
+  "netis_at": {
+   "name": "Net total issuance",
+   "theme": "value",
+   "cite": "Bradshaw Richardson and Sloan (2006)",
+   "in_sample": [
+    1971,
+    2000
+   ],
+   "original_t": -5.7
+  },
+  "eqnetis_at": {
+   "name": "Net equity issuance",
+   "theme": "value",
+   "cite": "Bradshaw Richardson and Sloan (2006)",
+   "in_sample": [
+    1971,
+    2000
+   ],
+   "original_t": -3.2
+  },
+  "dbnetis_at": {
+   "name": "Net debt issuance",
+   "theme": "seasonality",
+   "cite": "Bradshaw Richardson and Sloan (2006)",
+   "in_sample": [
+    1971,
+    2000
+   ],
+   "original_t": -8.4
+  },
+  "niq_be": {
+   "name": "Quarterly return on equity",
+   "theme": "profitability",
+   "cite": "Hou Xue and Zhang (2015)",
+   "in_sample": [
+    1972,
+    2012
+   ],
+   "original_t": 3.11
+  },
+  "niq_be_chg1": {
+   "name": "Change in quarterly return on equity",
+   "theme": "profit_growth",
+   "cite": null,
+   "in_sample": [
+    1967,
+    2016
+   ],
+   "original_t": null
+  },
+  "niq_at": {
+   "name": "Quarterly return on assets",
+   "theme": "quality",
+   "cite": "Balakrishnan Bartov and Faurel (2010)",
+   "in_sample": [
+    1976,
+    2005
+   ],
+   "original_t": null
+  },
+  "niq_at_chg1": {
+   "name": "Change in quarterly return on assets",
+   "theme": "profit_growth",
+   "cite": null,
+   "in_sample": [
+    1972,
+    2016
+   ],
+   "original_t": null
+  },
+  "ebit_bev": {
+   "name": "Return on net operating assets",
+   "theme": "profitability",
+   "cite": "Soliman (2008)",
+   "in_sample": [
+    1984,
+    2002
+   ],
+   "original_t": 1.41
+  },
+  "ebit_sale": {
+   "name": "Profit margin",
+   "theme": "profitability",
+   "cite": "Soliman (2008)",
+   "in_sample": [
+    1984,
+    2002
+   ],
+   "original_t": 1.04
+  },
+  "sale_bev": {
+   "name": "Asset turnover",
+   "theme": "quality",
+   "cite": "Soliman (2008)",
+   "in_sample": [
+    1984,
+    2002
+   ],
+   "original_t": 0.29
+  },
+  "at_turnover": {
+   "name": "Capital turnover",
+   "theme": "quality",
+   "cite": "Haugen and Baker (1996)",
+   "in_sample": [
+    1979,
+    1993
+   ],
+   "original_t": null
+  },
+  "gp_at": {
+   "name": "Gross profits-to-assets",
+   "theme": "quality",
+   "cite": "Novy-Marx (2013)",
+   "in_sample": [
+    1963,
+    2010
+   ],
+   "original_t": 4.59
+  },
+  "gp_atl1": {
+   "name": "Gross profits-to-lagged assets",
+   "theme": "quality",
+   "cite": null,
+   "in_sample": [
+    1967,
+    2016
+   ],
+   "original_t": null
+  },
+  "ope_be": {
+   "name": "Operating profits-to-book equity",
+   "theme": "profitability",
+   "cite": "Fama and French (2015)",
+   "in_sample": [
+    1963,
+    2013
+   ],
+   "original_t": 2.92
+  },
+  "ope_bel1": {
+   "name": "Operating profits-to-lagged book equity",
+   "theme": "profitability",
+   "cite": null,
+   "in_sample": [
+    1967,
+    2016
+   ],
+   "original_t": null
+  },
+  "op_at": {
+   "name": "Operating profits-to-book assets",
+   "theme": "quality",
+   "cite": null,
+   "in_sample": [
+    1963,
+    2013
+   ],
+   "original_t": null
+  },
+  "op_atl1": {
+   "name": "Operating profits-to-lagged book assets",
+   "theme": "quality",
+   "cite": "Ball et al. (2016)",
+   "in_sample": [
+    1963,
+    2014
+   ],
+   "original_t": 8.86
+  },
+  "cop_at": {
+   "name": "Cash-based operating profits-to-book assets",
+   "theme": "quality",
+   "cite": null,
+   "in_sample": [
+    1967,
+    2016
+   ],
+   "original_t": null
+  },
+  "cop_atl1": {
+   "name": "Cash-based operating profits-to-lagged book assets",
+   "theme": "quality",
+   "cite": "Ball et al. (2016)",
+   "in_sample": [
+    1963,
+    2014
+   ],
+   "original_t": 5.27
+  },
+  "f_score": {
+   "name": "Pitroski F-score",
+   "theme": "profitability",
+   "cite": "Piotroski (2000)",
+   "in_sample": [
+    1976,
+    1996
+   ],
+   "original_t": 5.889
+  },
+  "o_score": {
+   "name": "Ohlson O-score",
+   "theme": "profitability",
+   "cite": "Dichev (1998)",
+   "in_sample": [
+    1981,
+    1995
+   ],
+   "original_t": -3.38
+  },
+  "z_score": {
+   "name": "Altman Z-score",
+   "theme": "low_leverage",
+   "cite": "Dichev (1998)",
+   "in_sample": [
+    1981,
+    1995
+   ],
+   "original_t": 3.37
+  },
+  "pi_nix": {
+   "name": "Taxable income-to-book income",
+   "theme": "seasonality",
+   "cite": "Lev and Nissim (2004)",
+   "in_sample": [
+    1973,
+    2000
+   ],
+   "original_t": null
+  },
+  "at_be": {
+   "name": "Book leverage",
+   "theme": "low_leverage",
+   "cite": "Fama and French (1992)",
+   "in_sample": [
+    1963,
+    1990
+   ],
+   "original_t": -4.45
+  },
+  "saleq_gr1": {
+   "name": "Sales growth (1 quarter)",
+   "theme": "investment",
+   "cite": null,
+   "in_sample": [
+    1967,
+    2016
+   ],
+   "original_t": null
+  },
+  "rd_me": {
+   "name": "R&D-to-market",
+   "theme": "size",
+   "cite": "Chan Lakonishok and Sougiannis (2001)",
+   "in_sample": [
+    1975,
+    1995
+   ],
+   "original_t": null
+  },
+  "rd_sale": {
+   "name": "R&D-to-sales",
+   "theme": "low_leverage",
+   "cite": "Chan Lakonishok and Sougiannis (2001)",
+   "in_sample": [
+    1975,
+    1995
+   ],
+   "original_t": null
+  },
+  "opex_at": {
+   "name": "Operating leverage",
+   "theme": "quality",
+   "cite": "Novy-Marx (2011)",
+   "in_sample": [
+    1963,
+    2008
+   ],
+   "original_t": 2.52
+  },
+  "emp_gr1": {
+   "name": "Hiring rate",
+   "theme": "investment",
+   "cite": "Belo Lin and Bazdresch (2014)",
+   "in_sample": [
+    1965,
+    2010
+   ],
+   "original_t": -3.09
+  },
+  "rd5_at": {
+   "name": "R&D capital-to-book assets",
+   "theme": "low_leverage",
+   "cite": "Li (2011)",
+   "in_sample": [
+    1952,
+    2004
+   ],
+   "original_t": null
+  },
+  "age": {
+   "name": "Firm age",
+   "theme": "low_leverage",
+   "cite": "Jiang Lee and Zhang (2005)",
+   "in_sample": [
+    1965,
+    2001
+   ],
+   "original_t": -3.46
+  },
+  "dsale_dinv": {
+   "name": "Change sales minus change Inventory",
+   "theme": "profit_growth",
+   "cite": "Abarbanell and Bushee (1998)",
+   "in_sample": [
+    1974,
+    1988
+   ],
+   "original_t": 2.063
+  },
+  "dsale_drec": {
+   "name": "Change sales minus change receivables",
+   "theme": "profit_growth",
+   "cite": "Abarbanell and Bushee (1998)",
+   "in_sample": [
+    1974,
+    1988
+   ],
+   "original_t": -0.015
+  },
+  "dgp_dsale": {
+   "name": "Change gross margin minus change sales",
+   "theme": "quality",
+   "cite": "Abarbanell and Bushee (1998)",
+   "in_sample": [
+    1974,
+    1988
+   ],
+   "original_t": 1.304
+  },
+  "dsale_dsga": {
+   "name": "Change sales minus change SG&A",
+   "theme": "profit_growth",
+   "cite": "Abarbanell and Bushee (1998)",
+   "in_sample": [
+    1974,
+    1988
+   ],
+   "original_t": 1.363
+  },
+  "sale_emp_gr1": {
+   "name": "Labor force efficiency",
+   "theme": "profit_growth",
+   "cite": "Abarbanell and Bushee (1998)",
+   "in_sample": [
+    1974,
+    1988
+   ],
+   "original_t": 1.113
+  },
+  "tangibility": {
+   "name": "Asset tangibility",
+   "theme": "low_leverage",
+   "cite": "Hahn and Lee (2009)",
+   "in_sample": [
+    1973,
+    2001
+   ],
+   "original_t": 5.04
+  },
+  "kz_index": {
+   "name": "Kaplan-Zingales index",
+   "theme": "seasonality",
+   "cite": "Lamont Polk and Saa-Requejo (2001)",
+   "in_sample": [
+    1968,
+    1995
+   ],
+   "original_t": 3.06
+  },
+  "ocfq_saleq_std": {
+   "name": "Cash flow volatility",
+   "theme": "low_risk",
+   "cite": "Huang (2009)",
+   "in_sample": [
+    1980,
+    2004
+   ],
+   "original_t": -1.98
+  },
+  "cash_at": {
+   "name": "Cash-to-assets",
+   "theme": "low_leverage",
+   "cite": "Palazzo (2012)",
+   "in_sample": [
+    1972,
+    2009
+   ],
+   "original_t": null
+  },
+  "ni_ar1": {
+   "name": "Earnings persistence",
+   "theme": "debt_issuance",
+   "cite": "Francis et al. (2004)",
+   "in_sample": [
+    1975,
+    2001
+   ],
+   "original_t": null
+  },
+  "ni_ivol": {
+   "name": "Earnings volatility",
+   "theme": "low_leverage",
+   "cite": "Francis et al. (2004)",
+   "in_sample": [
+    1975,
+    2001
+   ],
+   "original_t": null
+  },
+  "earnings_variability": {
+   "name": "Earnings variability",
+   "theme": "low_risk",
+   "cite": "Francis et al. (2004)",
+   "in_sample": [
+    1975,
+    2001
+   ],
+   "original_t": null
+  },
+  "aliq_at": {
+   "name": "Liquidity of book assets",
+   "theme": "investment",
+   "cite": "Ortiz-Molina and Phillips (2014)",
+   "in_sample": [
+    1984,
+    2006
+   ],
+   "original_t": null
+  },
+  "aliq_mat": {
+   "name": "Liquidity of market assets",
+   "theme": "low_leverage",
+   "cite": "Ortiz-Molina and Phillips (2014)",
+   "in_sample": [
+    1984,
+    2006
+   ],
+   "original_t": null
+  },
+  "seas_1_1an": {
+   "name": "Year 1-lagged return, annual",
+   "theme": "profit_growth",
+   "cite": "Heston and Sadka (2008)",
+   "in_sample": [
+    1965,
+    2002
+   ],
+   "original_t": 7.6
+  },
+  "seas_1_1na": {
+   "name": "Year 1-lagged return, nonannual",
+   "theme": "momentum",
+   "cite": "Heston and Sadka (2008)",
+   "in_sample": [
+    1965,
+    2002
+   ],
+   "original_t": 4.2
+  },
+  "seas_2_5an": {
+   "name": "Years 2-5 lagged returns, annual",
+   "theme": "seasonality",
+   "cite": "Heston and Sadka (2008)",
+   "in_sample": [
+    1965,
+    2002
+   ],
+   "original_t": 5.35
+  },
+  "seas_2_5na": {
+   "name": "Years 2-5 lagged returns, nonannual",
+   "theme": "investment",
+   "cite": "Heston and Sadka (2008)",
+   "in_sample": [
+    1965,
+    2002
+   ],
+   "original_t": -5.6
+  },
+  "seas_6_10an": {
+   "name": "Years 6-10 lagged returns, annual",
+   "theme": "seasonality",
+   "cite": "Heston and Sadka (2008)",
+   "in_sample": [
+    1965,
+    2002
+   ],
+   "original_t": 6.15
+  },
+  "seas_6_10na": {
+   "name": "Years 6-10 lagged returns, nonannual",
+   "theme": "low_risk",
+   "cite": "Heston and Sadka (2008)",
+   "in_sample": [
+    1965,
+    2002
+   ],
+   "original_t": -4.62
+  },
+  "seas_11_15an": {
+   "name": "Years 11-15 lagged returns, annual",
+   "theme": "seasonality",
+   "cite": "Heston and Sadka (2008)",
+   "in_sample": [
+    1965,
+    2002
+   ],
+   "original_t": 6.43
+  },
+  "seas_11_15na": {
+   "name": "Years 11-15 lagged returns, nonannual",
+   "theme": "seasonality",
+   "cite": "Heston and Sadka (2008)",
+   "in_sample": [
+    1965,
+    2002
+   ],
+   "original_t": -1.77
+  },
+  "seas_16_20an": {
+   "name": "Years 16-20 lagged returns, annual",
+   "theme": "seasonality",
+   "cite": "Heston and Sadka (2008)",
+   "in_sample": [
+    1965,
+    2002
+   ],
+   "original_t": 4.58
+  },
+  "seas_16_20na": {
+   "name": "Years 16-20 lagged returns, nonannual",
+   "theme": "accruals",
+   "cite": "Heston and Sadka (2008)",
+   "in_sample": [
+    1965,
+    2002
+   ],
+   "original_t": -3.35
+  },
+  "market_equity": {
+   "name": "Market Equity",
+   "theme": "size",
+   "cite": "Banz (1981)",
+   "in_sample": [
+    1926,
+    1975
+   ],
+   "original_t": -2.42
+  },
+  "ivol_ff3_21d": {
+   "name": "Idiosyncratic volatility from the Fama-French 3-factor model",
+   "theme": "low_risk",
+   "cite": "Ang et al. (2006)",
+   "in_sample": [
+    1963,
+    2000
+   ],
+   "original_t": -2.86
+  },
+  "ivol_capm_252d": {
+   "name": "Idiosyncratic volatility from the CAPM (252 days)",
+   "theme": "low_risk",
+   "cite": "Ali Hwang and Trombley (2003)",
+   "in_sample": [
+    1976,
+    1997
+   ],
+   "original_t": -2.69
+  },
+  "ivol_capm_21d": {
+   "name": "Idiosyncratic volatility from the CAPM (21 days)",
+   "theme": "low_risk",
+   "cite": null,
+   "in_sample": [
+    1967,
+    2016
+   ],
+   "original_t": null
+  },
+  "ivol_hxz4_21d": {
+   "name": "Idiosyncratic volatility from the q-factor model",
+   "theme": "low_risk",
+   "cite": null,
+   "in_sample": [
+    1967,
+    2016
+   ],
+   "original_t": null
+  },
+  "rvol_21d": {
+   "name": "Return volatility",
+   "theme": "low_risk",
+   "cite": "Ang et al. (2006)",
+   "in_sample": [
+    1963,
+    2000
+   ],
+   "original_t": -2.86
+  },
+  "beta_60m": {
+   "name": "Market Beta",
+   "theme": "low_risk",
+   "cite": "Fama and MacBeth (1973)",
+   "in_sample": [
+    1935,
+    1968
+   ],
+   "original_t": 1.85
+  },
+  "betabab_1260d": {
+   "name": "Frazzini-Pedersen market beta",
+   "theme": "low_risk",
+   "cite": "Frazzini and Pedersen (2014)",
+   "in_sample": [
+    1926,
+    2012
+   ],
+   "original_t": 7.12
+  },
+  "beta_dimson_21d": {
+   "name": "Dimson beta",
+   "theme": "low_risk",
+   "cite": "Dimson (1979)",
+   "in_sample": [
+    1955,
+    1974
+   ],
+   "original_t": null
+  },
+  "turnover_126d": {
+   "name": "Share turnover",
+   "theme": "low_risk",
+   "cite": "Datar Naik and Radcliffe (1998)",
+   "in_sample": [
+    1963,
+    1991
+   ],
+   "original_t": -8.58
+  },
+  "turnover_var_126d": {
+   "name": "Coefficient of variation for share turnover",
+   "theme": "profitability",
+   "cite": "Chordia Subrahmanyam and Anshuman (2001)",
+   "in_sample": [
+    1966,
+    1995
+   ],
+   "original_t": -6.03
+  },
+  "dolvol_126d": {
+   "name": "Dollar trading volume",
+   "theme": "size",
+   "cite": "Brennan Chordia and Subrahmanyam (1998)",
+   "in_sample": [
+    1966,
+    1995
+   ],
+   "original_t": 2.86
+  },
+  "dolvol_var_126d": {
+   "name": "Coefficient of variation for dollar trading volume",
+   "theme": "profitability",
+   "cite": "Chordia Subrahmanyam and Anshuman (2001)",
+   "in_sample": [
+    1966,
+    1995
+   ],
+   "original_t": -5.1
+  },
+  "prc": {
+   "name": "Price per share",
+   "theme": "size",
+   "cite": "Miller and Scholes (1982)",
+   "in_sample": [
+    1940,
+    1978
+   ],
+   "original_t": 3.0
+  },
+  "ami_126d": {
+   "name": "Amihud Measure",
+   "theme": "size",
+   "cite": "Amihud (2002)",
+   "in_sample": [
+    1964,
+    1997
+   ],
+   "original_t": 5.39
+  },
+  "zero_trades_21d": {
+   "name": "Number of zero trades with turnover as tiebreaker (1 month)",
+   "theme": "low_risk",
+   "cite": "Liu (2006)",
+   "in_sample": [
+    1963,
+    2003
+   ],
+   "original_t": 0.93
+  },
+  "zero_trades_126d": {
+   "name": "Number of zero trades with turnover as tiebreaker (6 months)",
+   "theme": "low_risk",
+   "cite": "Liu (2006)",
+   "in_sample": [
+    1963,
+    2003
+   ],
+   "original_t": 4.06
+  },
+  "zero_trades_252d": {
+   "name": "Number of zero trades with turnover as tiebreaker (12 months)",
+   "theme": "low_risk",
+   "cite": "Liu (2006)",
+   "in_sample": [
+    1963,
+    2003
+   ],
+   "original_t": 4.4
+  },
+  "rmax1_21d": {
+   "name": "Maximum daily return",
+   "theme": "low_risk",
+   "cite": "Bali Cakici and Whitelaw (2011)",
+   "in_sample": [
+    1962,
+    2005
+   ],
+   "original_t": -6.16
+  },
+  "rskew_21d": {
+   "name": "Total skewness",
+   "theme": "short_term_reversal",
+   "cite": "Bali Engle and Murray (2016)",
+   "in_sample": [
+    1925,
+    2012
+   ],
+   "original_t": -4.01
+  },
+  "iskew_capm_21d": {
+   "name": "Idiosyncratic skewness from the CAPM",
+   "theme": "short_term_reversal",
+   "cite": null,
+   "in_sample": [
+    1967,
+    2016
+   ],
+   "original_t": null
+  },
+  "iskew_ff3_21d": {
+   "name": "Idiosyncratic skewness from the Fama-French 3-factor model",
+   "theme": "short_term_reversal",
+   "cite": "Bali Engle and Murray (2016)",
+   "in_sample": [
+    1925,
+    2012
+   ],
+   "original_t": -2.44
+  },
+  "iskew_hxz4_21d": {
+   "name": "Idiosyncratic skewness from the q-factor model",
+   "theme": "short_term_reversal",
+   "cite": null,
+   "in_sample": [
+    1967,
+    2016
+   ],
+   "original_t": null
+  },
+  "coskew_21d": {
+   "name": "Coskewness",
+   "theme": "seasonality",
+   "cite": "Harvey and Siddique (2000)",
+   "in_sample": [
+    1963,
+    1993
+   ],
+   "original_t": null
+  },
+  "ret_1_0": {
+   "name": "Short-term reversal",
+   "theme": "short_term_reversal",
+   "cite": "Jegadeesh (1990)",
+   "in_sample": [
+    1929,
+    1982
+   ],
+   "original_t": -18.58
+  },
+  "betadown_252d": {
+   "name": "Downside beta",
+   "theme": "low_risk",
+   "cite": "Ang Chen and Xing (2006)",
+   "in_sample": [
+    1963,
+    2001
+   ],
+   "original_t": 5.25
+  },
+  "bidaskhl_21d": {
+   "name": "The high-low bid-ask spread",
+   "theme": "low_leverage",
+   "cite": "Corwin and Schultz (2012)",
+   "in_sample": [
+    1927,
+    2006
+   ],
+   "original_t": 12.78
+  },
+  "ret_3_1": {
+   "name": "Price momentum t-3 to t-1",
+   "theme": "momentum",
+   "cite": "Jegedeesh and Titman (1993)",
+   "in_sample": [
+    1965,
+    1989
+   ],
+   "original_t": null
+  },
+  "ret_9_1": {
+   "name": "Price momentum t-9 to t-1",
+   "theme": "momentum",
+   "cite": "Jegedeesh and Titman (1993)",
+   "in_sample": [
+    1965,
+    1989
+   ],
+   "original_t": null
+  },
+  "ret_12_7": {
+   "name": "Price momentum t-12 to t-7",
+   "theme": "profit_growth",
+   "cite": "Novy-Marx (2012)",
+   "in_sample": [
+    1925,
+    2010
+   ],
+   "original_t": null
+  },
+  "corr_1260d": {
+   "name": "Market correlation",
+   "theme": "seasonality",
+   "cite": "Assness, Frazzini, Gormsen, Pedersen (2020)",
+   "in_sample": [
+    1925,
+    2015
+   ],
+   "original_t": null
+  },
+  "rmax5_21d": {
+   "name": "Highest 5 days of return",
+   "theme": "low_risk",
+   "cite": "Bali, Brown, Murray and Tang (2017)",
+   "in_sample": [
+    1993,
+    2012
+   ],
+   "original_t": null
+  },
+  "rmax5_rvol_21d": {
+   "name": "Highest 5 days of return scaled by volatility",
+   "theme": "short_term_reversal",
+   "cite": "Assness, Frazzini, Gormsen, Pedersen (2020)",
+   "in_sample": [
+    1925,
+    2015
+   ],
+   "original_t": null
+  },
+  "ni_be": {
+   "name": "Return on equity",
+   "theme": "profitability",
+   "cite": "Haugen and Baker (1996)",
+   "in_sample": [
+    1979,
+    1993
+   ],
+   "original_t": null
+  },
+  "ocf_at": {
+   "name": "Operating cash flow to assets",
+   "theme": "profitability",
+   "cite": "Bouchard, Krüger, Landier and Thesmar (2019)",
+   "in_sample": [
+    1990,
+    2015
+   ],
+   "original_t": null
+  },
+  "ocf_at_chg1": {
+   "name": "Change in operating cash flow to assets",
+   "theme": "profit_growth",
+   "cite": "Bouchard, Krüger, Landier and Thesmar (2019)",
+   "in_sample": [
+    1990,
+    2015
+   ],
+   "original_t": null
+  },
+  "mispricing_perf": {
+   "name": "Mispricing factor: Performance",
+   "theme": "quality",
+   "cite": "Stambaugh and Yuan (2016)",
+   "in_sample": [
+    1967,
+    2013
+   ],
+   "original_t": null
+  },
+  "mispricing_mgmt": {
+   "name": "Mispricing factor: Management",
+   "theme": "investment",
+   "cite": "Stambaugh and Yuan (2016)",
+   "in_sample": [
+    1967,
+    2013
+   ],
+   "original_t": null
+  },
+  "qmj": {
+   "name": "Quality minus Junk: Composite",
+   "theme": "quality",
+   "cite": "Assness, Frazzini and Pedersen (2018)",
+   "in_sample": [
+    1957,
+    2016
+   ],
+   "original_t": null
+  },
+  "qmj_prof": {
+   "name": "Quality minus Junk: Profitability",
+   "theme": "quality",
+   "cite": "Assness, Frazzini and Pedersen (2018)",
+   "in_sample": [
+    1957,
+    2016
+   ],
+   "original_t": null
+  },
+  "qmj_growth": {
+   "name": "Quality minus Junk: Growth",
+   "theme": "quality",
+   "cite": "Assness, Frazzini and Pedersen (2018)",
+   "in_sample": [
+    1957,
+    2016
+   ],
+   "original_t": null
+  },
+  "qmj_safety": {
+   "name": "Quality minus Junk: Safety",
+   "theme": "quality",
+   "cite": "Assness, Frazzini and Pedersen (2018)",
+   "in_sample": [
+    1957,
+    2016
+   ],
+   "original_t": null
+  }
+ }
+}
