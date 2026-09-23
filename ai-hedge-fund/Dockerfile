@@ -21,6 +21,10 @@ RUN pip install --no-cache-dir uv
 COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
 COPY config ./config
+# The JKP factor returns are a committed, dated file rather than a live fetch,
+# so the Factors tab answers on the hosted site too. The screen caches are not
+# copied: they are built by a local refresh, and the tab says so when absent.
+COPY data/factors ./data/factors
 # The openai extra ships the client for every OpenAI-compatible endpoint, not
 # just OpenAI's own — a hosted deployment has no local Ollama to fall back to,
 # so leaving it out makes LLM_PROVIDER=openai a runtime ImportError that only

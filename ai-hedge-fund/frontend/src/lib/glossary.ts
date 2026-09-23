@@ -97,6 +97,27 @@ export const GLOSSARY = {
     what: "Which metrics the model chose to compute, what each returned, and whether the prose it wrote actually agrees with them.",
     why: "A model that writes a confident paragraph citing a number it never computed is the main failure mode here. This is how you catch it.",
   },
+  factors: {
+    term: "Factors",
+    what: "The thirteen themes of the Jensen–Kelly–Pedersen factor dataset — value, momentum, quality, low risk and the rest — with a century of their returns, and where this company sits on each.",
+    why: "It says what kind of company the investors are arguing about, in the vocabulary the research uses, and whether that kind of company has been paid for being one.",
+    careful:
+      "The only tab here with no model in it. The returns are the authors' published data; the company's position is computed by this app and uses fewer characteristics than they do.",
+  },
+  "factor-tilt": {
+    term: "Factor tilt",
+    what: "For each theme, where this company ranks among about eleven hundred S&P 500 and SmallCap 600 names on the characteristics JKP sort on — 0 to 100, with 50 the middle. Above 50 is the side the factor buys.",
+    why: "A factor portfolio is long one end of a ranking and short the other. A rank is the honest single-company reading of that.",
+    careful:
+      "Some characteristics are approximations and several themes cannot be measured from this data at all; those are left blank, not set to 50. A tilt describes the company. It is not a forecast that the premium arrives for it.",
+  },
+  "factor-replication": {
+    term: "Survived its paper",
+    what: "Each factor's Sharpe ratio inside the years its original paper studied, against the years after that sample ended.",
+    why: "The question JKP's paper is named for: does a published anomaly keep working once it is known? A factor that only worked in-sample was a finding about the data, not about markets.",
+    careful:
+      "Most premiums shrink after publication, and that is expected — the bar is whether the return stayed positive, not whether it stayed the same size. A shorter post-sample window is a noisier one.",
+  },
   "signal-intelligence": {
     term: "Signal intelligence",
     what: "Where the model's view sits against the analyst consensus and the news sentiment.",
