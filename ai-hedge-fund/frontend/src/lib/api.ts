@@ -10,6 +10,8 @@
 const CONFIGURED = import.meta.env.VITE_API_BASE_URL?.trim();
 const BASE = CONFIGURED ? `${CONFIGURED.replace(/\/+$/, "")}/api` : "/api";
 
+import type { RegimeAnalysis } from "@/lib/regimes";
+
 async function fetchJSON<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`);
   if (!res.ok) {
@@ -1174,6 +1176,58 @@ export interface ThemeExposure {
   jkp_factors: number | null;
 }
 
+/** One series placed on the growth/inflation map. */
+export interface MacroPoint {
+  id: string;
+  label: string;
+  kind: "anchor" | "industry" | "factor" | "company";
+  note: string;
+  /** Partial correlation to inflation news, holding growth news fixed. */
+  inflation: number;
+  /** Partial correlation to growth news, holding inflation news fixed. */
+  growth: number;
+  quadrant: "goldilocks" | "overheating" | "recession" | "stagflation";
+  quarters: number;
+  /** Overlapping 12-month windows, so this is well below `quarters`. */
+  independent_years: number;
+  standard_error: number;
+  from: string;
+  to: string;
+}
+
+export interface MacroAxis {
+  change: number[];
+  surprise: number[];
+  news: number[];
+  realised: Array<number | null>;
+  forecast_splice: string | null;
+}
+
+export interface MacroContext {
+  built_at: string;
+  source: Record<string, string>;
+  quarters: string[];
+  inflation: MacroAxis;
+  growth: MacroAxis;
+  /** What AQR plot that we cannot source, named so its absence is legible. */
+  absent: string;
+  min_quarters: number;
+  overlap: number;
+}
+
+export interface MacroMapResponse {
+  context: MacroContext;
+  points: MacroPoint[];
+}
+
+export interface MacroPointResponse {
+  ticker: string;
+  point: MacroPoint | null;
+  /** Why there is no point — too short a history, never a silent omission. */
+  reason: string | null;
+  months_available: number;
+}
+
 export interface FactorProfile {
   ticker: string;
   in_reference: boolean;
@@ -1409,6 +1463,28 @@ export const api = {
 
   getFactorProfile: (ticker: string) =>
     fetchJSON<FactorProfile>(`/factors/profile/${encodeURIComponent(ticker)}`),
+
+  /** The growth/inflation map. Committed data, so it answers offline. */
+  getMacroMap: () => fetchJSON<MacroMapResponse>("/macro/map"),
+
+  getMacroPoint: (ticker: string) =>
+    fetchJSON<MacroPointResponse>(`/macro/map/${encodeURIComponent(ticker)}`),
+
+  /** Regime clustering. Computed, so no spend guard and no model. */
+  getRegimes: (
+    ticker: string,
+    opts: { days?: number; k?: number; window_days?: number; overlap_days?: number } = {},
+  ) => {
+    const q = new URLSearchParams(
+      Object.entries(opts)
+        .filter(([, v]) => v != null)
+        .map(([k, v]) => [k, String(v)]),
+    );
+    const qs = q.toString();
+    return fetchJSON<RegimeAnalysis>(
+      `/regimes/${encodeURIComponent(ticker)}${qs ? `?${qs}` : ""}`,
+    );
+  },
 
   getCachedScreens: () =>
     fetchJSON<{

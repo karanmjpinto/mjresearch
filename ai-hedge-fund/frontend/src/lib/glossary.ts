@@ -259,6 +259,49 @@ export const GLOSSARY = {
     careful:
       "Deliberately below what a confident reading would allow. An overestimated edge is not merely imprecise — bet the full amount on a drift you have overstated twofold and the long-run growth rate is exactly zero.",
   },
+  // ── Regimes ────────────────────────────────────────────────────────────
+  regimes: {
+    term: "Regimes",
+    what: "Stretches of history where this company's daily returns behaved like draws from one distribution — calm, or turbulent. Found by clustering the whole shape of each quarter's returns, not just how much they moved.",
+    why: "It says what kind of market a company has been in, which is the context every other number on the screen was measured in. A valuation multiple from a turbulent stretch is not the same evidence as one from a calm one.",
+    careful:
+      "Fitted over the whole period at once, so each label was assigned knowing what came afterwards. It describes where the company has been. It is not a signal, it does not say which regime comes next, and it must not be backtested on.",
+  },
+  "regime-separation": {
+    term: "Separation ratio",
+    what: "How much more a window resembles its own regime than the other one. Above 1 the two groups really are different; at or below 1 they are one population cut in half.",
+    why: "Any clustering returns clusters. Ask for two groups and you get two groups whether or not two exist, and the chart looks equally convincing either way. This is the number that says whether to believe the rest of the tab.",
+    careful:
+      "It is measured with the same kernel for every method shown, so the bars are comparable to each other — but not to a separation ratio from somewhere else, and not between two companies with very different volatility.",
+  },
+  "regime-barycentre": {
+    term: "The typical day",
+    what: "Each regime's representative return distribution — the middle value of its members at every percentile, from worst day to best.",
+    why: "This is the thing the method actually clusters. Two regimes can share a volatility and differ entirely in how bad their bad days get, and only the shape shows that.",
+    careful:
+      "It is a median of the windows in the regime, not an average, so a single crash window cannot drag it. That is deliberate, and it means the curve can sit away from the middle of the scatter cloud.",
+  },
+  "macro-sensitivity": {
+    term: "Macro map",
+    what: "Where a return series has sat against two things: US inflation news and US growth news. Right of centre means its good years came when inflation surprised upwards; above centre, when growth did.",
+    why: "Almost everything an investor owns is paid for the same two bets — growth up, inflation down. Seeing that drawn is the fastest way to notice a book has one macro opinion in it rather than several.",
+    careful:
+      "News, not level: prices already contain the inflation everyone expects, so the axes measure surprises against forecasts and against last year. It is descriptive and backward-looking, and says nothing about which environment comes next.",
+  },
+  "macro-news-metric": {
+    term: "Growth and inflation news",
+    what: "Two quarterly series. Each blends how much the year-on-year rate moved from the year before with how far it landed from the forecast made a year earlier, both standardised before averaging.",
+    why: "One measure of surprise assumes nobody updates their expectations, the other trusts a survey. Both are wrong in different directions, so averaging them cancels some of the error in each.",
+    careful:
+      "Forecasts come from the Survey of Professional Forecasters, whose CPI question only starts in 1981 — the GDP deflator forecast stands in before that, which is a different price index.",
+  },
+  "macro-error-bar": {
+    term: "Why the ring is wide",
+    what: "Every point is measured on twelve-month returns read off every quarter, so consecutive readings share nine months of the same data. Half a century of quarters is worth about fifty independent observations, not two hundred.",
+    why: "A correlation from fifty observations has a standard error near 0.14. Two points a tenth apart have not been shown to differ, and the map is honest only if it says so before you compare them.",
+    careful:
+      "A company with twenty years of prices gets a much wider ring than an industry with fifty. The Years column is the one to read before the sensitivities.",
+  },
   "implied-conviction": {
     term: "What your book claims",
     what: "Run backwards: for each position you already hold, the conviction that its size is implicitly claiming.",

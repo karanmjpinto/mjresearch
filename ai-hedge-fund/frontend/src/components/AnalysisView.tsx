@@ -5,7 +5,9 @@ import { AppNav } from "./AppNav";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { FactorsPanel } from "./FactorsPanel";
 import { InvestorViews } from "./InvestorViews";
+import { MacroMapPanel } from "./MacroMapPanel";
 import { PlanView } from "./PlanView";
+import { RegimesPanel } from "./RegimesPanel";
 import { ChatInput } from "./ChatInput";
 import { useTicker } from "@/lib/ticker-context";
 
@@ -35,23 +37,43 @@ import { useTicker } from "@/lib/ticker-context";
  * it answers instantly while the committee is still thinking.
  */
 
+/** `tip` is the glossary entry behind the blurb. It lives on the tab rather
+ * than in a ternary at the call site: one more tab used to mean one more
+ * nesting level in an expression nobody could read. */
 const TABS = [
   {
     id: "views",
     label: "Investor views",
+    tip: "investor-views",
     blurb: "The same numbers read through named styles, then reconciled.",
   },
   {
     id: "evaluation",
     label: "Evaluation",
+    tip: "evaluation",
     blurb:
       "Which metrics were computed, and whether the prose agrees with them.",
   },
   {
     id: "factors",
     label: "Factors",
+    tip: "factors",
     blurb:
       "Where the company sits on the thirteen JKP factor themes, and what each has paid since 1926.",
+  },
+  {
+    id: "regimes",
+    label: "Regimes",
+    tip: "regimes",
+    blurb:
+      "Which market the company has been in, found by clustering whole return distributions — and whether that division survives being checked.",
+  },
+  {
+    id: "macro",
+    label: "Macro map",
+    tip: "macro-sensitivity",
+    blurb:
+      "Which growth and inflation news the company, its industries and the factor themes have been paid for since 1972.",
   },
 ] as const;
 
@@ -81,6 +103,16 @@ export function AnalysisView() {
   const [seenFactors, setSeenFactors] = useState(tab === "factors");
   useEffect(() => {
     if (tab === "factors") setSeenFactors(true);
+  }, [tab]);
+
+  const [seenRegimes, setSeenRegimes] = useState(tab === "regimes");
+  useEffect(() => {
+    if (tab === "regimes") setSeenRegimes(true);
+  }, [tab]);
+
+  const [seenMacro, setSeenMacro] = useState(tab === "macro");
+  useEffect(() => {
+    if (tab === "macro") setSeenMacro(true);
   }, [tab]);
 
   const setTab = (next: TabId) =>
@@ -192,15 +224,7 @@ export function AnalysisView() {
           </div>
           <p className="mt-xs flex max-w-measure items-center gap-xs text-body-xs text-on-ink-faint">
             {TABS.find((t) => t.id === tab)?.blurb}
-            <InfoTip
-              term={
-                tab === "views"
-                  ? "investor-views"
-                  : tab === "evaluation"
-                    ? "evaluation"
-                    : "factors"
-              }
-            />
+            <InfoTip term={TABS.find((t) => t.id === tab)?.tip ?? "factors"} />
           </p>
         </div>
 
@@ -240,6 +264,36 @@ export function AnalysisView() {
           {seenFactors && (
             <ErrorBoundary>
               <FactorsPanel ticker={ticker} />
+            </ErrorBoundary>
+          )}
+        </div>
+
+        {/* Same treatment as Factors: no model runs here, so there is no long
+          * result worth preserving, and the clustering is a fresh fetch. */}
+        <div
+          role="tabpanel"
+          id="analysis-panel-regimes"
+          aria-labelledby="analysis-tab-regimes"
+          hidden={tab !== "regimes"}
+        >
+          {seenRegimes && (
+            <ErrorBoundary>
+              <RegimesPanel ticker={ticker} />
+            </ErrorBoundary>
+          )}
+        </div>
+
+        {/* The map itself is committed data and draws instantly; only the
+          * company's own point is fetched, so there is nothing to keep warm. */}
+        <div
+          role="tabpanel"
+          id="analysis-panel-macro"
+          aria-labelledby="analysis-tab-macro"
+          hidden={tab !== "macro"}
+        >
+          {seenMacro && (
+            <ErrorBoundary>
+              <MacroMapPanel ticker={ticker} />
             </ErrorBoundary>
           )}
         </div>
