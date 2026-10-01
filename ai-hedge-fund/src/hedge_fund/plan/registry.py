@@ -518,6 +518,125 @@ register(
 )
 
 
+def _regime_clustering(ctx: Any, days: int, k: int, window_days: int, overlap_days: int) -> dict[str, Any]:
+    from hedge_fund.regimes import analyse
+    from hedge_fund.regimes.wasserstein import RegimeError as _RegimeError
+
+    close = _require_close(ctx, days)
+    dates = [str(d)[:10] for d in close.index]
+    try:
+        a = analyse(
+            close.to_numpy(dtype=float),
+            dates,
+            k=k,
+            h1=window_days,
+            h2=min(overlap_days, window_days - 1),
+        )
+    except _RegimeError as exc:
+        raise MetricError(str(exc)) from exc
+
+    calm, turbulent = a.centroids[0], a.centroids[-1]
+    return {
+        "regime": a.current.name,
+        "run_days": a.current_run_days,
+        "regime_share_pct": a.current.share_pct,
+        "regime_volatility_pct": a.current.vol_pct,
+        "calm_volatility_pct": calm.vol_pct,
+        "turbulent_volatility_pct": turbulent.vol_pct,
+        "turbulent_worst_day_pct": turbulent.worst_day_pct,
+        "separation_ratio": _round(a.verdict.ratio, 3),
+        "separation_holds": a.verdict.holds,
+        "windows": len(a.windows),
+    }
+
+
+register(
+    Metric(
+        id="regime_clustering",
+        label="Regime clustering (Wasserstein)",
+        description=(
+            "Groups the price history into k regimes by clustering whole return "
+            "distributions in 1-Wasserstein distance, and reports which one the "
+            "company is in now. Unlike a volatility threshold this uses the full "
+            "shape of returns — tails and skew, not just spread."
+        ),
+        tier="transform",
+        params=(
+            ParamSpec(
+                "days",
+                "integer",
+                "History to cluster over. Needs several years to hold enough windows.",
+                default=2520,
+                minimum=400,
+                maximum=7300,
+            ),
+            ParamSpec(
+                "k",
+                "integer",
+                "How many regimes to fit. Two (calm, turbulent) is the convention.",
+                default=2,
+                minimum=2,
+                maximum=4,
+            ),
+            ParamSpec(
+                "window_days",
+                "integer",
+                "Trading days of returns in each clustered distribution.",
+                default=63,
+                minimum=21,
+                maximum=252,
+            ),
+            ParamSpec(
+                "overlap_days",
+                "integer",
+                "Days successive windows share. Higher gives a denser, smoother fit.",
+                default=42,
+                minimum=0,
+                maximum=240,
+            ),
+        ),
+        outputs=(
+            FieldSpec("regime", "string", "Which regime the latest window falls in"),
+            FieldSpec("run_days", "integer", "Trading days the company has been in it"),
+            FieldSpec("regime_share_pct", "number", "Share of history in this regime", "%"),
+            FieldSpec(
+                "regime_volatility_pct", "number", "Annualized volatility of this regime", "%"
+            ),
+            FieldSpec("calm_volatility_pct", "number", "Annualized volatility, calmest regime", "%"),
+            FieldSpec(
+                "turbulent_volatility_pct",
+                "number",
+                "Annualized volatility, most turbulent regime",
+                "%",
+            ),
+            FieldSpec(
+                "turbulent_worst_day_pct",
+                "number",
+                "Worst single day in the turbulent regime's typical distribution",
+                "%",
+            ),
+            FieldSpec(
+                "separation_ratio",
+                "number",
+                "How much more alike windows are to their own regime than the other. Above 1 means the split is real.",
+            ),
+            FieldSpec(
+                "separation_holds", "boolean", "Whether the separation ratio cleared 1"
+            ),
+            FieldSpec("windows", "integer", "Distributions clustered"),
+        ),
+        fn=_regime_clustering,
+        notes=(
+            "Fitted over the whole window at once, so a label saw the history "
+            "around it. Descriptive — it says where the company has been, not "
+            "what comes next, and must not be treated as a signal. Read "
+            "separation_ratio before quoting the regime: at or below 1 the two "
+            "groups are one population cut in half."
+        ),
+    )
+)
+
+
 def _news_sentiment_summary(ctx: Any) -> dict[str, Any]:
     ns = _snapshot_value(ctx, "news_sentiment") or {}
     if not ns.get("enabled"):
