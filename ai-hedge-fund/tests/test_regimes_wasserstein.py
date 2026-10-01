@@ -58,9 +58,7 @@ def test_w1_matches_scipy():
     for _ in range(20):
         a = rng.normal(0, 0.01, 64)
         b = rng.normal(0.002, 0.03, 64)
-        assert wk.w1(np.sort(a), np.sort(b)) == pytest.approx(
-            wasserstein_distance(a, b), rel=1e-9
-        )
+        assert wk.w1(np.sort(a), np.sort(b)) == pytest.approx(wasserstein_distance(a, b), rel=1e-9)
 
 
 def test_w1_is_a_metric_on_these_samples():
@@ -124,7 +122,6 @@ def test_non_finite_steps_are_dropped_not_propagated():
     """A zero close makes a log-return -inf, which would poison every window."""
     rets = wk.log_returns(np.array([100.0, 101.0, 0.0, 102.0, 103.0]))
     assert np.isfinite(rets).all()
-
 
 
 # ── the fit ───────────────────────────────────────────────────────────────
@@ -315,9 +312,10 @@ def test_route_serves_the_fields_the_tab_draws():
 
 
 def test_route_rejects_an_overlap_that_swallows_the_window():
-    assert client.get(
-        "/api/regimes/SPY", params={"window_days": 30, "overlap_days": 30}
-    ).status_code == 400
+    assert (
+        client.get("/api/regimes/SPY", params={"window_days": 30, "overlap_days": 30}).status_code
+        == 400
+    )
 
 
 def test_route_rejects_a_bad_ticker_before_fetching():

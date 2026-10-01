@@ -518,7 +518,9 @@ register(
 )
 
 
-def _regime_clustering(ctx: Any, days: int, k: int, window_days: int, overlap_days: int) -> dict[str, Any]:
+def _regime_clustering(
+    ctx: Any, days: int, k: int, window_days: int, overlap_days: int
+) -> dict[str, Any]:
     from hedge_fund.regimes import analyse
     from hedge_fund.regimes.wasserstein import RegimeError as _RegimeError
 
@@ -602,7 +604,9 @@ register(
             FieldSpec(
                 "regime_volatility_pct", "number", "Annualized volatility of this regime", "%"
             ),
-            FieldSpec("calm_volatility_pct", "number", "Annualized volatility, calmest regime", "%"),
+            FieldSpec(
+                "calm_volatility_pct", "number", "Annualized volatility, calmest regime", "%"
+            ),
             FieldSpec(
                 "turbulent_volatility_pct",
                 "number",
@@ -620,9 +624,7 @@ register(
                 "number",
                 "How much more alike windows are to their own regime than the other. Above 1 means the split is real.",
             ),
-            FieldSpec(
-                "separation_holds", "boolean", "Whether the separation ratio cleared 1"
-            ),
+            FieldSpec("separation_holds", "boolean", "Whether the separation ratio cleared 1"),
             FieldSpec("windows", "integer", "Distributions clustered"),
         ),
         fn=_regime_clustering,
