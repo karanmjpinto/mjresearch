@@ -25,3 +25,7 @@ frontend/coverage/
 # fixtures they score (evals/fixtures/) ARE tracked, because a moving input
 # makes two runs incomparable, which is the whole point of freezing them.
 evals/results/
+
+# The SPF workbook scripts/refresh_macro_news.py downloads; the news metrics it
+# produces are committed, the 550KB source spreadsheet is not.
+data/macro/.spf-medianlevel.xlsx

@@ -110,6 +110,18 @@ export const SECTIONS: DocSection[] = [
           "The theme and factor returns are Jensen, Kelly and Pedersen's published US series from jkpfactors.com, stored as a dated file; the Sharpe ratios and the in-sample/after-sample split are plain arithmetic over them. The company's tilt is a percentile rank against the cached screen universes. No model reads or writes any of it.",
       },
       {
+        name: "Regimes — clustering whole return distributions",
+        trust: "computed",
+        detail:
+          "Each quarter of returns is treated as a distribution and clustered in Wasserstein distance (Horvath, Issa and Muguruza, SSRN 3947905), rather than being reduced to a volatility number and thresholded. No model is involved and the same inputs always give the same labels. The tab also scores its own split, and scores the volatility rule it replaces on the same windows, so the reader can see whether the regimes are real.",
+      },
+      {
+        name: "Macro map — growth and inflation sensitivities",
+        trust: "computed",
+        detail:
+          "Two quarterly news metrics built from FRED (CPI, real GDP) and the Philadelphia Fed's Survey of Professional Forecasters, stored as a dated file; a point is the partial correlation of a series' twelve-month returns to one metric holding the other fixed. The reference series are Kenneth French's market and industry portfolios and the same JKP themes as the Factors tab; only the company's own point is fetched live. No model touches any of it, and every point carries the standard error its overlapping windows imply.",
+      },
+      {
         name: "Backtests and the out-of-sample test",
         trust: "computed",
         detail:
@@ -225,6 +237,30 @@ export const SECTIONS: DocSection[] = [
     ],
   },
   {
+    id: "regimes",
+    title: "Regimes, and how to tell whether one is real",
+    standfirst:
+      "Clustering whole return distributions instead of thresholding a volatility ratio — and a score that says whether the division holds.",
+    body: [
+      "The Regimes tab under Analysis cuts a company's price history into overlapping windows of about a quarter, treats each window as a distribution of daily returns rather than as a set of summary statistics, and clusters those distributions in 1-Wasserstein distance. The method is Horvath, Issa and Muguruza (SSRN 3947905). In one dimension the optimal transport problem has a closed form — sort two windows and average the absolute differences — so this is ordinary numpy and needs no solver, and a regime's centre is the pointwise median of its members, which is why a single crash window cannot drag it.",
+      "It replaces a rule that compared recent volatility to a longer baseline and cut the ratio at 1.25. That rule used one moment and two thresholds nobody derived. On synthetic paths where the regime changes are planted and therefore known, clustering distributions catches substantially more of them than the ratio does, and the gap widens when returns jump — which is the case real equity returns resemble. Those paths are in tests/test_regimes.py as an accuracy floor, because real market data has no answer key and any accuracy figure quoted on it is either circular or someone pointing at a chart.",
+      "The first thing on the tab is not the regimes but the separation ratio, because any clustering returns clusters: ask k-means for two groups and it produces two, whether or not two exist, and the resulting chart is equally convincing either way. The ratio measures how much more a window resembles its own group than the other, using a maximum mean discrepancy two-sample statistic. Above 1 the split means something; at or below 1 it is one population cut in half. The same score is computed for the volatility rule on identical windows with an identical kernel, and shown beside it — including on the names where the old rule wins.",
+      "Two limits are structural rather than temporary. The clustering is fitted over the whole period at once, so every label was assigned knowing what came after it: this describes where a company has been and must not be backtested on or treated as a signal. And it labels rather than predicts — which regime you are in now says nothing here about which comes next.",
+    ],
+  },
+  {
+    id: "macro",
+    title: "The macro map, and what a wide error bar means",
+    standfirst:
+      "Which growth and inflation surprises a series has been paid for, over fifty years — and why the quadrant is the reading, not the decimal.",
+    body: [
+      "The Macro map tab under Analysis places return series on two axes: sensitivity to US inflation news and to US growth news. The method is AQR's, from Alternative Thinking 2026 Issue 3, which in turn follows Brixton, Maloney and Thapar (2021). Prices already contain the inflation everyone expects, so the axes measure news rather than level, and each news metric blends two imperfect readings of it — how far the year-on-year rate moved from the year before, and how far it landed from the forecast made a year earlier. Each leg is divided by its own standard deviation before averaging, so the blend is not quietly dominated by whichever is more volatile.",
+      "A point is a partial correlation: its inflation sensitivity is measured holding growth news fixed, and the reverse. Simple correlations would not do, because the two metrics are not independent and a series that only ever responded to growth would pick up an inflation reading through the overlap. The four quadrant names describe the environment, not the asset — a series in the stagflation quadrant is one whose good years have been the ones with rising inflation and falling growth.",
+      "The macro series come from FRED and the Philadelphia Fed's Survey of Professional Forecasters, the market and industry returns from Kenneth French's library, and the factor themes from the same JKP file the Factors tab reads; scripts/refresh_macro_news.py writes them into one dated file, so the map draws offline. The company's own point is the only thing fetched live, and a company without about eleven years of monthly prices is told it is too short rather than given a point.",
+      "The honest part is the ring. These are twelve-month returns read off every quarter, so consecutive readings share nine months of the same data: half a century of quarters carries roughly fifty independent observations, and a correlation on fifty observations has a standard error near 0.14. Two points a tenth apart have not been shown to differ. The ring is drawn at that width on whatever is being read, and the Years column says how much history is actually behind each row.",
+    ],
+  },
+  {
     id: "autoresearch",
     title: "Autoresearch, and why almost everything is discarded",
     standfirst:
@@ -284,6 +320,18 @@ export const GAPS: [string, string][] = [
   [
     "Verification has real gaps",
     "Numeric claims are only checked for metrics the verifier knows about. Anything outside that set counts as unverifiable, not verified, and qualitative claims are not checked at all.",
+  ],
+  [
+    "Regime labels look backwards",
+    "The regime clustering is fitted over the whole history at once, so each label used the data around it, including later data. It is descriptive only — it cannot be traded on, and it does not say which regime comes next. Choosing how many regimes to fit is also a setting rather than a finding.",
+  ],
+  [
+    "The macro map is missing the assets that carry the argument",
+    "AQR's exhibit plots commodities, gold, inflation-linked bonds, credit and trend-following — the things that sit right of centre and are the point of drawing the map at all. Each needs a licensed index with no free equivalent back to 1972, so none is here, and what remains is an equity map where almost everything crowds into one quadrant. The Treasury line is also a duration approximation from the constant-maturity yield rather than a real total-return index, and the inflation surprise before 1981 uses the GDP deflator forecast because the survey's CPI question does not go back that far.",
+  ],
+  [
+    "Macro sensitivities are half as certain as they look",
+    "The map is built on overlapping twelve-month windows read off quarterly, so 218 quarters carry about 54 independent years. Every point's standard error is near 0.14 on a full sample and wider for a company with twenty years of prices. The effective count is a plain divide-by-four rather than a Newey–West correction, which is the cruder of the two honest options.",
   ],
   [
     "Scoring bands are absolute",

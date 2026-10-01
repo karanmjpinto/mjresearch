@@ -17,9 +17,11 @@ from hedge_fund.api.routes import (
     knowledge,
     data,
     factors,
+    macro,
     methodology,
     optimize as optimize_route,
     portfolio,
+    regimes,
     research,
     runs,
     screeners,
@@ -93,6 +95,8 @@ app.include_router(decisions.router, prefix="/api/decisions", tags=["decisions"]
 app.include_router(knowledge.router, prefix="/api/knowledge", tags=["knowledge"])
 app.include_router(constraints.router, prefix="/api/constraints", tags=["constraints"])
 app.include_router(factors.router, prefix="/api/factors", tags=["factors"])
+app.include_router(macro.router, prefix="/api/macro", tags=["macro"])
+app.include_router(regimes.router, prefix="/api/regimes", tags=["regimes"])
 
 
 @app.get("/api/health")
