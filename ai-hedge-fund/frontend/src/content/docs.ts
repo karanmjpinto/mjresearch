@@ -116,6 +116,12 @@ export const SECTIONS: DocSection[] = [
           "Each quarter of returns is treated as a distribution and clustered in Wasserstein distance (Horvath, Issa and Muguruza, SSRN 3947905), rather than being reduced to a volatility number and thresholded. No model is involved and the same inputs always give the same labels. The tab also scores its own split, and scores the volatility rule it replaces on the same windows, so the reader can see whether the regimes are real.",
       },
       {
+        name: "Constraint flow — where the investable surface is",
+        trust: "computed",
+        detail:
+          "A Sankey over the curated constraint map whose width is the count of listed companies named against each chokepoint. Nothing in the map carries a dollar figure, so the flow is denominated in companies and the caption says so; each system is ordered by how far past normal its worst-measured leg sits. No model touches it, and a chokepoint with no `normal` to measure against is still drawn, just not ranked.",
+      },
+      {
         name: "Macro map — growth and inflation sensitivities",
         trust: "computed",
         detail:
@@ -315,7 +321,7 @@ export const GAPS: [string, string][] = [
   ],
   [
     "Factor returns end where the authors' last update does",
-    "The JKP file runs to the month printed on the tab, currently December 2024. \"Last 12 months\" means the last twelve in that file, not the twelve before today.",
+    'The JKP file runs to the month printed on the tab, currently December 2024. "Last 12 months" means the last twelve in that file, not the twelve before today.',
   ],
   [
     "Verification has real gaps",
@@ -328,6 +334,10 @@ export const GAPS: [string, string][] = [
   [
     "The macro map is missing the assets that carry the argument",
     "AQR's exhibit plots commodities, gold, inflation-linked bonds, credit and trend-following — the things that sit right of centre and are the point of drawing the map at all. Each needs a licensed index with no free equivalent back to 1972, so none is here, and what remains is an equity map where almost everything crowds into one quadrant. The Treasury line is also a duration approximation from the constant-maturity yield rather than a real total-return index, and the inflation surprise before 1981 uses the GDP deflator forecast because the survey's CPI question does not go back that far.",
+  ],
+  [
+    "The constraint flow counts companies, not money",
+    "A reader who has seen a capex Sankey will expect the ribbons to be dollars. They are not: the constraint map holds no money figure anywhere, so a wide ribbon means many listed ways to play a chokepoint and says nothing about the size of the market behind it. The flow also only draws constraints that have at least one name recorded, so a chokepoint nobody has sourced a company for is absent from the picture even though it is in the map.",
   ],
   [
     "Macro sensitivities are half as certain as they look",

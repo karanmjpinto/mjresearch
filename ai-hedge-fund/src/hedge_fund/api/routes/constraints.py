@@ -23,6 +23,7 @@ from hedge_fund.constraints.catalogue import (
     rejected,
 )
 from hedge_fund.constraints.derive import derive_candidates
+from hedge_fund.constraints.flow import exposure_flow
 from hedge_fund.knowledge.vault import build_index, vault_root
 
 logger = logging.getLogger(__name__)
@@ -99,6 +100,21 @@ async def list_constraints(
             "note": "Looked at, and the evidence said no. Kept so the idea does not come back unexamined.",
         },
     }
+
+
+@router.get("/flow")
+async def constraint_flow() -> dict[str, Any]:
+    """The map as a flow, for the Sankey.
+
+    Registered before `/{constraint_id}` so the literal path wins: FastAPI
+    matches in declaration order, and a dynamic segment declared first would
+    swallow "flow" and answer 404 for a constraint that does not exist.
+    """
+    try:
+        return await run_in_threadpool(exposure_flow)
+    except CatalogueError as exc:
+        logger.error("curated constraint map unusable: %s", exc)
+        raise HTTPException(500, f"the curated constraint map is unusable: {exc}") from exc
 
 
 @router.get("/{constraint_id}")

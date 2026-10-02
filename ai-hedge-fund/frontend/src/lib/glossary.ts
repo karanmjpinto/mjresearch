@@ -302,6 +302,13 @@ export const GLOSSARY = {
     careful:
       "A company with twenty years of prices gets a much wider ring than an industry with fifty. The Years column is the one to read before the sensitivities.",
   },
+  "constraint-flow": {
+    term: "Where the investable surface is",
+    what: "Every listed company named against a chokepoint, flowing from the three systems out to the chokepoint it is named on. The width of a ribbon is how many companies, and each end bar is shaded by how pure that exposure is.",
+    why: "Each system is ordered tightest first, and the ribbons get thinner as you read down. The constraints that are hardest to get around turn out to have the fewest listed ways to own them, which is the opposite of what the card list suggests.",
+    careful:
+      "The width is a count of companies, not money. Nothing in the constraint map carries a dollar figure, so a wide ribbon means many ways to play it, never a large market.",
+  },
   "implied-conviction": {
     term: "What your book claims",
     what: "Run backwards: for each position you already hold, the conviction that its size is implicitly claiming.",

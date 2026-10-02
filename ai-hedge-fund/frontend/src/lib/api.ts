@@ -1228,6 +1228,34 @@ export interface MacroPointResponse {
   months_available: number;
 }
 
+/** One chokepoint as a flow terminal. `value` is named companies, not money. */
+export interface FlowConstraint {
+  id: string;
+  label: string;
+  system: string;
+  value: number;
+  /** Worst measured leg as a multiple of normal; null when nothing carries a `normal`. */
+  tightness: number | null;
+  bands: { pure: number; major: number; minor: number };
+  share_pct: number | null;
+  pricing_power: string | null;
+}
+
+export interface ConstraintFlowResponse {
+  unit: string;
+  total: number;
+  systems: Array<{
+    id: string;
+    label: string;
+    value: number;
+    constraints: FlowConstraint[];
+  }>;
+  bands: Array<{ id: string; label: string; value: number }>;
+  /** Chokepoints with no `normal` to measure against — named, never hidden. */
+  unmeasured: string[];
+  note: string;
+}
+
 export interface FactorProfile {
   ticker: string;
   in_reference: boolean;
@@ -1235,13 +1263,17 @@ export interface FactorProfile {
   sector: string | null;
   reference: {
     names: number;
-    caches: { screen: string; universe: string; built_at: string; count: number }[];
+    caches: {
+      screen: string;
+      universe: string;
+      built_at: string;
+      count: number;
+    }[];
   };
   min_peers: number;
   characteristics: CharacteristicExposure[];
   themes: ThemeExposure[];
 }
-
 
 export const api = {
   health: () => fetchJSON<{ status: string }>("/health"),
@@ -1363,6 +1395,10 @@ export const api = {
       `/constraints${system ? `?system=${encodeURIComponent(system)}` : ""}`,
     ),
 
+  /** The map as a flow. Computed from the committed catalogue. */
+  getConstraintFlow: () =>
+    fetchJSON<ConstraintFlowResponse>("/constraints/flow"),
+
   getConstraintCandidates: (id: string) =>
     fetchJSON<ConstraintCandidates>(
       `/constraints/${encodeURIComponent(id)}/candidates`,
@@ -1448,7 +1484,8 @@ export const api = {
     const q = new URLSearchParams();
     if (opts.universe) q.set("universe", opts.universe);
     if (opts.limit != null) q.set("limit", String(opts.limit));
-    if (opts.passingOnly != null) q.set("passing_only", String(opts.passingOnly));
+    if (opts.passingOnly != null)
+      q.set("passing_only", String(opts.passingOnly));
     return fetchJSON<ScreenResults>(
       `/screeners/${encodeURIComponent(screen)}/results?${q}`,
     );
@@ -1473,7 +1510,12 @@ export const api = {
   /** Regime clustering. Computed, so no spend guard and no model. */
   getRegimes: (
     ticker: string,
-    opts: { days?: number; k?: number; window_days?: number; overlap_days?: number } = {},
+    opts: {
+      days?: number;
+      k?: number;
+      window_days?: number;
+      overlap_days?: number;
+    } = {},
   ) => {
     const q = new URLSearchParams(
       Object.entries(opts)

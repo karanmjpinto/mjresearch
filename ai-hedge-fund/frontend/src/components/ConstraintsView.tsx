@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { AppNav } from "@/components/AppNav";
+import { ConstraintFlow } from "@/components/ConstraintFlow";
 import {
   api,
   type ConstraintSummary,
@@ -363,8 +364,17 @@ export function ConstraintsView() {
           </div>
         )}
 
+        {/* The shape of the map before the list of it. Ordered tightest first,
+         * which is what shows that the hardest constraints to get around have
+         * the fewest listed ways to own them. */}
         {d && (
-          <div className="mt-xl grid gap-2xl lg:grid-cols-2">
+          <section aria-label="The map as a flow" className="mt-xl">
+            <ConstraintFlow />
+          </section>
+        )}
+
+        {d && (
+          <div className="mt-2xl grid gap-2xl lg:grid-cols-2">
             <section aria-label="Researched constraints">
               <div className="border-b border-ink-line pb-xs">
                 <h2 className="font-display text-label uppercase tracking-label text-cadmium">
