@@ -281,6 +281,20 @@ export const GLOSSARY = {
     careful:
       "It is a median of the windows in the regime, not an average, so a single crash window cannot drag it. That is deliberate, and it means the curve can sit away from the middle of the scatter cloud.",
   },
+  "breadth-divergence": {
+    term: "Breadth divergence",
+    what: "The index at or near a new high while fewer than half its members are above their own 200-day average — the average rising on a shrinking number of shoulders.",
+    why: "It is the oldest warning in technical analysis, and it is cheap to check: the arithmetic is a count, not a model. Whether it predicts anything is a separate question, which the screen answers separately.",
+    careful:
+      "Breadth here is measured across the index's *current* members, so every company that fell out of the index after falling is missing from the history. Past breadth is flattered, and past divergences look rarer and milder than they were.",
+  },
+  "breadth-base-rate": {
+    term: "What followed a divergence",
+    what: "The index's median return over the following three, six and twelve months, measured once per episode rather than once per signal day, against the same figure measured on every day in the sample.",
+    why: "A divergence chart is extremely convincing to look at, which is exactly why it needs a base rate underneath it. This is the number that says whether the picture has been worth acting on.",
+    careful:
+      "The sample is single to low double digits of episodes, and starts in 2004 — the divergences the warning was built on, in 1929, 1962, 1973 and 1987, are outside it. This does not test the original claim.",
+  },
   "macro-sensitivity": {
     term: "Macro map",
     what: "Where a return series has sat against two things: US inflation news and US growth news. Right of centre means its good years came when inflation surprised upwards; above centre, when growth did.",

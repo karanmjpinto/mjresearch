@@ -14,6 +14,11 @@ import {
   RegistrationMark,
   RunTape,
 } from "./PixelArtifacts";
+import {
+  ModelBoundary,
+  PipelineLadder,
+  SameNameTwoBooks,
+} from "./ConceptDiagrams";
 
 /**
  * Public landing page — raw canvas, thrown paint, pixel display type, read
@@ -31,157 +36,118 @@ import {
  * oversells its certainty is worse than one that states plainly what it cannot do.
  */
 
-const FEATURES = [
+/**
+ * The three claims the page stands on, given room.
+ *
+ * There were eleven of these, each carrying a forty-word paragraph, and the
+ * section's own introduction admitted that "the first two are the whole
+ * argument". Eleven equal cards is not a list of features — it is a refusal to
+ * decide which ones matter, and it pushed the argument below the fold. Three
+ * lead, eight follow as one line each.
+ */
+const LEAD = [
   {
     n: "01",
-    hue: "var(--oxide-paper)",
-    label: "Deterministic numbers",
-    title: "The model picks the metrics. It never computes them.",
-    body: "A question compiles into a typed plan — a DAG of registered Python metrics. The planner chooses what to measure and never sees a value. The executor computes. A second pass writes prose over results it did not produce.",
+    hue: "var(--cobalt-paper)",
+    label: "Where figures come from",
+    title: "The model picks the metrics. It never works them out.",
+    body: "It chooses what to measure from a fixed list, then plain Python computes it. The planner never sees a value.",
   },
   {
     n: "02",
-    hue: "var(--cobalt-paper)",
+    hue: "var(--oxide-paper)",
     label: "Verification",
-    title: "Every number in the prose is checked.",
-    body: "A deterministic pass re-reads the finished thesis, extracts each numeric claim and compares it against the snapshot. Claims it cannot map are reported unverifiable — never as passing.",
+    title: "Every number in the thesis gets checked.",
+    body: "A second pass matches each figure against the data. What it cannot match it labels unverified — never passed.",
   },
   {
     n: "03",
-    hue: "var(--cadmium-paper)",
-    label: "Reproducibility",
-    title: "Runs are recorded and diffable.",
-    body: "Each analysis persists its snapshot, prompts, model parameters and output. Two runs with identical inputs should agree; when they do not, the divergence is surfaced rather than averaged away.",
+    hue: "var(--verdigris-paper)",
+    label: "Sized against your book",
+    title: "Whether to own it depends on what you already own.",
+    body: "A candidate is weighed against your real portfolio: its resulting weight, its overlap, and the effect on total swing.",
   },
+];
+
+/** The other eight, at one line each — enough to tell you it is there. */
+const MORE = [
   {
     n: "04",
-    hue: "var(--verdigris-paper)",
-    label: "Provenance",
-    title: "You can see which source answered.",
-    body: "Providers disagree on split adjustment, fiscal alignment and currency. Every fetch records who answered, whether it came from cache, and how the payload verified — frequency, coverage, units.",
+    title: "Runs you can replay",
+    body: "Every run keeps its data, prompts and settings, so two runs can be compared.",
   },
   {
     n: "05",
-    hue: "var(--oxide-paper)",
-    label: "Sized against your book",
-    title: "Whether to own it depends on what you already hold.",
-    body: "A candidate is sized against the existing portfolio, not in isolation: resulting weight, correlation to what you hold, concentration, and the effect on portfolio volatility. A volatile name can lower total risk if it moves differently.",
+    title: "You see which source answered",
+    body: "Providers disagree. Every fetch records who answered and how it checked out.",
   },
   {
     n: "06",
-    hue: "var(--cadmium-paper)",
-    label: "Decisions on the record",
-    title: "The call is kept with the book it was made against.",
-    body: "Weights and correlations move, so a decision reviewed a year later is judged against the portfolio as it stood — not against today's, which would mark every past call using information nobody had.",
+    title: "Decisions kept in context",
+    body: "A year on, a call is reviewed against the portfolio as it stood that day.",
   },
   {
     n: "07",
-    hue: "var(--cadmium-paper)",
-    label: "Screens you consult",
-    title: "Three screens, already run.",
-    body: "A screen is a list you consult, not a job you commission. Results for the multibagger, compounder and Bolton contrarian screens are computed ahead of time and shown on open, dated — because a screen built on quarterly fundamentals is wrong the moment a company reports.",
+    title: "Three screens, already run",
+    body: "Multibagger, compounder and Bolton contrarian — computed ahead of time, and dated.",
   },
   {
     n: "08",
-    hue: "var(--cobalt-paper)",
-    label: "Fifteen investors",
-    title: "You can see the standard being applied.",
-    body: "Each investor carries the concrete tests they are known for, shown next to their verdict and drawn from the same profile that builds their prompt. Seven speak by default, picked to disagree for different reasons. Read the spread, not the average.",
+    title: "Fifteen investors, named tests",
+    body: "Each carries the tests they are known for. Seven speak by default. Read the spread.",
   },
   {
     n: "09",
-    hue: "var(--verdigris-paper)",
-    label: "Autoresearch",
-    title: "Overnight experiments that are hard on themselves.",
-    body: "Proposes one strategy at a time and judges it on a window it never saw, with the bar rising as more things are tried — because searching enough variants against one price history will always turn something up. Discarded runs stay on the log.",
+    title: "Overnight experiments",
+    body: "One strategy at a time, judged on a window it never saw. Failures stay on the log.",
   },
   {
     n: "10",
-    hue: "var(--oxide-paper)",
-    label: "Methodology memory",
-    title: "Corrections of method, not of answers.",
-    body: "Teach it how to approach a problem and later runs apply it. Notes containing prices or scores are rejected — a stored number would be replayed onto runs where it is no longer true.",
+    title: "It remembers method, not answers",
+    body: "Teach it how to approach a problem. Notes containing numbers are rejected.",
   },
   {
     n: "11",
-    hue: "var(--cobalt-paper)",
-    label: "Local first",
-    title: "Runs on your machine. No API keys.",
-    body: "Ollama serves the model locally, market data comes from keyless providers by default, and the portfolio lives in a SQLite file you own. Optional keys add coverage; none are required.",
+    title: "Local first, no API keys",
+    body: "Ollama serves the model and the portfolio lives in a file you own.",
   },
 ];
 
-const PIPELINE = [
-  {
-    step: "Snapshot",
-    detail: "Market data fetched once, frozen, content-addressed",
-    hue: "var(--aluminium)",
-  },
-  {
-    step: "Planner",
-    detail: "Chooses metrics from a fixed catalog — sees no values",
-    hue: "var(--cobalt-paper)",
-  },
-  {
-    step: "Executor",
-    detail: "Plain Python computes every figure",
-    hue: "var(--cadmium-paper)",
-  },
-  {
-    step: "Narrator",
-    detail: "Writes prose over computed results only",
-    hue: "var(--cobalt-paper)",
-  },
-  {
-    step: "Harness",
-    detail: "Validates, verifies claims, overrides the conviction score",
-    hue: "var(--oxide-paper)",
-  },
-  {
-    step: "Record",
-    detail: "Persisted for replay and comparison",
-    hue: "var(--aluminium)",
-  },
-  {
-    step: "Size",
-    detail: "Weighted against the book you already hold",
-    hue: "var(--oxide-paper)",
-  },
-  {
-    step: "Decide",
-    detail: "The call kept with the portfolio context behind it",
-    hue: "var(--cadmium-paper)",
-  },
-];
-
+/**
+ * Kept at the same weight as the claims, and cut to the same length.
+ *
+ * The honesty was already the best thing on this page; the only problem was
+ * that each admission ran to forty words and the longest one — the catalyst
+ * note — ran to fifty. They say the same things in half the space.
+ */
 const LIMITATIONS = [
   [
-    "This is not investment advice",
-    "A research tool. Output is generated by a language model over public data and can be wrong in ways that read perfectly plausibly. Nothing here is a recommendation to buy or sell anything.",
+    "Not investment advice",
+    "A model wrote this over public data. It can be wrong in ways that read perfectly well. Nothing here is a recommendation.",
   ],
   [
-    "Verification has real gaps",
-    "Numeric claims are only checked for metrics the verifier knows about. Anything outside that set counts as unverifiable, not verified. Qualitative claims are not checked at all.",
+    "The checking has gaps",
+    "Only figures the checker knows about get matched. The rest are marked unverified. Qualitative claims are not checked at all.",
   ],
   [
-    "Scoring bands are absolute",
-    "Valuation scoring uses fixed thresholds rather than sector-relative ones, so a utility and a software company are judged on the same scale.",
+    "One scale for every sector",
+    "Valuation uses fixed thresholds, so a utility and a software company are marked against the same ruler.",
   ],
   [
-    "Determinism is bounded",
-    "Sampling is greedy and seeded and every input is recorded, but providers do not guarantee identical output. Moving arithmetic out of the model narrows this — it does not eliminate it.",
+    "Repeatability has a limit",
+    "Inputs are pinned and recorded, but no provider promises identical output. Moving the arithmetic out of the model narrows the gap rather than closing it.",
   ],
   [
-    "Data quality is inherited",
-    "Fundamentals come from third-party providers that disagree with each other and are sometimes stale. Provenance tells you which source answered; it cannot tell you that source was right.",
+    "The data is only as good as its source",
+    "Providers disagree with each other and go stale. We can tell you who answered. We cannot tell you they were right.",
   ],
   [
     "No screen checks a catalyst",
-    "A passing name is a candidate for a question, not an answer to one. The Bolton screen is explicit about it — his framework's catalyst section cannot be read from a data feed, so it is not scored and every row says so.",
+    "A passing name is a candidate for a question, not an answer. The Bolton screen says so on every row.",
   ],
   [
     "Committee mode is not audited",
-    "Persona analyses run with full freedom rather than as weightings over computed dimensions, so their conviction scores are not reproducible the way the plan pipeline's are.",
+    "The fifteen investors speak freely rather than scoring fixed dimensions, so their conviction numbers are not repeatable the way the pipeline's are.",
   ],
 ];
 
@@ -192,6 +158,7 @@ const CHAPTERS = [
   { id: "features", label: "Work" },
   { id: "architecture", label: "Method" },
   { id: "limitations", label: "Limits" },
+  { id: "door", label: "Door" },
   { id: "close", label: "Open" },
 ];
 
@@ -470,7 +437,11 @@ export function Landing() {
                   key={c.id}
                   type="button"
                   onClick={() => goTo(c.id)}
-                  className="hidden text-on-canvas transition-colors hover:text-oxide-paper sm:block"
+                  /* From `lg`, not `sm`. Five chapter links plus Reference
+                   * plus the Open button overran 768px and clipped the button
+                   * off the right edge — and these links drive the sideways
+                   * read, which only engages at `lg` anyway. */
+                  className="hidden text-on-canvas transition-colors hover:text-oxide-paper lg:block"
                 >
                   {c.label}
                 </button>
@@ -540,20 +511,20 @@ export function Landing() {
                     Local-first equity research
                   </Marker>
                   <h1 className="mt-lg font-display text-[clamp(38px,6vw,72px)] leading-[1.02] tracking-tight text-enamel">
-                    Numbers from code.
+                    The model writes
                     <br />
-                    <span className="text-oxide-paper">Not from the model.</span>
-                  </h1>
-                  <p className="mt-xl max-w-[58ch] text-body-lg text-on-canvas-soft">
-                    Most AI research tools hand a language model a pile of data
-                    and ask for a verdict, which makes every figure in the
-                    answer a token prediction. This one compiles the question
-                    into a typed program,{" "}
-                    <span className="marker">
-                      computes the figures in Python
+                    the words.
+                    <br />
+                    <span className="text-oxide-paper">
+                      Code does the maths.
                     </span>
-                    , and lets the model write only over results it did not
-                    produce.
+                  </h1>
+                  <p className="mt-xl max-w-[48ch] text-body-lg text-on-canvas-soft">
+                    Ask most AI research tools a question and every figure in
+                    the answer is a guess dressed as a fact. Here the figures
+                    are{" "}
+                    <span className="marker">worked out in Python first</span>,
+                    and the model only gets to describe them.
                   </p>
                   <div className="mt-2xl flex flex-wrap items-center gap-sm font-display text-label uppercase tracking-marker">
                     <Link
@@ -571,6 +542,14 @@ export function Landing() {
                       Source
                     </a>
                   </div>
+                  {/* The old page put "Open the app" on every screen and did
+                    * not mention until chapter five that there is no way in
+                    * without a link. Saying it here costs one line and saves
+                    * every cold visitor a locked door. */}
+                  <p className="mt-md text-body-xs text-on-canvas-faint">
+                    The app needs an invite link. The reference below is open to
+                    everyone.
+                  </p>
                 </div>
 
                 {/* The argument above, as something you can read off a slip of
@@ -611,32 +590,28 @@ export function Landing() {
               <section id="about" className={band()}>
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
                   <div className="mb-md h-[3px] w-16 bg-cobalt-paper" />
-                  <Marker hue="var(--cobalt-paper)">Chapter one</Marker>
+                  <Marker hue="var(--cobalt-paper)">One</Marker>
                   <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
-                    What this is
+                    A research desk
+                    <br />
+                    that shows its work
                   </h2>
+                  <p className="mt-lg max-w-[34ch] text-body-sm text-on-canvas-soft">
+                    The aim is not a cleverer model. It is a frame around one
+                    tight enough that you can check it, repeat it and argue with
+                    it.
+                  </p>
                 </div>
+                {/* Sized so the whole diagram lands inside one 1440px screen
+                  * beside its heading column. A diagram whose last stage sits
+                  * off the fold is a list again. */}
                 <div
                   className={clsx(
-                    "gap-lg",
-                    horizontal
-                      ? "flex w-[720px] shrink-0"
-                      : "grid md:grid-cols-2",
+                    "gap-xl",
+                    horizontal ? "flex w-[860px] shrink-0 flex-col" : "flex flex-col",
                   )}
                 >
-                  <p className="text-body text-on-canvas-soft">
-                    A research and portfolio workstation for a single investor.
-                    It pulls market data from several providers with fallback
-                    and caching, keeps a persistent book in SQLite, runs
-                    rule-based backtests and portfolio construction, and writes
-                    investment theses with a language model running locally.
-                  </p>
-                  <p className="text-body text-on-canvas-soft">
-                    The goal is not a smarter model. It is a harness around the
-                    model good enough that its output can be checked, repeated
-                    and argued with — so when an answer is wrong you can tell,
-                    and fix the method rather than the number.
-                  </p>
+                  <ModelBoundary />
                 </div>
                 <GlyphPlate className="hidden rotate-1 self-start lg:block" />
               </section>
@@ -645,35 +620,38 @@ export function Landing() {
               <section id="features" className={band()}>
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
                   <div className="mb-md h-[3px] w-16 bg-oxide-paper" />
-                  <Marker hue="var(--oxide-paper)">Chapter two</Marker>
+                  <Marker hue="var(--oxide-paper)">Two</Marker>
                   <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
-                    What it does
+                    Three claims,
+                    <br />
+                    then the fine print
                   </h2>
                   <p className="mt-lg max-w-[34ch] text-body-sm text-on-canvas-soft">
-                    Eleven things, in the order they matter. The first two are
-                    the whole argument; the rest are what it takes to make them
-                    hold up in practice.
+                    If you read only the three below, you have the argument.
+                    Eight more follow at a line each.
                   </p>
                 </div>
+
+                {/* The three that carry the page. */}
                 <div
                   className={clsx(
                     horizontal
                       ? "flex gap-lg"
-                      : "grid gap-px bg-enamel/15 sm:grid-cols-2",
+                      : "grid gap-px bg-enamel/15 sm:grid-cols-3",
                   )}
                 >
-                  {FEATURES.map((f) => (
+                  {LEAD.map((f) => (
                     <article
                       key={f.n}
                       className={clsx(
                         "group border-t-2 bg-canvas/90 p-xl backdrop-blur-[1px] transition-colors duration-300 ease-out-quart hover:bg-canvas-deep",
-                        horizontal && "w-[340px] shrink-0",
+                        horizontal && "w-[330px] shrink-0",
                       )}
                       style={{ borderTopColor: f.hue }}
                     >
                       <div className="flex items-baseline gap-sm">
                         <span
-                          className="font-display text-[28px] leading-none transition-transform duration-300 ease-out-expo group-hover:-translate-y-0.5"
+                          className="font-display text-display-sm leading-none transition-transform duration-300 ease-out-expo group-hover:-translate-y-0.5"
                           style={{ color: f.hue }}
                         >
                           {f.n}
@@ -683,11 +661,45 @@ export function Landing() {
                       <h3 className="mt-md text-title-sm font-semibold text-enamel">
                         {f.title}
                       </h3>
-                      <p className="mt-sm max-w-[52ch] text-body-sm text-on-canvas-soft">
+                      <p className="mt-sm max-w-measure-sm text-body-sm text-on-canvas-soft">
                         {f.body}
                       </p>
                     </article>
                   ))}
+                </div>
+
+                {/* Claim 03, drawn — the one idea on the page that a reader
+                  * cannot picture from a sentence. */}
+                <div className={clsx(horizontal && "w-[520px] shrink-0")}>
+                  <Marker hue="var(--on-canvas-faint)">Claim 03, drawn</Marker>
+                  <div className="mt-md">
+                    <SameNameTwoBooks />
+                  </div>
+                </div>
+
+                {/* The remaining eight, deliberately quieter. */}
+                <div className={clsx(horizontal && "w-[440px] shrink-0")}>
+                  <Marker hue="var(--on-canvas-faint)">Also here</Marker>
+                  <ul className="mt-md">
+                    {MORE.map((f) => (
+                      <li
+                        key={f.n}
+                        className="grid grid-cols-[auto_1fr] gap-x-md border-b border-enamel/12 py-sm first:border-t first:border-enamel/12"
+                      >
+                        <span className="font-display text-label tabular text-on-canvas-faint">
+                          {f.n}
+                        </span>
+                        <div>
+                          <h3 className="text-body-sm font-semibold text-enamel">
+                            {f.title}
+                          </h3>
+                          <p className="mt-2xs max-w-measure-sm text-body-xs text-on-canvas-soft">
+                            {f.body}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </section>
 
@@ -695,63 +707,24 @@ export function Landing() {
               <section id="architecture" className={band()}>
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
                   <div className="mb-md h-[3px] w-16 bg-cadmium-paper" />
-                  <Marker hue="var(--cadmium-paper)">Chapter three</Marker>
+                  <Marker hue="var(--cadmium-paper)">Three</Marker>
                   <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
                     How a question
                     <br />
                     becomes an answer
                   </h2>
                   <p className="mt-lg max-w-[34ch] text-body-sm text-on-canvas-soft">
-                    The model appears twice, in two narrow roles, and is never
-                    the source of a figure. When the plan computes a conviction
-                    score it replaces whatever the narrator wrote — and says so.
+                    Eight stages. The model holds two of them. When the plan
+                    works out a conviction score it replaces whatever the model
+                    wrote — and says so.
                   </p>
                 </div>
 
-                {/* Sideways the pipeline is a timeline on a rule, which is what
-                 * it always was; stacked it falls back to a numbered list. */}
-                <ol
-                  className={clsx(horizontal ? "flex items-start" : "w-full")}
-                >
-                  {PIPELINE.map((p, i) => (
-                    <li
-                      key={p.step}
-                      className={clsx(
-                        horizontal
-                          ? "w-[210px] shrink-0 border-t-2 border-enamel/25 pt-md"
-                          : "grid grid-cols-[auto_1fr] items-baseline gap-x-md gap-y-2xs border-b border-enamel/12 py-md first:border-t first:border-enamel/12 sm:grid-cols-[auto_140px_1fr]",
-                      )}
-                    >
-                      <span
-                        className={clsx(
-                          "font-display text-label tabular",
-                          horizontal && "block pr-lg",
-                        )}
-                        style={{ color: p.hue }}
-                      >
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span
-                        className={clsx(
-                          "font-display text-body-xs uppercase tracking-label text-enamel",
-                          horizontal && "mt-2xs block pr-lg",
-                        )}
-                      >
-                        {p.step}
-                      </span>
-                      <span
-                        className={clsx(
-                          "text-body-sm text-on-canvas-soft",
-                          horizontal
-                            ? "mt-sm block pr-lg"
-                            : "col-start-2 sm:col-start-3",
-                        )}
-                      >
-                        {p.detail}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
+                {/* The ladder carries the actor on every rung, so the claim
+                  * in the heading beside it is visible rather than asserted. */}
+                <div className={clsx(horizontal && "w-[620px] shrink-0")}>
+                  <PipelineLadder />
+                </div>
                 <DensityPlate className="hidden -rotate-1 self-start lg:block" />
               </section>
 
@@ -759,13 +732,14 @@ export function Landing() {
               <section id="limitations" className={band()}>
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
                   <div className="mb-md h-[3px] w-16 bg-oxide-paper" />
-                  <Marker hue="var(--oxide-paper)">Chapter four</Marker>
+                  <Marker hue="var(--oxide-paper)">Four</Marker>
                   <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
-                    What it does not do
+                    {LIMITATIONS.length} ways
+                    <br />
+                    this can be wrong
                   </h2>
                   <p className="mt-lg max-w-[34ch] text-body-sm text-on-canvas-soft">
-                    Read this part. It carries the same weight as the chapter
-                    before it.
+                    Read this part. It carries the same weight as the claims.
                   </p>
                 </div>
                 <div
@@ -784,6 +758,73 @@ export function Landing() {
                       )}
                     >
                       <span className="font-display text-label tabular text-oxide-paper">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <div>
+                        <h3 className="text-title-xs font-semibold text-enamel">
+                          {title}
+                        </h3>
+                        <p className="mt-2xs max-w-[52ch] text-body-sm text-on-canvas-soft">
+                          {body}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* The door.
+                *
+                * Carries a chapter of its own rather than a line in the
+                * footer, because for most people reading this page it is the
+                * operative fact: everything described above happens somewhere
+                * they cannot currently go. Stating that plainly is more
+                * convincing than describing capability and quietly withholding
+                * it — and the honest reason is money, not mystique, so the
+                * chapter says so. */}
+              <section id="door" className={band()}>
+                <div className={clsx(horizontal && "w-[360px] shrink-0")}>
+                  <div className="mb-md h-[3px] w-16 bg-cadmium-paper" />
+                  <Marker hue="var(--cadmium-paper)">Five</Marker>
+                  <h2 className="mt-sm font-display text-chapter tracking-tight text-enamel">
+                    Why there is no
+                    <br />
+                    sign-up button
+                  </h2>
+                  <p className="mt-lg max-w-[34ch] text-body-sm text-on-canvas-soft">
+                    No form, no waitlist. Three reasons, and none of them is
+                    mystique.
+                  </p>
+                </div>
+                <div
+                  className={clsx(
+                    horizontal
+                      ? "flex gap-xl"
+                      : "grid gap-x-2xl gap-y-xl md:grid-cols-3",
+                  )}
+                >
+                  {[
+                    [
+                      "One link, once",
+                      "A single-use link, sent by someone already inside. It opens one browser, then it is spent. Nobody follows you in on it.",
+                    ],
+                    [
+                      "Because a seat costs money",
+                      "Every run calls a paid model on my account. A seat is a standing bill with a monthly allowance against a name — which is why this is twenty people, not twenty thousand.",
+                    ],
+                    [
+                      "Nothing is hidden",
+                      "This page and the full reference are open to everyone, and the reference labels every capability as computed or merely written. The door controls who can spend, not who can read.",
+                    ],
+                  ].map(([title, body], i) => (
+                    <div
+                      key={title}
+                      className={clsx(
+                        "grid grid-cols-[auto_1fr] gap-md",
+                        horizontal && "w-[300px] shrink-0",
+                      )}
+                    >
+                      <span className="font-display text-label tabular text-cadmium-paper">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <div>

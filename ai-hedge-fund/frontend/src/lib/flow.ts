@@ -156,6 +156,7 @@ export const OTHER_DESTINATIONS: readonly {
   { to: "/constraints", key: "constraints", label: "Find a constraint" },
   { to: "/dashboard", key: "home", label: "Dashboard" },
   { to: "/screeners", key: "screeners", label: "Screeners" },
+  { to: "/breadth", key: "breadth", label: "Market breadth" },
   { to: "/portfolio", key: "portfolio", label: "Portfolio" },
   { to: "/optimize", key: "optimize", label: "Optimize" },
   { to: "/autoresearch", key: "autoresearch", label: "Autoresearch" },
