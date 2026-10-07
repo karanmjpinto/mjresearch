@@ -19,7 +19,13 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 
-from hedge_fund.breadth import BreadthDataMissing, analyse, available, read
+from hedge_fund.breadth import (
+    BreadthDataMissing,
+    BreadthUniverseInvalid,
+    analyse,
+    available,
+    read,
+)
 from hedge_fund.breadth.store import REFRESH
 
 logger = logging.getLogger(__name__)
@@ -41,6 +47,11 @@ def breadth(
 ) -> dict[str, Any]:
     try:
         stored = read(universe)
+    except BreadthUniverseInvalid as exc:
+        # 422, not 503: a malformed name is the caller's mistake, and answering
+        # 503 would make a rejected name indistinguishable from a universe that
+        # exists but has no cache yet — a file-existence oracle.
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except BreadthDataMissing as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 

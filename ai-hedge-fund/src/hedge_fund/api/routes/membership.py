@@ -60,11 +60,13 @@ async def join(
     namespace, join attempts and model runs would share one hourly bucket, so
     clicking an invite link twice would eat the member's own model allowance
     and a brute-forcer could exhaust the allowance of everyone behind the same
-    NAT.
+    NAT. Keyed on `trusted_client_ip` rather than the usual helper, because
+    here the limit is the security control and the usual helper reads a header
+    the caller can forge.
     """
     limit = settings.member_join_attempts_per_hour
     if limit > 0:
-        over, retry = guards.over_limit(f"join:{guards.client_ip(request)}", limit)
+        over, retry = guards.over_limit(f"join:{guards.trusted_client_ip(request)}", limit)
         if over:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,

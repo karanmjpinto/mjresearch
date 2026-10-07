@@ -97,14 +97,15 @@ class InviteRejected(Exception):
     """An invite could not be used, with a reason the holder can act on.
 
     The reason is deliberately specific. "Invalid" tells someone holding a
-    forwarded link nothing useful, and the three cases have three different
-    remedies: ask for a new one, ask for a new one, or you were never the
-    intended recipient.
+    forwarded link nothing useful, and the four cases have different remedies:
+    ask for a new one (used, expired), you were never the intended recipient
+    (unknown), or the owner took it back and asking again may be the wrong move
+    (withdrawn).
     """
 
     def __init__(self, reason: str, message: str) -> None:
         super().__init__(message)
-        #: One of: used, expired, unknown.
+        #: One of: used, expired, withdrawn, unknown.
         self.reason = reason
         self.message = message
 
@@ -156,7 +157,15 @@ def consume_invite(db: Session, secret: str) -> tuple[Member, str]:
                 "this was meant for you, ask for a fresh link.",
             )
         if row.revoked_at is not None:
-            raise InviteRejected("used", "That invite was withdrawn before it was used.")
+            # Its own reason, not "used". The screen maps reason to a heading,
+            # and "already been opened" over a body saying it was withdrawn
+            # contradicts itself — then tells the holder to ask for a fresh
+            # link for an invite the owner deliberately took back.
+            raise InviteRejected(
+                "withdrawn",
+                "That invite was withdrawn before it was used. Whoever sent it "
+                "took it back, so asking for another may not be the next step.",
+            )
         raise InviteRejected(
             "expired",
             "That invite has expired. Ask for a new one — they are short-lived on purpose.",

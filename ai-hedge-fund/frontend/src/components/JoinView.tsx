@@ -32,6 +32,7 @@ type State =
 const HEADING: Record<string, string> = {
   used: "That invite has already been opened",
   expired: "That invite has expired",
+  withdrawn: "That invite was withdrawn",
   unknown: "That is not an invite to this site",
   rate_limited: "Too many attempts",
 };
@@ -153,7 +154,10 @@ export function JoinView() {
              * a request nobody reads. Shown only for the two reasons where a
              * fresh link is the fix; an unknown token means they were never
              * the intended recipient, and telling them to ask again would be
-             * sending them to someone who did not invite them. */}
+             * sending them to someone who did not invite them. And a
+             * withdrawn invite was taken back deliberately, so telling the
+             * holder to ask again would send them to argue with the person who
+             * just revoked it. */}
             {(state.reason === "used" || state.reason === "expired") && (
               <p className="mt-lg max-w-[60ch] border-l-2 border-cadmium pl-md text-[15px] leading-relaxed text-on-ink">
                 Go back to whoever sent you this and ask them to mint a new

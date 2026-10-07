@@ -184,6 +184,11 @@ class Settings(BaseSettings):
     #: Join attempts allowed per IP per hour. Without this the endpoint is a
     #: token-guessing oracle however long the token.
     member_join_attempts_per_hour: int = 20
+    #: Whether the session cookie carries `Secure`. True in any real
+    #: deployment. Set False for local development over plain HTTP, where a
+    #: Secure cookie is never sent back and the session silently fails to
+    #: stick. None falls back to the scheme the server actually observed.
+    member_cookie_secure: bool | None = True
     #: Origin used when printing invite links from the CLI, e.g.
     #: https://investing.themariojude.com. Falls back to FRONTEND_URL.
     public_base_url: str | None = None

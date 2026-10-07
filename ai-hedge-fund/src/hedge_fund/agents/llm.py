@@ -291,10 +291,17 @@ async def call_json(
     — see :func:`model_for_role`. The resolved name is recorded on the result, so
     a run mixing models stays attributable stage by stage.
 
-    Raises :class:`LLMUnavailable` when the provider is unreachable,
+    Raises :class:`hedge_fund.members.ledger.BudgetExhausted` when the calling
+    member has spent their monthly allowance,
+    :class:`LLMUnavailable` when the provider is unreachable,
     :class:`OutputTruncated` when generation hit the token ceiling, and
     ``RuntimeError`` for provider-side errors.
     """
+    # Before the provider, not after: a fan-out that has spent its member's
+    # allowance stops here rather than running to completion. No-op unless an
+    # HTTP request opened a metered scope.
+    ledger.check_budget()
+
     started = time.perf_counter()
     if settings.llm_provider == "ollama":
         content, usage, resolved, fingerprint = await _ollama_chat(

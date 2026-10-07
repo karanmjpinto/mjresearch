@@ -17,6 +17,7 @@ from hedge_fund.breadth.series import Breadth, from_closes
 from hedge_fund.breadth.store import (
     REFRESH,
     BreadthDataMissing,
+    BreadthUniverseInvalid,
     StoredBreadth,
     available,
     read,
@@ -30,6 +31,7 @@ __all__ = [
     "HORIZONS",
     "Breadth",
     "BreadthDataMissing",
+    "BreadthUniverseInvalid",
     "REFRESH",
     "StoredBreadth",
     "analyse",

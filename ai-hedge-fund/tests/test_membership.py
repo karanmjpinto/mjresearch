@@ -68,6 +68,11 @@ def app_client(db_path, monkeypatch):
 
     monkeypatch.setattr(settings, "member_gate_enabled", True)
     monkeypatch.setattr(settings, "member_default_token_cap", 1000)
+    # The TestClient speaks plain HTTP, and a `Secure` cookie is never sent back
+    # over one — so with the production default every test here would join
+    # successfully and then be treated as a stranger. That is the same trap a
+    # developer hits on http://localhost:5173, which is what the setting is for.
+    monkeypatch.setattr(settings, "member_cookie_secure", False)
 
     from hedge_fund.api.main import app
 
@@ -358,7 +363,9 @@ def test_a_revoked_invite_cannot_be_used(client, db):
 
     resp = client.post("/api/join", json={"token": minted.secret})
     assert resp.status_code == 403
-    assert resp.json()["detail"]["reason"] == "used"
+    # Its own reason: see test_a_withdrawn_invite_says_withdrawn_not_used for
+    # why this is not folded into "used".
+    assert resp.json()["detail"]["reason"] == "withdrawn"
 
 
 # ---------------------------------------------------------------------------
@@ -508,3 +515,171 @@ def test_an_ordinary_invite_does_not_produce_an_owner(client, db):
     db.commit()
     client.post("/api/join", json={"token": minted.secret})
     assert client.get("/api/me").json()["is_owner"] is False
+
+
+# ---------------------------------------------------------------------------
+# Regressions from the pre-landing review
+
+
+def test_the_gates_401_carries_cors_headers(client):
+    """Middleware order, which is silent and backwards-looking when wrong.
+
+    `add_middleware` does `insert(0, ...)`, so the middleware added *last* is
+    outermost. Registering the gate after CORS put the gate outside it, and the
+    401 then went back without `Access-Control-Allow-Origin` — so an off-origin
+    browser saw an opaque network error, `api.ts` never parsed the typed
+    reason, and `MemberGate` fell into its "transport problem" branch and
+    rendered the app as though there were no gate at all. Same-origin
+    deployments never notice, which is what makes it worth a test.
+    """
+    origin = "http://localhost:5173"
+    refused = client.get("/api/methodology", headers={"Origin": origin})
+    assert refused.status_code == 401
+    assert refused.headers.get("access-control-allow-origin") == origin
+
+
+def test_a_universe_name_cannot_escape_the_cache_directory(client):
+    """`universe` is interpolated into a path and arrives from a query string."""
+    from hedge_fund.breadth.store import CACHE_DIR, BreadthUniverseInvalid, _path
+
+    for bad in ["../../../../../../tmp/evil", "a/b", "..", "", "A" * 40]:
+        with pytest.raises(BreadthUniverseInvalid):
+            _path(bad)
+
+    assert _path("sp500").is_relative_to(CACHE_DIR.resolve())
+
+
+def test_an_invalid_universe_is_422_not_503(app_client, db, monkeypatch):
+    """A rejected name must not be confusable with a universe that has no cache.
+
+    503 for both would make the endpoint a file-existence oracle.
+    """
+    from hedge_fund.members import service
+    from hedge_fund.settings import settings
+
+    client, _, _ = app_client
+    minted = service.mint_invite(db, label="Prober")
+    db.commit()
+    client.post("/api/join", json={"token": minted.secret})
+
+    assert client.get("/api/breadth/", params={"universe": "../../etc/x"}).status_code == 422
+    monkeypatch.setattr(settings, "member_gate_enabled", False)
+
+
+def test_the_budget_binds_inside_a_fan_out_not_just_at_the_door(app_client, db):
+    """The check at the door covers one request; a request is many calls.
+
+    A committee is a dozen calls and `/api/autoresearch/run` is a detached task
+    of up to two hundred experiments, all admitted by one check. Without a
+    re-check inside the metered path, a member with one token left can spend
+    for hours.
+    """
+    import pytest as _pytest
+
+    from hedge_fund.members import ledger
+
+    with ledger.attribute_to(1, "/api/research/check", spent=0, cap=1000):
+        ledger.check_budget()  # under the cap, proceeds
+        # Simulate calls landing mid-fan-out.
+        ledger.current().spent = 1000
+        with _pytest.raises(ledger.BudgetExhausted) as caught:
+            ledger.check_budget()
+    assert caught.value.spent == 1000
+    assert caught.value.cap == 1000
+
+
+def test_check_budget_is_a_no_op_when_nothing_is_metered(db):
+    """Local runs have no scope and no cap, so the client never refuses."""
+    from hedge_fund.members import ledger
+
+    ledger.check_budget()  # no scope at all
+    with ledger.attribute_to(1, "/api/research/check", spent=10**9, cap=0):
+        ledger.check_budget()  # cap 0 means "not enforced here"
+
+
+def test_the_running_total_survives_a_failed_ledger_write(db, monkeypatch):
+    """A member whose ledger writes fail must not get an unlimited allowance."""
+    from hedge_fund.members import ledger, service
+
+    member = service.ensure_owner(db, label="owner", token_cap=100)
+
+    def _boom(*args, **kwargs):
+        raise RuntimeError("database gone")
+
+    monkeypatch.setattr(service, "record_usage", _boom)
+
+    with ledger.attribute_to(member.id, "/api/research/check", spent=0, cap=100):
+        ledger.record("m", {"prompt_tokens": 60, "completion_tokens": 60})
+        assert ledger.current().spent == 120  # counted despite the write failing
+        with pytest.raises(ledger.BudgetExhausted):
+            ledger.check_budget()
+
+
+def test_a_withdrawn_invite_says_withdrawn_not_used(client, db):
+    """Four cases, four remedies. 'used' would tell them to ask for another."""
+    from hedge_fund.members import service
+
+    minted = service.mint_invite(db, label="Taken back")
+    db.commit()
+    service.revoke_invite(db, minted.invite.id)
+
+    resp = client.post("/api/join", json={"token": minted.secret})
+    assert resp.status_code == 403
+    assert resp.json()["detail"]["reason"] == "withdrawn"
+
+
+def test_the_join_limit_keys_on_an_address_the_caller_cannot_forge(client):
+    """Cloudflare appends the real client to any XFF the client sent.
+
+    So the FIRST hop is attacker-chosen: vary it and you get a fresh bucket
+    every attempt, and the limit that stands between a token and a guessing
+    oracle never fires.
+    """
+    from hedge_fund.api import guards
+
+    class _Req:
+        def __init__(self, headers):
+            self.headers = headers
+            self.client = type("C", (), {"host": "10.0.0.1"})()
+
+    forged = _Req({"x-forwarded-for": "1.2.3.4, 9.9.9.9"})
+    assert guards.trusted_client_ip(forged) == "9.9.9.9"  # last hop, not first
+    assert guards.client_ip(forged) == "1.2.3.4"  # the brake still reads first
+
+    edged = _Req({"cf-connecting-ip": "8.8.8.8", "x-forwarded-for": "1.2.3.4"})
+    assert guards.trusted_client_ip(edged) == "8.8.8.8"
+
+    assert guards.trusted_client_ip(_Req({})) == "10.0.0.1"
+
+
+def test_the_cookie_secure_flag_is_configuration_not_a_client_header(client, db, monkeypatch):
+    """A security flag must not be set by the party it constrains.
+
+    An origin reachable without the edge plus `x-forwarded-proto: http` used to
+    mint a session cookie with no Secure flag.
+    """
+    from hedge_fund.members import service
+    from hedge_fund.settings import settings
+
+    minted = service.mint_invite(db, label="Downgrade")
+    db.commit()
+
+    monkeypatch.setattr(settings, "member_cookie_secure", True)
+    resp = client.post(
+        "/api/join",
+        json={"token": minted.secret},
+        headers={"x-forwarded-proto": "http"},
+    )
+    assert resp.status_code == 200
+    # Set despite the header asking for plain HTTP.
+    assert "secure" in resp.headers["set-cookie"].lower()
+
+
+def test_the_cookie_secure_flag_defaults_to_on(db):
+    """The default has to be the safe one: a deployment that forgets to set it
+    must get `Secure`, not silently ship a session cookie that travels in the
+    clear. Local HTTP development is the case that opts out, by setting
+    MEMBER_COOKIE_SECURE=false."""
+    from hedge_fund.settings import Settings
+
+    assert Settings().member_cookie_secure is True

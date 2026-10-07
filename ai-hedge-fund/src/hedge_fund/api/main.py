@@ -7,7 +7,9 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi import status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from hedge_fund.api.routes import (
     autoresearch,
@@ -32,6 +34,7 @@ from hedge_fund.api.routes import (
     valuation,
 )
 from hedge_fund.api.membership import MemberGateMiddleware
+from hedge_fund.members.ledger import BudgetExhausted
 from hedge_fund.db.session import init_db
 from hedge_fund.settings import settings
 
@@ -72,6 +75,19 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
 )
 
+# Invite-only gate. Registered BEFORE CORS on purpose, and the ordering is the
+# opposite of what it looks like: `add_middleware` does `insert(0, ...)`, so the
+# middleware added *last* ends up outermost. Adding the gate first therefore
+# leaves CORS wrapping it, which is what makes the gate's 401 carry its
+# `Access-Control-Allow-Origin` header.
+#
+# Getting this backwards is silent and nasty. The gate still refuses, but the
+# refusal reaches an off-origin browser as an opaque network error instead of a
+# 401 — so `api.ts` never parses the typed reason, `MemberGate` falls into its
+# "transport problem" branch, and the app renders as though there were no gate
+# at all. Same-origin deployments never notice. See `test_membership.py`.
+app.add_middleware(MemberGateMiddleware)
+
 # CORS for frontend
 frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
 app.add_middleware(
@@ -81,12 +97,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Invite-only gate. Registered after CORS, which means it runs *inside* it —
-# Starlette applies middleware in reverse order of addition — so a 401 from the
-# gate still carries its CORS headers. Without that an off-origin client sees an
-# opaque network failure instead of "you are not a member".
-app.add_middleware(MemberGateMiddleware)
 
 # Membership first, and unprefixed: /api/join, /api/me and /api/logout are the
 # three paths that have to stay reachable without a session, because they are
@@ -113,6 +123,26 @@ app.include_router(factors.router, prefix="/api/factors", tags=["factors"])
 app.include_router(macro.router, prefix="/api/macro", tags=["macro"])
 app.include_router(regimes.router, prefix="/api/regimes", tags=["regimes"])
 app.include_router(breadth.router, prefix="/api/breadth", tags=["breadth"])
+
+
+@app.exception_handler(BudgetExhausted)
+async def _budget_exhausted(request, exc: BudgetExhausted):
+    """A fan-out that ran out part-way through answers like the door check.
+
+    Same status and same `reason` as `require_budget`, so the client needs one
+    branch rather than two for what is one situation reached two ways.
+    """
+    return JSONResponse(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        content={
+            "detail": {
+                "reason": "budget_exhausted",
+                "message": str(exc),
+                "tokens": exc.spent,
+                "cap": exc.cap,
+            }
+        },
+    )
 
 
 @app.get("/api/health")

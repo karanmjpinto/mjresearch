@@ -435,11 +435,13 @@ class LlmUsage(Base):
     """One model call, attributed to whoever caused it.
 
     Written after the call from the provider's own reported counts, so the
-    numbers are measured rather than estimated. Two consequences of recording
-    after rather than reserving before, both accepted at this scale: a single
-    in-flight call can carry a member past their cap (bounded by one call), and
-    a gateway timeout or 5xx can bill without returning counts, so the ledger
-    can undercount by the failure rate.
+    numbers are measured rather than estimated. Recording after rather than
+    reserving before has two consequences, both accepted at this scale. A call
+    already in flight when the cap is crossed still completes, so the overshoot
+    is one call per concurrent request — `members.ledger.check_budget` runs
+    before each call, which is what keeps that from becoming "one whole
+    fan-out". And a gateway timeout or 5xx can bill without returning counts,
+    so the ledger can undercount by the failure rate.
 
     `cost_usd` is filled only when the gateway reports a cost. There is no
     local price table on purpose — a hardcoded per-model price drifts silently,

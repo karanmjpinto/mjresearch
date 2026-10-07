@@ -166,6 +166,31 @@ client_ip = _client_ip
 over_limit = _over_limit
 
 
+def trusted_client_ip(request: Request) -> str:
+    """The caller, for a limit that is a security control rather than a brake.
+
+    `_client_ip` takes the FIRST `x-forwarded-for` hop, which is the right
+    answer for a spend brake and the wrong one here. Cloudflare *appends* the
+    real client to whatever XFF the client sent, so the first hop is
+    attacker-chosen: vary that header and you get a fresh bucket every attempt,
+    and the limit never fires. For the join endpoint that limit is the only
+    thing standing between a token and a guessing oracle, so it has to key on
+    something the caller cannot forge.
+
+    `cf-connecting-ip` is written by the edge and cannot be overridden from
+    outside it. Failing that, the LAST XFF hop is the one the nearest trusted
+    proxy appended. Failing both, the socket address.
+    """
+    edge = request.headers.get("cf-connecting-ip", "").strip()
+    if edge:
+        return edge
+    fwd = request.headers.get("x-forwarded-for", "")
+    hops = [h.strip() for h in fwd.split(",") if h.strip()]
+    if hops:
+        return hops[-1]
+    return request.client.host if request.client else "unknown"
+
+
 def reset_rate_limits() -> None:
     """Clear the counters. For tests, and for a deliberate manual reset."""
     _hits.clear()

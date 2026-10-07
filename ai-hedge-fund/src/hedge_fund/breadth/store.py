@@ -20,6 +20,7 @@ import os
 import tempfile
 from dataclasses import dataclass
 from datetime import UTC, datetime
+import re
 from pathlib import Path
 from typing import Any
 
@@ -62,8 +63,32 @@ class StoredBreadth:
         return self.age_days > STALE_DAYS
 
 
+#: A universe name is a filename component, so it is constrained to one.
+#: `universe` arrives from a query string (`GET /api/breadth/?universe=...`) and
+#: is interpolated into a path, which without this is a directory traversal:
+#: `../../../../etc/foo` escapes the cache directory and turns the endpoint into
+#: a reader for any .json the process can open. Validated here, at the lowest
+#: layer, rather than at the route — every caller gets the check, including the
+#: writer and any future one.
+_UNIVERSE = re.compile(r"^[a-z0-9_-]{1,32}$")
+
+
+class BreadthUniverseInvalid(ValueError):
+    """The universe name is not a name. Raised before any filesystem access."""
+
+
 def _path(universe: str) -> Path:
-    return CACHE_DIR / f"{universe}.json"
+    if not _UNIVERSE.match(universe or ""):
+        raise BreadthUniverseInvalid(
+            f"{universe!r} is not a universe name: expected lowercase letters, "
+            "digits, hyphen or underscore, up to 32 characters."
+        )
+    resolved = (CACHE_DIR / f"{universe}.json").resolve()
+    # Belt and braces. The pattern above already forbids separators and dots,
+    # so this can only fire if that pattern is ever loosened.
+    if not resolved.is_relative_to(CACHE_DIR.resolve()):
+        raise BreadthUniverseInvalid(f"{universe!r} escapes the cache directory.")
+    return resolved
 
 
 def write(

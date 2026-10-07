@@ -47,16 +47,24 @@ PUBLIC_API_PATHS = frozenset(
 
 
 def _is_https(request: Request) -> bool:
-    """Whether the browser's hop to us was encrypted.
+    """Whether to mark the session cookie `Secure`.
 
-    `request.url.scheme` is the scheme uvicorn saw, which behind Cloudflare and
-    Railway is plain HTTP on the internal hop even though the visitor is on
-    HTTPS. `x-forwarded-proto` is what the edge recorded about the real
-    connection, so it is checked first.
+    Configuration first, and that ordering is the point. An earlier version
+    read `x-forwarded-proto`, which the client sets: a join request carrying
+    `x-forwarded-proto: http` to an origin reachable without the edge — the
+    `*.up.railway.app` host behind Cloudflare, say — would mint a session
+    cookie with no `Secure` flag, which the browser then sends over plain HTTP.
+    A security flag must not be decided by the party it constrains.
+
+    `member_cookie_secure` is True by default. It exists to be turned *off* for
+    local development, because a `Secure` cookie is never returned over plain
+    HTTP and the session would silently fail to stick on
+    `http://localhost:5173` — the developer joins, gets a 200, and is treated
+    as a stranger by every request after it. So: trust the setting, and fall
+    back to the observed scheme only when nothing is configured either way.
     """
-    forwarded = request.headers.get("x-forwarded-proto", "")
-    if forwarded:
-        return forwarded.split(",")[0].strip().lower() == "https"
+    if settings.member_cookie_secure is not None:
+        return settings.member_cookie_secure
     return request.url.scheme == "https"
 
 
@@ -129,11 +137,16 @@ MEMBER = Depends(require_member)
 def require_budget(request: Request, db: Session = Depends(get_db)) -> None:
     """Refuse a model call when this member has spent their month.
 
-    Checked before the provider is touched, so a member at their cap costs
-    nothing. Not a reservation, though: the counts only exist after the call
-    returns, so one in-flight request can cross the line. The overshoot is
-    bounded by a single call, which at this scale is cheaper than the
-    bookkeeping that would prevent it.
+    This is the check at the door, and on its own it is not enough: it runs
+    once per request, while a request is a fan-out. A committee is a dozen
+    calls and `/api/autoresearch/run` is a detached task of up to two hundred
+    experiments, so a single admission here would license hours of spending.
+    `meter_llm` therefore carries the cap into the attribution scope and
+    `ledger.check_budget` re-checks before every model call, which is what
+    actually bounds it.
+
+    What remains is one call per *concurrent* request, because a call's token
+    count only exists once it returns.
 
     Silent when the gate is off — a local run has no member and no budget.
     """
@@ -205,7 +218,12 @@ async def meter_llm(request: Request, db: Session = Depends(get_db)):
     route = request.scope.get("root_path", "") + str(
         getattr(request.scope.get("route"), "path", request.url.path)
     )
-    with ledger.attribute_to(member.id, route):
+    # Carry the cap and the month-to-date total into the scope so the model
+    # client can refuse mid-fan-out. Without this the check at the door is the
+    # only one there is, and one admitted request can spend without limit —
+    # `/api/autoresearch/run` is a detached task of up to 200 experiments.
+    spend = service.spend_for(db, member)
+    with ledger.attribute_to(member.id, route, spent=spend.tokens, cap=spend.cap):
         yield
 
 
