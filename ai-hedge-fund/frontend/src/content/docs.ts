@@ -116,6 +116,12 @@ export const SECTIONS: DocSection[] = [
           "Each quarter of returns is treated as a distribution and clustered in Wasserstein distance (Horvath, Issa and Muguruza, SSRN 3947905), rather than being reduced to a volatility number and thresholded. No model is involved and the same inputs always give the same labels. The tab also scores its own split, and scores the volatility rule it replaces on the same windows, so the reader can see whether the regimes are real.",
       },
       {
+        name: "Constraint flow — where the investable surface is",
+        trust: "computed",
+        detail:
+          "A Sankey over the curated constraint map whose width is the count of listed companies named against each chokepoint. Nothing in the map carries a dollar figure, so the flow is denominated in companies and the caption says so; each system is ordered by how far past normal its worst-measured leg sits. No model touches it, and a chokepoint with no `normal` to measure against is still drawn, just not ranked.",
+      },
+      {
         name: "Macro map — growth and inflation sensitivities",
         trust: "computed",
         detail:
@@ -261,6 +267,18 @@ export const SECTIONS: DocSection[] = [
     ],
   },
   {
+    id: "breadth",
+    title: "Market breadth, and a warning that did not pay",
+    standfirst:
+      "The index at a high while half its members are below their own trend \u2014 measured exactly, then checked against what actually followed.",
+    body: [
+      "Market breadth is the one screen here that is about the market rather than about a company, and it exists because of a specific and very old claim: that an index making new highs on a shrinking number of participating stocks is a warning, and that this warning preceded the crashes of 1929, 1962, 1973 and 1987. The measurement half of that claim is arithmetic. Three measures are built from the index\u2019s members \u2014 a cumulative advance-decline line, the share trading above their own 200-day average, and new 52-week highs less new lows \u2014 and the signal is deliberately crude: the index within a couple of percent of its one-year high while fewer than half its members are above their 200-day average. A divergence that needs a clever definition to appear is not the thing the warning is about.",
+      "The predictive half is an empirical question, and it is answered on the same screen rather than assumed. Signal days arrive in clumps, so they are collapsed into episodes and forward returns are measured once per episode \u2014 counting a forty-day run as forty observations is the commonest way this kind of study is overstated. Across every threshold setting offered, the index\u2019s median return after a divergence has not been worse than its unconditional return over the same history, and at most settings it was better. The verdict says so in those words, above the chart rather than below it, because a divergence chart is extremely persuasive to look at and that is precisely the problem with it.",
+      "Three reasons that finding may itself be wrong, none of which the screen can rule out. Breadth is measured across the index\u2019s current members carried backwards, so every company that fell out of the index after falling is missing and past breadth is flattered. The history starts in 2004, which contains two bear markets and none of the episodes the warning was built on \u2014 no free source of index membership reaches 1962. And a signal that fires a handful of times cannot be separated from noise by its own hit rate, in either direction. The episode count sits beside every median for that reason.",
+      "The thresholds are controls rather than constants. Neither is derived from anything \u2014 both are conventions \u2014 and the episode count moves by an order of magnitude across the range offered, which is the most useful thing on the screen. The five hundred price histories behind it are built ahead of time by scripts/refresh_breadth.py and served dated, so the page answers instantly and says how old it is.",
+    ],
+  },
+  {
     id: "autoresearch",
     title: "Autoresearch, and why almost everything is discarded",
     standfirst:
@@ -282,6 +300,46 @@ export const SECTIONS: DocSection[] = [
       "The committee's investor calls run one at a time, not in parallel. The local model server serialises them, so a seven-member run costs roughly seven times one call — about a minute and a half. Measured, not estimated.",
     ],
   },
+  {
+    id: "membership",
+    title: "Who can run this, and what a seat costs",
+    standfirst:
+      "The hosted site is invite-only. The reason is the model bill, not exclusivity for its own sake.",
+    body: [
+      "Run locally, none of this applies: the model is Ollama on your own machine, the portfolio is a SQLite file you own, and there is no gate, no member and no allowance. Everything below describes the hosted deployment only, and it is switched off by default in the code.",
+      "On the hosted site the model provider is a paid gateway, so the four routes that invoke a model bill whoever deployed it. Left open, those routes are an anonymous proxy with somebody's card behind it — which is why they ran switched off entirely for months rather than being left reachable. Membership is what lets them come back on: a named member carries a monthly token allowance, so a seat is a known cost rather than an open one.",
+      "Access works by single-use invite link, sent by someone already inside. There is no sign-up form and no waitlist. The link carries its key in the URL fragment rather than the path, so the key is never transmitted to the server and never appears in an access log; the page strips it from browser history as soon as it has been read. An invite opens exactly one session and is then spent, and it can be withdrawn before it is used.",
+      "Allowances are counted in tokens, per UTC calendar month, summed from the provider's own reported counts after each call. A member's own usage is shown in the app chrome as a percentage, because a cap you cannot see is a trap whose first symptom is a refusal in the middle of an analysis. Two refusals are deliberately distinguishable: running out of monthly allowance is not the same as hitting the per-hour rate limit, and only one of them is worth retrying.",
+      "Dollars are not tracked here. A per-model price table drifts silently as a gateway changes its rates, and a plausible-looking cost that is quietly wrong is exactly the kind of number the rest of this app exists to avoid. The gateway's own dashboard is the source for money; this ledger counts tokens, which is what the allowance is denominated in.",
+      "What revocation does and does not reach: withdrawing a member closes their open sessions immediately, including a tab that was already loaded, because sessions are database rows rather than signed tokens. What it cannot undo is spend that has already happened.",
+    ],
+    items: [
+      {
+        name: "Invite admission — single-use, at most once",
+        trust: "computed",
+        detail:
+          "An invite is claimed by one conditional UPDATE, and admission requires it to have changed exactly one row. Two simultaneous clicks on a forwarded link therefore admit one person, not two — a check-then-write would admit both.",
+      },
+      {
+        name: "Monthly token allowance",
+        trust: "computed",
+        detail:
+          "Summed from the provider's reported prompt and completion counts since the first instant of the current UTC month. Checked before a model is called, so a member at their cap costs nothing.",
+      },
+      {
+        name: "Allowance overshoot",
+        trust: "written",
+        detail:
+          "Counts exist only after a call returns, so one in-flight request can cross the line and a gateway timeout can bill without reporting anything. The overshoot is bounded by a single call; the ledger can undercount by the failure rate. Neither is estimated or corrected for.",
+      },
+      {
+        name: "Per-member cost in dollars",
+        trust: "written",
+        detail:
+          "Recorded only when the gateway itself reports a cost, and left empty otherwise. There is no local price table, so this column is blank rather than guessed.",
+      },
+    ],
+  },
 ];
 
 /**
@@ -292,6 +350,10 @@ export const GAPS: [string, string][] = [
   [
     "This is not investment advice",
     "A research tool. Output is generated by a language model over public data and can be wrong in ways that read perfectly plausibly. Nothing here is a recommendation to buy or sell anything.",
+  ],
+  [
+    "A leaked invite link is a seat",
+    "An invite is a bearer capability: whoever opens the link first becomes the member, and there is no second factor behind it. Single use, a short expiry and the ability to withdraw it bound the damage; they do not prevent it. At this size that is a deliberate trade, not an oversight.",
   ],
   [
     "No screen checks a catalyst",
@@ -315,7 +377,7 @@ export const GAPS: [string, string][] = [
   ],
   [
     "Factor returns end where the authors' last update does",
-    "The JKP file runs to the month printed on the tab, currently December 2024. \"Last 12 months\" means the last twelve in that file, not the twelve before today.",
+    'The JKP file runs to the month printed on the tab, currently December 2024. "Last 12 months" means the last twelve in that file, not the twelve before today.',
   ],
   [
     "Verification has real gaps",
@@ -328,6 +390,10 @@ export const GAPS: [string, string][] = [
   [
     "The macro map is missing the assets that carry the argument",
     "AQR's exhibit plots commodities, gold, inflation-linked bonds, credit and trend-following — the things that sit right of centre and are the point of drawing the map at all. Each needs a licensed index with no free equivalent back to 1972, so none is here, and what remains is an equity map where almost everything crowds into one quadrant. The Treasury line is also a duration approximation from the constant-maturity yield rather than a real total-return index, and the inflation surprise before 1981 uses the GDP deflator forecast because the survey's CPI question does not go back that far.",
+  ],
+  [
+    "The constraint flow counts companies, not money",
+    "A reader who has seen a capex Sankey will expect the ribbons to be dollars. They are not: the constraint map holds no money figure anywhere, so a wide ribbon means many listed ways to play a chokepoint and says nothing about the size of the market behind it. The flow also only draws constraints that have at least one name recorded, so a chokepoint nobody has sourced a company for is absent from the picture even though it is in the map.",
   ],
   [
     "Macro sensitivities are half as certain as they look",

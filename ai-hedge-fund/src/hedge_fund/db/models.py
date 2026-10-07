@@ -294,3 +294,174 @@ class Decision(Base):
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+# ---------------------------------------------------------------------------
+# Membership
+#
+# The hosted deployment runs `llm_provider=openai` against a paid gateway, so
+# the four model-invoking routes bill whoever deployed the site. For a long
+# time the only honest setting was to switch them off entirely
+# (`llm_endpoints_enabled=False`), which left the best part of the app dark in
+# public. These four tables are what lets it come back on: a named member
+# carrying a token budget is not an anonymous proxy.
+#
+# Three properties are load-bearing, and all three are about revocation rather
+# than growth. A marginal member here is a recurring charge, not a free signup,
+# so this is a spend-authorisation tree and not a referral loop.
+#
+#   1. Secrets are stored only as SHA-256 hashes. The invite secret lives in
+#      the link and the session secret lives in the cookie, and nowhere else,
+#      so a dump of the database admits nobody.
+#   2. Sessions are rows, not signed cookies. That is the entire reason for the
+#      table: revoking a member can then kill their live session in the same
+#      transaction. A stateless signed token cannot be withdrawn before it
+#      expires, and "revoked but still browsing" is the case that matters.
+#   3. `admitted_by` and `Invite.issued_by` are written from the first day even
+#      though only the owner issues invites. There is no Alembic in this repo —
+#      `init_db()` is `create_all` and nothing else — so a column added once
+#      the volume holds real members means hand-written SQL against production.
+#
+# Datetimes here are **naive UTC**, unlike the `server_default=func.now()`
+# columns above. SQLite has no timezone storage, so an aware value is written
+# as a naive string anyway and the awareness is silently lost on read; the
+# comparisons below (`expires_at > now`) have to be exact, so the convention is
+# stated once and applied everywhere rather than left to the dialect. Use
+# `hedge_fund.members.service.utcnow()`.
+
+
+class Member(Base):
+    """Someone who has been let in. The label is the owner's own note."""
+
+    __tablename__ = "members"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    label: Mapped[str] = mapped_column(String(128))
+
+    #: Explicit rather than inferred from `admitted_by IS NULL`. Overloading
+    #: null to also mean "owner" leaves a future grant permission with nothing
+    #: to key off.
+    is_owner: Mapped[bool] = mapped_column(default=False)
+
+    #: Who let them in. Null means seeded directly by the owner's CLI, which is
+    #: every member in v1 — members cannot invite anyone yet.
+    admitted_by: Mapped[int | None] = mapped_column(
+        ForeignKey("members.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+
+    #: Tokens per UTC calendar month, summed across every model call made on
+    #: this member's behalf. 0 means no model access at all.
+    llm_monthly_token_cap: Mapped[int] = mapped_column(default=0)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    sessions: Mapped[list["MemberSession"]] = relationship(
+        back_populates="member", cascade="all, delete-orphan"
+    )
+
+
+class Invite(Base):
+    """A single-use capability to become a member.
+
+    The row is the invite; the secret that opens it is never stored. Admission
+    consumes the row in one UPDATE (see `members.service.consume_invite`)
+    rather than a read followed by a write, because SQLAlchemy opens SQLite
+    transactions DEFERRED and two simultaneous clicks on a forwarded link would
+    otherwise both pass the read.
+    """
+
+    __tablename__ = "invites"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+
+    #: The label and cap the minted member will be created with. Carried on the
+    #: invite so the owner decides the budget when they hand out the link, not
+    #: afterwards.
+    label: Mapped[str] = mapped_column(String(128))
+    llm_monthly_token_cap: Mapped[int] = mapped_column(default=0)
+
+    #: Whether consuming this invite produces the owner rather than an ordinary
+    #: member. Exists so the owner can obtain their own session through the
+    #: same door everyone else uses: a CLI cannot set a cookie in a browser, so
+    #: without this the owner would need a second, privileged login path, and a
+    #: second path is a second thing to get wrong.
+    grants_owner: Mapped[bool] = mapped_column(default=False)
+
+    #: Null means minted by the owner's CLI. Populated from day one so turning
+    #: member-granted invites on later is a feature flag, not a migration.
+    issued_by: Mapped[int | None] = mapped_column(
+        ForeignKey("members.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+
+    issued_at: Mapped[datetime] = mapped_column(DateTime)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+
+    consumed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    #: The one direction the invite-to-member link is stored in. A mirrored
+    #: `Member.invite_id` would hold the same fact twice, could disagree with
+    #: itself, and would make the two tables a mutual foreign-key cycle that
+    #: `create_all` only survives by accident of SQLite's CREATE order.
+    consumed_by: Mapped[int | None] = mapped_column(
+        ForeignKey("members.id", ondelete="SET NULL"), nullable=True
+    )
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class MemberSession(Base):
+    """One browser, holding one secret, until it expires or is revoked."""
+
+    __tablename__ = "member_sessions"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    member_id: Mapped[int] = mapped_column(ForeignKey("members.id", ondelete="CASCADE"), index=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+
+    #: Touched at most hourly, not per request. Every request would be a SQLite
+    #: write on a network volume, and the column only has to answer "is this
+    #: seat still in use", which an hour resolves fine.
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime)
+
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    member: Mapped["Member"] = relationship(back_populates="sessions")
+
+
+class LlmUsage(Base):
+    """One model call, attributed to whoever caused it.
+
+    Written after the call from the provider's own reported counts, so the
+    numbers are measured rather than estimated. Recording after rather than
+    reserving before has two consequences, both accepted at this scale. A call
+    already in flight when the cap is crossed still completes, so the overshoot
+    is one call per concurrent request — `members.ledger.check_budget` runs
+    before each call, which is what keeps that from becoming "one whole
+    fan-out". And a gateway timeout or 5xx can bill without returning counts,
+    so the ledger can undercount by the failure rate.
+
+    `cost_usd` is filled only when the gateway reports a cost. There is no
+    local price table on purpose — a hardcoded per-model price drifts silently,
+    and the rest of this app exists to avoid plausible unverifiable numbers.
+    The dollar question is answered by the gateway's own dashboard; this table
+    answers the token question, which is the one the cap is denominated in.
+    """
+
+    __tablename__ = "llm_usage"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    member_id: Mapped[int] = mapped_column(ForeignKey("members.id", ondelete="CASCADE"), index=True)
+
+    #: The API route that caused the call, not the model's own name for itself.
+    #: A committee run is many calls under one route.
+    route: Mapped[str] = mapped_column(String(64))
+    model: Mapped[str] = mapped_column(String(128))
+
+    prompt_tokens: Mapped[int] = mapped_column(default=0)
+    completion_tokens: Mapped[int] = mapped_column(default=0)
+    cost_usd: Mapped[Decimal | None] = mapped_column(Numeric(18, 8), nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime, index=True)

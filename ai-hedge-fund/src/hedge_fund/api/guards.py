@@ -134,9 +134,18 @@ async def require_llm_access(
     if limit > 0:
         over, retry = _over_limit(_client_ip(request), limit)
         if over:
+            # `reason` matters because the budget check also answers 429, and
+            # the two mean different things to a client: this one is worth
+            # retrying after `Retry-After`, a spent monthly budget is not worth
+            # retrying at all until the month turns.
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail=f"Rate limit reached: {limit} model runs per hour. Retry in {retry}s.",
+                detail={
+                    "reason": "rate_limited",
+                    "message": (
+                        f"Rate limit reached: {limit} model runs per hour. Retry in {retry}s."
+                    ),
+                },
                 headers={"Retry-After": str(retry)},
             )
 
@@ -144,6 +153,42 @@ async def require_llm_access(
 #: Attach to a route with `dependencies=[LLM_ACCESS]`, which leaves the
 #: endpoint's own signature alone.
 LLM_ACCESS = Depends(require_llm_access)
+
+
+#: Public names for the two helpers above, because membership needs them too.
+#:
+#: The join endpoint has to be rate-limited or it is a token-guessing oracle,
+#: and it must use its own namespaced key: `_hits` is keyed on the caller alone,
+#: so a shared bucket would let two clicks on an invite link eat that member's
+#: model-run allowance, and would let someone guessing tokens exhaust the
+#: allowance of everyone behind the same NAT.
+client_ip = _client_ip
+over_limit = _over_limit
+
+
+def trusted_client_ip(request: Request) -> str:
+    """The caller, for a limit that is a security control rather than a brake.
+
+    `_client_ip` takes the FIRST `x-forwarded-for` hop, which is the right
+    answer for a spend brake and the wrong one here. Cloudflare *appends* the
+    real client to whatever XFF the client sent, so the first hop is
+    attacker-chosen: vary that header and you get a fresh bucket every attempt,
+    and the limit never fires. For the join endpoint that limit is the only
+    thing standing between a token and a guessing oracle, so it has to key on
+    something the caller cannot forge.
+
+    `cf-connecting-ip` is written by the edge and cannot be overridden from
+    outside it. Failing that, the LAST XFF hop is the one the nearest trusted
+    proxy appended. Failing both, the socket address.
+    """
+    edge = request.headers.get("cf-connecting-ip", "").strip()
+    if edge:
+        return edge
+    fwd = request.headers.get("x-forwarded-for", "")
+    hops = [h.strip() for h in fwd.split(",") if h.strip()]
+    if hops:
+        return hops[-1]
+    return request.client.host if request.client else "unknown"
 
 
 def reset_rate_limits() -> None:

@@ -116,6 +116,7 @@ describe("other destinations", () => {
       "constraints",
       "home",
       "screeners",
+      "breadth",
       "portfolio",
       "optimize",
       "autoresearch",

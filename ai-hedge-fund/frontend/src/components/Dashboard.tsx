@@ -27,6 +27,15 @@ export function Dashboard() {
     queryFn: api.getSectorPerformance,
     retry: false,
   });
+  /* Market-level, unlike everything else on this screen. It is one card
+   * rather than a panel because the interesting half of breadth is the base
+   * rate underneath it, and that does not compress. */
+  const breadth = useQuery({
+    queryKey: ["breadth", 2, 50],
+    queryFn: () => api.getBreadth(),
+    staleTime: 10 * 60_000,
+    retry: false,
+  });
   const providers = useQuery({
     queryKey: ["providers"],
     queryFn: api.getProviderStatus,
@@ -130,7 +139,7 @@ export function Dashboard() {
           </section>
 
           {/* Snapshot strip — portfolio + providers + sector drift */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             <SnapshotCard
               label="Book value"
               info="book-value"
@@ -173,6 +182,30 @@ export function Dashboard() {
               }
               href="#sectors"
               cta={sectorData.length > 0 ? "All sectors ↓" : ""}
+            />
+            <SnapshotCard
+              label="Market breadth"
+              info="breadth-divergence"
+              value={
+                breadth.data
+                  ? `${breadth.data.reading.pct_above_200dma.toFixed(0)}% above 200d`
+                  : "—"
+              }
+              /* The card says whether the condition is on, never what to do
+               * about it. What followed past divergences is on the screen it
+               * links to, with its episode count beside it, and a dashboard
+               * tile has no room to carry that caveat. */
+              sub={
+                breadth.isPending
+                  ? "Loading…"
+                  : breadth.isError
+                    ? "Not built on this server"
+                    : breadth.data?.reading.divergent
+                      ? `Diverging — index ${Math.abs(breadth.data.reading.index_gap_pct).toFixed(1)}% off its high`
+                      : "No divergence"
+              }
+              href="/breadth"
+              cta="See breadth →"
             />
           </section>
 

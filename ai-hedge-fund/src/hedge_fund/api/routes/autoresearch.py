@@ -10,6 +10,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from hedge_fund.api.guards import LLM_ACCESS
+from hedge_fund.api.membership import METERED
 from hedge_fund.autoresearch import (
     describe_harness,
     leaderboard,
@@ -73,7 +74,7 @@ async def get_status() -> dict[str, Any]:
     return {"running": sorted(_running), "busy": bool(_running)}
 
 
-@router.post("/run", dependencies=[LLM_ACCESS])
+@router.post("/run", dependencies=[LLM_ACCESS, METERED])
 async def start_loop(req: LoopRequest, background: BackgroundTasks) -> dict[str, Any]:
     """Start a loop in the background and return immediately.
 

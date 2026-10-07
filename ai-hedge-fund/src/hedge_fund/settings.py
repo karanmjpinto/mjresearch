@@ -160,6 +160,39 @@ class Settings(BaseSettings):
     # to publish for the convenience of one.
     vault_path: str | None = None
 
+    # Membership — invite-only access, off by default.
+    #
+    # Default False so a local checkout is untouched: free Ollama, no key, no
+    # limit, no member, every route open. Switching it on makes every `/api/*`
+    # path require a session cookie except the four that have to stay reachable
+    # to get one (`health`, `join`, `me`, `logout`).
+    #
+    # This is deliberately a separate switch from `llm_endpoints_enabled`. That
+    # one says "this deployment does not run models at all"; this one says "and
+    # only members may call anything". A deployment can sensibly have the gate
+    # on and the models still off, which is the state to ship in and verify
+    # before any key is spent.
+    member_gate_enabled: bool = False
+    #: How long a session cookie lasts. Long on purpose — the invite link is
+    #: the login, and there is no second way back in, so an expiry short enough
+    #: to be a security feature would just be a support burden for twenty
+    #: people.
+    member_session_days: int = 90
+    #: Default tokens per UTC calendar month for a newly minted invite. A guess
+    #: rather than a measurement; watch the first few members before trusting it.
+    member_default_token_cap: int = 200_000
+    #: Join attempts allowed per IP per hour. Without this the endpoint is a
+    #: token-guessing oracle however long the token.
+    member_join_attempts_per_hour: int = 20
+    #: Whether the session cookie carries `Secure`. True in any real
+    #: deployment. Set False for local development over plain HTTP, where a
+    #: Secure cookie is never sent back and the session silently fails to
+    #: stick. None falls back to the scheme the server actually observed.
+    member_cookie_secure: bool | None = True
+    #: Origin used when printing invite links from the CLI, e.g.
+    #: https://investing.themariojude.com. Falls back to FRONTEND_URL.
+    public_base_url: str | None = None
+
     # Sentry (optional — set SENTRY_DSN in production)
     sentry_dsn: str | None = None
     sentry_environment: str = "development"

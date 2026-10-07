@@ -7,17 +7,21 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi import status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from hedge_fund.api.routes import (
     autoresearch,
     backtest,
+    breadth,
     decisions,
     constraints,
     knowledge,
     data,
     factors,
     macro,
+    membership as membership_route,
     methodology,
     optimize as optimize_route,
     portfolio,
@@ -29,6 +33,8 @@ from hedge_fund.api.routes import (
     simulation,
     valuation,
 )
+from hedge_fund.api.membership import MemberGateMiddleware
+from hedge_fund.members.ledger import BudgetExhausted
 from hedge_fund.db.session import init_db
 from hedge_fund.settings import settings
 
@@ -69,6 +75,19 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
 )
 
+# Invite-only gate. Registered BEFORE CORS on purpose, and the ordering is the
+# opposite of what it looks like: `add_middleware` does `insert(0, ...)`, so the
+# middleware added *last* ends up outermost. Adding the gate first therefore
+# leaves CORS wrapping it, which is what makes the gate's 401 carry its
+# `Access-Control-Allow-Origin` header.
+#
+# Getting this backwards is silent and nasty. The gate still refuses, but the
+# refusal reaches an off-origin browser as an opaque network error instead of a
+# 401 — so `api.ts` never parses the typed reason, `MemberGate` falls into its
+# "transport problem" branch, and the app renders as though there were no gate
+# at all. Same-origin deployments never notice. See `test_membership.py`.
+app.add_middleware(MemberGateMiddleware)
+
 # CORS for frontend
 frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:5173")
 app.add_middleware(
@@ -78,6 +97,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Membership first, and unprefixed: /api/join, /api/me and /api/logout are the
+# three paths that have to stay reachable without a session, because they are
+# how one is obtained and how a client learns it has not got one. The gate
+# exempts exactly these plus /api/health.
+app.include_router(membership_route.router, prefix="/api", tags=["membership"])
 
 app.include_router(data.router, prefix="/api/data", tags=["data"])
 app.include_router(research.router, prefix="/api/research", tags=["research"])
@@ -97,6 +122,27 @@ app.include_router(constraints.router, prefix="/api/constraints", tags=["constra
 app.include_router(factors.router, prefix="/api/factors", tags=["factors"])
 app.include_router(macro.router, prefix="/api/macro", tags=["macro"])
 app.include_router(regimes.router, prefix="/api/regimes", tags=["regimes"])
+app.include_router(breadth.router, prefix="/api/breadth", tags=["breadth"])
+
+
+@app.exception_handler(BudgetExhausted)
+async def _budget_exhausted(request, exc: BudgetExhausted):
+    """A fan-out that ran out part-way through answers like the door check.
+
+    Same status and same `reason` as `require_budget`, so the client needs one
+    branch rather than two for what is one situation reached two ways.
+    """
+    return JSONResponse(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        content={
+            "detail": {
+                "reason": "budget_exhausted",
+                "message": str(exc),
+                "tokens": exc.spent,
+                "cap": exc.cap,
+            }
+        },
+    )
 
 
 @app.get("/api/health")
