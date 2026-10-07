@@ -12,12 +12,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from hedge_fund.api.routes import (
     autoresearch,
     backtest,
+    breadth,
     decisions,
     constraints,
     knowledge,
     data,
     factors,
     macro,
+    membership as membership_route,
     methodology,
     optimize as optimize_route,
     portfolio,
@@ -29,6 +31,7 @@ from hedge_fund.api.routes import (
     simulation,
     valuation,
 )
+from hedge_fund.api.membership import MemberGateMiddleware
 from hedge_fund.db.session import init_db
 from hedge_fund.settings import settings
 
@@ -79,6 +82,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Invite-only gate. Registered after CORS, which means it runs *inside* it —
+# Starlette applies middleware in reverse order of addition — so a 401 from the
+# gate still carries its CORS headers. Without that an off-origin client sees an
+# opaque network failure instead of "you are not a member".
+app.add_middleware(MemberGateMiddleware)
+
+# Membership first, and unprefixed: /api/join, /api/me and /api/logout are the
+# three paths that have to stay reachable without a session, because they are
+# how one is obtained and how a client learns it has not got one. The gate
+# exempts exactly these plus /api/health.
+app.include_router(membership_route.router, prefix="/api", tags=["membership"])
+
 app.include_router(data.router, prefix="/api/data", tags=["data"])
 app.include_router(research.router, prefix="/api/research", tags=["research"])
 app.include_router(valuation.router, prefix="/api/valuation", tags=["valuation"])
@@ -97,6 +112,7 @@ app.include_router(constraints.router, prefix="/api/constraints", tags=["constra
 app.include_router(factors.router, prefix="/api/factors", tags=["factors"])
 app.include_router(macro.router, prefix="/api/macro", tags=["macro"])
 app.include_router(regimes.router, prefix="/api/regimes", tags=["regimes"])
+app.include_router(breadth.router, prefix="/api/breadth", tags=["breadth"])
 
 
 @app.get("/api/health")

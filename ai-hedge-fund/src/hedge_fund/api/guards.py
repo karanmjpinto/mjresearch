@@ -134,9 +134,18 @@ async def require_llm_access(
     if limit > 0:
         over, retry = _over_limit(_client_ip(request), limit)
         if over:
+            # `reason` matters because the budget check also answers 429, and
+            # the two mean different things to a client: this one is worth
+            # retrying after `Retry-After`, a spent monthly budget is not worth
+            # retrying at all until the month turns.
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail=f"Rate limit reached: {limit} model runs per hour. Retry in {retry}s.",
+                detail={
+                    "reason": "rate_limited",
+                    "message": (
+                        f"Rate limit reached: {limit} model runs per hour. Retry in {retry}s."
+                    ),
+                },
                 headers={"Retry-After": str(retry)},
             )
 
@@ -144,6 +153,17 @@ async def require_llm_access(
 #: Attach to a route with `dependencies=[LLM_ACCESS]`, which leaves the
 #: endpoint's own signature alone.
 LLM_ACCESS = Depends(require_llm_access)
+
+
+#: Public names for the two helpers above, because membership needs them too.
+#:
+#: The join endpoint has to be rate-limited or it is a token-guessing oracle,
+#: and it must use its own namespaced key: `_hits` is keyed on the caller alone,
+#: so a shared bucket would let two clicks on an invite link eat that member's
+#: model-run allowance, and would let someone guessing tokens exhaust the
+#: allowance of everyone behind the same NAT.
+client_ip = _client_ip
+over_limit = _over_limit
 
 
 def reset_rate_limits() -> None:

@@ -24,6 +24,7 @@ from urllib.parse import urlparse
 
 import httpx
 
+from hedge_fund.members import ledger
 from hedge_fund.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -304,6 +305,14 @@ async def call_json(
             system, user, schema, model=model
         )
     elapsed_ms = int((time.perf_counter() - started) * 1000)
+
+    # Meter the call against whoever caused it. A no-op unless an HTTP request
+    # opened an attribution scope, so local runs and the CLI write nothing.
+    # Deliberately after the call rather than reserved before it: the counts
+    # here are the provider's own, which is the only way the ledger and the
+    # gateway's bill can be reconciled. The cost of that choice is that a
+    # provider error raises above this line and bills without being recorded.
+    ledger.record(resolved, usage)
 
     return LLMResult(
         content=content,

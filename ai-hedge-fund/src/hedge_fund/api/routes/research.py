@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from hedge_fund.api.guards import LLM_ACCESS
+from hedge_fund.api.membership import METERED
 from hedge_fund.agents.personas import (
     DEFAULT_COMMITTEE_PERSONAS,
     is_valid_persona,
@@ -102,7 +103,7 @@ async def get_plan_graph():
     return describe_plan_graph()
 
 
-@router.post("/check", dependencies=[LLM_ACCESS])
+@router.post("/check", dependencies=[LLM_ACCESS, METERED])
 async def check_ticker(req: CheckRequest):
     """Aggregated research: prices, fundamentals, technicals, news; optional AI layer."""
     ticker = req.ticker.strip().upper()
@@ -248,7 +249,7 @@ async def get_metric_catalog():
     }
 
 
-@router.post("/plan", dependencies=[LLM_ACCESS])
+@router.post("/plan", dependencies=[LLM_ACCESS, METERED])
 async def plan_ticker(req: PlanRequest):
     """Plan → execute → narrate.
 

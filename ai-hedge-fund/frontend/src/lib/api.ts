@@ -10,27 +10,91 @@
 const CONFIGURED = import.meta.env.VITE_API_BASE_URL?.trim();
 const BASE = CONFIGURED ? `${CONFIGURED.replace(/\/+$/, "")}/api` : "/api";
 
+import type { BreadthResponse } from "@/lib/breadth";
 import type { RegimeAnalysis } from "@/lib/regimes";
 
-async function fetchJSON<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`);
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`API ${res.status}: ${body}`);
+/**
+ * Membership is a cookie, so every call has to carry credentials.
+ *
+ * Worth being precise about why, because the obvious reason is wrong and the
+ * wrong reason gets this line deleted: the Vite dev proxy is *same-origin*
+ * (the browser talks to :5173, which forwards to :8000), and `fetch` already
+ * sends cookies same-origin. Dev works without this. It is needed for a build
+ * where VITE_API_BASE_URL points at another origin — which also requires that
+ * origin to be in the API's CORS allow-list, and that list never to become
+ * `["*"]`, because credentialed requests and a wildcard origin are mutually
+ * exclusive by spec.
+ */
+const CREDENTIALS: RequestCredentials = "include";
+
+/** A refusal the server described, as opposed to a network failure. */
+export class ApiError extends Error {
+  readonly status: number;
+  /** Machine-readable: `not_a_member`, `budget_exhausted`, `rate_limited`, … */
+  readonly reason: string | null;
+  readonly retryAfter: number | null;
+
+  constructor(
+    status: number,
+    message: string,
+    reason: string | null,
+    retryAfter: number | null,
+  ) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.reason = reason;
+    this.retryAfter = retryAfter;
   }
+}
+
+/**
+ * Turn a failed response into an ApiError, keeping the typed reason.
+ *
+ * The reason matters because two different refusals share status 429: a
+ * per-hour rate limit, which is worth retrying after `Retry-After`, and a
+ * spent monthly token budget, which is not worth retrying at all until the
+ * month turns. A bare status cannot tell a caller which message to show.
+ */
+async function toError(res: Response): Promise<ApiError> {
+  const raw = await res.text();
+  let message = raw;
+  let reason: string | null = null;
+  try {
+    const parsed = JSON.parse(raw);
+    const detail = parsed?.detail;
+    if (detail && typeof detail === "object") {
+      message = detail.message ?? raw;
+      reason = detail.reason ?? null;
+    } else if (typeof detail === "string") {
+      message = detail;
+    }
+  } catch {
+    // Not JSON — keep the body as the message.
+  }
+  const retry = Number(res.headers.get("Retry-After"));
+  return new ApiError(
+    res.status,
+    message || `API ${res.status}`,
+    reason,
+    Number.isFinite(retry) && retry > 0 ? retry : null,
+  );
+}
+
+async function fetchJSON<T>(path: string): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, { credentials: CREDENTIALS });
+  if (!res.ok) throw await toError(res);
   return res.json();
 }
 
 async function postJSON<T>(path: string, data: unknown): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     method: "POST",
+    credentials: CREDENTIALS,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`API ${res.status}: ${body}`);
-  }
+  if (!res.ok) throw await toError(res);
   return res.json();
 }
 
@@ -1275,8 +1339,37 @@ export interface FactorProfile {
   themes: ThemeExposure[];
 }
 
+export interface Me {
+  /** False on a local checkout, where there is no door and no badge to show. */
+  gate_enabled: boolean;
+  member: boolean;
+  label: string | null;
+  is_owner: boolean;
+  tokens_this_month: number;
+  monthly_token_cap: number;
+  /** Whether this deployment runs models for anyone at all. */
+  llm_enabled: boolean;
+}
+
 export const api = {
   health: () => fetchJSON<{ status: string }>("/health"),
+
+  // --- Membership ---
+
+  /**
+   * Who you are. 200 with `member: false` when you are nobody, deliberately —
+   * not being signed in yet is the ordinary case on first load, not an error,
+   * and a thrown 401 would make every screen handle it as one.
+   */
+  me: () => fetchJSON<Me>("/me"),
+  join: (token: string) =>
+    postJSON<{ label: string; tokens_this_month: number; monthly_token_cap: number }>(
+      "/join",
+      { token },
+    ),
+  logout: async () => {
+    await fetch(`${BASE}/logout`, { method: "POST", credentials: CREDENTIALS });
+  },
 
   // --- Runs ---
 
@@ -1502,6 +1595,19 @@ export const api = {
     fetchJSON<FactorProfile>(`/factors/profile/${encodeURIComponent(ticker)}`),
 
   /** The growth/inflation map. Committed data, so it answers offline. */
+  /** Market breadth and the divergence test. Computed; no model, no spend. */
+  getBreadth: (
+    opts: { universe?: string; near?: number; floor?: number; sessions?: number } = {},
+  ) => {
+    const q = new URLSearchParams(
+      Object.entries(opts)
+        .filter(([, v]) => v != null)
+        .map(([k, v]) => [k, String(v)]),
+    );
+    const qs = q.toString();
+    return fetchJSON<BreadthResponse>(`/breadth/${qs ? `?${qs}` : ""}`);
+  },
+
   getMacroMap: () => fetchJSON<MacroMapResponse>("/macro/map"),
 
   getMacroPoint: (ticker: string) =>

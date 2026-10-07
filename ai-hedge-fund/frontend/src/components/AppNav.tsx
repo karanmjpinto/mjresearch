@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
+import { MemberBadge } from "@/components/MemberBadge";
 import { TickerBar } from "@/components/TickerBar";
 import { OTHER_DESTINATIONS } from "@/lib/flow";
 import { useTicker } from "@/lib/ticker-context";
@@ -36,6 +37,7 @@ export type AppNavActive =
   | "plan"
   | "research"
   | "screeners"
+  | "breadth"
   | "optimize"
   | "portfolio"
   | "decide"
@@ -114,6 +116,8 @@ export function AppNav({ active, end }: Props) {
           </form>
 
           {end != null && <div className="hidden shrink-0 sm:flex">{end}</div>}
+
+          <MemberBadge />
 
           <ThemeToggle />
 
