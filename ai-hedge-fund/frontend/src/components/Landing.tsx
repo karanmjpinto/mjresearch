@@ -88,12 +88,12 @@ const MORE = [
   },
   {
     n: "07",
-    title: "Three screens, already run",
+    title: "Four screens, already run",
     body: "Multibagger, compounder, Bolton contrarian and Kiyohara's Japan handbook — computed ahead of time, and dated.",
   },
   {
     n: "08",
-    title: "Fifteen investors, named tests",
+    title: "Sixteen investors, named tests",
     body: "Each carries the tests they are known for. Seven speak by default. Read the spread.",
   },
   {

@@ -98,7 +98,7 @@ export const SECTIONS: DocSection[] = [
           "Equal weight, inverse volatility, mean-variance, hierarchical risk parity, and conviction weighting. Returns are aligned on common trading days; Sharpe, volatility, drawdown and effective N are computed from those aligned series.",
       },
       {
-        name: "The three screens",
+        name: "The four screens",
         trust: "computed",
         detail:
           "Every filter and every score is arithmetic over fetched fundamentals. No model reads a screen or ranks it. Results are computed ahead of time and served from a dated cache, so what you see is a list, not a request.",
@@ -110,10 +110,10 @@ export const SECTIONS: DocSection[] = [
           "The theme and factor returns are Jensen, Kelly and Pedersen's published US series from jkpfactors.com, stored as a dated file; the Sharpe ratios and the in-sample/after-sample split are plain arithmetic over them. The company's tilt is a percentile rank against the cached screen universes. No model reads or writes any of it.",
       },
       {
-        name: "Regimes — clustering whole return distributions",
+        name: "Regimes — clustering whole return distributions, and a fitted chain",
         trust: "computed",
         detail:
-          "Each quarter of returns is treated as a distribution and clustered in Wasserstein distance (Horvath, Issa and Muguruza, SSRN 3947905), rather than being reduced to a volatility number and thresholded. No model is involved and the same inputs always give the same labels. The tab also scores its own split, and scores the volatility rule it replaces on the same windows, so the reader can see whether the regimes are real.",
+          "Each quarter of returns is treated as a distribution and clustered in Wasserstein distance (Horvath, Issa and Muguruza, SSRN 3947905), rather than being reduced to a volatility number and thresholded. A hidden Markov model is fitted to the same returns by Baum-Welch, for the transition matrix the clustering cannot produce. No model is involved in any of it — language model, that is — and the same inputs always give the same labels. The tab scores all three labellings on the same windows with the same kernel, including the volatility rule it replaces, so the reader can see whether the regimes are real and which method found them. The chain's transition matrix is served on /api/regimes but is not yet drawn on the tab.",
       },
       {
         name: "Constraint flow — where the investable surface is",
@@ -126,6 +126,12 @@ export const SECTIONS: DocSection[] = [
         trust: "computed",
         detail:
           "Two quarterly news metrics built from FRED (CPI, real GDP) and the Philadelphia Fed's Survey of Professional Forecasters, stored as a dated file; a point is the partial correlation of a series' twelve-month returns to one metric holding the other fixed. The reference series are Kenneth French's market and industry portfolios and the same JKP themes as the Factors tab; only the company's own point is fetched live. No model touches any of it, and every point carries the standard error its overlapping windows imply.",
+      },
+      {
+        name: "Market breadth, and the forward returns after a divergence",
+        trust: "computed",
+        detail:
+          "An advance-decline line, the share of members above their own 200-day average, and new highs less new lows, all built from 503 member price histories rather than read off a vendor's summary figure. The divergence test that follows — episodes, median forward returns, the unconditional comparison — is the same arithmetic. No model reads any of it, which is why the verdict can disagree with the chart.",
       },
       {
         name: "Backtests and the out-of-sample test",
@@ -247,19 +253,21 @@ export const SECTIONS: DocSection[] = [
     body: [
       "The Factors tab under Analysis draws the thirteen themes of the Jensen–Kelly–Pedersen dataset — value, momentum, quality, profitability, investment, low risk, low leverage, size, accruals, debt issuance, profit growth, short-term reversal and seasonality — from their US, monthly, capped value-weighted long-short portfolios back to 1926. The returns are theirs, reshaped by scripts/refresh_jkp.py into a committed file that records the last month it covers, so the tab works offline and never silently changes between two page loads.",
       "Pick a theme and every factor inside it is split around the years its original paper studied: a Sharpe ratio inside that sample, and one after it ended. That is the paper's own question — does a published anomaly keep working once it is known — asked factor by factor. Most shrink; the bar is whether the return stayed positive, not whether it stayed the same size.",
-      "The company's tilt is this app's own measurement, not JKP's. Each characteristic it can compute from the fetched fundamentals is ranked against the roughly eleven hundred names in the cached screens, flipped where JKP buy the low end so that above 50 always means the side the factor buys, and averaged into its theme. Approximations are marked where they differ from JKP's definition, and a theme with nothing measurable is left blank rather than shown as a neutral 50.",
+      "The company's tilt is this app's own measurement, not JKP's. Each characteristic it can compute from the fetched fundamentals is ranked against whichever of the four screen caches' 1,980 names carry that field, which is between about four hundred and eleven hundred of them depending on the field — the Japanese cache stores market capitalisation and balance-sheet lines but no trailing income or cash flow, so it supplies peers to one characteristic and none of the rest — flipped where JKP buy the low end so that above 50 always means the side the factor buys, and averaged into its theme. Approximations are marked where they differ from JKP's definition, and a theme with nothing measurable is left blank rather than shown as a neutral 50.",
     ],
   },
   {
     id: "regimes",
     title: "Regimes, and how to tell whether one is real",
     standfirst:
-      "Clustering whole return distributions instead of thresholding a volatility ratio — and a score that says whether the division holds.",
+      "Clustering whole return distributions instead of thresholding a volatility ratio, a fitted chain for the question clustering cannot answer, and a score that says whether any of the three divisions hold.",
     body: [
       "The Regimes tab under Analysis cuts a company's price history into overlapping windows of about a quarter, treats each window as a distribution of daily returns rather than as a set of summary statistics, and clusters those distributions in 1-Wasserstein distance. The method is Horvath, Issa and Muguruza (SSRN 3947905). In one dimension the optimal transport problem has a closed form — sort two windows and average the absolute differences — so this is ordinary numpy and needs no solver, and a regime's centre is the pointwise median of its members, which is why a single crash window cannot drag it.",
       "It replaces a rule that compared recent volatility to a longer baseline and cut the ratio at 1.25. That rule used one moment and two thresholds nobody derived. On synthetic paths where the regime changes are planted and therefore known, clustering distributions catches substantially more of them than the ratio does, and the gap widens when returns jump — which is the case real equity returns resemble. Those paths are in tests/test_regimes.py as an accuracy floor, because real market data has no answer key and any accuracy figure quoted on it is either circular or someone pointing at a chart.",
-      "The first thing on the tab is not the regimes but the separation ratio, because any clustering returns clusters: ask k-means for two groups and it produces two, whether or not two exist, and the resulting chart is equally convincing either way. The ratio measures how much more a window resembles its own group than the other, using a maximum mean discrepancy two-sample statistic. Above 1 the split means something; at or below 1 it is one population cut in half. The same score is computed for the volatility rule on identical windows with an identical kernel, and shown beside it — including on the names where the old rule wins.",
-      "Two limits are structural rather than temporary. The clustering is fitted over the whole period at once, so every label was assigned knowing what came after it: this describes where a company has been and must not be backtested on or treated as a signal. And it labels rather than predicts — which regime you are in now says nothing here about which comes next.",
+      "The first thing on the tab is not the regimes but the separation ratio, because any clustering returns clusters: ask k-means for two groups and it produces two, whether or not two exist, and the resulting chart is equally convincing either way. The ratio measures how much more a window resembles its own group than the other, using a maximum mean discrepancy two-sample statistic. Above 1 the split means something; at or below 1 it is one population cut in half. The same score is computed for the volatility rule and for the hidden Markov labelling on identical windows with an identical kernel, and shown beside it — including on the names where the old rule wins. A labelling whose windows all fall into one group cannot be scored at all, which is the usual outcome for the chain, and the tab says so rather than printing a number.",
+      "The clustering is fitted over the whole period at once, so every label was assigned knowing what came after it. That limit is structural rather than temporary: this describes where a company has been, and must not be backtested on or treated as a signal.",
+      "Clustering also cannot be asked how long a regime lasts, because it treats the windows as an unordered bag — shuffle the history and the labels come back identical. Every question about order is therefore unanswerable in that model: how long these stretches run, whether turbulence follows turbulence, what the odds are that this one is over. So a hidden Markov model of the same returns is fitted beside it, by Baum-Welch with Gaussian emissions, and the response carries what only a transition matrix can give — each state's persistence, the run length the fitted chain implies, and the share of tomorrow the last day's posterior pushes onto each state. Those three figures are computed and returned by /api/regimes; the tab currently draws only the chain's separation score next to the other two, so for now they are an API answer rather than something on the page.",
+      "That last number is the one to be careful with. It is a description of the fitted history, not a forecast, and the chain it comes from is the weakest detector of the three on the paths where the answer is known: a Gaussian cannot jump and equity returns do, so maximum likelihood prefers to widen one state's variance over spending a transition. That is what tests/test_regimes.py pins — the clustering beats the chain on synthetic paths with planted regime changes — and it is pinned so no later change can quietly promote it. On a real history the chain often cannot be given a separation ratio at all, because its turbulent state is a one- or two-day bucket that never wins a whole window. Read it for the shape of the chain, not for where the market goes next.",
     ],
   },
   {
@@ -312,10 +320,11 @@ export const SECTIONS: DocSection[] = [
     id: "membership",
     title: "Who can run this, and what a seat costs",
     standfirst:
-      "The hosted site is invite-only. The reason is the model bill, not exclusivity for its own sake.",
+      "Invite-only is built and not yet switched on. The reason for it is the model bill, not exclusivity for its own sake.",
     body: [
       "Run locally, none of this applies: the model is Ollama on your own machine, the portfolio is a SQLite file you own, and there is no gate, no member and no allowance. Everything below describes the hosted deployment only, and it is switched off by default in the code.",
-      "On the hosted site the model provider is a paid gateway, so the four routes that invoke a model bill whoever deployed it. Left open, those routes are an anonymous proxy with somebody's card behind it — which is why they ran switched off entirely for months rather than being left reachable. Membership is what lets them come back on: a named member carries a monthly token allowance, so a seat is a known cost rather than an open one.",
+      "On the hosted site the model provider is a paid gateway, so the four routes that invoke a model bill whoever deployed it. Left open, those routes are an anonymous proxy with somebody's card behind it — which is why they have run switched off entirely rather than being left reachable. Membership is what would let them come back on: a named member carries a monthly token allowance, so a seat is a known cost rather than an open one.",
+      "Both switches live in the deployment's environment, not in the code, so this page cannot be the authority on them — ask `GET /api/me`, which reports both. When this was last checked it answered `gate_enabled: false, llm_enabled: false`: nobody is a member, the hosted site asks for no invite, and the four model routes refuse everyone. The code's own defaults differ from that, so a flipped variable makes this paragraph stale with nothing failing. They are two separate switches on purpose — one says 'this deployment runs no models', the other says 'and only members may call anything' — and the order to turn them on is gate first, models second, because the reverse is an open gateway for however long it takes to notice.",
       "Access works by single-use invite link, sent by someone already inside. There is no sign-up form and no waitlist. The link carries its key in the URL fragment rather than the path, so the key is never transmitted to the server and never appears in an access log; the page strips it from browser history as soon as it has been read. An invite opens exactly one session and is then spent, and it can be withdrawn before it is used.",
       "Allowances are counted in tokens, per UTC calendar month, summed from the provider's own reported counts after each call. A member's own usage is shown in the app chrome as a percentage, because a cap you cannot see is a trap whose first symptom is a refusal in the middle of an analysis. Two refusals are deliberately distinguishable: running out of monthly allowance is not the same as hitting the per-hour rate limit, and only one of them is worth retrying.",
       "Dollars are not tracked here. A per-model price table drifts silently as a gateway changes its rates, and a plausible-looking cost that is quietly wrong is exactly the kind of number the rest of this app exists to avoid. The gateway's own dashboard is the source for money; this ledger counts tokens, which is what the allowance is denominated in.",
@@ -373,7 +382,11 @@ export const GAPS: [string, string][] = [
   ],
   [
     "The published site does not run the model",
-    "Four things here invoke a language model: researching a ticker, the plan pipeline, the backtest, and the autoresearch loop. Those run on your own machine against your own Ollama, which is why they are free and why nothing about your book leaves your computer. The published site deliberately refuses them rather than running them for you on a paid gateway — it can show the screens, the methodology and this reference, and it will tell you plainly when you ask it for analysis it cannot do.",
+    "Four things here invoke a language model: researching a ticker, the plan pipeline, the backtest, and the autoresearch loop. Those run on your own machine against your own Ollama, which is why they are free and why nothing about your book leaves your computer. The hosted deployment's provider is a paid gateway instead, so all four are switched off there and answer 503 with a sentence saying why. Membership is what would let them back on, under a per-member allowance; it is not switched on yet, so today the published site runs no model for anyone, member or not.",
+  ],
+  [
+    "And most of its data is not shipped either",
+    "Every one of these files is committed, but only two of the four directories are copied into the deployed image: the JKP factor returns and the macro news series, which is why the Factors and Macro tabs answer on the published site. The screen caches and the breadth series are left out of the image deliberately, so a visitor gets an empty screen list and a breadth page that says it has not been built. The company tilt on the Factors tab needs the screen caches for its peers, so it is absent there too. What the published site is for is the landing page, the methodology and this reference.",
   ],
   [
     "Only the single-investor path is measured",
@@ -381,7 +394,11 @@ export const GAPS: [string, string][] = [
   ],
   [
     "The factor tilt measures less than JKP do",
-    "JKP sort on 153 characteristics from CRSP and Compustat. The tilt uses about twenty that the screen caches can supply, some approximated (a six-month return that does not skip the latest month, a five-year sales growth standing in for three), and four themes — low risk, debt issuance, profit growth and seasonality — cannot be measured at all. Peers are the S&P 500 and SmallCap 600 caches, not JKP's full sample, and on the hosted site there are no caches, so there is no tilt. Accounting ratios also mean something different for banks and insurers, which sit in the same ranking.",
+    "JKP sort on 153 characteristics from CRSP and Compustat. The tilt uses about twenty that the screen caches can supply, some approximated (a six-month return that does not skip the latest month, a five-year sales growth standing in for three), and four themes — low risk, debt issuance, profit growth and seasonality — cannot be measured at all. Peers are whatever the screen caches hold for that characteristic: between about four hundred and eleven hundred US names, median under six hundred, and 1,974 for market capitalisation — the one field the Japanese cache also supplies — not JKP's full sample, and on the hosted site there are no caches, so there is no tilt. Accounting ratios also mean something different for banks and insurers, which sit in the same ranking.",
+  ],
+  [
+    "One factor characteristic is currently wrong, by a lot",
+    "The peer ranking pools every screen cache into one cross-section, and the Japanese cache stores market capitalisation in yen while the US ones store dollars. Nothing converts them. Market equity is the one characteristic read as a raw currency amount rather than a ratio, so every one of the 872 Japanese names outranks the 791 smallest of the 1,102 US names on it — the bottom 72% — and a $44bn US company ranks at the 44th percentile of size in the pooled list where it is really at the 77th. JKP go long the small end, so the flip turns that into a large company reading as a small one, and the error carries into the Size theme average. Every other characteristic is a ratio and is unaffected. This is a defect with a known fix, not a limit of the method — until it lands, read the Size theme on a US company as unreliable.",
   ],
   [
     "Factor returns end where the authors' last update does",
@@ -393,7 +410,11 @@ export const GAPS: [string, string][] = [
   ],
   [
     "Regime labels look backwards",
-    "The regime clustering is fitted over the whole history at once, so each label used the data around it, including later data. It is descriptive only — it cannot be traded on, and it does not say which regime comes next. Choosing how many regimes to fit is also a setting rather than a finding.",
+    "The regime clustering is fitted over the whole history at once, so each label used the data around it, including later data. It is descriptive only, and cannot be traded on. Choosing how many regimes to fit is also a setting rather than a finding, not least because the same k is handed to the clustering and to the chain.",
+  ],
+  [
+    "The chain's next-day number is the most misreadable figure here",
+    "The hidden Markov model is fitted on the whole series too, so its transition matrix is in-sample, and it is the weakest of the three labellings on this app's own separation score — the Gaussian emission cannot represent a jump, which is most of what matters in equity returns. Its persistence and expected run length describe the history it was fitted on. The share of tomorrow it puts on each state is one step of that same matrix applied to the last day's posterior: a restatement of the fit, not a prediction, and it is reported next to how sure the model is that it has even got today right.",
   ],
   [
     "The macro map is missing the assets that carry the argument",
@@ -412,8 +433,8 @@ export const GAPS: [string, string][] = [
     "Valuation scoring uses fixed thresholds rather than sector-relative ones, so a utility and a software company are judged on the same scale.",
   ],
   [
-    "Only three universes load",
-    "The S&P 500, MidCap 400 and SmallCap 600. The NASDAQ-100, Dow and Russell 2000 loaders all broke upstream when their sources changed shape, and were removed rather than left as options that can only fail. Other markets are available as short curated watchlists, not full indices.",
+    "Only four universes load",
+    "The S&P 500, MidCap 400 and SmallCap 600, plus TOPIX Mid400 and Small 1 as one Japanese band. The NASDAQ-100, Dow and Russell 2000 loaders all broke upstream when their sources changed shape, and were removed rather than left as options that can only fail — so did the Nikkei 225, which is why Japan comes from the Tokyo exchange's own listing file instead of a third party's rendering of one. Every other market is a short curated watchlist, not an index.",
   ],
   [
     "Institutional selling is not tracked",

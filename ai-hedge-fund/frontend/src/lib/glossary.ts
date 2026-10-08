@@ -106,7 +106,7 @@ export const GLOSSARY = {
   },
   "factor-tilt": {
     term: "Factor tilt",
-    what: "For each theme, where this company ranks among about eleven hundred S&P 500 and SmallCap 600 names on the characteristics JKP sort on — 0 to 100, with 50 the middle. Above 50 is the side the factor buys.",
+    what: "For each theme, where this company ranks against the cached screen names that carry each characteristic — a few hundred to about eleven hundred, and the count is shown per row — on the characteristics JKP sort on — 0 to 100, with 50 the middle. Above 50 is the side the factor buys.",
     why: "A factor portfolio is long one end of a ranking and short the other. A rank is the honest single-company reading of that.",
     careful:
       "Some characteristics are approximations and several themes cannot be measured from this data at all; those are left blank, not set to 50. A tilt describes the company. It is not a forecast that the premium arrives for it.",
