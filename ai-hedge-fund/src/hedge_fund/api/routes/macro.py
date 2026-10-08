@@ -17,6 +17,7 @@ import pandas as pd
 from fastapi import APIRouter, HTTPException
 
 from hedge_fund.agents.guardrails import GuardrailError, sanitize_ticker
+from hedge_fund.data.frames import close_series
 from hedge_fund.macro import news, sensitivity
 
 router = APIRouter()
@@ -47,23 +48,20 @@ async def macro_map() -> dict[str, Any]:
 
 
 def _monthly_returns(ticker: str) -> tuple[list[str], list[float]]:
-    """Month labels and simple returns from the provider chain's monthly closes."""
+    """Month labels and simple returns from the provider chain's monthly closes.
+
+    Thirteen closes, because twelve returns is the least that places a company
+    on the quarterly map. An empty pair means "not enough history", which this
+    route answers with a 404 rather than a fault.
+    """
     from hedge_fund.data.service import get_data_service
 
     frame = get_data_service().get_price_history(ticker, days=TICKER_DAYS, interval="1mo")
-    if frame is None or frame.empty:
+    closes = close_series(frame, min_points=13)
+    if closes is None:
         return [], []
 
-    column = next((c for c in ("Close", "close", "Adj Close") if c in frame.columns), None)
-    if column is None:
-        return [], []
-
-    closes = pd.to_numeric(frame[column], errors="coerce").dropna()
-    closes = closes[closes > 0]
-    if len(closes) < 13:
-        return [], []
-
-    index = pd.PeriodIndex(pd.to_datetime(closes.index), freq="M")
+    index = pd.PeriodIndex(closes.index, freq="M")
     changes = closes.pct_change().iloc[1:]
     return [str(p) for p in index[1:]], [float(v) for v in changes]
 

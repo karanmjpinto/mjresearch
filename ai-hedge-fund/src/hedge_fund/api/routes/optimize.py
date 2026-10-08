@@ -10,6 +10,7 @@ import pandas as pd
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from hedge_fund.data.frames import close_series
 from hedge_fund.data.service import get_data_service
 from hedge_fund.quant.portfolio import (
     METHOD_META,
@@ -72,12 +73,15 @@ def optimize(req: OptimizeRequest) -> dict[str, Any]:
         except Exception as exc:
             logger.debug("price fetch failed for %s: %s", t, exc)
             continue
-        if df is None or (isinstance(df, pd.DataFrame) and df.empty):
+        # calendar_days because these series are joined on date below. The
+        # providers disagree about what a date is — yfinance a tz-aware
+        # exchange stamp, OpenBB a naive one, some paths a 09:30 session time —
+        # and unfloored a six-name basket either raises on the concat or joins
+        # to an empty frame that reads as "these names never traded together".
+        close = close_series(df, min_points=20, calendar_days=True)
+        if close is None:
             continue
-        df = _normalize_prices(df)
-        if df is None or "close" not in df.columns or len(df) < 20:
-            continue
-        closes[t] = df["close"]
+        closes[t] = close
 
     if len(closes) < 2:
         raise HTTPException(
@@ -138,49 +142,3 @@ def optimize(req: OptimizeRequest) -> dict[str, Any]:
         "equal_weight_metrics": eq_metrics,
         "excluded_tickers": [t for t in tickers if t not in closes],
     }
-
-
-def _calendar_days(idx: pd.DatetimeIndex) -> pd.DatetimeIndex:
-    """One bar per trading day, with no timezone and no time of day.
-
-    The baskets here are assembled from whichever provider answered for each
-    name, and the providers do not agree on what a date is: yfinance returns a
-    tz-aware index in the exchange's zone, OpenBB a naive one, and some paths
-    carry a market-open time rather than midnight. Concatenating a tz-aware
-    series with a naive one raises outright, which is how a six-name basket
-    became a 500. Flooring to the day is the quieter half of the fix — two
-    series stamped 09:30 and 00:00 on the same day would otherwise join to an
-    empty frame and read as "these tickers never traded together".
-
-    Local calendar day, not UTC: an index already in US/Eastern must keep the
-    session it belongs to, and converting to UTC first would move a 20:00
-    close onto the following date.
-    """
-    if idx.tz is not None:
-        idx = idx.tz_localize(None)
-    return idx.normalize()
-
-
-def _normalize_prices(df: pd.DataFrame) -> pd.DataFrame | None:
-    if isinstance(df, list):
-        df = pd.DataFrame(df)
-    if not isinstance(df, pd.DataFrame):
-        return None
-    df = df.copy()
-    df.columns = [str(c).lower() for c in df.columns]
-    if "close" not in df.columns:
-        for alt in ("adjclose", "adj close", "adjusted_close", "price"):
-            if alt in df.columns:
-                df = df.rename(columns={alt: "close"})
-                break
-    if "close" not in df.columns:
-        return None
-    if "date" in df.columns:
-        df = df.set_index(pd.to_datetime(df["date"])).drop(columns=["date"])
-    elif not isinstance(df.index, pd.DatetimeIndex):
-        df.index = pd.to_datetime(df.index)
-    df.index = _calendar_days(df.index)
-    df = df.sort_index()
-    df["close"] = pd.to_numeric(df["close"], errors="coerce")
-    df = df.dropna(subset=["close"])
-    return df

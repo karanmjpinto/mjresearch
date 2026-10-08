@@ -9,6 +9,7 @@ import click
 from rich.console import Console
 from rich.table import Table
 
+from hedge_fund.data.frames import close_series
 from hedge_fund.data.service import get_data_service
 
 console = Console()
@@ -65,10 +66,10 @@ def _show_ticker(ticker: str, as_json: bool):
     console.print(table)
 
     # Quick price
-    df = ds.get_price_history(ticker, days=5)
-    if not df.empty:
-        last = df["close"].iloc[-1]
-        prev = df["close"].iloc[-2] if len(df) > 1 else last
+    close = close_series(ds.get_price_history(ticker, days=5))
+    if close is not None:
+        last = close.iloc[-1]
+        prev = close.iloc[-2] if len(close) > 1 else last
         change = last - prev
         pct = (change / prev) * 100
         color = "green" if change >= 0 else "red"

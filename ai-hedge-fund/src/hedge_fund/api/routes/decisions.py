@@ -8,6 +8,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from hedge_fund.data.frames import latest_close
 from hedge_fund.data.service import get_data_service
 from hedge_fund.db.session import SessionLocal
 from hedge_fund.decisions import assess_addition, store
@@ -25,13 +26,11 @@ def _portfolio() -> dict[str, Any]:
 
 
 def _last_price(ticker: str) -> float | None:
+    """The spot price, or None. A provider that throws is a missing price here."""
     try:
-        df = _ds.get_price_history(ticker, days=7)
-        if df is not None and not df.empty and "close" in df:
-            return float(df["close"].iloc[-1])
+        return latest_close(_ds.get_price_history(ticker, days=7))
     except Exception:
         return None
-    return None
 
 
 class SizeRequest(BaseModel):

@@ -10,6 +10,7 @@ from typing import Any
 
 import pandas as pd
 
+from hedge_fund.data.frames import price_summary as build_price_summary
 from hedge_fund.data.service import get_data_service
 from hedge_fund.nlp.news_sentiment import enrich_news_with_sentiment
 
@@ -80,16 +81,9 @@ def tool_research_snapshot(ticker: str) -> dict[str, Any]:
     sym = ticker.upper().strip()
     fundamentals = ds.get_fundamentals(sym)
     technicals = ds.get_technical_indicators(sym)
-    df = ds.get_price_history(sym, days=30)
-    price_summary: dict[str, Any] = {}
-    if not df.empty:
-        close = df["close"]
-        price_summary = {
-            "current": float(close.iloc[-1]),
-            "change_30d_pct": round((float(close.iloc[-1]) / float(close.iloc[0]) - 1) * 100, 2),
-            "high_30d": float(close.max()),
-            "low_30d": float(close.min()),
-        }
+    # The same four numbers the research snapshot and the UI panel show, from
+    # the same place, so the three cannot drift apart.
+    price_summary: dict[str, Any] = build_price_summary(ds.get_price_history(sym, days=30))
     news = ds.get_news(sym, limit=5)
     news_list = [
         {"title": n.get("title", ""), "date": str(n.get("date", n.get("published", "")))}

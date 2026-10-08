@@ -9,6 +9,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 
+from hedge_fund.data.frames import latest_close
 from hedge_fund.data.service import get_data_service
 from hedge_fund.valuation import implied_bands, summarise
 from hedge_fund.valuation.concentration import concentration
@@ -32,15 +33,7 @@ _ds = get_data_service()
 
 def _last_close(ticker: str) -> float | None:
     """Latest close. Short window: this is a spot price, not a series."""
-    df = _ds.get_price_history(ticker, days=10)
-    if df is None or getattr(df, "empty", True):
-        return None
-    for col in ("close", "Close"):
-        if col in df.columns:
-            series = df[col].dropna()
-            if not series.empty:
-                return float(series.iloc[-1])
-    return None
+    return latest_close(_ds.get_price_history(ticker, days=10))
 
 
 @router.get("/comps/{ticker}")

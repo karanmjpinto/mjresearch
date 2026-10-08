@@ -15,6 +15,7 @@ import numpy as np
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from hedge_fund.data.frames import close_series, latest_close
 from hedge_fund.data.service import get_data_service
 from hedge_fund.db.models import Account, CorporateAction, Holding, Transaction, TxnType
 from hedge_fund.db.models import CorporateActionType as CAType
@@ -360,11 +361,7 @@ def build_portfolio_view(db: Session, account_id: int) -> dict[str, Any]:
     for h in rows:
         fallback = float(h.avg_cost)
         try:
-            df = _ds.get_price_history(h.ticker, days=5)
-            if not df.empty:
-                current = float(df["close"].iloc[-1])
-            else:
-                current = fallback
+            current = latest_close(_ds.get_price_history(h.ticker, days=5)) or fallback
         except Exception as e:
             logger.warning("price for %s: %s", h.ticker, e)
             current = fallback
@@ -444,15 +441,12 @@ def risk_weighted(db: Session, account_id: int, *, days: int = 252) -> dict[str,
 
     for h in rows:
         try:
-            df = _ds.get_price_history(h.ticker, days=days)
-            if df.empty or len(df) < 10:
+            close = close_series(_ds.get_price_history(h.ticker, days=days), min_points=10)
+            if close is None:
                 excluded.append({"ticker": h.ticker, "reason": "insufficient price history"})
                 continue
-            ret = df["close"].pct_change().dropna().values
-            prices.append(ret)
-            cur = float(df["close"].iloc[-1])
-            mv = cur * float(h.shares)
-            live_mv.append(mv)
+            prices.append(close.pct_change().dropna().values)
+            live_mv.append(float(close.iloc[-1]) * float(h.shares))
         except Exception as exc:
             logger.warning("risk: excluding %s — %s", h.ticker, exc)
             excluded.append({"ticker": h.ticker, "reason": str(exc)[:200]})

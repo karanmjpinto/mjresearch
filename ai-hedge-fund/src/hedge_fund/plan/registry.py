@@ -14,6 +14,7 @@ from typing import Any
 
 import pandas as pd
 
+from hedge_fund.data.frames import close_series
 from hedge_fund.plan.types import FieldSpec, Metric, MetricError, ParamSpec
 
 TRADING_DAYS = 252
@@ -64,10 +65,16 @@ def _round(value: float | None, places: int = 4) -> float | None:
 
 
 def _require_close(ctx: Any, days: int) -> pd.Series:
+    """The close series, or a MetricError the plan can report.
+
+    Two refusals, kept apart because a reader acts on them differently: no
+    frame at all is a provider or ticker problem, a short frame is a young
+    listing. Three points is the floor — fewer cannot show dispersion.
+    """
     df = ctx.price_frame(days)
-    if df is None or df.empty or "close" not in df:
+    close = close_series(df, min_points=1)
+    if close is None:
         raise MetricError(f"no price history available for a {days}-day window")
-    close = pd.to_numeric(df["close"], errors="coerce").dropna()
     if len(close) < 3:
         raise MetricError(f"only {len(close)} usable price points for a {days}-day window")
     return close

@@ -17,8 +17,9 @@ import math
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
-import numpy as np
 import pandas as pd
+
+from hedge_fund.data.frames import simple_returns
 
 logger = logging.getLogger(__name__)
 
@@ -77,14 +78,8 @@ def _finite(x: Any) -> float | None:
 
 
 def _returns(df: pd.DataFrame) -> pd.Series | None:
-    if df is None or df.empty or "close" not in df:
-        return None
-    close = pd.to_numeric(df["close"], errors="coerce").dropna()
-    if len(close) < 3:
-        return None
-    rets = close.pct_change().dropna()
-    rets.index = pd.to_datetime(rets.index)
-    return rets[np.isfinite(rets.to_numpy())]
+    """Daily returns, or None. Three closes is the floor — see `simple_returns`."""
+    return simple_returns(df)
 
 
 def _book_returns(

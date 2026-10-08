@@ -47,6 +47,7 @@ from hedge_fund.runs import get_run as _get_run
 from hedge_fund.runs import get_snapshot as _get_snapshot
 from hedge_fund.runs import list_runs as _list_runs
 from hedge_fund.api.research_snapshot import assemble_research_snapshot
+from hedge_fund.data.frames import close_series, normalise_prices
 from hedge_fund.data.service import get_data_service
 from hedge_fund.orchestration import describe_research_graph as _describe_graph
 from hedge_fund.quant.backtest import STRATEGY_META, run_backtest
@@ -73,34 +74,6 @@ def _ok(payload: Any) -> str:
         return json.dumps(payload, default=str, indent=2)
     except Exception as exc:
         return json.dumps({"error": "serialization_failed", "message": str(exc)})
-
-
-def _normalize_price_df(raw: Any) -> pd.DataFrame | None:
-    if raw is None:
-        return None
-    if isinstance(raw, list):
-        df = pd.DataFrame(raw)
-    elif isinstance(raw, pd.DataFrame):
-        df = raw.copy()
-    else:
-        return None
-    if df.empty:
-        return None
-    df.columns = [str(c).lower() for c in df.columns]
-    if "close" not in df.columns:
-        for alt in ("adjclose", "adj close", "adjusted_close", "price"):
-            if alt in df.columns:
-                df = df.rename(columns={alt: "close"})
-                break
-    if "close" not in df.columns:
-        return None
-    if "date" in df.columns:
-        df = df.set_index(pd.to_datetime(df["date"])).drop(columns=["date"])
-    elif not isinstance(df.index, pd.DatetimeIndex):
-        df.index = pd.to_datetime(df.index)
-    df = df.sort_index()
-    df["close"] = pd.to_numeric(df["close"], errors="coerce")
-    return df.dropna(subset=["close"])
 
 
 # --- tools --------------------------------------------------------------
@@ -222,8 +195,8 @@ async def run_backtest_tool(
             }
         )
     raw = _ds().get_price_history(ticker, days=max(60, min(days, 3650)))
-    df = _normalize_price_df(raw)
-    if df is None or df.empty:
+    df = normalise_prices(raw)
+    if df is None:
         return _ok({"ticker": ticker, "error": "no_price_data"})
     try:
         result = run_backtest(
@@ -270,10 +243,13 @@ async def optimize_portfolio(
     closes: dict[str, pd.Series] = {}
     for t in clean:
         raw = _ds().get_price_history(t, days=max(60, min(days, 3650)))
-        df = _normalize_price_df(raw)
-        if df is None or "close" not in df.columns or len(df) < 20:
+        # calendar_days because these series are about to be joined on date:
+        # one provider stamps 09:30 in the exchange zone and another midnight
+        # UTC, and unfloored they share no index at all.
+        close = close_series(raw, min_points=20, calendar_days=True)
+        if close is None:
             continue
-        closes[t] = df["close"]
+        closes[t] = close
 
     if len(closes) < 2:
         return _ok(
