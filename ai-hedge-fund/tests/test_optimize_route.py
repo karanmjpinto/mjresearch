@@ -36,9 +36,13 @@ def test_mixed_timezone_basket_optimises(monkeypatch):
         "BBB": _prices(seed=2),
         "CCC": _prices(tz="UTC", seed=3),
     }
-    monkeypatch.setattr(
-        route._ds, "get_price_history", lambda t, days=730: frames[t], raising=False
-    )
+
+    # Mirrors DataService.get_price_history, so the stub cannot pass while the
+    # real signature has moved on.
+    def fake_history(ticker, days=730, interval="1d", end_date=None):
+        return frames[ticker]
+
+    monkeypatch.setattr(route._ds, "get_price_history", fake_history, raising=False)
 
     out = route.optimize(route.OptimizeRequest(tickers=list(frames), method="hrp"))
 

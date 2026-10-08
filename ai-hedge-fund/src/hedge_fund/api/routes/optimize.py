@@ -10,6 +10,7 @@ import pandas as pd
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from hedge_fund.data.batch import fetch_prices
 from hedge_fund.data.frames import close_series
 from hedge_fund.data.service import get_data_service
 from hedge_fund.quant.portfolio import (
@@ -65,23 +66,21 @@ def optimize(req: OptimizeRequest) -> dict[str, Any]:
     if len(tickers) < 2:
         raise HTTPException(400, "Need at least 2 tickers.")
 
-    # Fetch returns for each ticker
+    # In parallel, not one after another: a provider call is about a second of
+    # network wait, so an eight-name basket took eleven seconds serially and
+    # takes under two this way. A name whose fetch fails is simply absent.
+    frames = fetch_prices(tickers, days=req.days, data_service=_ds)
+
+    # calendar_days because these series are joined on date below. The
+    # providers disagree about what a date is — yfinance a tz-aware exchange
+    # stamp, OpenBB a naive one, some paths a 09:30 session time — and
+    # unfloored a six-name basket either raises on the concat or joins to an
+    # empty frame that reads as "these names never traded together".
     closes: dict[str, pd.Series] = {}
     for t in tickers:
-        try:
-            df = _ds.get_price_history(t, days=req.days)
-        except Exception as exc:
-            logger.debug("price fetch failed for %s: %s", t, exc)
-            continue
-        # calendar_days because these series are joined on date below. The
-        # providers disagree about what a date is — yfinance a tz-aware
-        # exchange stamp, OpenBB a naive one, some paths a 09:30 session time —
-        # and unfloored a six-name basket either raises on the concat or joins
-        # to an empty frame that reads as "these names never traded together".
-        close = close_series(df, min_points=20, calendar_days=True)
-        if close is None:
-            continue
-        closes[t] = close
+        close = close_series(frames.get(t), min_points=20, calendar_days=True)
+        if close is not None:
+            closes[t] = close
 
     if len(closes) < 2:
         raise HTTPException(

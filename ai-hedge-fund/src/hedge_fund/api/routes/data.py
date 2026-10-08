@@ -1,4 +1,17 @@
-"""Data endpoints — price, fundamentals, technicals, macro, news + 13 new categories."""
+"""Data endpoints — price, fundamentals, technicals, macro, news + 13 new categories.
+
+Every handler here is a plain `def`, deliberately. They all do one thing: a
+blocking HTTP call into the provider chain, which takes about a second when the
+answer is not cached. Written as `async def` with no `await` in the body — as
+they were — that second is spent holding the event loop, so the whole process
+stops: four concurrent requests measured 1.01s, 2.01s and 4.03s for one, two
+and four callers, because none of them overlapped.
+
+A sync handler is the fix, not a defect. Starlette runs it in a worker thread,
+so the waits happen side by side and the loop stays free to answer everything
+else, the health check included. Do not add `async` to a handler here unless it
+genuinely awaits something.
+"""
 
 from __future__ import annotations
 
@@ -21,7 +34,7 @@ CONFIG_DIR = Path(__file__).resolve().parents[4] / "config"
 
 
 @router.get("/price/{ticker}")
-async def get_price(ticker: str, days: int = Query(365, ge=1, le=3650)):
+def get_price(ticker: str, days: int = Query(365, ge=1, le=3650)):
     """OHLCV price history."""
     df = _ds.get_price_history(ticker, days=days)
     if df.empty:
@@ -35,7 +48,7 @@ async def get_price(ticker: str, days: int = Query(365, ge=1, le=3650)):
 
 
 @router.get("/fundamentals/{ticker}")
-async def get_fundamentals(ticker: str):
+def get_fundamentals(ticker: str):
     """Key fundamental metrics."""
     result = _ds.get_fundamentals(ticker)
     if "error" in result:
@@ -44,7 +57,7 @@ async def get_fundamentals(ticker: str):
 
 
 @router.get("/technicals/{ticker}")
-async def get_technicals(ticker: str):
+def get_technicals(ticker: str):
     """RSI, MACD, SMA, Bollinger Bands, ATR and trend."""
     result = _ds.get_technical_indicators(ticker)
     if "error" in result:
@@ -53,7 +66,7 @@ async def get_technicals(ticker: str):
 
 
 @router.get("/macro/{series}")
-async def get_macro(series: str, days: int = Query(1825, ge=30, le=7300)):
+def get_macro(series: str, days: int = Query(1825, ge=30, le=7300)):
     """FRED macro time series."""
     df = _ds.get_macro_data(series, days=days)
     if df.empty:
@@ -67,7 +80,7 @@ async def get_macro(series: str, days: int = Query(1825, ge=30, le=7300)):
 
 
 @router.get("/bubble")
-async def get_bubble(days: int = Query(3650, ge=365, le=7300)):
+def get_bubble(days: int = Query(3650, ge=365, le=7300)):
     """Market-wide bubble detector — composite macro valuation & complacency gauges."""
     result = _ds.get_bubble_detector(days=days)
     if "error" in result:
@@ -76,7 +89,7 @@ async def get_bubble(days: int = Query(3650, ge=365, le=7300)):
 
 
 @router.get("/news")
-async def get_news(q: str = Query(..., min_length=1), limit: int = Query(10, ge=1, le=50)):
+def get_news(q: str = Query(..., min_length=1), limit: int = Query(10, ge=1, le=50)):
     """News search."""
     results = _ds.get_news(q, limit=limit)
     return {"query": q, "count": len(results), "articles": results}
@@ -88,7 +101,7 @@ async def get_news(q: str = Query(..., min_length=1), limit: int = Query(10, ge=
 
 
 @router.get("/esg/{ticker}")
-async def get_esg(ticker: str):
+def get_esg(ticker: str):
     """ESG scores (requires Finnhub API key)."""
     result = _ds.get_esg(ticker)
     if result is None:
@@ -97,7 +110,7 @@ async def get_esg(ticker: str):
 
 
 @router.get("/insider/{ticker}")
-async def get_insider(ticker: str):
+def get_insider(ticker: str):
     """Insider transactions."""
     result = _ds.get_insider(ticker)
     if result is None:
@@ -106,7 +119,7 @@ async def get_insider(ticker: str):
 
 
 @router.get("/institutional/{ticker}")
-async def get_institutional(ticker: str):
+def get_institutional(ticker: str):
     """Institutional holders."""
     result = _ds.get_institutional(ticker)
     if result is None:
@@ -115,7 +128,7 @@ async def get_institutional(ticker: str):
 
 
 @router.get("/earnings/{ticker}")
-async def get_earnings(ticker: str):
+def get_earnings(ticker: str):
     """Earnings dates, history, estimates."""
     result = _ds.get_earnings(ticker)
     if result is None:
@@ -124,7 +137,7 @@ async def get_earnings(ticker: str):
 
 
 @router.get("/analyst/{ticker}")
-async def get_analyst(ticker: str):
+def get_analyst(ticker: str):
     """Analyst ratings and price targets."""
     result = _ds.get_analyst(ticker)
     if result is None:
@@ -133,7 +146,7 @@ async def get_analyst(ticker: str):
 
 
 @router.get("/sentiment/{ticker}")
-async def get_sentiment(ticker: str):
+def get_sentiment(ticker: str):
     """Provider news-sentiment scores (requires a Finnhub API key).
 
     Returns an explicit `available: false` rather than a 404 when no provider is
@@ -159,7 +172,7 @@ async def get_sentiment(ticker: str):
 
 
 @router.get("/sector-performance")
-async def get_sector_performance():
+def get_sector_performance():
     """Sector performance rankings, best to worst, over six windows."""
     result = _ds.get_sector_performance()
     if result is None:
@@ -178,7 +191,7 @@ async def get_sector_performance():
 
 
 @router.get("/fama-french")
-async def get_fama_french():
+def get_fama_french():
     """Fama-French 5-factor data."""
     result = _ds.get_fama_french()
     if result is None:
@@ -187,7 +200,7 @@ async def get_fama_french():
 
 
 @router.get("/options/{ticker}")
-async def get_options(ticker: str):
+def get_options(ticker: str):
     """Options chain data."""
     result = _ds.get_options(ticker)
     if result is None:
@@ -196,7 +209,7 @@ async def get_options(ticker: str):
 
 
 @router.get("/filings/{ticker}")
-async def get_filings(ticker: str):
+def get_filings(ticker: str):
     """SEC filings (requires Finnhub API key)."""
     result = _ds.get_filings(ticker)
     if result is None:
@@ -205,7 +218,7 @@ async def get_filings(ticker: str):
 
 
 @router.get("/congressional/{ticker}")
-async def get_congressional(ticker: str):
+def get_congressional(ticker: str):
     """Congressional trades (requires Finnhub API key)."""
     result = _ds.get_congressional(ticker)
     if result is None:
@@ -214,7 +227,7 @@ async def get_congressional(ticker: str):
 
 
 @router.get("/peers/{ticker}")
-async def get_peers(ticker: str):
+def get_peers(ticker: str):
     """Peer comparison data."""
     result = _ds.get_peers(ticker)
     if result is None:
@@ -223,13 +236,13 @@ async def get_peers(ticker: str):
 
 
 @router.get("/providers/status")
-async def get_provider_status():
+def get_provider_status():
     """Status of all registered data providers."""
     return {"providers": _ds.get_provider_status()}
 
 
 @router.get("/watchlists")
-async def get_watchlists():
+def get_watchlists():
     """Named ticker lists for the research dashboard (edit config/watchlists.json)."""
     path = CONFIG_DIR / "watchlists.json"
     if not path.exists():

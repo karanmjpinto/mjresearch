@@ -15,6 +15,7 @@ import numpy as np
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from hedge_fund.data.batch import fetch_prices
 from hedge_fund.data.frames import close_series, latest_close
 from hedge_fund.data.service import get_data_service
 from hedge_fund.db.models import Account, CorporateAction, Holding, Transaction, TxnType
@@ -358,15 +359,15 @@ def build_portfolio_view(db: Session, account_id: int) -> dict[str, Any]:
     holdings: list[PositionSnapshot] = []
     total_mv = float(acc.cash_balance)
 
+    # One parallel fetch for the whole book rather than one call per position.
+    # A twenty-name portfolio was twenty seconds of network wait in a row, and
+    # this is the view the app opens on. A name that does not answer is absent
+    # from `quotes`, and falls back to its cost basis exactly as before.
+    quotes = fetch_prices([h.ticker for h in rows], days=5, data_service=_ds)
+
     for h in rows:
         fallback = float(h.avg_cost)
-        try:
-            current = latest_close(_ds.get_price_history(h.ticker, days=5)) or fallback
-        except Exception as e:
-            logger.warning("price for %s: %s", h.ticker, e)
-            current = fallback
-
-        current = _finite_float(current, fallback)
+        current = _finite_float(latest_close(quotes.get(h.ticker)) or fallback, fallback)
         sh = float(h.shares)
         mv = _finite_float(current * sh, 0.0)
         cost = _finite_float(float(h.avg_cost) * sh, 0.0)
@@ -439,18 +440,19 @@ def risk_weighted(db: Session, account_id: int, *, days: int = 252) -> dict[str,
     # answer. Keep the exclusions and return them.
     excluded: list[dict[str, str]] = []
 
+    # Parallel, for the same reason as the valuation above. `fetch_prices`
+    # logs and omits a name whose provider raised, which is what the `except`
+    # here used to do — so an unavailable name is still an exclusion with a
+    # reason, not a missing row.
+    frames = fetch_prices([h.ticker for h in rows], days=days, data_service=_ds)
+
     for h in rows:
-        try:
-            close = close_series(_ds.get_price_history(h.ticker, days=days), min_points=10)
-            if close is None:
-                excluded.append({"ticker": h.ticker, "reason": "insufficient price history"})
-                continue
-            prices.append(close.pct_change().dropna().values)
-            live_mv.append(float(close.iloc[-1]) * float(h.shares))
-        except Exception as exc:
-            logger.warning("risk: excluding %s — %s", h.ticker, exc)
-            excluded.append({"ticker": h.ticker, "reason": str(exc)[:200]})
+        close = close_series(frames.get(h.ticker), min_points=10)
+        if close is None:
+            excluded.append({"ticker": h.ticker, "reason": "insufficient price history"})
             continue
+        prices.append(close.pct_change().dropna().values)
+        live_mv.append(float(close.iloc[-1]) * float(h.shares))
 
     if not prices or not live_mv:
         return {"error": "insufficient price history", "excluded": excluded}
