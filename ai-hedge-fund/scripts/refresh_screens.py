@@ -2,7 +2,7 @@
 
 Run from the repo root:
 
-    uv run python scripts/refresh_screens.py                    # both screens, each
+    uv run python scripts/refresh_screens.py                    # every screen, each
                                                                 # on the universe it
                                                                 # is written for
     uv run python scripts/refresh_screens.py --universe sp400    # mid-caps
@@ -209,7 +209,7 @@ def main() -> int:
     ap.add_argument(
         "--universe",
         default=None,
-        help="universe id: sp500, sp400, sp600. Default: each screen's own.",
+        help="universe id: sp500, sp400, sp600, jp_mid_small. Default: each screen's own.",
     )
     ap.add_argument(
         "--screen",

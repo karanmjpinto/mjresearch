@@ -72,7 +72,7 @@ export function DeploymentLimits() {
     missing.push({
       what: "Screen results",
       detail:
-        "The three screens will list no names here. They are computed by a refresh against a market data provider and cached on the machine that ran it; this deployment has no cache. The screens' rules and thresholds are still documented in full.",
+        "The screens will list no names here. They are computed by a refresh against a market data provider and cached on the machine that ran it; this deployment has no cache. The screens' rules and thresholds are still documented in full.",
     });
   }
 
