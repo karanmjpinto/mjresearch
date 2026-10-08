@@ -206,6 +206,13 @@ DEFAULT_UNIVERSE_FOR: dict[str, str] = {
     # All-cap by nature — Bolton ran a UK all-companies fund — but the 500 is
     # where "unloved" is most surprising and most liquid to act on.
     "bolton-contrarian": "sp500",
+    # The only screen here that is not optional about its universe. Kiyohara's
+    # checklist is a page of the Japan Company Handbook, and two of its tests
+    # — the founder family's stake and the inheritance tax that eventually
+    # forces it to move — are facts about Japanese ownership. Pointed at the
+    # S&P 500 it would still return names, which is the problem: a plausible
+    # list produced by applying a framework outside the market it describes.
+    "kiyohara-handbook": "jp_mid_small",
 }
 
 #: Fallback for anything not named above.
@@ -235,6 +242,7 @@ SCREEN_FIELDS: dict[str, ScreenFields] = {
     "yartseva": ScreenFields("stage1_passed", "composite", "stage1_failures"),
     "acquisition-compounder": ScreenFields("stage1_passed", "total_score", "stage1_failures"),
     "bolton-contrarian": ScreenFields("passed", "composite", "failures"),
+    "kiyohara-handbook": ScreenFields("passed", "composite", "failures"),
 }
 
 

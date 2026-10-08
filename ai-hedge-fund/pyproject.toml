@@ -10,6 +10,10 @@ dependencies = [
     "uvicorn[standard]>=0.34",
     "httpx>=0.28",
     "pandas>=2.2",
+    # Read by the Japan universe loader: the Tokyo exchange publishes its
+    # listing file as xlsx and nothing else, and pandas needs this to open it.
+    # Previously present only as a transitive dependency of openbb.
+    "openpyxl>=3.1",
     "numpy>=2.0",
     "pydantic>=2.10",
     "pydantic-settings>=2.7",

@@ -9,9 +9,15 @@ Run from the repo root:
     uv run python scripts/refresh_screens.py --screen yartseva --max 120
     uv run python scripts/refresh_screens.py --fill              # retry what failed
 
-Universes: sp500, sp400, sp600. With no --universe, each screen is refreshed on
-its own default — the multi-bagger screen on the SmallCap 600, because its
-market-cap ceiling means it cannot pass a single S&P 500 name.
+Universes: sp500, sp400, sp600, jp_mid_small. With no --universe, each screen is
+refreshed on its own default — the multi-bagger screen on the SmallCap 600,
+because its market-cap ceiling means it cannot pass a single S&P 500 name, and
+the Kiyohara screen on Japanese mid and small caps, because its checklist is a
+page of the Japan Company Handbook.
+
+An explicit --universe applies to every screen named, which is rarely what you
+want across markets: `--universe sp500` will run the Kiyohara screen over US
+large caps and produce a list it has no business producing.
 
 Concurrency is the point. Each name costs a few seconds of waiting on
 yfinance, almost none of it CPU, so the work is embarrassingly parallel and
@@ -36,6 +42,7 @@ from hedge_fund.api.routes.screeners import DEFAULT_UNIVERSE_FOR as api_defaults
 from hedge_fund.data.universes import load_universe
 from hedge_fund.screeners import cache
 from hedge_fund.screeners.bolton_contrarian import run_bolton_contrarian_for_ticker
+from hedge_fund.screeners.kiyohara_handbook import run_kiyohara_handbook_for_ticker
 from hedge_fund.screeners.acquisition_compounder import (
     run_acquisition_compounder_for_ticker,
 )
@@ -48,6 +55,7 @@ RUNNERS = {
     "yartseva": run_yartseva_for_ticker,
     "acquisition-compounder": run_acquisition_compounder_for_ticker,
     "bolton-contrarian": run_bolton_contrarian_for_ticker,
+    "kiyohara-handbook": run_kiyohara_handbook_for_ticker,
 }
 
 #: Imported from the API so the script and the page it feeds cannot drift.
@@ -70,6 +78,15 @@ FILL_WORKERS = 2
 #: cheap — the point is to find out whether the provider is answering at all.
 PREFLIGHT_TICKERS = ("AAPL", "MSFT", "JNJ")
 
+#: Except where the screen cannot say anything about those three. The Kiyohara
+#: screen reads a Japanese shareholder register and a yen-denominated market
+#: cap, so probing it with US large caps tests the provider with the one input
+#: the screen is built to refuse — and a correct refusal would read as the
+#: provider being offline, which aborts the run.
+PREFLIGHT_TICKERS_FOR = {
+    "kiyohara-handbook": ("7203.T", "6301.T", "8058.T"),
+}
+
 
 def preflight(screen: str) -> str:
     """Can the provider answer at all, before we spend twenty minutes finding out?
@@ -90,8 +107,9 @@ def preflight(screen: str) -> str:
     cache full of companies that look like they have no financials.
     """
     runner = RUNNERS[screen]
+    probes = PREFLIGHT_TICKERS_FOR.get(screen, PREFLIGHT_TICKERS)
     good = 0
-    for t in PREFLIGHT_TICKERS:
+    for t in probes:
         try:
             row = runner(t)
         except Exception as exc:  # noqa: BLE001
@@ -103,7 +121,7 @@ def preflight(screen: str) -> str:
             log.warning("  preflight %s: %s", t, str(row.get("error"))[:90])
     if good == 0:
         return "offline"
-    return "ok" if good == len(PREFLIGHT_TICKERS) else "degraded"
+    return "ok" if good == len(probes) else "degraded"
 
 
 def run_screen(screen: str, tickers: list[str], workers: int) -> list[dict]:
@@ -157,7 +175,9 @@ def fill_errors(screen: str, universe: str, workers: int) -> int:
         log.info("%s/%s: nothing to fill", screen, universe)
         return 0
 
-    log.info("%s/%s: refilling %d failed names at %d workers", screen, universe, len(failed), workers)
+    log.info(
+        "%s/%s: refilling %d failed names at %d workers", screen, universe, len(failed), workers
+    )
     started = time.time()
     refreshed = run_screen(screen, failed, workers)
 
@@ -256,14 +276,12 @@ def main() -> int:
                 log.error(
                     "  preflight: offline — the data provider answered for none of %s. "
                     "Not starting, and not overwriting the existing cache.",
-                    ", ".join(PREFLIGHT_TICKERS),
+                    ", ".join(PREFLIGHT_TICKERS_FOR.get(screen, PREFLIGHT_TICKERS)),
                 )
                 rc = max(rc, 0)
                 continue
             if state == "degraded":
-                log.warning(
-                    "  preflight: degraded — expect gaps. Re-run with --fill afterwards."
-                )
+                log.warning("  preflight: degraded — expect gaps. Re-run with --fill afterwards.")
             else:
                 log.info("  preflight: ok")
 

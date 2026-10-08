@@ -183,9 +183,9 @@ export const SECTIONS: DocSection[] = [
   },
   {
     id: "screens",
-    title: "The three screens",
+    title: "The four screens",
     standfirst:
-      "Each one is a different question, pointed at the universe it was designed for.",
+      "Each one is a different question, pointed at the universe and the market it was designed for.",
     items: [
       {
         name: "Yartseva multibagger — S&P SmallCap 600",
@@ -205,17 +205,25 @@ export const SECTIONS: DocSection[] = [
         detail:
           "Anthony Bolton's special-situations framework, automated as far as it honestly goes: cheap on at least one multiple, sitting low in its own 52-week range, and generating enough cash to survive the wait. Scored out of 100 across valuation, neglect, balance sheet, insider buying and whether the fall has stopped.",
       },
+      {
+        name: "Kiyohara handbook — Japan mid & small",
+        trust: "computed",
+        detail:
+          "Tatsuro Kiyohara's own checklist, which is one page of the Japan Company Handbook: the P/E on the second-year forecast, the equity ratio, net cash against market value, and whether the company has ever issued equity to fund itself. Scored out of 100. It runs on TOPIX Mid400 plus Small 1, sourced from the Tokyo exchange's own listing file, because the framework is about Japanese ownership and would still produce a plausible-looking list anywhere else.",
+      },
     ],
     body: [
       "The Bolton screen is deliberately incomplete, and the gap is the most important thing about it. His framework has five sections and only four can be computed. The fifth is the catalyst — a restructuring, a hidden asset, a legal overhang lifting, an earnings inflection still priced as decline — and that is the section he says separates a re-rating from a value trap. It cannot be read from a data feed.",
       "So the screen does not score it and does not pretend to. Every row it returns records that the catalyst was never checked, and by Bolton's own reasoning a name that passes is a value trap until someone finds one. That judgment is the Bolton persona's job on a company's own page, which is why the screen's output links there instead of ending in a verdict.",
+      "The Kiyohara screen has the same shape of hole in two places. His P/E ceiling depends on what kind of business it is — 20x for high share of a global niche, 15x for a long and credible customer list, 10x for small or mid-cap real estate, 7x for a subcontractor living off three customers — and a data feed carries a sector code, not a market share. So the screen reports which of the four ceilings a name is under and records that the business type was never checked; real estate is the one tier the sector code settles, and that 10x is enforced. The second hole is the shareholder register: the Handbook names the founder's family, and the trade he described turns on inheritance tax eventually forcing that stake to move. The feed gives one anonymous insider percentage, so the screen says 'closely held' at most and never claims to have found the founder.",
+      "What it deliberately does not look at is also his: no dividend, no price chart, no broker ratings. He says to ignore them, so nothing in the screen reads them, and a test fails if a field for any of them ever appears.",
     ],
   },
   {
     id: "investors",
     title: "The investor committee",
     standfirst:
-      "Fifteen investors are available; seven speak by default, chosen to disagree for different reasons.",
+      "Sixteen investors are available; seven speak by default, chosen to disagree for different reasons.",
     body: [
       "Each investor is a prompt built from a stored profile: who they are, how they think, and the concrete tests they apply. The app shows you those tests next to their verdict, and both come from the same source — a description kept separately from the instruction would eventually tell you an investor weighs one thing while the model had been told to weigh another.",
       "The default committee is Buffett, Graham, Wood, Burry, Bolton, Druckenmiller and Damodaran. Each covers an axis the others do not: business quality, statistical cheapness, disruption, the bear case, the unloved-with-a-catalyst, the macro regime, and whether the price's own assumptions are internally consistent. A committee of near-duplicates produces a confident consensus that reflects one way of looking, which is worse than a narrower claim honestly made.",
@@ -357,7 +365,7 @@ export const GAPS: [string, string][] = [
   ],
   [
     "No screen checks a catalyst",
-    "The Bolton screen is explicit about it, but it applies to all three: a passing name is a candidate for a question, not an answer to one. Nothing in the app can see a restructuring, a spin-off or a legal overhang lifting.",
+    "The Bolton screen is explicit about it, but it applies to all four: a passing name is a candidate for a question, not an answer to one. Nothing in the app can see a restructuring, a spin-off or a legal overhang lifting.",
   ],
   [
     "Committee conviction is not reproducible",

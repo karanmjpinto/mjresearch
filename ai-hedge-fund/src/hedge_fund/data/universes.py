@@ -17,6 +17,15 @@ A loader that always raises is worse than an absent one — it puts a choice in
 the UI that can only fail — so they are not listed. The S&P 600 replaces the
 Russell 2000 as the small-cap universe: a real index rather than one fund's
 holdings, and the band the multi-bagger screen actually needs.
+
+Japan is the exception to the scraping pattern, because it had to be. The
+Kiyohara screen reads the Japan Company Handbook's own checks, so it needs a
+Japanese universe, and the obvious sources are the ones already known to be
+dead: the Nikkei 225 Wikipedia article renders no constituents table and its
+navbox is lazy-loaded, so `read_html` finds price history and nothing else.
+The Tokyo exchange publishes the list itself — every domestic listing with its
+33-sector code and its TOPIX size band — so `jp_mid_small` comes from the
+primary source rather than a third party's rendering of it.
 """
 
 from __future__ import annotations
@@ -57,6 +66,16 @@ UNIVERSE_META: list[dict[str, Any]] = [
         ),
         "approx_count": 600,
     },
+    {
+        "id": "jp_mid_small",
+        "label": "Japan mid & small",
+        "description": (
+            "TOPIX Mid400 plus Small 1 — the mid and small Japanese companies "
+            "the Kiyohara screen is written for. Sourced from the Tokyo "
+            "exchange's own listing file."
+        ),
+        "approx_count": 874,
+    },
 ]
 
 _CACHE: dict[str, tuple[float, list[str]]] = {}
@@ -80,9 +99,13 @@ def _cached(key: str, loader: Any) -> list[str]:
 
 
 def _fetch_url_text(url: str) -> str:
+    return _fetch_url_bytes(url).decode("utf-8", errors="replace")
+
+
+def _fetch_url_bytes(url: str) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": _WIKI_UA})
     with urllib.request.urlopen(req, timeout=120) as r:
-        return r.read().decode("utf-8", errors="replace")
+        return bytes(r.read())
 
 
 def fetch_sp500() -> list[str]:
@@ -134,6 +157,71 @@ def fetch_sp600() -> list[str]:
     return _fetch_sp_list("https://en.wikipedia.org/wiki/List_of_S%26P_600_companies", 600)
 
 
+#: Every domestic listing on the Tokyo exchange, with its sector and its
+#: TOPIX size band. Published by JPX in English and updated monthly.
+JPX_LISTED_URL = (
+    "https://www.jpx.co.jp/english/markets/statistics-equities/misc/"
+    "tvdivq0000001vg2-att/data_e.xlsx"
+)
+
+#: The size bands the Kiyohara screen wants. He ran a Japanese small and mid
+#: cap fund, and the two largest bands — Core30 and Large70 — are the hundred
+#: companies every Japanese institution already owns, which is the opposite of
+#: the shelf he worked off. TOPIX Small 2 is left out for length rather than
+#: principle: it is another 660 names, and each one costs a few seconds of
+#: waiting on the data provider.
+JP_MID_SMALL_BANDS = ("TOPIX Mid400", "TOPIX Small 1")
+
+
+def jp_symbol(code: str) -> str:
+    """A Tokyo listing code as Yahoo spells it: `7203` becomes `7203.T`.
+
+    Deliberately not `normalize_yahoo_symbol`, which turns a dot into a hyphen
+    for US class shares and would make `7203.T` into `7203-T` — a symbol that
+    returns no data rather than an error. Codes are left-padded because the
+    exchange file stores them as text but a spreadsheet round-trip can drop a
+    leading zero, and some are alphanumeric now (`160A`), so this does not
+    assume digits.
+    """
+    c = str(code).strip().upper()
+    if c.isdigit():
+        c = c.zfill(4)
+    return f"{c}.T"
+
+
+def fetch_jp_mid_small() -> list[str]:
+    """Mid and small Japanese companies, from the exchange's own listing file.
+
+    Picked by the two columns that matter rather than by row position, for the
+    same reason the S&P loaders pick their table by shape: the file carries
+    ETFs, REITs, foreign listings and the PRO market alongside the domestic
+    companies, and taking it whole would put 485 exchange-traded funds into a
+    screen that reads company balance sheets.
+    """
+    raw = _fetch_url_bytes(JPX_LISTED_URL)
+    df = pd.read_excel(io.BytesIO(raw))
+
+    needed = {"Local Code", "Section/Products", "Size (New Index Series)"}
+    missing = needed - {str(c) for c in df.columns}
+    if missing:
+        raise ValueError(f"JPX listing file is missing columns: {sorted(missing)}")
+
+    domestic = df["Section/Products"].astype(str).str.contains("Domestic", na=False)
+    banded = df["Size (New Index Series)"].astype(str).str.strip().isin(JP_MID_SMALL_BANDS)
+    rows = df[domestic & banded]
+
+    # A shrunken file is the failure this guards. If JPX changes the size
+    # labels, the filter matches nothing and returns an empty universe — which
+    # reads downstream as a market with no companies in it rather than as a
+    # broken loader.
+    if len(rows) < 600:
+        raise ValueError(
+            f"JPX listing file yielded only {len(rows)} mid/small names "
+            f"(expected ~874) — the size bands {JP_MID_SMALL_BANDS} may have been renamed"
+        )
+    return _dedupe([jp_symbol(c) for c in rows["Local Code"].tolist() if pd.notna(c)])
+
+
 #: Module-level rather than built inside `load_universe`, so that the one
 #: invariant that actually broke here is testable: every universe advertised in
 #: UNIVERSE_META must have a loader, and every loader must be advertised. The
@@ -144,6 +232,7 @@ LOADERS: dict[str, Any] = {
     "sp500": fetch_sp500,
     "sp400": fetch_sp400,
     "sp600": fetch_sp600,
+    "jp_mid_small": fetch_jp_mid_small,
 }
 
 

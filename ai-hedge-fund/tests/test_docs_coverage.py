@@ -37,6 +37,7 @@ SCREEN_PROSE = {
     "yartseva": "multibagger",
     "acquisition-compounder": "compounder",
     "bolton-contrarian": "Bolton",
+    "kiyohara-handbook": "Kiyohara",
 }
 
 

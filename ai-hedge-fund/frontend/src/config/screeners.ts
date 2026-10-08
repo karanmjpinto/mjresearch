@@ -38,11 +38,19 @@ export type ScreenerViewDef = {
    * the `else` silently claimed every new screen was the compounder. Carrying
    * the real name as data makes adding a screen a row rather than a branch.
    */
-  screenId?: "yartseva" | "acquisition-compounder" | "bolton-contrarian";
+  screenId?:
+    | "yartseva"
+    | "acquisition-compounder"
+    | "bolton-contrarian"
+    | "kiyohara-handbook";
   /** Highest attainable score, for the result bars. */
   scoreMax?: number;
   /** Glossary term for the results heading. */
-  infoTerm?: "screen-yartseva" | "screen-acquisition" | "screen-bolton";
+  infoTerm?:
+    | "screen-yartseva"
+    | "screen-acquisition"
+    | "screen-bolton"
+    | "screen-kiyohara";
   /** Heading and blurb for the pre-computed results panel. */
   resultsTitle?: string;
   resultsBlurb?: string;
@@ -134,11 +142,69 @@ export const SCREENER_VIEWS: ScreenerViewDef[] = [
     criteria: [],
     plays: [],
   },
+  {
+    id: "kiyohara_handbook",
+    screenId: "kiyohara-handbook",
+    scoreMax: 100,
+    infoTerm: "screen-kiyohara",
+    resultsTitle: "Japanese mid and small caps, ranked on his own checklist",
+    resultsBlurb:
+      "TOPIX Mid400 and Small 1, from the Tokyo exchange's own listing file. Every name here is under the loosest of his four P/E ceilings on the second-year forecast and has an equity ratio thick enough not to need a share issue. Which ceiling actually applies is a judgment about the business, and the founder's stake is not in any feed — both are left to the reader, and to the Kiyohara persona on a company's own page.",
+    label: "Kiyohara Handbook",
+    description:
+      "Tatsuro Kiyohara compounded roughly 93x over three decades in Japanese small and mid caps, then retired and published what he looks at: one page of the Japan Company Handbook. This is that page — second-year P/E against the ceiling the business earns, the shareholder register, the equity ratio, net cash against market value, and whether the company has ever asked the market for money. Nothing else, because he says to ignore everything else.",
+    usesApi: true,
+    criteriaSections: [
+      {
+        title: "Hard filters (all required)",
+        items: [
+          "A second-year earnings forecast exists and is positive — his whole method prices next year, so without one there is nothing to judge",
+          "Second-year P/E under 20x, the loosest of his four ceilings",
+          "Real estate under 10x — the one tier a sector code settles, and the band he worked in",
+          "Equity ratio of at least 30%: enough cushion that a downturn does not become a share issue",
+          "Market cap above ¥10bn, applied in the currency the company reports in rather than converted at an invented rate",
+        ],
+      },
+      {
+        title: "Score (out of 100)",
+        items: [
+          "Valuation 30 — the second-year P/E itself, scored against 20x rather than against a tier the screen cannot know",
+          "Forecast 20 — second-year earnings against the first year, weighted heavier than the first year against trailing, because the price already reflects next year",
+          "Equity ratio 20 — 30% is the floor, 70% is full marks",
+          "Net cash 15 — net cash over market cap, how much of the price is handed back to you",
+          "Capital structure 10 — share count flat or falling; a buyback scores, a financing issue scores nothing",
+          "Closely held 5 — insiders' aggregate stake, the most the data can say about the register",
+        ],
+      },
+      {
+        title: "His four P/E ceilings — reported, not chosen",
+        items: [
+          "Under 20x: high market share in a global niche",
+          "Under 15x: lower share, but many credible customers",
+          "Under 10x: small or mid-cap real estate — his bread and butter",
+          "Under 7x: a subcontractor or tier-two supplier with concentrated customers",
+        ],
+      },
+      {
+        title: "Not scored, and why",
+        items: [
+          "Which ceiling applies — market share, niche, customer concentration — needs reading, not a sector code. Every row records that the business type was never checked",
+          "The founder and family stake, which is what the inheritance-tax trade turns on: the Handbook names them, the feed gives one anonymous insider percentage",
+          "Dividend, price chart, broker ratings and momentum are absent by his instruction, not by omission",
+          "Forecasts are the analyst consensus for next fiscal year, a substitute for the Handbook's own Toyo Keizai estimate rather than the same number",
+        ],
+      },
+    ],
+    criteria: [],
+    plays: [],
+  },
 ];
 
 export const DEFAULT_SCREENER_ID = SCREENER_VIEWS[0]!.id;
 
-export function getScreenerById(id: string | undefined): ScreenerViewDef | undefined {
+export function getScreenerById(
+  id: string | undefined,
+): ScreenerViewDef | undefined {
   if (!id) return undefined;
   return SCREENER_VIEWS.find((v) => v.id === id);
 }

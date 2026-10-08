@@ -230,6 +230,13 @@ export const GLOSSARY = {
     careful:
       "This list is not a list of buys, and the gap is the whole point. Bolton's framework has a fifth section — the catalyst — and he says cheap without one is a value trap. Restructurings, spin-offs, hidden assets and legal overhangs lifting cannot be read from a data feed, so the screen does not score them and does not pretend to. Open a name and ask the Bolton persona what changes it; if there is no answer, that is your answer.",
   },
+  "screen-kiyohara": {
+    term: "Kiyohara handbook screen",
+    what: "Tatsuro Kiyohara's own checklist, which is one page of the Japan Company Handbook: the P/E on the second-year forecast, the equity ratio, net cash against market value, and whether the company has ever had to issue equity. Scored out of 100 across Japanese mid and small caps.",
+    why: "He compounded roughly 93x over three decades on this list and then published it, which makes it one of very few screens whose author has said out loud what it should contain — and what it should leave out. The dividend and the price chart are absent because he says to ignore them.",
+    careful:
+      "Two of his tests are missing and the screen says so on every row. Which P/E ceiling applies depends on the business — 20x for a global niche leader, 7x for a subcontractor with three customers — and a feed carries a sector code, not a market share, so the screen reports every ceiling a name is under rather than picking one. And the founder's family stake, which is what the inheritance-tax trade turns on, is not in the feed at all: 'closely held' is the most it can say. Forecasts here are the analyst consensus, not the Handbook's own Toyo Keizai estimate.",
+  },
   "screen-universe": {
     term: "Universe",
     what: "The list of companies a screen was run against — by default the S&P 500.",

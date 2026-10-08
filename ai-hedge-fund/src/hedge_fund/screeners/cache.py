@@ -48,7 +48,7 @@ CACHE_DIR = Path(__file__).resolve().parents[3] / "data" / "screens"
 STALE_AFTER_DAYS = 7
 
 #: The screens that have a cache. Names match the endpoint paths.
-SCREENS = ("yartseva", "acquisition-compounder", "bolton-contrarian")
+SCREENS = ("yartseva", "acquisition-compounder", "bolton-contrarian", "kiyohara-handbook")
 
 
 @dataclass(frozen=True)

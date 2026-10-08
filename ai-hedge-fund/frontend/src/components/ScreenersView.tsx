@@ -154,6 +154,19 @@ export function ScreenersView() {
     return <Navigate to={`/screeners/${DEFAULT_SCREENER_ID}`} replace />;
   }
 
+  /* Only two screens can actually be run live, and this used to be a ternary:
+   * Yartseva, else the compounder. Which meant every screen added after those
+   * two — Bolton, now Kiyohara — offered a "run it on another market" panel
+   * that quietly ran the *compounder* and printed its results under the other
+   * screen's name. A cached-only screen gets no panel instead, and the
+   * results table already prints the command that rebuilds it. */
+  const livePanel =
+    active.id === "yartseva" ? (
+      <YartsevaPanel />
+    ) : active.id === "acquisition_compounder" ? (
+      <AcquisitionCompounderPanel />
+    ) : null;
+
   return (
     <div className="flex flex-col min-h-screen">
       <AppNav active="screeners" />
@@ -195,14 +208,16 @@ export function ScreenersView() {
         )}
 
         <div>
-          <h2 className="font-display text-title-xs text-bone">{active.label}</h2>
+          <h2 className="font-display text-title-xs text-bone">
+            {active.label}
+          </h2>
           <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
             {active.description}
           </p>
         </div>
 
         {/* The recipe, folded away. It was above the results and three
-          * screenfuls long, so the answer was always below the fold. */}
+         * screenfuls long, so the answer was always below the fold. */}
         <details className="border border-ink-line bg-ink-raised">
           <summary className="cursor-pointer list-none px-md py-sm font-display text-label uppercase tracking-label text-on-ink-soft transition-colors hover:text-bone [&::-webkit-details-marker]:hidden">
             What this screen tests ▾
@@ -234,30 +249,27 @@ export function ScreenersView() {
         </details>
 
         {/* Run it somewhere else. Optional, and precise about what "another
-          * market" means here, because the two kinds behave nothing alike:
-          * the three S&P bands are whole indices, several hundred names and
-          * ten-plus minutes each, while Japan, Korea, Europe and the rest are
-          * curated watchlists of roughly twenty large caps that finish in
-          * about a minute. Offering them as one undifferentiated list invites
-          * someone to start a quarter-hour run expecting the short one. */}
-        {active.usesApi && (
+         * market" means here, because the two kinds behave nothing alike:
+         * the three S&P bands are whole indices, several hundred names and
+         * ten-plus minutes each, while Japan, Korea, Europe and the rest are
+         * curated watchlists of roughly twenty large caps that finish in
+         * about a minute. Offering them as one undifferentiated list invites
+         * someone to start a quarter-hour run expecting the short one. */}
+        {livePanel && (
           <details className="border border-ink-line bg-ink-raised">
             <summary className="cursor-pointer list-none px-md py-sm font-display text-label uppercase tracking-label text-on-ink-soft transition-colors hover:text-bone [&::-webkit-details-marker]:hidden">
-              Run it on another market — Japan, Korea, Europe — or a full index ▾
+              Run it on another market — Japan, Korea, Europe — or a full index
+              ▾
             </summary>
             <div className="border-t border-ink-line p-md">
               <p className="mb-md max-w-measure text-body-xs text-on-ink-faint">
                 These run live, one company at a time. The market watchlists —
                 Japan, Korea, Europe, India, Brazil and a dozen more — are
                 around twenty large caps each and take about a minute. A full
-                S&P band is several hundred names and takes ten minutes or
-                more, so cap it if you only want a look.
+                S&P band is several hundred names and takes ten minutes or more,
+                so cap it if you only want a look.
               </p>
-              {active.id === "yartseva" ? (
-                <YartsevaPanel />
-              ) : (
-                <AcquisitionCompounderPanel />
-              )}
+              {livePanel}
             </div>
           </details>
         )}
