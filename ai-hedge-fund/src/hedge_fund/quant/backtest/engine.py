@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 
 import pandas as pd
 
+from hedge_fund.data.frames import normalise_prices
 from hedge_fund.quant.backtest.metrics import compute_metrics
 from hedge_fund.quant.backtest.strategies import (
     STRATEGY_META,
@@ -130,31 +131,16 @@ def run_backtest(
 
 
 def _prepare_prices(df: pd.DataFrame) -> pd.DataFrame:
-    """Ensure df has 'close' column and a DateTimeIndex."""
-    df = df.copy()
-    # Normalize column names to lowercase
-    df.columns = [str(c).lower() for c in df.columns]
+    """A dated, numeric price frame, or a refusal the caller can read.
 
-    # If there's no 'close' but there's 'adj close' / 'adjclose', use that
-    if "close" not in df.columns:
-        for alt in ("adjclose", "adj close", "adjusted_close", "price"):
-            if alt in df.columns:
-                df = df.rename(columns={alt: "close"})
-                break
-
-    if "close" not in df.columns:
+    The shaping lives in `hedge_fund.data.frames`, shared with the other price
+    consumers. This wrapper adds only the engine's own policy: a frame with no
+    readable close is a programming error here, not an empty backtest.
+    """
+    prepared = normalise_prices(df)
+    if prepared is None:
         raise ValueError("DataFrame missing 'close' column after normalization.")
-
-    # Handle date column
-    if "date" in df.columns:
-        df = df.set_index(pd.to_datetime(df["date"])).drop(columns=["date"])
-    elif not isinstance(df.index, pd.DatetimeIndex):
-        df.index = pd.to_datetime(df.index)
-
-    df = df.sort_index()
-    df["close"] = pd.to_numeric(df["close"], errors="coerce")
-    df = df.dropna(subset=["close"])
-    return df
+    return prepared
 
 
 def _extract_trades(df: pd.DataFrame, position: pd.Series) -> list[dict]:

@@ -5,9 +5,9 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import pandas as pd
 from fastapi import APIRouter, HTTPException, Query
 
+from hedge_fund.data.frames import normalise_prices
 from hedge_fund.data.service import get_data_service
 from hedge_fund.quant.backtest import (
     STRATEGY_META,
@@ -64,11 +64,11 @@ def run(
         logger.exception("Price fetch failed for %s", ticker)
         raise HTTPException(status_code=502, detail=f"Price fetch failed: {exc}") from exc
 
-    if df is None or (isinstance(df, pd.DataFrame) and df.empty):
-        raise HTTPException(status_code=404, detail=f"No price data for {ticker}")
-
-    df = _coerce_df(df)
-    if df is None or df.empty:
+    # `normalise_prices` also absorbs the shapes the provider chain returns —
+    # a frame, a list of records, or a {"data": [...]} envelope — so the route
+    # does not have to know which one answered.
+    df = normalise_prices(df)
+    if df is None:
         raise HTTPException(status_code=404, detail=f"No usable price data for {ticker}")
 
     try:
@@ -83,16 +83,3 @@ def run(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     return result.to_dict()
-
-
-def _coerce_df(obj: Any) -> pd.DataFrame | None:
-    """DataService.get_price can return either a DataFrame or a list of dicts."""
-    if isinstance(obj, pd.DataFrame):
-        return obj
-    if isinstance(obj, list):
-        if not obj:
-            return None
-        return pd.DataFrame(obj)
-    if isinstance(obj, dict) and "data" in obj:
-        return pd.DataFrame(obj["data"])
-    return None

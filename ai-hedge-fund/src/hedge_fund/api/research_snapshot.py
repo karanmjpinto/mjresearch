@@ -13,6 +13,8 @@ from __future__ import annotations
 from datetime import date
 from typing import Any
 
+from hedge_fund.data.frames import close_series
+from hedge_fund.data.frames import price_summary as build_price_summary
 from hedge_fund.data.provenance import capture
 from hedge_fund.data.service import DataService
 from hedge_fund.nlp.news_sentiment import enrich_news_with_sentiment_async
@@ -47,23 +49,16 @@ async def assemble_research_snapshot(
         technicals = ds.get_technical_indicators(ticker)
 
         df = ds.get_price_history(ticker, days=price_days, end_date=end_date)
-        price_summary: dict = {}
-        if not df.empty:
-            close = df["close"]
-            price_summary = {
-                "current": float(close.iloc[-1]),
-                # Window length is price_days; the *_30d names are kept for
-                # API/frontend compatibility.
-                "change_30d_pct": round(
-                    (float(close.iloc[-1]) / float(close.iloc[0]) - 1) * 100,
-                    2,
-                ),
-                "high_30d": float(close.max()),
-                "low_30d": float(close.min()),
+        # Window length is price_days; the *_30d key names in `price_summary`
+        # are kept for API and frontend compatibility.
+        close = close_series(df)
+        price_summary: dict = build_price_summary(df)
+        if close is not None and price_summary:
+            price_summary |= {
                 "price_window_days": price_days,
                 "observations": int(len(close)),
-                "window_start": str(df.index.min())[:10],
-                "window_end": str(df.index.max())[:10],
+                "window_start": str(close.index.min())[:10],
+                "window_end": str(close.index.max())[:10],
             }
 
         news = ds.get_news(ticker, limit=5)

@@ -26,6 +26,7 @@ import pandas as pd
 from fastapi import APIRouter, HTTPException, Query
 
 from hedge_fund.agents.guardrails import GuardrailError, sanitize_ticker
+from hedge_fund.data.frames import dated_closes
 from hedge_fund.data.service import get_data_service
 from hedge_fund.regimes import DEFAULT_H1, DEFAULT_H2, analyse
 from hedge_fund.regimes.wasserstein import RegimeError
@@ -34,36 +35,24 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 _ds = get_data_service()
 
-_DATE_COLS = ("date", "index", "datetime", "timestamp")
-
 
 def _series(df: pd.DataFrame) -> tuple[list[str], list[float]]:
-    """Dates and closes out of whatever shape the provider handed back.
+    """Dates and closes, or a 502 saying the provider sent neither.
 
-    Providers disagree on whether the date is the index or a column, and on
-    its capitalisation. Guessing wrong here silently mislabels every episode
-    by returning positional integers as dates, so it is explicit.
+    The shaping is `hedge_fund.data.frames.dated_closes`, shared with the other
+    price consumers — providers disagree on whether the date is the index or a
+    column, and on its capitalisation, and guessing wrong here mislabels every
+    episode by returning positional integers as dates. This route adds the
+    policy: an unreadable frame is the provider's fault, so it is a 502 rather
+    than an empty chart.
     """
-    frame = df.reset_index()
-    date_col = next(
-        (c for c in frame.columns if str(c).strip().lower() in _DATE_COLS),
-        None,
-    )
-    close_col = next(
-        (c for c in frame.columns if str(c).strip().lower() == "close"),
-        None,
-    )
-    if date_col is None or close_col is None:
+    dates, closes = dated_closes(df)
+    if not dates:
         raise HTTPException(
             status_code=502,
             detail="price history arrived without a date or close column",
         )
-    closes = pd.to_numeric(frame[close_col], errors="coerce")
-    keep = closes.notna() & (closes > 0)
-    return (
-        [str(d)[:10] for d in frame.loc[keep, date_col]],
-        [float(v) for v in closes[keep]],
-    )
+    return dates, closes
 
 
 @router.get("/{ticker}")

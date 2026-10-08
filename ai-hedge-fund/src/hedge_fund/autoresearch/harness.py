@@ -32,6 +32,7 @@ from typing import Any
 
 import pandas as pd
 
+from hedge_fund.data.frames import normalise_prices
 from hedge_fund.quant.backtest import STRATEGY_META, run_backtest
 
 # Fixed across every experiment. Changing these invalidates comparison against
@@ -130,9 +131,9 @@ def _window_result(label: str, frame: pd.DataFrame, result: Any) -> WindowResult
 
 def split_history(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Split chronologically. Never randomly — that leaks the future backwards."""
-    if df is None or df.empty or "close" not in df:
+    frame = normalise_prices(df)
+    if frame is None:
         raise HarnessError("no price history")
-    frame = df.sort_index()
     if len(frame) < MIN_OBSERVATIONS:
         raise HarnessError(
             f"only {len(frame)} observations; need {MIN_OBSERVATIONS} to split a window"
