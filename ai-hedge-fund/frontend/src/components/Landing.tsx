@@ -89,7 +89,7 @@ const MORE = [
   {
     n: "07",
     title: "Three screens, already run",
-    body: "Multibagger, compounder and Bolton contrarian — computed ahead of time, and dated.",
+    body: "Multibagger, compounder, Bolton contrarian and Kiyohara's Japan handbook — computed ahead of time, and dated.",
   },
   {
     n: "08",
@@ -447,7 +447,7 @@ export function Landing() {
                 </button>
               ))}
               {/* A real route, not a chapter — the others scroll this page,
-                * this one leaves it, so it does not sit in CHAPTERS. */}
+               * this one leaves it, so it does not sit in CHAPTERS. */}
               <Link
                 to="/docs"
                 className="text-on-canvas transition-colors hover:text-oxide-paper"
@@ -543,9 +543,9 @@ export function Landing() {
                     </a>
                   </div>
                   {/* The old page put "Open the app" on every screen and did
-                    * not mention until chapter five that there is no way in
-                    * without a link. Saying it here costs one line and saves
-                    * every cold visitor a locked door. */}
+                   * not mention until chapter five that there is no way in
+                   * without a link. Saying it here costs one line and saves
+                   * every cold visitor a locked door. */}
                   <p className="mt-md text-body-xs text-on-canvas-faint">
                     The app needs an invite link. The reference below is open to
                     everyone.
@@ -603,12 +603,14 @@ export function Landing() {
                   </p>
                 </div>
                 {/* Sized so the whole diagram lands inside one 1440px screen
-                  * beside its heading column. A diagram whose last stage sits
-                  * off the fold is a list again. */}
+                 * beside its heading column. A diagram whose last stage sits
+                 * off the fold is a list again. */}
                 <div
                   className={clsx(
                     "gap-xl",
-                    horizontal ? "flex w-[860px] shrink-0 flex-col" : "flex flex-col",
+                    horizontal
+                      ? "flex w-[860px] shrink-0 flex-col"
+                      : "flex flex-col",
                   )}
                 >
                   <ModelBoundary />
@@ -669,7 +671,7 @@ export function Landing() {
                 </div>
 
                 {/* Claim 03, drawn — the one idea on the page that a reader
-                  * cannot picture from a sentence. */}
+                 * cannot picture from a sentence. */}
                 <div className={clsx(horizontal && "w-[520px] shrink-0")}>
                   <Marker hue="var(--on-canvas-faint)">Claim 03, drawn</Marker>
                   <div className="mt-md">
@@ -721,7 +723,7 @@ export function Landing() {
                 </div>
 
                 {/* The ladder carries the actor on every rung, so the claim
-                  * in the heading beside it is visible rather than asserted. */}
+                 * in the heading beside it is visible rather than asserted. */}
                 <div className={clsx(horizontal && "w-[620px] shrink-0")}>
                   <PipelineLadder />
                 </div>
@@ -774,14 +776,14 @@ export function Landing() {
               </section>
 
               {/* The door.
-                *
-                * Carries a chapter of its own rather than a line in the
-                * footer, because for most people reading this page it is the
-                * operative fact: everything described above happens somewhere
-                * they cannot currently go. Stating that plainly is more
-                * convincing than describing capability and quietly withholding
-                * it — and the honest reason is money, not mystique, so the
-                * chapter says so. */}
+               *
+               * Carries a chapter of its own rather than a line in the
+               * footer, because for most people reading this page it is the
+               * operative fact: everything described above happens somewhere
+               * they cannot currently go. Stating that plainly is more
+               * convincing than describing capability and quietly withholding
+               * it — and the honest reason is money, not mystique, so the
+               * chapter says so. */}
               <section id="door" className={band()}>
                 <div className={clsx(horizontal && "w-[360px] shrink-0")}>
                   <div className="mb-md h-[3px] w-16 bg-cadmium-paper" />
@@ -892,7 +894,10 @@ export function Landing() {
                     Scroll →
                   </span>
                   <div className="h-px flex-1 bg-enamel/20">
-                    <div ref={railFillRef} className="h-px w-0 bg-oxide-paper" />
+                    <div
+                      ref={railFillRef}
+                      className="h-px w-0 bg-oxide-paper"
+                    />
                   </div>
                 </div>
               </div>

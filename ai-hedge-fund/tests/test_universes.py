@@ -75,6 +75,70 @@ def test_dedupe_preserves_order_and_drops_blanks():
     assert universes._dedupe(["A", "B", "A", "", "C"]) == ["A", "B", "C"]
 
 
+def test_japanese_codes_become_yahoo_symbols():
+    """`7203` is `7203.T` at Yahoo, and the dot must survive.
+
+    `normalize_yahoo_symbol` turns a dot into a hyphen for US class shares, so
+    running a Tokyo code through it produces `7203-T` — a symbol that returns
+    no data rather than an error, which is how an entire universe silently
+    becomes a list of names with no financials.
+    """
+    assert universes.jp_symbol("7203") == "7203.T"
+    assert universes.jp_symbol(" 83 ") == "0083.T", "leading zeros survive a spreadsheet"
+    assert universes.jp_symbol("160a") == "160A.T", "codes are alphanumeric now"
+
+
+def _jpx_frame(rows):
+    import pandas as pd
+
+    return pd.DataFrame(
+        rows,
+        columns=["Local Code", "Section/Products", "Size (New Index Series)"],
+    )
+
+
+def test_the_japan_loader_keeps_only_domestic_companies_in_the_right_size_bands(monkeypatch):
+    """The file carries 485 ETFs, plus REITs, foreign listings and PRO names.
+
+    Taking it whole would put exchange-traded funds into a screen that reads
+    company balance sheets.
+    """
+    import pandas as pd
+
+    rows = [[f"{3000 + i}", "Prime Market (Domestic)", "TOPIX Mid400"] for i in range(400)]
+    rows += [[f"{5000 + i}", "Standard Market(Domestic)", "TOPIX Small 1"] for i in range(400)]
+    rows += [["1306", "ETFs/ ETNs", "-"]]
+    rows += [["8951", "REIT, Venture Funds, Country Funds and Infrastructure Funds", "-"]]
+    rows += [["9999", "Prime Market (Domestic)", "TOPIX Core30"]]
+
+    monkeypatch.setattr(universes, "_fetch_url_bytes", lambda url: b"")
+    monkeypatch.setattr(pd, "read_excel", lambda *a, **k: _jpx_frame(rows))
+
+    got = universes.fetch_jp_mid_small()
+    assert len(got) == 800
+    assert "1306.T" not in got and "8951.T" not in got
+    assert "9999.T" not in got, "Core30 is the hundred names every institution already owns"
+
+
+def test_a_shrunken_japan_file_raises_rather_than_returning_a_short_universe(monkeypatch):
+    """If JPX renames the size bands the filter matches nothing.
+
+    An empty universe reads downstream as a market with no companies in it,
+    not as a broken loader — the same failure that took out the Dow and
+    NASDAQ-100 lists for months.
+    """
+    import pandas as pd
+
+    monkeypatch.setattr(universes, "_fetch_url_bytes", lambda url: b"")
+    monkeypatch.setattr(
+        pd,
+        "read_excel",
+        lambda *a, **k: _jpx_frame([["7203", "Prime Market (Domestic)", "TOPIX Renamed"]]),
+    )
+    with pytest.raises(ValueError, match="mid/small names"):
+        universes.fetch_jp_mid_small()
+
+
 def test_only_loadable_universes_are_offered():
     """Every advertised universe must have a loader, and vice versa.
 

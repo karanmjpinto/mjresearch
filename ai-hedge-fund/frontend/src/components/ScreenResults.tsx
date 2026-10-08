@@ -58,11 +58,19 @@ function ScoreBar({ value, max }: { value: number | null; max: number }) {
 }
 
 type Props = {
-  screen: "yartseva" | "acquisition-compounder" | "bolton-contrarian";
+  screen:
+    | "yartseva"
+    | "acquisition-compounder"
+    | "bolton-contrarian"
+    | "kiyohara-handbook";
   title: string;
   blurb: string;
   /** Glossary term for the heading marker. */
-  info?: "screen-yartseva" | "screen-acquisition" | "screen-bolton";
+  info?:
+    | "screen-yartseva"
+    | "screen-acquisition"
+    | "screen-bolton"
+    | "screen-kiyohara";
   universe?: string;
   /** Highest possible score, for the bars. /100, except the compounder at /45. */
   scoreMax: number;
@@ -104,7 +112,9 @@ export function ScreenResults({
             {title}
             {info && <InfoTip term={info} />}
           </h2>
-          <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">{blurb}</p>
+          <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
+            {blurb}
+          </p>
         </div>
 
         {d?.available && (
@@ -122,7 +132,10 @@ export function ScreenResults({
             <p className="mt-2xs font-display text-label tabular text-on-ink-soft">
               {d.passing} of {d.checked} passed
               {d.errored > 0 && (
-                <span className="text-on-ink-faint"> · {d.errored} unfetchable</span>
+                <span className="text-on-ink-faint">
+                  {" "}
+                  · {d.errored} unfetchable
+                </span>
               )}
             </p>
           </div>
@@ -160,7 +173,10 @@ export function ScreenResults({
           <p className="mt-sm max-w-measure text-body-xs text-on-ink-faint">
             If it keeps failing, the screen may never have been built. Compute
             it with{" "}
-            <span className="font-display text-on-ink-soft">{refreshCommand}</span>.
+            <span className="font-display text-on-ink-soft">
+              {refreshCommand}
+            </span>
+            .
           </p>
         </div>
       )}
@@ -174,7 +190,9 @@ export function ScreenResults({
           <p className="font-display text-label uppercase tracking-label text-cadmium">
             Nothing computed yet
           </p>
-          <p className="mt-xs max-w-measure text-body-sm text-on-ink-soft">{d.reason}</p>
+          <p className="mt-xs max-w-measure text-body-sm text-on-ink-soft">
+            {d.reason}
+          </p>
           <pre className="mt-sm overflow-x-auto border border-ink-line bg-ink p-sm font-display text-label text-on-ink-soft">
             {d.refresh_command}
           </pre>
@@ -200,23 +218,23 @@ export function ScreenResults({
                   <span className="w-12 shrink-0 text-right font-display text-label tabular text-oxide">
                     {f.count}
                   </span>
-                  <span className="text-body-xs text-on-ink-soft">{f.reason}</span>
+                  <span className="text-body-xs text-on-ink-soft">
+                    {f.reason}
+                  </span>
                 </li>
               ))}
             </ul>
           )}
-          {d.top_failures?.[0] &&
-            d.top_failures[0].count > d.checked * 0.9 &&
+          {d.top_failures?.[0] && d.top_failures[0].count > d.checked * 0.9 && (
             /* One reason knocking out almost everything is not a screen that
              * found nothing — it is a screen aimed at the wrong list. */
-            (
-              <p className="mt-sm max-w-measure border-t border-ink-line pt-sm text-body-xs text-cadmium">
-                Almost every name failed on the same rule, which means this
-                universe is the wrong one for this screen rather than a market
-                with nothing in it. Use the panel below to point it somewhere
-                that fits.
-              </p>
-            )}
+            <p className="mt-sm max-w-measure border-t border-ink-line pt-sm text-body-xs text-cadmium">
+              Almost every name failed on the same rule, which means this
+              universe is the wrong one for this screen rather than a market
+              with nothing in it. Use the panel below to point it somewhere that
+              fits.
+            </p>
+          )}
         </div>
       )}
 
@@ -243,7 +261,10 @@ export function ScreenResults({
               {d.results.map((r, i) => {
                 const t = String(r.ticker ?? "").toUpperCase();
                 return (
-                  <tr key={`${t}-${i}`} className="border-b border-ink-line last:border-b-0">
+                  <tr
+                    key={`${t}-${i}`}
+                    className="border-b border-ink-line last:border-b-0"
+                  >
                     <td className="px-md py-xs">
                       {t ? (
                         <Link
@@ -253,18 +274,25 @@ export function ScreenResults({
                           {t}
                         </Link>
                       ) : (
-                        <span className="font-display text-mark text-on-ink-faint">—</span>
+                        <span className="font-display text-mark text-on-ink-faint">
+                          —
+                        </span>
                       )}
                     </td>
                     <td className="px-md py-xs">
-                      <ScoreBar value={scoreOf(r, d.score_key)} max={scoreMax} />
+                      <ScoreBar
+                        value={scoreOf(r, d.score_key)}
+                        max={scoreMax}
+                      />
                     </td>
                     {/* Capped narrower than the app's measure: this cell now
-                      * carries a sentence's worth of evidence, and without a
-                      * bound it absorbs the table's slack on a wide screen and
-                      * out-runs every paragraph on the page. */}
+                     * carries a sentence's worth of evidence, and without a
+                     * bound it absorbs the table's slack on a wide screen and
+                     * out-runs every paragraph on the page. */}
                     <td className="px-md py-xs text-body-xs text-on-ink-soft">
-                      <span className="block max-w-measure-sm">{reason(r)}</span>
+                      <span className="block max-w-measure-sm">
+                        {reason(r)}
+                      </span>
                     </td>
                   </tr>
                 );
@@ -278,7 +306,10 @@ export function ScreenResults({
         <p className="max-w-measure text-body-xs text-on-ink-faint">
           Figures come from yfinance quarterly data, so verify against the
           filings before acting on any of it. Refresh with{" "}
-          <span className="font-display text-on-ink-soft">{d.refresh_command}</span>.
+          <span className="font-display text-on-ink-soft">
+            {d.refresh_command}
+          </span>
+          .
         </p>
       )}
     </section>
@@ -306,13 +337,25 @@ function reason(r: ScreenRow): string {
       bits.push(`${label} ${(v * 100).toFixed(0)}%`);
     }
   };
-  const pct = (obj: Record<string, unknown>, key: string, label: string, dp = 1) => {
+  const pct = (
+    obj: Record<string, unknown>,
+    key: string,
+    label: string,
+    dp = 1,
+  ) => {
     const v = obj[key];
-    if (typeof v === "number" && Number.isFinite(v)) bits.push(`${label} ${v.toFixed(dp)}%`);
+    if (typeof v === "number" && Number.isFinite(v))
+      bits.push(`${label} ${v.toFixed(dp)}%`);
   };
-  const raw = (obj: Record<string, unknown>, key: string, label: string, dp = 2) => {
+  const raw = (
+    obj: Record<string, unknown>,
+    key: string,
+    label: string,
+    dp = 2,
+  ) => {
     const v = obj[key];
-    if (typeof v === "number" && Number.isFinite(v)) bits.push(`${label} ${v.toFixed(dp)}`);
+    if (typeof v === "number" && Number.isFinite(v))
+      bits.push(`${label} ${v.toFixed(dp)}`);
   };
 
   // Compounder: fractions in `snapshot`.
@@ -328,7 +371,7 @@ function reason(r: ScreenRow): string {
   // Bolton: the interesting facts are which measures are cheap and how far
   // the market has walked away, not another ratio. `cheap_on` arrives
   // pre-formatted from the screen, so it is not re-derived here.
-  const cheap = (top.cheap_on as unknown) as string[] | undefined;
+  const cheap = top.cheap_on as unknown as string[] | undefined;
   if (Array.isArray(cheap) && cheap.length > 0) {
     // Two, then say how many more. Truncating silently reported a company
     // cheap on four measures as cheap on two, which understates the only
@@ -342,12 +385,46 @@ function reason(r: ScreenRow): string {
     bits.push(`${Math.round(pos * 100)}% up its 52w range`);
   }
   const shorted = top.short_percent_float;
-  if (typeof shorted === "number" && Number.isFinite(shorted) && shorted >= 0.05) {
+  if (
+    typeof shorted === "number" &&
+    Number.isFinite(shorted) &&
+    shorted >= 0.05
+  ) {
     bits.push(`${(shorted * 100).toFixed(0)}% short`);
   }
   const insider = top.insider_net_12m;
   if (typeof insider === "number" && insider > 0) {
     bits.push(`${insider} net insider buy${insider === 1 ? "" : "s"}`);
+  }
+
+  /* Kiyohara: the multiple he actually works from, and the two balance-sheet
+   * facts behind it. `tiers_cleared` is the honest half of the P/E test — the
+   * screen reports which of his four ceilings a name is under because
+   * choosing one would mean claiming to know the business type it says on
+   * every row it has not checked. */
+  const pe2 = top.pe_second_year;
+  if (typeof pe2 === "number" && Number.isFinite(pe2)) {
+    bits.push(`${pe2.toFixed(1)}x 2nd-yr`);
+  }
+  const tiers = top.tiers_cleared as unknown as string[] | undefined;
+  if (Array.isArray(tiers) && tiers.length > 0) {
+    /* How many of his four ceilings, not which. Naming the strictest one
+     * cleared would print "under his small/mid real estate ceiling" against a
+     * machinery company — a sector claim the screen has not made. The count
+     * says the same thing without asserting a business type, and the
+     * thresholds stay in one place, in the screen. */
+    bits.push(`under ${tiers.length} of his 4 P/E ceilings`);
+  }
+  const equityRatio = top.equity_ratio;
+  if (typeof equityRatio === "number" && Number.isFinite(equityRatio)) {
+    bits.push(`${Math.round(equityRatio * 100)}% equity ratio`);
+  }
+  const netCash = top.net_cash_ratio;
+  if (typeof netCash === "number" && Number.isFinite(netCash) && netCash > 0) {
+    bits.push(`net cash ${Math.round(netCash * 100)}% of cap`);
+  }
+  if (top.equity_issued_recently === true) {
+    bits.push("has issued equity");
   }
 
   const flags = r.red_flags;

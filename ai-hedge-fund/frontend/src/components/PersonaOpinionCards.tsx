@@ -20,6 +20,7 @@ export function humanizePersonaId(id: string): string {
     peter_lynch: "Peter Lynch",
     phil_fisher: "Phil Fisher",
     rakesh_jhunjhunwala: "Rakesh Jhunjhunwala",
+    tatsuro_kiyohara: "Tatsuro Kiyohara",
     stanley_druckenmiller: "Stanley Druckenmiller",
     aswath_damodaran: "Aswath Damodaran",
   };

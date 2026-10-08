@@ -97,3 +97,27 @@ def test_the_probe_can_be_skipped_from_the_command_line():
         assert "--no-preflight" in src
     else:  # pragma: no cover - only if the parser is ever extracted
         assert ap.parse_args(["--no-preflight"]).no_preflight is True
+
+
+def test_a_screen_with_its_own_probes_uses_them(monkeypatch):
+    """The Kiyohara screen must not be probed with US large caps.
+
+    It reads a Japanese shareholder register and a yen-denominated market cap,
+    so AAPL, MSFT and JNJ are names it is built to refuse. Probing with those
+    would have the screen correctly reject all three, which reads as "the
+    provider is offline" and aborts a run that would have worked.
+    """
+    screen = "kiyohara-handbook"
+    probes = rs.PREFLIGHT_TICKERS_FOR[screen]
+    assert all(t.endswith(".T") for t in probes), "a Japanese screen needs Japanese probes"
+    assert not set(probes) & set(rs.PREFLIGHT_TICKERS)
+
+    seen: list[str] = []
+
+    def runner(t: str) -> dict:
+        seen.append(t)
+        return {"ticker": t, "passed": True}
+
+    monkeypatch.setitem(rs.RUNNERS, screen, runner)
+    assert rs.preflight(screen) == "ok"
+    assert seen == list(probes)

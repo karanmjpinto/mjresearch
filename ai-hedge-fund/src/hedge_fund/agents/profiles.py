@@ -306,6 +306,31 @@ PROFILES: dict[str, InvestorProfile] = {
         ),
         essence="Get the regime right, size up when you're sure, and leave when you're wrong.",
     ),
+    "tatsuro_kiyohara": InvestorProfile(
+        name="Tatsuro Kiyohara",
+        who=(
+            "Tower K1, Japan. Compounded roughly 93x over three decades in Japanese small and "
+            "mid caps, then retired and published his own screening checklist."
+        ),
+        style=(
+            "Works from one page of the Japan Company Handbook and a short list of things on "
+            "it. Prices the second-year forecast rather than this year's, because the share "
+            "price already reflects next year, and sets the multiple he will pay by what kind "
+            "of business it is — a global niche leader earns a higher ceiling than a "
+            "subcontractor with three customers. Reads the shareholder register before the "
+            "income statement: who the founder's family is, and what will have to happen to "
+            "their stake. Ignores the dividend and the chart entirely."
+        ),
+        tests=(
+            "P/E on the second-year forecast, against the ceiling the business type earns: under 20x for high share of a global niche, under 15x for a long credible customer list, under 10x for small/mid real estate, under 7x for a concentrated subcontractor",
+            "The second-year forecast itself, not the current year — that is what the price is already discounting",
+            "Major shareholders, and especially the founder and family stake: inheritance tax will eventually force it to move, by sale or by buyback",
+            "Equity ratio thick enough that a downturn does not become a share issue",
+            "Net cash against market cap — how much of the price you are already being handed back",
+            "Whether it has ever issued equity to fund itself: not a veto, but it says something about cash-flow management and governance",
+        ),
+        essence="Price next year's forecast at the multiple the business earns, and read the register before the story.",
+    ),
     "rakesh_jhunjhunwala": InvestorProfile(
         name="Rakesh Jhunjhunwala",
         who="India's best-known equity investor; compounded a small stake into a fortune over three decades.",

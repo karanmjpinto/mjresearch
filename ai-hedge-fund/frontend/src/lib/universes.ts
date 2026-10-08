@@ -17,7 +17,18 @@ import type { ScreenerUniverseMeta } from "@/lib/api";
 export const FALLBACK_UNIVERSES: ScreenerUniverseMeta[] = [
   { id: "sp500", label: "S&P 500", description: "", approx_count: 503 },
   { id: "sp400", label: "S&P MidCap 400", description: "", approx_count: 400 },
-  { id: "sp600", label: "S&P SmallCap 600", description: "", approx_count: 600 },
+  {
+    id: "sp600",
+    label: "S&P SmallCap 600",
+    description: "",
+    approx_count: 600,
+  },
+  {
+    id: "jp_mid_small",
+    label: "Japan mid & small",
+    description: "",
+    approx_count: 874,
+  },
 ];
 
 /**
@@ -32,4 +43,9 @@ export const FALLBACK_UNIVERSES: ScreenerUniverseMeta[] = [
 export const DEFAULT_UNIVERSE_FOR: Record<string, string> = {
   yartseva: "sp600",
   "acquisition-compounder": "sp500",
+  "bolton-contrarian": "sp500",
+  /* Not a preference. Kiyohara's checklist reads a Japanese shareholder
+   * register and a yen market cap; run over the S&P 500 it would still return
+   * names, which is worse than returning none. */
+  "kiyohara-handbook": "jp_mid_small",
 };
