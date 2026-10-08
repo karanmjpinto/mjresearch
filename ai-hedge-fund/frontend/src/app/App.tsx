@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import clsx from "clsx";
 import { BackendGate } from "@/components/BackendGate";
+import { ChunkErrorBoundary } from "@/components/ChunkErrorBoundary";
 import { DeploymentLimits } from "@/components/DeploymentLimits";
 import { JoinView } from "@/components/JoinView";
 import { Landing } from "@/components/Landing";
@@ -18,6 +19,10 @@ import { DEFAULT_SCREENER_ID } from "@/config/screeners";
  * that the comment above says makes no API calls and needs none of it.
  * A visitor reading the landing page or the docs now fetches the chart
  * libraries only if they go somewhere that draws a chart.
+ *
+ * Each Suspense sits inside a ChunkErrorBoundary, because a lazy chunk can
+ * fail to arrive and a bare Suspense would wait on it for ever. See that
+ * component: the usual cause is a deploy, and the cure is a reload.
  */
 const AnalysisView = lazy(() =>
   import("@/components/AnalysisView").then((m) => ({ default: m.AnalysisView })),
@@ -132,9 +137,11 @@ export default function App() {
         <Route
           path="/docs"
           element={
-            <Suspense fallback={<ScreenLoading ground="canvas" />}>
-              <DocsView />
-            </Suspense>
+            <ChunkErrorBoundary ground="canvas">
+              <Suspense fallback={<ScreenLoading ground="canvas" />}>
+                <DocsView />
+              </Suspense>
+            </ChunkErrorBoundary>
           }
         />
         <Route path="/join" element={<JoinView />} />
@@ -147,9 +154,11 @@ export default function App() {
                     a property of the deployment, not of the screen you happen
                     to be on, and it renders nothing when nothing is limited. */}
                 <DeploymentLimits />
-                <Suspense fallback={<ScreenLoading />}>
-                  <AppRoutes />
-                </Suspense>
+                <ChunkErrorBoundary>
+                  <Suspense fallback={<ScreenLoading />}>
+                    <AppRoutes />
+                  </Suspense>
+                </ChunkErrorBoundary>
               </MemberGate>
             </BackendGate>
           }
