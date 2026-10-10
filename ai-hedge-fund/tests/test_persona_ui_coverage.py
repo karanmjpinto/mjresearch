@@ -95,16 +95,36 @@ def test_profiles_say_something_specific(pid: str):
 def test_the_committee_covers_distinct_approaches():
     """A committee of near-duplicates produces a confident, one-eyed consensus.
 
-    These four are the axes the original four-person committee missed
-    entirely: nobody asked what the macro regime was doing, nobody hunted the
-    unloved, and nobody checked whether the multiple implied anything
-    possible.
+    This used to name three members outright and assert they were present,
+    which made the test an echo of the list rather than a check on it: the
+    only way to fail was to change the committee, which is a thing one is
+    allowed to do. Re-benching the desk for global small and mid caps broke it
+    for no reason a reader could see.
+
+    So it asserts the properties the committee has to have instead. Plural,
+    distinct, every member explainable, and covering both halves of the
+    question this desk asks — whether the business is good, and whether
+    anyone has looked at it outside the United States.
     """
     assert len(DEFAULT_COMMITTEE_PERSONAS) == len(set(DEFAULT_COMMITTEE_PERSONAS))
     for pid in DEFAULT_COMMITTEE_PERSONAS:
         assert pid in PROFILES, f"committee member with no profile: {pid}"
-    for pid in ("anthony_bolton", "stanley_druckenmiller", "aswath_damodaran"):
-        assert pid in DEFAULT_COMMITTEE_PERSONAS
+
+    # Investors whose records were made substantially outside the US. A
+    # committee of seven Americans cannot review a global screen; it will
+    # reach for US comparables on a company that has none.
+    non_us = {"tatsuro_kiyohara", "li_lu", "anthony_bolton", "rakesh_jhunjhunwala"}
+    assert non_us & set(DEFAULT_COMMITTEE_PERSONAS), (
+        "no committee member made their record outside the US, on a desk that "
+        "screens eight universes across six currencies"
+    )
+
+    # And at least one voice whose stated method is business quality rather
+    # than statistical cheapness, since that is what the screens now rank on.
+    quality = {"warren_buffett", "charlie_munger", "phil_fisher", "li_lu", "norbert_lou"}
+    assert quality & set(DEFAULT_COMMITTEE_PERSONAS), (
+        "the committee has no quality voice to weigh a quality screen"
+    )
 
 
 def test_committee_fits_the_api_ceiling():

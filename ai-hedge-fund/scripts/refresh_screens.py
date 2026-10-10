@@ -9,11 +9,17 @@ Run from the repo root:
     uv run python scripts/refresh_screens.py --screen yartseva --max 120
     uv run python scripts/refresh_screens.py --fill              # retry what failed
 
-Universes: sp500, sp400, sp600, jp_mid_small. With no --universe, each screen is
-refreshed on its own default — the multi-bagger screen on the SmallCap 600,
-because its market-cap ceiling means it cannot pass a single S&P 500 name, and
-the Kiyohara screen on Japanese mid and small caps, because its checklist is a
-page of the Japan Company Handbook.
+Universes: sp500, sp400, sp600, jp_mid_small, uk_mid, de_mid, ca_all, au_all.
+With no --universe, each screen is refreshed on its own default — the
+multi-bagger screen on the SmallCap 600, because its market-cap ceiling means
+it cannot pass a single S&P 500 name; the compounder screen on the MidCap 400,
+because it now carries an explicit small and mid-cap band; and the Kiyohara
+screen on Japanese mid and small caps, because its checklist is a page of the
+Japan Company Handbook.
+
+The run time is the name count, and the eight universes differ by more than an
+order of magnitude: the MDAX is 50 companies, the ASX is about 1,900. Use
+--max on the big ones unless you want the full wait.
 
 An explicit --universe applies to every screen named, which is rarely what you
 want across markets: `--universe sp500` will run the Kiyohara screen over US
@@ -39,9 +45,10 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from hedge_fund.api.routes.screeners import DEFAULT_UNIVERSE_FOR as api_defaults
-from hedge_fund.data.universes import load_universe
+from hedge_fund.data.universes import list_universe_meta, load_universe
 from hedge_fund.screeners import cache
 from hedge_fund.screeners.bolton_contrarian import run_bolton_contrarian_for_ticker
+from hedge_fund.screeners.ellenbogen_two_act import run_ellenbogen_two_act_for_ticker
 from hedge_fund.screeners.kiyohara_handbook import run_kiyohara_handbook_for_ticker
 from hedge_fund.screeners.acquisition_compounder import (
     run_acquisition_compounder_for_ticker,
@@ -56,6 +63,7 @@ RUNNERS = {
     "acquisition-compounder": run_acquisition_compounder_for_ticker,
     "bolton-contrarian": run_bolton_contrarian_for_ticker,
     "kiyohara-handbook": run_kiyohara_handbook_for_ticker,
+    "ellenbogen-two-act": run_ellenbogen_two_act_for_ticker,
 }
 
 #: Imported from the API so the script and the page it feeds cannot drift.
@@ -209,7 +217,13 @@ def main() -> int:
     ap.add_argument(
         "--universe",
         default=None,
-        help="universe id: sp500, sp400, sp600, jp_mid_small. Default: each screen's own.",
+        # Built from the registry rather than typed, so a new loader cannot
+        # leave the help text advertising four universes out of eight.
+        help=(
+            "universe id: "
+            + ", ".join(u["id"] for u in list_universe_meta())
+            + ". Default: each screen's own."
+        ),
     )
     ap.add_argument(
         "--screen",

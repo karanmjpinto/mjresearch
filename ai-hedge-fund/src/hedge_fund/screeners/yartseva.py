@@ -13,11 +13,32 @@ from typing import Any
 import pandas as pd
 import yfinance as yf
 
+from hedge_fund.screeners import principles
+
 logger = logging.getLogger(__name__)
 
 # --- Constants (USD) ---
 MCAP_MIN = 50_000_000
 MCAP_MAX = 2_000_000_000
+
+#: The composite, as weights rather than as six multiplications inline.
+#:
+#: Named because these six numbers *are* the screen's argument — 55% of the
+#: score is valuation (FCF yield plus book/market), which is what makes this a
+#: cheapness screen rather than a quality one, and that is a thing a reader
+#: should be able to find. As literals buried in a sum they were invisible,
+#: and they could not be registered in the criteria fingerprint, so changing
+#: one silently invalidated every cached run with nothing to detect it.
+#:
+#: Each name resolves to a `<name>_score` attribute on the result.
+COMPOSITE_WEIGHTS: tuple[tuple[str, float], ...] = (
+    ("fcf_yield", 0.30),
+    ("value", 0.25),
+    ("profitability", 0.15),
+    ("investment_quality", 0.15),
+    ("size", 0.10),
+    ("entry_timing", 0.05),
+)
 EXCLUDED_SECTORS = frozenset(
     {
         "Financial Services",
@@ -367,6 +388,15 @@ def score_yartseva(snap: YartsevaSnapshot) -> YartsevaResult:
     if sec in EXCLUDED_SECTORS:
         failures.append("sector_excluded")
 
+    # A standing exclusion, applied before the numbers are weighed. These are
+    # desk principles rather than screen rules — see principles.py — so every
+    # screen applies the same ones, and the failure names which principle
+    # removed the company. "Excluded" with no reason is indistinguishable from
+    # having failed on the arithmetic.
+    _excl = principles.excluded_by(snap.sector, None)
+    if _excl:
+        failures.append(f"excluded_{_excl.replace('-', '_')}")
+
     if snap.ebitda_ttm is None or snap.ebitda_ttm <= 0:
         failures.append("ebitda_not_positive")
 
@@ -479,14 +509,7 @@ def score_yartseva(snap: YartsevaSnapshot) -> YartsevaResult:
             ent += 5
     r.entry_timing_score = _cap100(ent)
 
-    comp = (
-        (r.fcf_yield_score or 0) * 0.30
-        + (r.value_score or 0) * 0.25
-        + (r.profitability_score or 0) * 0.15
-        + (r.investment_quality_score or 0) * 0.15
-        + (r.size_score or 0) * 0.10
-        + (r.entry_timing_score or 0) * 0.05
-    )
+    comp = sum((getattr(r, f"{name}_score") or 0) * weight for name, weight in COMPOSITE_WEIGHTS)
     r.composite = round(comp, 2)
     r.tier = _tier(comp)
 

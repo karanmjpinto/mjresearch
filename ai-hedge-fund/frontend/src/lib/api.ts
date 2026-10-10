@@ -929,6 +929,17 @@ export type ScreenResults =
       age_days: number | null;
       stale: boolean;
       stale_after_days: number;
+      /**
+       * Whether the screen's own rules moved since this run was computed.
+       *
+       * `criteria_known` is false for a cache written before fingerprints
+       * existed, and the two must not be collapsed: "the rules changed" and
+       * "we cannot tell whether the rules changed" are different claims, and
+       * a reader deciding whether to act on these rows needs to know which
+       * one they are being given.
+       */
+      criteria_changed: boolean;
+      criteria_known: boolean;
       /** Names in the universe that were asked for. */
       requested: number;
       /** Names that returned usable data. */
@@ -952,6 +963,8 @@ export type CachedScreenMeta = {
   built_at: string;
   age_days: number | null;
   stale: boolean;
+  criteria_changed: boolean;
+  criteria_known: boolean;
   count: number;
   errors: number;
   requested: number;

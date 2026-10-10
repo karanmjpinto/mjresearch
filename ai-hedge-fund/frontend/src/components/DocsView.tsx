@@ -205,6 +205,28 @@ export function DocsView() {
                   ))}
                 </div>
               )}
+
+              {/* Where an outside claim came from. A reference section whose
+                * argument is "check this rather than trust me" has to hand
+                * the reader the thing to check, and prose naming a paper does
+                * not do that. `rel` is set because these are third-party
+                * destinations opening in a new tab. */}
+              {s.sources && s.sources.length > 0 && (
+                <ul className="mt-lg flex flex-col gap-2xs border-l border-on-canvas/15 pl-md">
+                  {s.sources.map((src) => (
+                    <li key={src.url}>
+                      <a
+                        href={src.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="max-w-measure text-body-sm text-on-canvas-soft underline decoration-on-canvas/30 underline-offset-4 transition-colors hover:text-enamel hover:decoration-oxide-paper focus-visible:text-enamel focus-visible:outline-none"
+                      >
+                        {src.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </section>
           ))}
 

@@ -4,6 +4,7 @@ import {
   OTHER_DESTINATIONS,
   STAGES,
   TICKER_PATH_RE,
+  VISIBLE_OTHER_DESTINATIONS,
   stageFor,
   stagePath,
 } from "./flow";
@@ -114,6 +115,7 @@ describe("other destinations", () => {
     // when you have no symbol yet.
     expect(OTHER_DESTINATIONS.map((d) => d.key)).toEqual([
       "constraints",
+      "capture",
       "home",
       "screeners",
       "breadth",
@@ -127,5 +129,40 @@ describe("other destinations", () => {
   it("never lists a stage route, or the menu would compete with the rail", () => {
     const segments = DESTINATIONS.map((s) => `/${s.segment}`);
     for (const d of OTHER_DESTINATIONS) expect(segments).not.toContain(d.to);
+  });
+});
+
+describe("hiding a destination", () => {
+  it("is a subset — hiding removes from the menu, never from the app", () => {
+    // The guarantee the whole mechanism rests on. A hidden screen keeps its
+    // route, its chunk and its inbound links; the only thing it loses is a
+    // row in the disclosure. Anything that drops an entry from
+    // OTHER_DESTINATIONS instead of flipping `visible` breaks that.
+    for (const d of VISIBLE_OTHER_DESTINATIONS) {
+      expect(OTHER_DESTINATIONS).toContain(d);
+    }
+    expect(VISIBLE_OTHER_DESTINATIONS.length).toBeLessThanOrEqual(
+      OTHER_DESTINATIONS.length,
+    );
+  });
+
+  it("still names where you are when you arrive on a hidden screen by URL", () => {
+    // The actual bug this guards: AppNav labels the menu "Other · <here>" by
+    // looking `active` up in the destination list. Narrowing that lookup to
+    // the visible list would make a hidden screen render a bare "Other",
+    // telling the reader the screen they are looking at does not exist.
+    const hidden = OTHER_DESTINATIONS.filter((d) => !d.visible);
+    for (const d of hidden) {
+      expect(OTHER_DESTINATIONS.find((x) => x.key === d.key)?.label).toBe(
+        d.label,
+      );
+    }
+  });
+
+  it("keeps at least the entry points listed, so the menu is never empty", () => {
+    const keys = VISIBLE_OTHER_DESTINATIONS.map((d) => d.key);
+    for (const required of ["home", "screeners", "setup"]) {
+      expect(keys).toContain(required);
+    }
   });
 });

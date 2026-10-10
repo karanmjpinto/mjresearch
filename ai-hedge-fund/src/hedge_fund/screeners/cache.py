@@ -7,7 +7,7 @@ seven seconds per name against yfinance. Five hundred names is an hour. Nobody
 opens a screen they have to commission first.
 
 So the results are computed ahead of time and served instantly, the way a
-screen actually gets used. Three consequences worth stating, because each one
+screen actually gets used. Four consequences worth stating, because each one
 is a decision:
 
 **Dated, not live.** Every cache carries the timestamp it was built at, and
@@ -24,6 +24,15 @@ passes, and there is nothing on screen to tell them apart.
 **Errors are kept.** A name whose data could not be fetched is recorded as
 such rather than dropped. Dropping it makes the screen look cleaner and quietly
 turns "we could not check this" into "this did not qualify".
+
+**Dated against the rules, not just the clock.** A cache also records a
+fingerprint of the thresholds the screen applied, because `built_at` only
+answers half the staleness question. Adding a market-cap band to the
+compounder turned 398 of the 503 names in its cached S&P 500 run into
+companies that would now be rejected on size — and the file still reported
+them as passes, with a fresh date and nothing to indicate otherwise. See
+`criteria.py`. A cache built under different rules is still served, because it
+is real data, but it is labelled.
 """
 
 from __future__ import annotations
@@ -37,6 +46,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from hedge_fund.screeners import criteria as screen_criteria
+
 logger = logging.getLogger(__name__)
 
 CACHE_DIR = Path(__file__).resolve().parents[3] / "data" / "screens"
@@ -48,7 +59,13 @@ CACHE_DIR = Path(__file__).resolve().parents[3] / "data" / "screens"
 STALE_AFTER_DAYS = 7
 
 #: The screens that have a cache. Names match the endpoint paths.
-SCREENS = ("yartseva", "acquisition-compounder", "bolton-contrarian", "kiyohara-handbook")
+SCREENS = (
+    "yartseva",
+    "acquisition-compounder",
+    "bolton-contrarian",
+    "kiyohara-handbook",
+    "ellenbogen-two-act",
+)
 
 
 @dataclass(frozen=True)
@@ -60,6 +77,10 @@ class CachedScreen:
     requested: int
     errors: int
     duration_s: float
+    #: The fingerprint of the screen's rules when this was built. None for a
+    #: cache written before fingerprints existed, which is not the same thing
+    #: as a mismatch and must not be reported as one.
+    criteria: str | None = None
 
     @property
     def age_days(self) -> float:
@@ -71,8 +92,25 @@ class CachedScreen:
             built = built.replace(tzinfo=UTC)
         return (datetime.now(UTC) - built).total_seconds() / 86_400
 
+    @property
+    def criteria_changed(self) -> bool:
+        """Whether the screen's rules moved since this was computed.
+
+        Two cases deliberately answer False. An unregistered screen has no
+        fingerprint to compare against, and a cache from before fingerprints
+        existed has none stored — in both the honest answer is "unknown", and
+        `criteria_known` is what distinguishes it. Reporting unknown as
+        changed would cry wolf on every pre-existing file; reporting it as
+        unchanged would be the original bug. So the API sends both.
+        """
+        current = screen_criteria.fingerprint(self.screen)
+        if current is None or self.criteria is None:
+            return False
+        return current != self.criteria
+
     def as_dict(self) -> dict[str, Any]:
         age = self.age_days
+        current = screen_criteria.fingerprint(self.screen)
         return {
             "screen": self.screen,
             "universe": self.universe,
@@ -80,6 +118,13 @@ class CachedScreen:
             "age_days": round(age, 2) if age != float("inf") else None,
             "stale": age > STALE_AFTER_DAYS,
             "stale_after_days": STALE_AFTER_DAYS,
+            # Two fields, not one. "The rules changed" and "we cannot tell
+            # whether the rules changed" are different claims and a reader
+            # deciding whether to act on a row needs to know which they have.
+            "criteria": self.criteria,
+            "criteria_current": current,
+            "criteria_known": self.criteria is not None and current is not None,
+            "criteria_changed": self.criteria_changed,
             "requested": self.requested,
             "errors": self.errors,
             "duration_s": round(self.duration_s, 1),
@@ -115,6 +160,10 @@ def read(screen: str, universe: str) -> CachedScreen | None:
             requested=int(raw.get("requested", 0)),
             errors=int(raw.get("errors", 0)),
             duration_s=float(raw.get("duration_s", 0.0)),
+            # Absent in every cache written before fingerprints existed.
+            # `.get` rather than `[...]`, so those keep loading and report
+            # "unknown" rather than vanishing from the listing.
+            criteria=raw.get("criteria"),
         )
     except (KeyError, TypeError, ValueError) as exc:
         logger.warning("screen cache %s has an unexpected shape (%s)", p, exc)
@@ -144,6 +193,9 @@ def write(
         "requested": requested,
         "errors": errors,
         "duration_s": round(duration_s, 1),
+        # Recorded at write time, from the modules that just produced these
+        # rows, so the stored hash always describes the run beside it.
+        "criteria": screen_criteria.fingerprint(screen),
         "results": results,
     }
 

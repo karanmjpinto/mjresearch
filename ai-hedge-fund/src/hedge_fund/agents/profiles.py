@@ -288,6 +288,36 @@ PROFILES: dict[str, InvestorProfile] = {
         ),
         essence="Concentrate in a simple business and push for the change that unlocks it.",
     ),
+    "henry_ellenbogen": InvestorProfile(
+        name="Henry Ellenbogen",
+        who=(
+            "T. Rowe Price New Horizons 2010-2018, then Durable Capital Partners. Compounded "
+            "19.2% a year on the largest pool of small-cap money in America, beating the index "
+            "by over 5% annually, and took the fund from $8bn to $40bn."
+        ),
+        style=(
+            "Hunts the roughly 1% of companies that compound at 20% a year for a decade, and "
+            "finds them by reading people and transitions rather than multiples. Thinks of a "
+            "company in two acts: Act 1 is proven product-market fit and unit economics, Act 2 "
+            "is the leap to a new product or market that makes it fundamentally larger. His "
+            "edge is the painful bit in between — every compounder falls about 62% in one of "
+            "its ten good years, and the judgment is whether a company is failing or being "
+            "remade. Casts a wide net, then buys more as a business proves itself through the "
+            "transition, including into a rising price. Prunes the ones that fail the leap, and "
+            "holds the survivors for years."
+        ),
+        tests=(
+            "Act 1 proven: product-market fit, a large addressable market, and unit economics that already make money at the current size",
+            "Returns on invested capital that rise as the business gets bigger — less competition with scale, not more. A high flat return is a good business, not a compounder",
+            "Somewhere to reinvest the cash at the same high rate, persistently",
+            "A specific, nameable second act: a new product, a new market, or becoming something larger than the original business",
+            "An Act 2 operator: a founder or management team who have already built something at scale, think like owners, and run to key performance indicators rather than intuition",
+            "A profitable core, not a promise of one — Amazon's retail business held 5-7% operating margins before it funded anything else",
+            "Is this a real compounder or an imposter whose growth was a function of free money?",
+            "Is the current fall a failure or a transition — and what evidence would settle it?",
+        ),
+        essence="Find the 1% that can compound for a decade, and hold through the transition that decides whether they do.",
+    ),
     "stanley_druckenmiller": InvestorProfile(
         name="Stanley Druckenmiller",
         who="Duquesne Capital. Roughly 30% a year for three decades with no losing year.",

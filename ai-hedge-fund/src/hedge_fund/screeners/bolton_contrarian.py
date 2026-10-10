@@ -37,6 +37,8 @@ from typing import Any
 import pandas as pd
 import yfinance as yf
 
+from hedge_fund.screeners import principles
+
 from hedge_fund.screeners.yartseva import _f, _sum_q
 
 logger = logging.getLogger(__name__)
@@ -86,6 +88,10 @@ class BoltonSnapshot:
     ticker: str
     market_cap: float | None = None
     sector: str | None = None
+    #: Carried separately from `sector` because the standing exclusions
+    #: match industry labels — "Tobacco", "Aerospace & Defense" — and a
+    #: sector-only snapshot sees "Consumer Defensive" and lets them pass.
+    industry: str | None = None
     price_current: float | None = None
     price_52w_high: float | None = None
     price_52w_low: float | None = None
@@ -121,6 +127,7 @@ def fetch_bolton_snapshot(ticker: str) -> BoltonSnapshot:
 
         snap.market_cap = _f(info.get("marketCap"))
         snap.sector = info.get("sector") or info.get("industry") or None
+        snap.industry = info.get("industry") or None
         snap.price_current = _f(info.get("currentPrice") or info.get("regularMarketPrice"))
         snap.price_52w_high = _f(info.get("fiftyTwoWeekHigh"))
         snap.price_52w_low = _f(info.get("fiftyTwoWeekLow"))
@@ -294,6 +301,15 @@ def score_bolton_contrarian(snap: BoltonSnapshot) -> BoltonResult:
 
     # ---- Hard filters ----
     fails: list[str] = []
+
+    # A standing exclusion, applied before the numbers are weighed. These are
+    # desk principles rather than screen rules — see principles.py — so every
+    # screen applies the same ones, and the failure names which principle
+    # removed the company. "Excluded" with no reason is indistinguishable from
+    # having failed on the arithmetic.
+    _excl = principles.excluded_by(snap.sector, snap.industry)
+    if _excl:
+        fails.append(f"excluded_{_excl.replace('-', '_')}")
 
     if snap.market_cap is None or snap.market_cap < MIN_MARKET_CAP:
         fails.append("market_cap_below_floor")

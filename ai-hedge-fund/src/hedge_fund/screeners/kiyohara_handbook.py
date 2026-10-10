@@ -56,6 +56,8 @@ from typing import Any
 import pandas as pd
 import yfinance as yf
 
+from hedge_fund.screeners import principles
+
 from hedge_fund.screeners.bolton_contrarian import _band, _ratio
 from hedge_fund.screeners.yartseva import _f
 
@@ -401,6 +403,15 @@ def score_kiyohara_handbook(snap: KiyoharaSnapshot) -> KiyoharaResult:
 
     # ---- Hard filters ----
     fails: list[str] = []
+
+    # A standing exclusion, applied before the numbers are weighed. These are
+    # desk principles rather than screen rules — see principles.py — so every
+    # screen applies the same ones, and the failure names which principle
+    # removed the company. "Excluded" with no reason is indistinguishable from
+    # having failed on the arithmetic.
+    _excl = principles.excluded_by(snap.sector, snap.industry)
+    if _excl:
+        fails.append(f"excluded_{_excl.replace('-', '_')}")
 
     floor = _size_floor(snap.currency)
     if floor is None:

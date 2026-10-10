@@ -62,7 +62,8 @@ type Props = {
     | "yartseva"
     | "acquisition-compounder"
     | "bolton-contrarian"
-    | "kiyohara-handbook";
+    | "kiyohara-handbook"
+    | "ellenbogen-two-act";
   title: string;
   blurb: string;
   /** Glossary term for the heading marker. */
@@ -70,7 +71,8 @@ type Props = {
     | "screen-yartseva"
     | "screen-acquisition"
     | "screen-bolton"
-    | "screen-kiyohara";
+    | "screen-kiyohara"
+    | "screen-ellenbogen";
   universe?: string;
   /** Highest possible score, for the bars. /100, except the compounder at /45. */
   scoreMax: number;
@@ -129,6 +131,25 @@ export function ScreenResults({
                 : `Built ${Math.round(d.age_days ?? 0)} days ago`}
               {d.stale && " · worth refreshing"}
             </p>
+            {/* A second kind of stale, and the more dangerous one, because a
+              * recent date actively argues against it. These rows were scored
+              * by rules the screen no longer applies: when the market-cap band
+              * was added, 398 of the 503 names in the cached S&P 500 run became
+              * companies that would now be rejected on size, while the file
+              * went on reporting them as passes dated that morning.
+              *
+              * Cadmium rather than a neutral tone because this one invalidates
+              * the rows themselves rather than merely ageing them. */}
+            {/* Two deliberate lines rather than one wrapped one. At this
+              * column width a single string broke after the separator and
+              * left a middot orphaned at the start of a line. The fact and
+              * the instruction are different sentences anyway. */}
+            {d.criteria_changed && (
+              <p className="mt-2xs font-display text-label uppercase leading-tight tracking-label text-cadmium">
+                <span className="block">Scored under older rules</span>
+                <span className="block text-on-ink-faint">Rebuild before trusting</span>
+              </p>
+            )}
             <p className="mt-2xs font-display text-label tabular text-on-ink-soft">
               {d.passing} of {d.checked} passed
               {d.errored > 0 && (
@@ -360,6 +381,12 @@ function reason(r: ScreenRow): string {
 
   // Compounder: fractions in `snapshot`.
   rate(snap, "roic", "ROIC");
+  /* The reinvestment leg, next to ROIC on purpose: the pair is the point.
+   * ROIC says what the capital already deployed earns; this says what the
+   * business can compound at from its own cash. A high ROIC beside a 2%
+   * implied rate is a good business with nowhere to put the next dollar,
+   * and that is a distinction worth seeing without opening the row. */
+  rate(snap, "implied_compounding", "implied compounding");
   rate(snap, "revenue_cagr_5y", "5y revenue");
   raw(snap, "net_debt_to_ebitda", "net debt/EBITDA", 1);
 
@@ -425,6 +452,48 @@ function reason(r: ScreenRow): string {
   }
   if (top.equity_issued_recently === true) {
     bits.push("has issued equity");
+  }
+
+  /* Ellenbogen: the slope, not the level. His research found compounders got
+   * better as they got bigger, so the change in return on capital is the
+   * first thing worth seeing — and the row has to say when that change was
+   * not measurable, because a neutral score and a measured mediocre one look
+   * identical otherwise. The drawdown is here for the same reason it is
+   * unscored: it marks where the failing-or-transitioning question gets
+   * asked. */
+  const roicChange = top.roic_change_pp;
+  if (
+    typeof roicChange === "number" &&
+    Number.isFinite(roicChange) &&
+    top.roic_slope_measured === true
+  ) {
+    const sign = roicChange >= 0 ? "+" : "";
+    bits.push(`ROIC ${sign}${roicChange.toFixed(1)}pp as it grew`);
+  } else if (typeof top.roic_slope_unmeasured_reason === "string") {
+    bits.push(
+      `slope not measured (${top.roic_slope_unmeasured_reason.replace(/_/g, " ")})`,
+    );
+  }
+  /* Found on a real name: years of buybacks leave invested capital near zero
+   * and the ratio prints in the hundreds of percent. Saying so beats printing
+   * it. */
+  if (top.roic_level_measured === false) {
+    bits.push("ROIC unrankable — capital base bought back");
+  }
+  const gap = top.gap_to_compounder_bar_pp;
+  if (typeof gap === "number" && Number.isFinite(gap)) {
+    bits.push(
+      gap <= 0
+        ? `${(-gap).toFixed(0)}pp past his 20% bar`
+        : `${gap.toFixed(0)}pp short of his 20% bar`,
+    );
+  }
+  const dd = top.drawdown_from_5y_high;
+  if (typeof dd === "number" && Number.isFinite(dd) && dd >= 0.2) {
+    bits.push(`${Math.round(dd * 100)}% off its 5y high`);
+  }
+  if (top.transition_candidate === true) {
+    bits.push("transition candidate — not a buy");
   }
 
   const flags = r.red_flags;

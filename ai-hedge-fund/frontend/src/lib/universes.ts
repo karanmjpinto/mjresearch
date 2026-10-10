@@ -29,6 +29,20 @@ export const FALLBACK_UNIVERSES: ScreenerUniverseMeta[] = [
     description: "",
     approx_count: 874,
   },
+  { id: "uk_mid", label: "UK mid (FTSE 250)", description: "", approx_count: 250 },
+  { id: "de_mid", label: "Germany mid (MDAX)", description: "", approx_count: 50 },
+  {
+    id: "ca_all",
+    label: "Canada (TSX operating cos)",
+    description: "",
+    approx_count: 800,
+  },
+  {
+    id: "au_all",
+    label: "Australia (ASX listed)",
+    description: "",
+    approx_count: 1900,
+  },
 ];
 
 /**
@@ -36,16 +50,26 @@ export const FALLBACK_UNIVERSES: ScreenerUniverseMeta[] = [
  *
  * Not one shared default, because the screens disagree about what a candidate
  * is: the multi-bagger screen has a hard market-cap ceiling and passes
- * literally nothing in the S&P 500 — 502 of 503 names fail on size alone —
- * while the compounder wants the scale that serial acquirers operate at.
- * A single default would leave one of the two screens permanently empty.
+ * literally nothing in the S&P 500 — 502 of 503 names fail on size alone.
+ *
+ * The compounder used to default to the S&P 500, and that one line was the
+ * only thing making it a large-cap screen: it had no market-cap filter at all,
+ * while every test it runs — return on capital above 12%, cash conversion
+ * above 80%, a share count that does not grow — applies at any size. It now
+ * carries an explicit small and mid-cap band, so it is pointed at the mid-cap
+ * index, which is the band that band describes and the one universe no screen
+ * previously landed on.
  */
 export const DEFAULT_UNIVERSE_FOR: Record<string, string> = {
   yartseva: "sp600",
-  "acquisition-compounder": "sp500",
+  "acquisition-compounder": "sp400",
   "bolton-contrarian": "sp500",
   /* Not a preference. Kiyohara's checklist reads a Japanese shareholder
    * register and a yen market cap; run over the S&P 500 it would still return
    * names, which is worse than returning none. */
   "kiyohara-handbook": "jp_mid_small",
+  /* His own study: roughly 80% of the companies that compound at 20% for a
+   * decade start that run as small caps, between about $1bn and $6bn. The
+   * SmallCap 600 is that shelf. */
+  "ellenbogen-two-act": "sp600",
 };
