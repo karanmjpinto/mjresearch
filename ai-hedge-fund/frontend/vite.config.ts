@@ -22,9 +22,39 @@ const FRONTEND_PORT = Number(process.env.FRONTEND_PORT ?? 5173);
  */
 const PAGES_REPO = process.env.GITHUB_PAGES_REPO?.trim();
 
+/**
+ * Libraries that change on their own release schedule, not ours, get their own
+ * chunks. Without this they land in whichever route chunk happened to import
+ * them first, so every deploy of our own code invalidates React and the chart
+ * libraries too, and a returning visitor re-downloads ~300 kB that did not
+ * change. Splitting them means an app deploy busts only the app chunks.
+ *
+ * `charts` is the pair that made the single bundle 1.36 MB. It stays one chunk
+ * rather than two because no screen loads only one of them.
+ */
+const VENDOR_CHUNKS: Record<string, string[]> = {
+  react: ["react", "react-dom", "react-router", "react-router-dom"],
+  charts: ["recharts", "lightweight-charts", "d3-", "victory-"],
+  query: ["@tanstack/react-query"],
+  sentry: ["@sentry"],
+};
+
+function vendorChunk(id: string): string | undefined {
+  if (!id.includes("node_modules")) return undefined;
+  for (const [chunk, markers] of Object.entries(VENDOR_CHUNKS)) {
+    if (markers.some((m) => id.includes(`node_modules/${m}`))) return chunk;
+  }
+  return "vendor";
+}
+
 export default defineConfig(({ command }) => ({
   base: command === "build" && PAGES_REPO ? `/${PAGES_REPO}/` : "/",
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: { manualChunks: (id: string) => vendorChunk(id) },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

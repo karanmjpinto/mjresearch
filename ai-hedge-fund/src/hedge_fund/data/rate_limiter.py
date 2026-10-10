@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import threading
 import time
 from dataclasses import dataclass, field
 
@@ -39,39 +40,50 @@ class _Bucket:
 
 
 class RateLimiter:
-    """Per-provider rate limiting using token buckets."""
+    """Per-provider rate limiting using token buckets.
+
+    Safe to share across threads. The price fetches now run side by side, so
+    several of them reach the same bucket at once; without the lock the
+    read-modify-write of `tokens` can lose an update and admit more calls than
+    the limit allows.
+    """
 
     def __init__(self) -> None:
         self._buckets: dict[str, _Bucket] = {}
+        self._lock = threading.Lock()
 
     def configure(self, provider: str, calls_per_minute: int) -> None:
         """Set rate limit for a provider."""
         capacity = float(calls_per_minute)
         refill_rate = calls_per_minute / 60.0
-        self._buckets[provider] = _Bucket(capacity=capacity, refill_rate=refill_rate)
+        with self._lock:
+            self._buckets[provider] = _Bucket(capacity=capacity, refill_rate=refill_rate)
 
     def acquire(self, provider: str) -> bool:
         """Try to acquire a rate limit token for the provider.
         Returns True if the call is allowed. If no bucket is configured, always allows."""
-        bucket = self._buckets.get(provider)
-        if bucket is None:
-            return True
-        return bucket.acquire()
+        with self._lock:
+            bucket = self._buckets.get(provider)
+            if bucket is None:
+                return True
+            return bucket.acquire()
 
     def wait_time(self, provider: str) -> float:
         """How long to wait before next call is allowed."""
-        bucket = self._buckets.get(provider)
-        if bucket is None:
-            return 0.0
-        return bucket.wait_time()
+        with self._lock:
+            bucket = self._buckets.get(provider)
+            if bucket is None:
+                return 0.0
+            return bucket.wait_time()
 
     def status(self) -> dict[str, dict]:
         """Return rate limit status for all providers."""
-        return {
-            name: {
-                "tokens_available": round(bucket.tokens, 1),
-                "capacity": bucket.capacity,
-                "refill_rate_per_sec": round(bucket.refill_rate, 2),
+        with self._lock:
+            return {
+                name: {
+                    "tokens_available": round(bucket.tokens, 1),
+                    "capacity": bucket.capacity,
+                    "refill_rate_per_sec": round(bucket.refill_rate, 2),
+                }
+                for name, bucket in self._buckets.items()
             }
-            for name, bucket in self._buckets.items()
-        }

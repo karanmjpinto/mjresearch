@@ -1,24 +1,108 @@
+import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AutoResearchView } from "@/components/AutoResearchView";
+import clsx from "clsx";
 import { BackendGate } from "@/components/BackendGate";
+import { ChunkErrorBoundary } from "@/components/ChunkErrorBoundary";
 import { DeploymentLimits } from "@/components/DeploymentLimits";
-import { Dashboard } from "@/components/Dashboard";
-import { DocsView } from "@/components/DocsView";
-import { DecideView } from "@/components/DecideView";
 import { JoinView } from "@/components/JoinView";
 import { Landing } from "@/components/Landing";
 import { MemberGate } from "@/components/MemberGate";
-import { OptimizeView } from "@/components/OptimizeView";
-import { AnalysisView } from "@/components/AnalysisView";
-import { ValueRiskView } from "@/components/ValueRiskView";
-import { YourLensView } from "@/components/YourLensView";
-import PortfolioView from "@/components/PortfolioView";
-import { ResearchReport } from "@/components/ResearchReport";
-import { ScreenersView } from "@/components/ScreenersView";
-import { BreadthView } from "@/components/BreadthView";
-import { ConstraintsView } from "@/components/ConstraintsView";
-import { SetupView } from "@/components/SetupView";
 import { DEFAULT_SCREENER_ID } from "@/config/screeners";
+
+/**
+ * Landing, the two gates and JoinView are imported eagerly: they are the first
+ * paint and the entry path, and a spinner on `/` would be a regression.
+ *
+ * Every screen below is a separate chunk, because statically importing all
+ * nineteen put the whole app in one 1.36 MB file — recharts, lightweight-charts
+ * and every panel downloaded and parsed before `/` could render, on a route
+ * that the comment above says makes no API calls and needs none of it.
+ * A visitor reading the landing page or the docs now fetches the chart
+ * libraries only if they go somewhere that draws a chart.
+ *
+ * Each Suspense sits inside a ChunkErrorBoundary, because a lazy chunk can
+ * fail to arrive and a bare Suspense would wait on it for ever. See that
+ * component: the usual cause is a deploy, and the cure is a reload.
+ */
+const AnalysisView = lazy(() =>
+  import("@/components/AnalysisView").then((m) => ({ default: m.AnalysisView })),
+);
+const AutoResearchView = lazy(() =>
+  import("@/components/AutoResearchView").then((m) => ({ default: m.AutoResearchView })),
+);
+const BreadthView = lazy(() =>
+  import("@/components/BreadthView").then((m) => ({ default: m.BreadthView })),
+);
+const ConstraintsView = lazy(() =>
+  import("@/components/ConstraintsView").then((m) => ({ default: m.ConstraintsView })),
+);
+const Dashboard = lazy(() =>
+  import("@/components/Dashboard").then((m) => ({ default: m.Dashboard })),
+);
+const DecideView = lazy(() =>
+  import("@/components/DecideView").then((m) => ({ default: m.DecideView })),
+);
+const DocsView = lazy(() =>
+  import("@/components/DocsView").then((m) => ({ default: m.DocsView })),
+);
+const OptimizeView = lazy(() =>
+  import("@/components/OptimizeView").then((m) => ({ default: m.OptimizeView })),
+);
+const PortfolioView = lazy(() => import("@/components/PortfolioView"));
+const ResearchReport = lazy(() =>
+  import("@/components/ResearchReport").then((m) => ({ default: m.ResearchReport })),
+);
+const ScreenersView = lazy(() =>
+  import("@/components/ScreenersView").then((m) => ({ default: m.ScreenersView })),
+);
+const SetupView = lazy(() =>
+  import("@/components/SetupView").then((m) => ({ default: m.SetupView })),
+);
+const ValueRiskView = lazy(() =>
+  import("@/components/ValueRiskView").then((m) => ({ default: m.ValueRiskView })),
+);
+const YourLensView = lazy(() =>
+  import("@/components/YourLensView").then((m) => ({ default: m.YourLensView })),
+);
+
+/**
+ * The same wording and micro-label treatment BackendGate uses for its own
+ * wait, so a chunk arriving and a health check replying do not look like two
+ * different kinds of pause. It is spelled in the named tokens — `text-label`
+ * and `tracking-marker` — rather than BackendGate's inline `text-[12px]` and
+ * `tracking-[0.2em]`, which are two stragglers from the cleanup that collapsed
+ * four near-identical tracks into `marker`. The 0.02em is invisible at 12px,
+ * which is why that cleanup happened.
+ *
+ * The ground is a parameter because the two places this appears sit on
+ * different ones, and DESIGN.md is explicit that text is always a shade of its
+ * own ground. `/docs` is a reading surface and paints `bg-canvas`, the fixed
+ * linen; the gated screens paint `bg-ink`, which follows the theme. One
+ * hardcoded ground would therefore show the wrong one on half the routes —
+ * and at night the gap is the whole way across, enamel black against linen.
+ * A chunk that arrives in a colour the page is not is the flash lazy loading
+ * is meant to be worth avoiding, not a new one to introduce.
+ */
+function ScreenLoading({ ground = "ink" }: { ground?: "ink" | "canvas" }) {
+  const onCanvas = ground === "canvas";
+  return (
+    <div
+      className={clsx(
+        "flex min-h-screen items-center justify-center",
+        onCanvas ? "on-canvas bg-canvas" : "bg-ink",
+      )}
+    >
+      <p
+        className={clsx(
+          "font-display text-label uppercase tracking-marker",
+          onCanvas ? "text-on-canvas-faint" : "text-on-ink-faint",
+        )}
+      >
+        Loading…
+      </p>
+    </div>
+  );
+}
 
 /**
  * `/` and `/docs` make no API calls, so the published static build always
@@ -50,7 +134,16 @@ export default function App() {
     <div className="min-h-screen bg-surface">
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/docs" element={<DocsView />} />
+        <Route
+          path="/docs"
+          element={
+            <ChunkErrorBoundary ground="canvas">
+              <Suspense fallback={<ScreenLoading ground="canvas" />}>
+                <DocsView />
+              </Suspense>
+            </ChunkErrorBoundary>
+          }
+        />
         <Route path="/join" element={<JoinView />} />
         <Route
           path="*"
@@ -61,7 +154,11 @@ export default function App() {
                     a property of the deployment, not of the screen you happen
                     to be on, and it renders nothing when nothing is limited. */}
                 <DeploymentLimits />
-                <AppRoutes />
+                <ChunkErrorBoundary>
+                  <Suspense fallback={<ScreenLoading />}>
+                    <AppRoutes />
+                  </Suspense>
+                </ChunkErrorBoundary>
               </MemberGate>
             </BackendGate>
           }

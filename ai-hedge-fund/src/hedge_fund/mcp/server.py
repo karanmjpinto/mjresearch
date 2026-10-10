@@ -47,6 +47,7 @@ from hedge_fund.runs import get_run as _get_run
 from hedge_fund.runs import get_snapshot as _get_snapshot
 from hedge_fund.runs import list_runs as _list_runs
 from hedge_fund.api.research_snapshot import assemble_research_snapshot
+from hedge_fund.data.batch import fetch_prices
 from hedge_fund.data.frames import close_series, normalise_prices
 from hedge_fund.data.service import get_data_service
 from hedge_fund.orchestration import describe_research_graph as _describe_graph
@@ -240,16 +241,18 @@ async def optimize_portfolio(
     if len(clean) < 2:
         return _ok({"error": "need_at_least_2_tickers", "received": clean})
 
+    # In parallel: the waiting is network, so the basket costs one call rather
+    # than one per name.
+    frames = fetch_prices(clean, days=max(60, min(days, 3650)), data_service=_ds())
+
     closes: dict[str, pd.Series] = {}
     for t in clean:
-        raw = _ds().get_price_history(t, days=max(60, min(days, 3650)))
         # calendar_days because these series are about to be joined on date:
         # one provider stamps 09:30 in the exchange zone and another midnight
         # UTC, and unfloored they share no index at all.
-        close = close_series(raw, min_points=20, calendar_days=True)
-        if close is None:
-            continue
-        closes[t] = close
+        close = close_series(frames.get(t), min_points=20, calendar_days=True)
+        if close is not None:
+            closes[t] = close
 
     if len(closes) < 2:
         return _ok(
