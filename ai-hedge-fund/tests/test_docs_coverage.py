@@ -21,7 +21,7 @@ import pytest
 
 from hedge_fund.agents.personas import DEFAULT_COMMITTEE_PERSONAS
 from hedge_fund.agents.profiles import PROFILES
-from hedge_fund.screeners import cache
+from hedge_fund.screeners import cache, principles
 
 DOCS = Path(__file__).resolve().parents[1] / "frontend" / "src" / "content" / "docs.ts"
 
@@ -39,6 +39,7 @@ SCREEN_PROSE = {
     "acquisition-compounder": "compounder",
     "bolton-contrarian": "Bolton",
     "kiyohara-handbook": "Kiyohara",
+    "ellenbogen-two-act": "Ellenbogen",
 }
 
 
@@ -62,6 +63,35 @@ def test_every_default_committee_member_is_documented(pid: str):
     surname = PROFILES[pid].name.split()[-1]
     assert surname in _docs(), (
         f"{PROFILES[pid].name} speaks on every committee run but is not named in the reference."
+    )
+
+
+@pytest.mark.parametrize("pid", sorted(principles.EXCLUSION_PATTERNS))
+def test_every_standing_exclusion_is_documented(pid: str):
+    """An exclusion the reference never mentions is a rule nobody can audit.
+
+    These remove companies before anything is measured and across every
+    screen, so they shape every list the app produces. Same reasoning as the
+    screen and committee coverage tests above: the docs cannot be made to be
+    good, but they can be made to be complete.
+    """
+    assert pid in _docs().lower(), (
+        f"the reference never mentions the {pid!r} exclusion. It silently removes "
+        "companies from every screen, which is exactly the kind of rule a reader "
+        "has to be able to find."
+    )
+
+
+def test_the_unenforced_geography_principle_is_disclosed():
+    """The registry admits this one is not enforced; the docs must too.
+
+    It is the principle most likely to be read as a guarantee, and the one
+    that would vanish without trace the moment a universe is added.
+    """
+    text = _docs().lower()
+    assert "not enforced" in text, (
+        "the docs do not disclose that the developed-markets principle is "
+        "unenforced, so a reader would take it as a rule the app applies"
     )
 
 

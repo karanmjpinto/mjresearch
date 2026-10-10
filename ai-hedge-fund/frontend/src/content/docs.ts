@@ -60,11 +60,32 @@ export const TRUST_META: Record<
 
 export type DocSection = {
   id: string;
+  /**
+   * One or two plain words. This is a navigation label before it is a
+   * heading — it sits in the sidebar rail, where a reader is scanning for
+   * the thing they want, not reading sentences.
+   *
+   * These used to be clauses: "Factors, and whether they survived being
+   * published", "Market breadth, and a warning that did not pay". Each was a
+   * good line and a bad label, and the rail read as a paragraph broken into
+   * links. The qualifier belongs in `standfirst`, which is right underneath
+   * and already says it.
+   */
   title: string;
   /** One line that answers "why does this section exist". */
   standfirst: string;
   body: string[];
   items?: { name: string; trust: Trust; detail: string }[];
+  /**
+   * Where a claim in this section came from, when it came from outside.
+   *
+   * Several sections rest on published work — the JKP factor series, the
+   * Wasserstein regime paper, the small-cap case — and until now each was
+   * named in prose with no way to reach it. A reference section whose whole
+   * argument is "check this rather than trust it" should hand the reader the
+   * thing to check.
+   */
+  sources?: { label: string; url: string }[];
 };
 
 export const OPENING = {
@@ -77,7 +98,7 @@ export const OPENING = {
 export const SECTIONS: DocSection[] = [
   {
     id: "determinism",
-    title: "What is calculated, and what is predicted",
+    title: "Trust",
     standfirst:
       "The single most useful thing to know before acting on anything this app says.",
     body: [
@@ -98,10 +119,10 @@ export const SECTIONS: DocSection[] = [
           "Equal weight, inverse volatility, mean-variance, hierarchical risk parity, and conviction weighting. Returns are aligned on common trading days; Sharpe, volatility, drawdown and effective N are computed from those aligned series.",
       },
       {
-        name: "The four screens",
+        name: "The five screens",
         trust: "computed",
         detail:
-          "Every filter and every score is arithmetic over fetched fundamentals. No model reads a screen or ranks it. Results are computed ahead of time and served from a dated cache, so what you see is a list, not a request.",
+          "Every filter and every score is arithmetic over fetched fundamentals. No model reads a screen or ranks it. Results are computed ahead of time and served from a dated cache, so what you see is a list, not a request. The cache is dated twice over: once by the clock, and once by a fingerprint of the thresholds the screen applied, so a run scored under rules that have since changed says so instead of presenting itself as current. That second check exists because the first was not enough — adding a market-cap band to the compounder turned 398 of the 503 names in its cached S&P 500 run into companies that would now be rejected on size, and the file went on reporting them as passes dated that morning.",
       },
       {
         name: "Factors — JKP theme returns and where a company sits on them",
@@ -178,8 +199,41 @@ export const SECTIONS: DocSection[] = [
     ],
   },
   {
+    id: "smallcaps",
+    title: "Small caps",
+    standfirst:
+      "Why the desk is pointed at small and mid caps worldwide, and the figures that argument rests on — none of them computed here.",
+    body: [
+      "Everything else in this document is about how carefully the app handles a number. This section is the exception, and it is worth saying so plainly: every figure below comes from somebody else's research, not from anything this app computed. They are cited so you can check them, and they are the reason the desk is shaped the way it is rather than a claim it can defend from its own data.",
+      "The case has three parts. The first is a valuation gap: the MSCI World Small Cap index has been trading around a 20% forward-earnings discount to the S&P 500, which is wide against prior regimes, and large-cap leadership cycles have historically run eleven to fifteen years before turning. The second is longer-run: small caps have outperformed large caps by roughly three to four times cumulatively since 1927. Neither is a timing signal, and the source says so — large-cap leadership can persist well past the point where it looks stretched.",
+      "The third part is the one this app is actually built on, because it is the only one a single person can do something about. Roughly 18,000 listed companies worldwide have a market capitalisation under $10bn, representing about $30tn of market value, against something like $100bn of dedicated global small-cap mandates. Apple is followed by more than seventy analysts; a great many of these companies are followed by one or two. The inefficiency is not that small caps are cheap. It is that most of them are unexamined, and research organised country by country rarely compares two similar businesses competing in the same niche from different domiciles. That gap is reachable by one person with a screen and a method, and it is not reachable in large caps at any effort.",
+      "The same research also explains why this desk screens for quality rather than merely for size, which is the distinction that matters most here. Around 40% of the Russell 2000 has no earnings at all. Profitable US small caps returned roughly 14% annualised since 1963 against about 9% for unprofitable ones, and over 2004–2024 profitable Russell 2000 constituents beat the loss-makers by around 6.5% a year. Small caps misprice weak businesses as readily as strong ones, so 'small' on its own is not an edge — it is a wider distribution. The compounder screen's return-on-capital floor, cash-conversion test and reinvestment runway all exist to stand on the right side of that split, and the market-cap band exists so the screens are actually pointed at the shelf where the coverage gap is.",
+      "Read it as a thesis with a counterargument attached, not as a finding. The app computes nothing in this section and cannot check any of it.",
+    ],
+    sources: [
+      {
+        label: "The case for global small-cap equities — Hedge Fund Alpha",
+        url: "https://hedgefundalpha.com/news/the-case-for-global-small-cap-equities/",
+      },
+    ],
+  },
+  {
+    id: "principles",
+    title: "Principles",
+    standfirst:
+      "What this desk will and will not own, separated by whether a machine can actually check it.",
+    body: [
+      "Most of this existed before it was written down. A commodity avoid-list sat inside one screener's regex, a size band inside another's constants, a concentration ceiling in the sizing module. Each arrived as a threshold in a function rather than as a choice, which meant the desk's philosophy could not be read without reading six files, and nothing stopped two of them from disagreeing.",
+      "They are now registered in one place, and — this is the part that matters — each one is tagged with how it is enforced. A universe rule is checked when a universe loads. An exclusion is matched against the sector and industry a company reports. A threshold is a bar a screen computes, and is covered by the criteria fingerprint so that moving it invalidates every cached run. A judgment is something true that no feed can check.",
+      "That fourth kind is the one most often faked. 'A defensible position in a niche' and 'management who treat minority holders fairly' are the two most load-bearing judgments in small-cap investing, and neither can be read off a data feed — a sector code is not a market share, and an aggregate insider percentage does not identify a founder. They are registered as explicitly unenforceable, handed to the committee, and recorded on every screen row as not checked. Scoring them would produce numbers that look exactly like the measured ones, which is the single thing this whole application is built to prevent.",
+      "Three standing exclusions are applied before any company is measured, across every screen: vice, defence, and fossil-extraction. These are ethical lines rather than analytical ones — gambling and tobacco businesses in particular score well on nearly every measure here, which is precisely why the rule has to stand rather than be re-decided each time a cheap one appears. The defence pattern knowingly over-reaches: the standard label is 'Aerospace & Defense' and it is excluded whole, which also removes civil aerospace suppliers. A screen row says which principle removed it, because 'excluded' with no reason is indistinguishable from having failed on the arithmetic.",
+      "One principle is deliberately registered as NOT enforced. This desk only looks at developed markets with reliable disclosure, and that is true today purely because the eight universes happen to be the US, Japan, the UK, Germany, Canada and Australia. It is a description of the current state, not a rule, and adding one emerging-market universe would end it with nothing to catch the change. Recording it as a judgment rather than as a universe rule is the honest option; claiming a check that does not run is the same defect as a screen that reads as large-cap only because of its default universe.",
+      "The exclusions match reported sector and industry labels, not revenue. A conglomerate earning a fifth of its profit from tobacco through a subsidiary classified as Packaged Foods will not be caught. This is a coarse instrument that removes the obvious cases, and it should not be described as more than that.",
+    ],
+  },
+  {
     id: "pipeline",
-    title: "How a question becomes an answer",
+    title: "Method",
     standfirst:
       "The model appears twice, in two narrow roles, and is the source of no figure in between.",
     body: [
@@ -189,7 +243,7 @@ export const SECTIONS: DocSection[] = [
   },
   {
     id: "screens",
-    title: "The four screens",
+    title: "Screens",
     standfirst:
       "Each one is a different question, pointed at the universe and the market it was designed for.",
     items: [
@@ -203,7 +257,7 @@ export const SECTIONS: DocSection[] = [
         name: "Acquisition compounder — S&P 500",
         trust: "computed",
         detail:
-          "Growth, return on invested capital, cash conversion, leverage, margin trend and dilution as hard filters, then a nine-factor score out of 45. Organic growth is a revenue proxy, not a reported figure, so a company growing purely by acquisition can read as organic — check the segment disclosures.",
+          "Size, growth, return on invested capital, cash conversion, leverage, margin trend and dilution as hard filters, then a ten-factor score out of 50. Bounded to roughly $500m–$20bn in the currency the company reports in. The tenth factor is Akre's reinvestment runway — the reinvestment rate multiplied by the return on incremental capital, which is what the business can compound at from its own cash. Organic growth is a revenue proxy, not a reported figure, so a company growing purely by acquisition can read as organic — check the segment disclosures.",
       },
       {
         name: "Bolton contrarian — S&P 500",
@@ -217,28 +271,37 @@ export const SECTIONS: DocSection[] = [
         detail:
           "Tatsuro Kiyohara's own checklist, which is one page of the Japan Company Handbook: the P/E on the second-year forecast, the equity ratio, net cash against market value, and whether the company has ever issued equity to fund itself. Scored out of 100. It runs on TOPIX Mid400 plus Small 1, sourced from the Tokyo exchange's own listing file, because the framework is about Japanese ownership and would still produce a plausible-looking list anywhere else.",
       },
+      {
+        name: "Ellenbogen two-act — S&P SmallCap 600",
+        trust: "computed",
+        detail:
+          "Henry Ellenbogen's compounder framework, scored out of 100: size inside the $1bn–$20bn band his own study starts compounders in, revenue on a 20% path and still growing, a core that already earns money at the size it has reached, and — the trait his research actually found — a return on invested capital that rises as the business gets bigger. Owner alignment and gross-margin trend carry the rest. It runs on the small-cap index because about 80% of the roughly 40 companies that compound at 20% in any decade begin that run there.",
+      },
     ],
     body: [
       "The Bolton screen is deliberately incomplete, and the gap is the most important thing about it. His framework has five sections and only four can be computed. The fifth is the catalyst — a restructuring, a hidden asset, a legal overhang lifting, an earnings inflection still priced as decline — and that is the section he says separates a re-rating from a value trap. It cannot be read from a data feed.",
       "So the screen does not score it and does not pretend to. Every row it returns records that the catalyst was never checked, and by Bolton's own reasoning a name that passes is a value trap until someone finds one. That judgment is the Bolton persona's job on a company's own page, which is why the screen's output links there instead of ending in a verdict.",
       "The Kiyohara screen has the same shape of hole in two places. His P/E ceiling depends on what kind of business it is — 20x for high share of a global niche, 15x for a long and credible customer list, 10x for small or mid-cap real estate, 7x for a subcontractor living off three customers — and a data feed carries a sector code, not a market share. So the screen reports which of the four ceilings a name is under and records that the business type was never checked; real estate is the one tier the sector code settles, and that 10x is enforced. The second hole is the shareholder register: the Handbook names the founder's family, and the trade he described turns on inheritance tax eventually forcing that stake to move. The feed gives one anonymous insider percentage, so the screen says 'closely held' at most and never claims to have found the founder.",
       "What it deliberately does not look at is also his: no dividend, no price chart, no broker ratings. He says to ignore them, so nothing in the screen reads them, and a test fails if a field for any of them ever appears.",
+      "The Ellenbogen screen is the third version of the same honesty, and the largest hole of the three. His framework splits a company into two acts: Act 1 is proven product-market fit, a large addressable market and unit economics that work, and Act 2 is the leap to a significant new product or market that makes it fundamentally larger. Act 1 leaves a financial trace and that trace is what is scored. Act 2 is a judgment about a product that does not exist yet and a management team's appetite for a hard transition, so every row records that it was never checked — along with whether this is a founder on their second act, which is what he actually selects on and which no feed carries.",
+      "Two choices inside it are worth knowing about. The scored trait is the slope of return on invested capital rather than its level, because his research found compounders that got better as they got bigger, and a high flat return is a good business rather than a compounder. That slope is reported as unmeasured, and scored neutral, when it would be an artefact: revenue that did not actually grow, or a capital base shrinking under a buyback, which lifts the ratio with no operating improvement at all. And the drawdown from the five-year high is reported but never scored. His study found a compounder falls about 62% in one of its ten good years, usually during the transition, so a deep fall on a financially intact business is flagged as a transition candidate — which marks where his question gets asked, not an answer to it. Scoring it would turn a quality screen into a falling-knife screen.",
     ],
   },
   {
     id: "investors",
-    title: "The investor committee",
+    title: "Investors",
     standfirst:
-      "Sixteen investors are available; seven speak by default, chosen to disagree for different reasons.",
+      "Seventeen investors are available; seven speak by default, chosen to disagree for different reasons.",
     body: [
       "Each investor is a prompt built from a stored profile: who they are, how they think, and the concrete tests they apply. The app shows you those tests next to their verdict, and both come from the same source — a description kept separately from the instruction would eventually tell you an investor weighs one thing while the model had been told to weigh another.",
-      "The default committee is Buffett, Graham, Wood, Burry, Bolton, Druckenmiller and Damodaran. Each covers an axis the others do not: business quality, statistical cheapness, disruption, the bear case, the unloved-with-a-catalyst, the macro regime, and whether the price's own assumptions are internally consistent. A committee of near-duplicates produces a confident consensus that reflects one way of looking, which is worse than a narrower claim honestly made.",
+      "The default committee is Buffett, Munger, Lynch, Fisher, Li Lu, Lou and Kiyohara. Each covers an axis the others do not: durable economics at a sensible price, the inversion of what would make it a bad business, growth a generalist can actually understand, the qualitative checks no feed carries, a concentrated owner's view, deep work on very few names, and the Japanese small-cap register and balance sheet. Four of the seven made their records outside the United States, which matters on a desk that screens eight universes across six currencies. A committee of near-duplicates produces a confident consensus that reflects one way of looking, which is worse than a narrower claim honestly made.",
+      "It used to be Buffett, Graham, Wood, Burry, Bolton, Druckenmiller and Damodaran, which was the right committee for a different desk. Three of those seven answered questions this one does not ask — what is the disruption thesis, what is the liquidity regime, what does the multiple imply — and two of the three were top-down voices reviewing a bottom-up screen. All seventeen investors are still there and still individually selectable; this is only who speaks when you do not choose.",
       "Read the spread, not the average. Seven investors agreeing tells you less than two of them disagreeing for a reason you had not considered.",
     ],
   },
   {
     id: "lookback",
-    title: "Portfolio construction looks backwards",
+    title: "Portfolio",
     standfirst: "Every figure on that screen is measured, not forecast.",
     body: [
       "Weights, expected returns, volatilities and the correlations the weights are derived from are all computed over one historical window, and nothing outside it. The screen draws that window as a dated bar with an arrow pointing into the past, because a table of two dates makes the reader do the subtraction and a backtest read as a forecast is the most expensive misreading available here.",
@@ -247,7 +310,7 @@ export const SECTIONS: DocSection[] = [
   },
   {
     id: "factors",
-    title: "Factors, and whether they survived being published",
+    title: "Factors",
     standfirst:
       "A century of factor returns from the replication-crisis paper, and one company placed on them.",
     body: [
@@ -255,10 +318,16 @@ export const SECTIONS: DocSection[] = [
       "Pick a theme and every factor inside it is split around the years its original paper studied: a Sharpe ratio inside that sample, and one after it ended. That is the paper's own question — does a published anomaly keep working once it is known — asked factor by factor. Most shrink; the bar is whether the return stayed positive, not whether it stayed the same size.",
       "The company's tilt is this app's own measurement, not JKP's. Each characteristic it can compute from the fetched fundamentals is ranked against whichever of the four screen caches' 1,980 names carry that field, which is between about four hundred and eleven hundred of them depending on the field — the Japanese cache stores market capitalisation and balance-sheet lines but no trailing income or cash flow, so it supplies peers to one characteristic and none of the rest — flipped where JKP buy the low end so that above 50 always means the side the factor buys, and averaged into its theme. Approximations are marked where they differ from JKP's definition, and a theme with nothing measurable is left blank rather than shown as a neutral 50.",
     ],
+    sources: [
+      {
+        label: "Jensen, Kelly & Pedersen — Global Factor Data",
+        url: "https://jkpfactors.com/",
+      },
+    ],
   },
   {
     id: "regimes",
-    title: "Regimes, and how to tell whether one is real",
+    title: "Regimes",
     standfirst:
       "Clustering whole return distributions instead of thresholding a volatility ratio, a fitted chain for the question clustering cannot answer, and a score that says whether any of the three divisions hold.",
     body: [
@@ -269,10 +338,16 @@ export const SECTIONS: DocSection[] = [
       "Clustering also cannot be asked how long a regime lasts, because it treats the windows as an unordered bag — shuffle the history and the labels come back identical. Every question about order is therefore unanswerable in that model: how long these stretches run, whether turbulence follows turbulence, what the odds are that this one is over. So a hidden Markov model of the same returns is fitted beside it, by Baum-Welch with Gaussian emissions, and the response carries what only a transition matrix can give — each state's persistence, the run length the fitted chain implies, and the share of tomorrow the last day's posterior pushes onto each state. Those three figures are computed and returned by /api/regimes; the tab currently draws only the chain's separation score next to the other two, so for now they are an API answer rather than something on the page.",
       "That last number is the one to be careful with. It is a description of the fitted history, not a forecast, and the chain it comes from is the weakest detector of the three on the paths where the answer is known: a Gaussian cannot jump and equity returns do, so maximum likelihood prefers to widen one state's variance over spending a transition. That is what tests/test_regimes.py pins — the clustering beats the chain on synthetic paths with planted regime changes — and it is pinned so no later change can quietly promote it. On a real history the chain often cannot be given a separation ratio at all, because its turbulent state is a one- or two-day bucket that never wins a whole window. Read it for the shape of the chain, not for where the market goes next.",
     ],
+    sources: [
+      {
+        label: "Horvath, Issa & Muguruza — Clustering Market Regimes (SSRN 3947905)",
+        url: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3947905",
+      },
+    ],
   },
   {
     id: "macro",
-    title: "The macro map, and what a wide error bar means",
+    title: "Macro",
     standfirst:
       "Which growth and inflation surprises a series has been paid for, over fifty years — and why the quadrant is the reading, not the decimal.",
     body: [
@@ -284,7 +359,7 @@ export const SECTIONS: DocSection[] = [
   },
   {
     id: "breadth",
-    title: "Market breadth, and a warning that did not pay",
+    title: "Breadth",
     standfirst:
       "The index at a high while half its members are below their own trend \u2014 measured exactly, then checked against what actually followed.",
     body: [
@@ -296,7 +371,7 @@ export const SECTIONS: DocSection[] = [
   },
   {
     id: "autoresearch",
-    title: "Autoresearch, and why almost everything is discarded",
+    title: "Autoresearch",
     standfirst:
       "The searcher only ever sees the in-sample window. The out-of-sample window decides.",
     body: [
@@ -306,7 +381,7 @@ export const SECTIONS: DocSection[] = [
   },
   {
     id: "data",
-    title: "Data, provenance and what runs where",
+    title: "Data",
     standfirst: "Several providers, which disagree with each other.",
     body: [
       "Market data comes from keyless providers by default, with fallback and caching, and every fetch records who answered, whether it came from cache, and how the payload verified — frequency, coverage, units. Providers disagree on split adjustment, fiscal alignment and currency, so knowing which source answered is part of reading the number.",
@@ -318,7 +393,7 @@ export const SECTIONS: DocSection[] = [
   },
   {
     id: "membership",
-    title: "Who can run this, and what a seat costs",
+    title: "Access",
     standfirst:
       "Invite-only is built and not yet switched on. The reason for it is the model bill, not exclusivity for its own sake.",
     body: [
@@ -433,8 +508,12 @@ export const GAPS: [string, string][] = [
     "Valuation scoring uses fixed thresholds rather than sector-relative ones, so a utility and a software company are judged on the same scale.",
   ],
   [
-    "Only four universes load",
-    "The S&P 500, MidCap 400 and SmallCap 600, plus TOPIX Mid400 and Small 1 as one Japanese band. The NASDAQ-100, Dow and Russell 2000 loaders all broke upstream when their sources changed shape, and were removed rather than left as options that can only fail — so did the Nikkei 225, which is why Japan comes from the Tokyo exchange's own listing file instead of a third party's rendering of one. Every other market is a short curated watchlist, not an index.",
+    "Only eight universes load",
+    "The S&P 500, MidCap 400 and SmallCap 600; TOPIX Mid400 and Small 1 as one Japanese band; the FTSE 250 and the MDAX; and every listed company on the Toronto and Australian exchanges. Four of the eight come from an exchange's own file. The NASDAQ-100, Dow and Russell 2000 loaders all broke upstream when their sources changed shape, and were removed rather than left as options that can only fail — so did the Nikkei 225, which is why Japan comes from the Tokyo exchange's own listing file instead of a third party's rendering of one. Three more were probed and refused for the same reason: the SDAX article lists German small caps with no ticker column, the STOXX Europe 600 table renders 467 of 600 constituents without saying so, and the Indian index publisher answers its own constituent file with a 403. Every market outside those eight is a short curated watchlist, not an index.",
+  ],
+  [
+    "The second act is the whole judgment and no screen makes it",
+    "Three of the five screens are missing their most important section by construction, and each says so on every row. Bolton's catalyst, the Kiyohara P/E tier and the founder's stake, and Ellenbogen's Act 2 all need a person to read a business rather than a feed to return a field. A name that passes any of those screens has cleared the arithmetic half of a framework whose author says the other half is what decides the answer.",
   ],
   [
     "Institutional selling is not tracked",

@@ -144,21 +144,48 @@ export const TICKER_PATH_RE = new RegExp(
   "i",
 );
 
+export type OtherDestination = {
+  to: string;
+  key: string;
+  label: string;
+  /**
+   * Whether the menu offers it. `false` hides the entry; it does not remove
+   * the screen.
+   *
+   * This is the whole of the "focus the desk" change, and it is deliberately
+   * the weakest mechanism that does the job. The route stays registered in
+   * `App.tsx`, the component stays in the bundle as its own lazy chunk, every
+   * inbound link keeps resolving, and `active` still labels the menu
+   * correctly if you arrive on a hidden screen by URL. Flipping one `false`
+   * to `true` brings a screen back with nothing else to undo.
+   *
+   * What is hidden, and why, is a judgment about *this* desk: one person
+   * looking for quality small and mid caps worldwide. Market breadth is
+   * market timing, which does not help decide whether a company is good, and
+   * the Dashboard already carries a breadth card for the glance. Optimize is
+   * mean-variance weighting, and a book of fifteen to twenty-five conviction
+   * names is sized on stage 06 by conviction, not by a covariance matrix.
+   * Neither is wrong. Both answer a question asked by a different desk.
+   */
+  visible: boolean;
+};
+
 /**
  * Everything that is not about one company. These keep working untouched; they
  * just stop competing for attention with the flow.
  */
-export const OTHER_DESTINATIONS: readonly {
-  to: string;
-  key: string;
-  label: string;
-}[] = [
-  { to: "/constraints", key: "constraints", label: "Find a constraint" },
-  { to: "/dashboard", key: "home", label: "Dashboard" },
-  { to: "/screeners", key: "screeners", label: "Screeners" },
-  { to: "/breadth", key: "breadth", label: "Market breadth" },
-  { to: "/portfolio", key: "portfolio", label: "Portfolio" },
-  { to: "/optimize", key: "optimize", label: "Optimize" },
-  { to: "/autoresearch", key: "autoresearch", label: "Autoresearch" },
-  { to: "/setup", key: "setup", label: "Setup" },
+export const OTHER_DESTINATIONS: readonly OtherDestination[] = [
+  { to: "/constraints", key: "constraints", label: "Find a constraint", visible: true },
+  { to: "/capture", key: "capture", label: "Capture", visible: true },
+  { to: "/dashboard", key: "home", label: "Dashboard", visible: true },
+  { to: "/screeners", key: "screeners", label: "Screeners", visible: true },
+  { to: "/breadth", key: "breadth", label: "Market breadth", visible: false },
+  { to: "/portfolio", key: "portfolio", label: "Portfolio", visible: true },
+  { to: "/optimize", key: "optimize", label: "Optimize", visible: false },
+  { to: "/autoresearch", key: "autoresearch", label: "Autoresearch", visible: true },
+  { to: "/setup", key: "setup", label: "Setup", visible: true },
 ] as const;
+
+/** What the menu actually lists. Everything else stays reachable by URL. */
+export const VISIBLE_OTHER_DESTINATIONS: readonly OtherDestination[] =
+  OTHER_DESTINATIONS.filter((d) => d.visible);

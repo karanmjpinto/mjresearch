@@ -259,9 +259,22 @@ export function ResearchReport() {
           choosing a company is the whole job. */}
       <AppNav active="research" />
 
-      <div className="flex grow overflow-hidden">
+      {/* Stacks on a phone, side by side from `lg` up.
+        *
+        * This was a bare `flex` with a `w-72 shrink-0` sidebar, which at 375px
+        * handed 288 of those pixels to the sidebar and left about 87 for
+        * everything else. The page did not overflow — it had no reason to —
+        * so every automated check passed while the ticker rendered as "KLIC"
+        * cut mid-word, the tab bar as "Funda…", and the price rows as single
+        * letters. Squashing is worse than overflowing: you cannot scroll to
+        * content that was compressed out of existence.
+        *
+        * `overflow-hidden` also has to go at phone width. It exists to let the
+        * two columns scroll independently, which is only meaningful when
+        * there are two columns; stacked, it clips the page at one screen. */}
+      <div className="flex grow flex-col lg:flex-row lg:overflow-hidden">
         {/* Main content */}
-        <main className="grow p-6 overflow-y-auto flex flex-col gap-6">
+        <main className="grow p-md sm:p-6 overflow-y-auto flex flex-col gap-6">
           {/* Ticker header */}
           <div className="flex items-center justify-between">
             <div>
@@ -322,7 +335,7 @@ export function ResearchReport() {
             {/* ================================================================ */}
             {activeTab === "Fundamental" && (
               <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <DataCard
                     title="Key Metrics"
                     items={[
@@ -434,7 +447,7 @@ export function ResearchReport() {
             {/* ================================================================ */}
             {activeTab === "Technical" && (
               <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <DataCard
                     title="Momentum"
                     items={[
@@ -677,7 +690,7 @@ export function ResearchReport() {
 
         {/* Right sidebar — hidden once the AI analysis is showing */}
         {
-          <aside className="w-72 shrink-0 border-l border-border p-4 overflow-y-auto flex flex-col gap-4">
+          <aside className="w-full border-t border-border p-4 flex flex-col gap-4 lg:w-72 lg:shrink-0 lg:border-l lg:border-t-0 lg:overflow-y-auto">
             <ConvictionGauge
               score={d?.conviction ?? null}
               label={d?.stance ?? undefined}
@@ -777,7 +790,7 @@ function AnalystCard({ data }: { data: AnalystRating }) {
       <h3 className="text-xs text-gray-500 uppercase tracking-wider mb-3">
         Analyst Consensus
       </h3>
-      <div className="grid grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-2 gap-4 mb-4 sm:grid-cols-4">
         <div>
           <p className="text-xs text-gray-500">Recommendation</p>
           <p className="text-lg font-bold text-white capitalize">

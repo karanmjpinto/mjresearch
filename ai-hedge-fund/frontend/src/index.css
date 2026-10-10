@@ -516,3 +516,42 @@ body {
   background-size: 100% 34px;
   background-repeat: repeat-y;
 }
+
+/* --- Touch targets -------------------------------------------------------
+ *
+ * Scoped to coarse pointers, so desktop density is untouched. On a phone this
+ * app had 36 controls under Apple's 44pt minimum on one screen, some as short
+ * as 16px: tab rails, table links and the nav disclosure, all built at a
+ * density that reads fine with a cursor and cannot be hit with a thumb.
+ *
+ * Done here rather than by editing 36 call sites because it is a property of
+ * the input device, not of any one control — and because the next control
+ * someone adds with `py-1.5` should inherit the fix rather than reintroduce
+ * the bug.
+ *
+ * `a[class]` rather than `a`: an unstyled anchor is a link inside prose, and
+ * giving every one of those a 44px box would wreck the reading surfaces in
+ * /docs. Controls in this codebase always carry classes.
+ *
+ * `inline-flex` restores vertical centring that a bare `min-height` would
+ * lose, and is applied only to elements that are already inline-ish controls.
+ * `display` is deliberately NOT forced on `input` or `select`, which have
+ * their own intrinsic layout and break when it is.
+ */
+@media (pointer: coarse) {
+  :is(a[class], button, summary, [role="button"]) {
+    min-height: 44px;
+  }
+
+  /* Centre the label in the taller box. Excludes anything already laying out
+   * its own children, so grid/flex controls keep their own arrangement. */
+  :is(a[class], button, summary):not(.no-tap-grow):not([class*="grid"]):not([class*="flex-col"]) {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Form controls get the height without the display change. */
+  :is(input, select, textarea) {
+    min-height: 44px;
+  }
+}

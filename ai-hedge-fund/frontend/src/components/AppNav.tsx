@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { MemberBadge } from "@/components/MemberBadge";
 import { TickerBar } from "@/components/TickerBar";
-import { OTHER_DESTINATIONS } from "@/lib/flow";
+import { OTHER_DESTINATIONS, VISIBLE_OTHER_DESTINATIONS } from "@/lib/flow";
 import { useTicker } from "@/lib/ticker-context";
 import { useTheme } from "@/lib/theme";
 
@@ -42,6 +42,7 @@ export type AppNavActive =
   | "portfolio"
   | "decide"
   | "autoresearch"
+  | "capture"
   | "setup";
 
 /**
@@ -69,6 +70,10 @@ export function AppNav({ active, end }: Props) {
   const { goTo } = useTicker();
   const [draft, setDraft] = useState("");
 
+  /* Searched across *all* destinations, not just the listed ones. A hidden
+   * screen is still reachable by URL, and arriving on one has to label the
+   * menu with where you are — "Other · Optimize" — rather than falling back
+   * to a bare "Other" that says the current screen does not exist. */
   const here = OTHER_DESTINATIONS.find((d) => d.key === active);
 
   const search = (e: FormEvent) => {
@@ -82,7 +87,15 @@ export function AppNav({ active, end }: Props) {
   return (
     <div className="sticky top-0 z-30 bg-ink/95 backdrop-blur-sm">
       <nav className="border-b border-ink-line">
-        <div className="flex items-center gap-md px-lg py-sm">
+        {/* Wraps on a phone. This row carries six controls — wordmark, search,
+          * open, theme, membership, the Other menu — which fit on one line
+          * with a cursor and do not once every control is a 44px touch
+          * target. Unwrapped they overlapped each other rather than
+          * overflowing, so "OPEN" rendered on top of "NIGHT".
+          *
+          * `gap-x`/`gap-y` differ on purpose: a wrapped second row needs
+          * vertical breathing room that the single-row desktop case does not. */}
+        <div className="flex flex-wrap items-center gap-x-md gap-y-xs px-md py-sm sm:flex-nowrap sm:px-lg">
           <Link
             to="/"
             className="shrink-0 font-display text-mark tracking-marker text-bone transition-colors hover:text-oxide"
@@ -135,7 +148,7 @@ export function AppNav({ active, end }: Props) {
               className="absolute right-0 z-40 mt-2xs min-w-[180px] border border-ink-line bg-ink-raised py-2xs"
             >
               <ul>
-                {OTHER_DESTINATIONS.map((d) => {
+                {VISIBLE_OTHER_DESTINATIONS.map((d) => {
                   const on = d.key === active;
                   return (
                     <li key={d.key}>

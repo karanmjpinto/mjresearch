@@ -56,3 +56,20 @@ const root = (
 );
 
 ReactDOM.createRoot(document.getElementById("root")!).render(root);
+
+/* Register the shell worker — production only.
+ *
+ * In dev it would sit in front of Vite's module graph and serve yesterday's
+ * chunks over an HMR update, which looks exactly like a build that silently
+ * stopped applying your edits. The one hour someone loses to that is worth
+ * more than offline support on a dev server nobody installs to a home screen.
+ *
+ * Failure is swallowed on purpose: the worker makes the app launch faster and
+ * survive a sleeping backend, and an app that refuses to start because it
+ * could not register a cache would be strictly worse than one without it.
+ */
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+  });
+}

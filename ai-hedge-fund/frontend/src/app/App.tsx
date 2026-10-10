@@ -36,6 +36,9 @@ const BreadthView = lazy(() =>
 const ConstraintsView = lazy(() =>
   import("@/components/ConstraintsView").then((m) => ({ default: m.ConstraintsView })),
 );
+const CaptureView = lazy(() =>
+  import("@/components/CaptureView").then((m) => ({ default: m.CaptureView })),
+);
 const Dashboard = lazy(() =>
   import("@/components/Dashboard").then((m) => ({ default: m.Dashboard })),
 );
@@ -183,6 +186,7 @@ function AppRoutes() {
       <Route path="/optimize" element={<OptimizeView />} />
       <Route path="/constraints" element={<ConstraintsView />} />
       <Route path="/breadth" element={<BreadthView />} />
+      <Route path="/capture/:ticker?" element={<CaptureView />} />
       <Route path="/lens/:ticker?" element={<YourLensView />} />
       <Route path="/value/:ticker?" element={<ValueRiskView />} />
       <Route path="/decide/:ticker?" element={<DecideView />} />

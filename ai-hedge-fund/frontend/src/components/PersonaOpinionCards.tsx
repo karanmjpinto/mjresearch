@@ -23,6 +23,7 @@ export function humanizePersonaId(id: string): string {
     tatsuro_kiyohara: "Tatsuro Kiyohara",
     stanley_druckenmiller: "Stanley Druckenmiller",
     aswath_damodaran: "Aswath Damodaran",
+    henry_ellenbogen: "Henry Ellenbogen",
   };
   return (
     map[id] ?? id.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())

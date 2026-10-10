@@ -5,6 +5,8 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import time
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, NamedTuple
 
@@ -189,6 +191,145 @@ async def run_acquisition_compounder(req: ScreenerRunRequest):
 
 
 # ------------------------------------------------------------------
+# Background runs — a run outlives the request that asked for it
+# ------------------------------------------------------------------
+#
+# `POST /yartseva` and `POST /acquisition-compounder` do the whole screen
+# inline and hand the results back in the response body. On a laptop with the
+# tab open that is fine. From a phone it is not: a universe run is several
+# hundred names at roughly a second each, the screen locks, the connection
+# drops, and ten minutes of work is discarded with nothing written down.
+#
+# The pattern is already in this codebase — `autoresearch.start_loop` returns
+# immediately with a poll URL and says in its own docstring that "a run of any
+# length outlives an HTTP request". This is that, for screens.
+#
+# The result store is the existing screen cache rather than a new one. A run
+# started from anywhere is just a refresh of the cache the screeners page
+# already reads, so the phone polls `/screeners/cached` like every other
+# client and there is no second copy of a screen's results to disagree.
+
+#: In-flight jobs, keyed by `screen--universe` so the same screen can run on
+#: two universes at once but never twice on the same one.
+_jobs: dict[str, dict[str, Any]] = {}
+
+#: Per-screen runner. A dict rather than a branch for the reason the frontend
+#: config learned the hard way: an `else` here silently runs the compounder
+#: under another screen's name.
+_RUNNERS: dict[str, Any] = {
+    "yartseva": run_yartseva_for_ticker,
+    "acquisition-compounder": run_acquisition_compounder_for_ticker,
+}
+
+
+def _job_key(screen: str, universe: str) -> str:
+    return f"{screen}--{universe}"
+
+
+class ScreenJobRequest(BaseModel):
+    universe: str | None = Field(
+        default=None, description="Universe id. Defaults to the screen's own."
+    )
+    max_symbols: int | None = Field(
+        default=None, ge=1, description="Cap the universe, for a quick look."
+    )
+
+
+@router.get("/jobs")
+async def screen_jobs() -> dict[str, Any]:
+    """What is running right now, and how far through.
+
+    Polled by a client that may have been closed when the run started, so it
+    reports progress rather than just a boolean.
+    """
+    return {
+        "running": [
+            {
+                "screen": j["screen"],
+                "universe": j["universe"],
+                "done": j["done"],
+                "total": j["total"],
+                "started_at": j["started_at"],
+                "error": j.get("error"),
+            }
+            for j in _jobs.values()
+        ],
+        "busy": bool(_jobs),
+    }
+
+
+@router.post("/jobs/{screen}")
+async def start_screen_job(screen: str, req: ScreenJobRequest) -> dict[str, Any]:
+    """Start a screen in the background and return at once.
+
+    The response carries where to look rather than what was found, because by
+    design there is nothing to report yet.
+    """
+    runner = _RUNNERS.get(screen)
+    if runner is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"no background runner for {screen!r}; have {sorted(_RUNNERS)}",
+        )
+
+    universe = req.universe or _default_universe(screen)
+    key = _job_key(screen, universe)
+    if key in _jobs:
+        raise HTTPException(status_code=409, detail=f"{screen} is already running on {universe}")
+
+    try:
+        tickers = load_universe(universe)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if req.max_symbols:
+        tickers = tickers[: req.max_symbols]
+
+    job: dict[str, Any] = {
+        "screen": screen,
+        "universe": universe,
+        "done": 0,
+        "total": len(tickers),
+        "started_at": datetime.now(UTC).isoformat(timespec="seconds"),
+    }
+    _jobs[key] = job
+
+    async def _work() -> None:
+        started = time.monotonic()
+        results: list[dict[str, Any]] = []
+        try:
+            for t in tickers:
+                results.append(await asyncio.to_thread(runner, t))
+                job["done"] = len(results)
+            # Written through the same cache every other reader uses, so the
+            # run is complete-or-absent rather than half-visible.
+            screen_cache.write(
+                screen,
+                universe,
+                results,
+                requested=len(tickers),
+                duration_s=time.monotonic() - started,
+            )
+        except Exception as exc:  # noqa: BLE001 - recorded, not swallowed
+            logger.exception("screen job %s failed", key)
+            job["error"] = str(exc)
+        finally:
+            # Kept briefly on failure so a poller can see why, dropped on
+            # success because the cache is now the answer.
+            if not job.get("error"):
+                _jobs.pop(key, None)
+
+    job["task"] = asyncio.create_task(_work())
+    return {
+        "started": True,
+        "screen": screen,
+        "universe": universe,
+        "total": len(tickers),
+        "poll": "/api/screeners/jobs",
+        "result": f"/api/screeners/cached/{screen}?universe={universe}",
+    }
+
+
+# ------------------------------------------------------------------
 # Cached screens — a list to consult, not a job to commission
 # ------------------------------------------------------------------
 
@@ -202,7 +343,11 @@ async def run_acquisition_compounder(req: ScreenerRunRequest):
 #: actually operate at, so it keeps the 500.
 DEFAULT_UNIVERSE_FOR: dict[str, str] = {
     "yartseva": "sp600",
-    "acquisition-compounder": "sp500",
+    # The compounder had no market-cap filter at all, so this one line was the
+    # only thing making it a large-cap screen. It now carries an explicit
+    # small and mid-cap band, so it points at the mid-cap index — which is the
+    # band that band describes, and the one universe no screen landed on.
+    "acquisition-compounder": "sp400",
     # All-cap by nature — Bolton ran a UK all-companies fund — but the 500 is
     # where "unloved" is most surprising and most liquid to act on.
     "bolton-contrarian": "sp500",
@@ -213,6 +358,12 @@ DEFAULT_UNIVERSE_FOR: dict[str, str] = {
     # S&P 500 it would still return names, which is the problem: a plausible
     # list produced by applying a framework outside the market it describes.
     "kiyohara-handbook": "jp_mid_small",
+    # Ellenbogen's own study is the reason for this one: about 80% of the
+    # companies that compound at 20% for a decade begin that run as small
+    # caps, starting between roughly $1bn and $6bn. The SmallCap 600 is that
+    # shelf. The mid-cap index is the other half of his book — the two-thirds
+    # already in Act 2 — and is worth running by hand.
+    "ellenbogen-two-act": "sp600",
 }
 
 #: Fallback for anything not named above.
@@ -243,6 +394,7 @@ SCREEN_FIELDS: dict[str, ScreenFields] = {
     "acquisition-compounder": ScreenFields("stage1_passed", "total_score", "stage1_failures"),
     "bolton-contrarian": ScreenFields("passed", "composite", "failures"),
     "kiyohara-handbook": ScreenFields("passed", "composite", "failures"),
+    "ellenbogen-two-act": ScreenFields("passed", "composite", "failures"),
 }
 
 

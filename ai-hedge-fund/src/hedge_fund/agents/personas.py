@@ -46,6 +46,40 @@ _PERSONA_PREAMBLES: dict[str, str] = {
         "Most of your answers should be 'this does not need to be owned', and a thin thesis is a "
         "pass, never a small position."
     ),
+    "henry_ellenbogen": (
+        "You are an analyst in the spirit of Henry Ellenbogen — T. Rowe Price New Horizons, "
+        "then Durable Capital Partners. Your question is never 'is this cheap'. It is: can this "
+        "business compound at 20% a year for a decade, and is it about to attempt the transition "
+        "that decides whether it does. About 40 of roughly 4,000 listed companies manage that in "
+        "any ten-year period, and about 80% of them start as small caps, so almost everything is "
+        "a no and you should say so quickly. Work the two acts. Act 1 is product-market fit, a "
+        "large addressable market, and unit economics that demonstrably work — not promised "
+        "scale, actual money: a profitable core at the size it already is. Act 2 is the leap — a "
+        "significant new product, a major new market, becoming something fundamentally larger "
+        "than the original business — and you must name what the second act would specifically "
+        "be, or say plainly that you cannot find one, which is the usual answer. Look for the "
+        "compounder signature: returns on invested capital that RISE as the business gets bigger, "
+        "less competition with scale rather than more, and somewhere to reinvest the cash at the "
+        "same rate. A high and flat return on capital is a good business, not a compounder, and "
+        "you should separate the two by name. Expect violence: in the ten years a compounder "
+        "grows at 20%, one of those years it falls about 62%, usually not in a crash but during "
+        "the transition. So a halving is not a thesis break and you should refuse to treat it as "
+        "one — the judgment you are being paid for is whether this company is failing or being "
+        "remade, and you must state which and what evidence would change your mind. Judge the "
+        "people hardest. Prefer founders and operators who have already built a business at "
+        "scale — second-act entrepreneurs — who think like owners, allocate capital as if it "
+        "were their own, run to key performance indicators rather than intuition, and are "
+        "intellectually honest on their worst day. Be deeply suspicious of anyone who says their "
+        "strategy is to be like Amazon and means ignoring profitability: Amazon's retail business "
+        "held a 5-7% operating margin before it funded anything else, and that is the actual "
+        "story. Reject imposters — companies whose growth was a function of free money rather "
+        "than of the business — and say when a figure you are shown is a rate-regime artefact. "
+        "Hold for years, not quarters: all of his alpha came from companies owned more than four "
+        "years, so write as if you will not be allowed to trade this for four. Where the data "
+        "cannot tell you the second act, the founder's record or the competitive position, say "
+        "so rather than inferring it — those three are the whole judgment and a confident guess "
+        "at any of them is worse than an admission."
+    ),
     "aswath_damodaran": (
         "You are a valuation-focused analyst in the spirit of Aswath Damodaran: emphasize "
         "story, intrinsic value, cost of capital, and narrative–numbers consistency. "
@@ -131,31 +165,46 @@ _PERSONA_PREAMBLES: dict[str, str] = {
 #:
 #: Seven, chosen so each one can disagree with the others for a *different*
 #: reason — a committee of near-duplicates produces a confident consensus that
-#: only reflects one way of looking:
+#: only reflects one way of looking.
 #:
-#:   buffett        business quality at a fair price
-#:   graham        statistical cheapness and downside protection
-#:   wood          disruption and long-duration growth
-#:   burry         the bear case, and crowded consensus
-#:   bolton        unloved, with a specific catalyst
-#:   druckenmiller macro regime and liquidity
-#:   damodaran     whether the price's own assumptions are consistent
+#: Re-benched for the desk this actually serves: quality small and mid caps,
+#: worldwide.
 #:
-#: The first four were the original committee and covered value, growth and the
-#: bear. Nobody asked what the regime was doing, nobody hunted the unloved, and
-#: nobody checked whether the multiple implied anything possible. Each addition
-#: fills one of those holes rather than adding another value voice.
+#: The previous seven were Buffett, Graham, Wood, Burry, Bolton, Druckenmiller
+#: and Damodaran. Three of them — Wood, Druckenmiller, Damodaran — answer
+#: questions this desk is not asking: what is the disruption thesis, what is
+#: the liquidity regime, what does the multiple imply. All reasonable
+#: questions, none of them "is this a good business at this size", and two of
+#: the three are explicitly top-down on a bottom-up screen.
+#:
+#: Meanwhile Lynch, Fisher, Munger, Li Lu, Lou and Kiyohara were all on the
+#: bench in `_PERSONA_PREAMBLES`, unused — six investors who made their
+#: records precisely in this band. Four of the seven below are non-US or
+#: made their returns outside the US, which is the point of "across the globe".
+#:
+#: The axes, one voice each:
+#:   buffett    durable economics and what price is still sensible
+#:   munger     the inversion: what would make this a bad business
+#:   lynch      the growth-at-a-reasonable-price small cap, understood plainly
+#:   fisher     scuttlebutt — the qualitative checks no feed carries
+#:   li_lu      a concentrated owner's view, and Asia
+#:   lou        deep work on very few names
+#:   kiyohara   the Japanese small and mid cap register and balance sheet
+#:
+#: The displaced three are not removed from the app: all eighteen personas
+#: stay in `_PERSONA_PREAMBLES` and stay individually selectable. This list is
+#: only who speaks by default.
 #:
 #: Cost is the reason this is not simply everyone: each member is a separate
 #: model call, so the run time scales with the list.
 DEFAULT_COMMITTEE_PERSONAS: tuple[str, ...] = (
     "warren_buffett",
-    "ben_graham",
-    "cathie_wood",
-    "michael_burry",
-    "anthony_bolton",
-    "stanley_druckenmiller",
-    "aswath_damodaran",
+    "charlie_munger",
+    "peter_lynch",
+    "phil_fisher",
+    "li_lu",
+    "norbert_lou",
+    "tatsuro_kiyohara",
 )
 
 ALL_PERSONA_IDS: tuple[str, ...] = tuple(sorted(_PERSONA_PREAMBLES.keys()))

@@ -218,10 +218,10 @@ export const GLOSSARY = {
   },
   "screen-acquisition": {
     term: "Acquisition compounder screen",
-    what: "Hard filters on growth, return on capital, cash conversion, leverage, margins and dilution, then a nine-factor score out of 45.",
-    why: "It looks for businesses that grow by buying others and actually earn a return on what they pay — the pattern works rarely and fails expensively, so the filters are strict about leverage and share issuance.",
+    what: "Hard filters on size, growth, return on capital, cash conversion, leverage, margins and dilution, then a ten-factor score out of 50.",
+    why: "It looks for businesses that grow by buying others and actually earn a return on what they pay — the pattern works rarely and fails expensively, so the filters are strict about leverage and share issuance. The tenth factor is the reinvestment runway: a high return on existing capital says nothing about whether there is anywhere to put the next dollar at that rate, and that is the difference between a good business and a compounder.",
     careful:
-      "Organic growth here is a revenue proxy, not a reported figure, so a company growing purely by acquisition can look organic. Check the segment disclosures before believing the growth split.",
+      "Organic growth here is a revenue proxy, not a reported figure, so a company growing purely by acquisition can look organic. Check the segment disclosures before believing the growth split. The runway factor scores neutral rather than low when the capital base barely moved, because the ratio would be noise — so a 3 there means 'not measured', not 'measured and mediocre'.",
   },
   "screen-bolton": {
     term: "Bolton contrarian screen",
@@ -236,6 +236,13 @@ export const GLOSSARY = {
     why: "He compounded roughly 93x over three decades on this list and then published it, which makes it one of very few screens whose author has said out loud what it should contain — and what it should leave out. The dividend and the price chart are absent because he says to ignore them.",
     careful:
       "Two of his tests are missing and the screen says so on every row. Which P/E ceiling applies depends on the business — 20x for a global niche leader, 7x for a subcontractor with three customers — and a feed carries a sector code, not a market share, so the screen reports every ceiling a name is under rather than picking one. And the founder's family stake, which is what the inheritance-tax trade turns on, is not in the feed at all: 'closely held' is the most it can say. Forecasts here are the analyst consensus, not the Handbook's own Toyo Keizai estimate.",
+  },
+  "screen-ellenbogen": {
+    term: "Ellenbogen two-act screen",
+    what: "Henry Ellenbogen's compounder framework, automated as far as its first act goes: growth on a 20% path, a core that already earns money at the size it has reached, and — the trait his own research actually found — a return on invested capital that rises as the business gets bigger. Scored out of 100 across US small caps.",
+    why: "He ran T. Rowe Price New Horizons at 19.2% a year, and over 90% of that came from 20 compounders held longer than four years. His study of the market found about 40 companies in any decade compound at 20%, out of roughly 4,000, and about 80% of them start as small caps — so the value of the framework is almost entirely in where it points and what it refuses.",
+    careful:
+      "The second act is missing and that is the whole point. Act 1 — product-market fit, a large market, working unit economics — leaves a financial trace, and that trace is what is scored. Act 2 is a new product, a new market, or becoming something fundamentally larger, and it is a judgment about something that does not exist yet. Every row records that it was never checked, as was whether this is a founder on their second act. The drawdown from the five-year high is reported and deliberately unscored: his research found a compounder falls about 62% in one of its ten good years, so a deep fall is where his question gets asked, not an answer to it. One more gap worth knowing: his compounder is a ten-year fact, and this provider returns four or five annual columns for a small cap, so the growth rate is usually a three- or four-year CAGR — a weaker claim, and every row says how many years it had.",
   },
   "screen-universe": {
     term: "Universe",

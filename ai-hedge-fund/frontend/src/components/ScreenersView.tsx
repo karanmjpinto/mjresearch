@@ -3,7 +3,7 @@ import { Navigate, useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   DEFAULT_SCREENER_ID,
-  SCREENER_VIEWS,
+  VISIBLE_SCREENER_VIEWS,
   getScreenerById,
   type ScreenerPlay,
 } from "@/config/screeners";
@@ -182,7 +182,7 @@ export function ScreenersView() {
         </div>
 
         <div className="flex flex-wrap gap-2 border-b border-border pb-3">
-          {SCREENER_VIEWS.map((v) => (
+          {VISIBLE_SCREENER_VIEWS.map((v) => (
             <Link
               key={v.id}
               to={`/screeners/${v.id}`}
@@ -248,26 +248,32 @@ export function ScreenersView() {
           </div>
         </details>
 
-        {/* Run it somewhere else. Optional, and precise about what "another
-         * market" means here, because the two kinds behave nothing alike:
-         * the three S&P bands are whole indices, several hundred names and
-         * ten-plus minutes each, while Japan, Korea, Europe and the rest are
-         * curated watchlists of roughly twenty large caps that finish in
-         * about a minute. Offering them as one undifferentiated list invites
-         * someone to start a quarter-hour run expecting the short one. */}
+        {/* Run it somewhere else. Precise about the cost, because the eight
+         * universes differ by more than an order of magnitude in size and
+         * every name is a separate call to the data provider: the MDAX is 50
+         * companies and the ASX is 1,900. Offering them as one
+         * undifferentiated list invites someone to start a half-hour run
+         * expecting a one-minute one.
+         *
+         * This copy used to promise curated watchlists for "Japan, Korea,
+         * Europe, India, Brazil and a dozen more" of twenty large caps each.
+         * Three of those five markets exist nowhere in the backend — there is
+         * no Korea, no Brazil and no India anywhere in it — and the two that
+         * do exist are full index universes, not twenty-name watchlists. It
+         * described a feature that was never built. */}
         {livePanel && (
           <details className="border border-ink-line bg-ink-raised">
             <summary className="cursor-pointer list-none px-md py-sm font-display text-label uppercase tracking-label text-on-ink-soft transition-colors hover:text-bone [&::-webkit-details-marker]:hidden">
-              Run it on another market — Japan, Korea, Europe — or a full index
+              Run it on another market — eight universes across six currencies
               ▾
             </summary>
             <div className="border-t border-ink-line p-md">
               <p className="mb-md max-w-measure text-body-xs text-on-ink-faint">
-                These run live, one company at a time. The market watchlists —
-                Japan, Korea, Europe, India, Brazil and a dozen more — are
-                around twenty large caps each and take about a minute. A full
-                S&P band is several hundred names and takes ten minutes or more,
-                so cap it if you only want a look.
+                These run live, one company at a time, so the wait is the name
+                count. The MDAX is 50 German mid caps and finishes in about a
+                minute. The FTSE 250 and the S&amp;P bands are a few hundred
+                names and ten minutes or more. Toronto is roughly 800 and the
+                ASX is about 1,900, so cap the count if you only want a look.
               </p>
               {livePanel}
             </div>
