@@ -9,6 +9,7 @@ import {
   TRUST_META,
   type Trust,
 } from "@/content/docs";
+import { ProvenanceBar, countTrust } from "@/components/ProvenanceBar";
 
 /**
  * The reference section.
@@ -68,6 +69,9 @@ const NAV = [
   ...SECTIONS.map((s) => ({ id: s.id, label: s.title })),
   { id: "gaps", label: "Known gaps" },
 ];
+
+/** Every labelled capability in the reference, flattened once. */
+const ALL_ITEMS = SECTIONS.flatMap((s) => s.items ?? []);
 
 export function DocsView() {
   const active = useActiveSection(NAV.map((n) => n.id));
@@ -140,6 +144,18 @@ export function DocsView() {
               {OPENING.thesis}
             </p>
 
+            {/* The shape of the whole desk, before any of the detail. Every
+              * capability below carries a trust label and nobody could see
+              * the aggregate — which is the one number that says what kind
+              * of tool this is. */}
+            <div className="mt-2xl border-t-2 border-enamel/25 pt-lg">
+              <ProvenanceBar
+                counts={countTrust(ALL_ITEMS)}
+                title="What the whole desk is made of"
+                caption={`Every capability in this reference, counted by how its output is produced. ${ALL_ITEMS.length} in total.`}
+              />
+            </div>
+
             {/* The legend, up front. Every label used below is defined here
               * once, so a reader who starts in the middle can come back to
               * one place rather than inferring four conventions. */}
@@ -174,6 +190,17 @@ export function DocsView() {
               <p className="mt-xs max-w-measure text-body-sm italic text-on-canvas-faint">
                 {s.standfirst}
               </p>
+
+              {/* Per section, because the aggregate hides the variation that
+                * matters: the screens are almost entirely computed and the
+                * committee is almost entirely written. Only drawn where
+                * there is more than one kind to compare — a bar with a
+                * single segment is a rectangle, not a measurement. */}
+              {s.items && new Set(s.items.map((i) => i.trust)).size > 1 && (
+                <div className="mt-lg">
+                  <ProvenanceBar counts={countTrust(s.items)} compact />
+                </div>
+              )}
 
               {s.items && (
                 <ul className="mt-xl flex flex-col">
