@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { MemberBadge } from "@/components/MemberBadge";
 import { TickerBar } from "@/components/TickerBar";
-import { OTHER_DESTINATIONS, VISIBLE_OTHER_DESTINATIONS } from "@/lib/flow";
+import { SECTIONS, sectionFor, type SectionKey } from "@/lib/sections";
 import { useTicker } from "@/lib/ticker-context";
 import { useTheme } from "@/lib/theme";
 
@@ -34,6 +34,9 @@ function ThemeToggle() {
 
 export type AppNavActive =
   | "home"
+  | "find"
+  | "evaluate"
+  | "manage"
   | "plan"
   | "research"
   | "screeners"
@@ -46,19 +49,26 @@ export type AppNavActive =
   | "setup";
 
 /**
- * Application chrome: a way in, and a way to everything else.
- *
- * This used to be nine equal links, which made a screener and the middle of a
- * research flow look like the same kind of thing. They are not. The work is
- * one company at a time, so the bar now carries only the entry to that — a
- * search field — and the stage rail below it. The six screens that are not
- * about a single name live behind one disclosure, reachable in two clicks
- * instead of permanently occupying the top of the window.
- *
- * `active` is still accepted, and still names the caller's own screen, so all
- * nine views compile unchanged. It is used to label the menu with where you
- * already are rather than to paint an underline.
+ * Fallback only. Maps a caller's own screen name to the section it sits in,
+ * for the cases `sectionFor` cannot answer from the path. Keys absent here
+ * simply fall through to "no section highlighted", which is correct for
+ * anything outside the desk.
  */
+const SECTION_FOR_ACTIVE: Partial<Record<AppNavActive, SectionKey>> = {
+  find: "find",
+  screeners: "find",
+  evaluate: "evaluate",
+  plan: "evaluate",
+  research: "evaluate",
+  capture: "evaluate",
+  decide: "evaluate",
+  manage: "manage",
+  portfolio: "manage",
+  breadth: "manage",
+  optimize: "manage",
+  autoresearch: "manage",
+  setup: "setup",
+};
 
 type Props = {
   active: AppNavActive;
@@ -66,15 +76,38 @@ type Props = {
   end?: React.ReactNode;
 };
 
+/**
+ * Application chrome: where you are, and the three other places you could be.
+ *
+ * This was nine equal links, then a search field plus an "Other ▾" disclosure
+ * listing seven unrelated screens. Both versions asked the same bad question
+ * at the top of every window — "which of these words is the thing you want?"
+ * — and neither grouped them by anything a user cares about.
+ *
+ * It now carries the four sections from `sections.ts`, which are the four
+ * things you can be doing here. The one you are inside is marked, including
+ * when you are several screens deep: standing on stage 05 of a company
+ * lights Evaluate, because that is what you are doing.
+ *
+ * `active` is still accepted and still names the caller's own screen, so
+ * every existing view compiles unchanged. It is now only a fallback — the
+ * section is derived from the URL, which cannot go stale the way a hand-
+ * passed prop does.
+ */
+
 export function AppNav({ active, end }: Props) {
   const { goTo } = useTicker();
+  const location = useLocation();
   const [draft, setDraft] = useState("");
 
-  /* Searched across *all* destinations, not just the listed ones. A hidden
-   * screen is still reachable by URL, and arriving on one has to label the
-   * menu with where you are — "Other · Optimize" — rather than falling back
-   * to a bare "Other" that says the current screen does not exist. */
-  const here = OTHER_DESTINATIONS.find((d) => d.key === active);
+  /* The URL is the authority, not the prop. A screen that passes a stale
+   * `active` — or a new route whose author forgot to pass one — still lights
+   * the right section, because `sectionFor` reads the path. The prop is the
+   * fallback for the hubs, whose own paths (`/find`, `/manage`) resolve
+   * anyway, and for anything mounted outside the router in a test. */
+  const current: SectionKey | null =
+    sectionFor(location.pathname) ??
+    (SECTION_FOR_ACTIVE[active] ?? null);
 
   const search = (e: FormEvent) => {
     e.preventDefault();
@@ -87,11 +120,11 @@ export function AppNav({ active, end }: Props) {
   return (
     <div className="sticky top-0 z-30 bg-ink/95 backdrop-blur-sm">
       <nav className="border-b border-ink-line">
-        {/* Wraps on a phone. This row carries six controls — wordmark, search,
-          * open, theme, membership, the Other menu — which fit on one line
-          * with a cursor and do not once every control is a 44px touch
-          * target. Unwrapped they overlapped each other rather than
-          * overflowing, so "OPEN" rendered on top of "NIGHT".
+        {/* Wraps on a phone. This row carries five controls — wordmark,
+          * search, open, membership, theme — which fit on one line with a
+          * cursor and do not once every control is a 44px touch target.
+          * Unwrapped they overlapped each other rather than overflowing, so
+          * "OPEN" rendered on top of "NIGHT".
           *
           * `gap-x`/`gap-y` differ on purpose: a wrapped second row needs
           * vertical breathing room that the single-row desktop case does not. */}
@@ -134,47 +167,49 @@ export function AppNav({ active, end }: Props) {
 
           <ThemeToggle />
 
-          <details className="relative shrink-0 [&>summary::-webkit-details-marker]:hidden">
-            <summary
-              aria-label="Other sections"
-              className="cursor-pointer list-none border border-ink-line px-sm py-1.5 font-display text-label uppercase tracking-label text-on-ink-soft transition-colors hover:border-cobalt hover:text-bone"
-            >
-              {here ? `Other · ${here.label}` : "Other"} ▾
-            </summary>
-            {/* A landmark inside the disclosure, so a screen reader is told these
-                are navigation links rather than arbitrary revealed content. */}
-            <nav
-              aria-label="Other sections"
-              className="absolute right-0 z-40 mt-2xs min-w-[180px] border border-ink-line bg-ink-raised py-2xs"
-            >
-              <ul>
-                {VISIBLE_OTHER_DESTINATIONS.map((d) => {
-                  const on = d.key === active;
-                  return (
-                    <li key={d.key}>
-                      <Link
-                        to={d.to}
-                        aria-current={on ? "page" : undefined}
-                        className={`block px-sm py-1.5 font-display text-label uppercase tracking-label transition-colors hover:bg-ink hover:text-bone ${
-                          on ? "text-cadmium" : "text-on-ink-soft"
-                        }`}
-                      >
-                        {d.label}
-                        {on && (
-                          <span className="ml-2xs text-on-ink-faint">
-                            · here
-                          </span>
-                        )}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
-          </details>
         </div>
       </nav>
-      <TickerBar />
+
+      {/* The four sections. A row of links rather than a disclosure: there
+        * are four of them, they are the whole app, and hiding the shape of
+        * the app behind a click is what the previous two versions of this
+        * bar got wrong. Scrolls sideways on a narrow phone rather than
+        * wrapping, so the chrome stays one line tall and the content keeps
+        * the screen. */}
+      <nav
+        aria-label="Sections"
+        className="overflow-x-auto border-b border-ink-line"
+      >
+        <ul className="flex min-w-max items-stretch">
+          {SECTIONS.map((s) => {
+            const on = s.key === current;
+            return (
+              <li key={s.key}>
+                <Link
+                  to={s.to}
+                  aria-current={on ? "page" : undefined}
+                  className={`flex items-baseline gap-2xs px-md py-sm font-display text-label uppercase tracking-label transition-colors hover:text-bone ${
+                    on
+                      ? "border-b-2 border-cadmium text-cadmium"
+                      : "border-b-2 border-transparent text-on-ink-soft"
+                  }`}
+                >
+                  <span className="tabular text-on-ink-faint">{s.num}</span>
+                  {s.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {/* The stage rail belongs to Evaluate and only to Evaluate. It is the
+        * path through one company; on the chooser, on Find, on the portfolio
+        * it is six words of someone else's workflow competing with the
+        * screen you actually opened. Showing it everywhere is what made the
+        * "simple first screen" impossible — the first screen had a six-stage
+        * rail on it before it had any content of its own. */}
+      {current === "evaluate" && <TickerBar />}
     </div>
   );
 }
