@@ -90,7 +90,7 @@ const MORE = [
   },
   {
     n: "07",
-    title: "Five screens, already run",
+    title: "Six screens, already run",
     body: "Multibagger, compounder, Bolton contrarian, Kiyohara's Japan handbook and Ellenbogen's two acts — computed ahead of time, and dated.",
   },
   {

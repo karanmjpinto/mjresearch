@@ -1,3 +1,4 @@
+import type { ScreenName, ScreenInfoTerm } from "@/config/screeners";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api, type ScreenRow } from "@/lib/api";
@@ -58,21 +59,11 @@ function ScoreBar({ value, max }: { value: number | null; max: number }) {
 }
 
 type Props = {
-  screen:
-    | "yartseva"
-    | "acquisition-compounder"
-    | "bolton-contrarian"
-    | "kiyohara-handbook"
-    | "ellenbogen-two-act";
+  screen: ScreenName;
   title: string;
   blurb: string;
   /** Glossary term for the heading marker. */
-  info?:
-    | "screen-yartseva"
-    | "screen-acquisition"
-    | "screen-bolton"
-    | "screen-kiyohara"
-    | "screen-ellenbogen";
+  info?: ScreenInfoTerm;
   universe?: string;
   /** Highest possible score, for the bars. /100, except the compounder at /45. */
   scoreMax: number;

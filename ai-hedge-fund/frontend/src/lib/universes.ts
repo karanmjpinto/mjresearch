@@ -72,4 +72,10 @@ export const DEFAULT_UNIVERSE_FOR: Record<string, string> = {
    * decade start that run as small caps, between about $1bn and $6bn. The
    * SmallCap 600 is that shelf. */
   "ellenbogen-two-act": "sp600",
+  /* Rollup targets are small by definition — the thesis is that the
+   * efficiency delta after automation is largest where the operation was
+   * least industrialised, which means the operator is small. The SmallCap
+   * 600 is the cheapest shelf to find them on; the screen's own band goes
+   * well below it, so any universe is fair game. */
+  "ai-rollup": "sp600",
 };

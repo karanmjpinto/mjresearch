@@ -119,7 +119,7 @@ export const SECTIONS: DocSection[] = [
           "Equal weight, inverse volatility, mean-variance, hierarchical risk parity, and conviction weighting. Returns are aligned on common trading days; Sharpe, volatility, drawdown and effective N are computed from those aligned series.",
       },
       {
-        name: "The five screens",
+        name: "The six screens",
         trust: "computed",
         detail:
           "Every filter and every score is arithmetic over fetched fundamentals. No model reads a screen or ranks it. Results are computed ahead of time and served from a dated cache, so what you see is a list, not a request. The cache is dated twice over: once by the clock, and once by a fingerprint of the thresholds the screen applied, so a run scored under rules that have since changed says so instead of presenting itself as current. That second check exists because the first was not enough — adding a market-cap band to the compounder turned 398 of the 503 names in its cached S&P 500 run into companies that would now be rejected on size, and the file went on reporting them as passes dated that morning.",
@@ -247,6 +247,18 @@ export const SECTIONS: DocSection[] = [
     standfirst:
       "Each one is a different question, pointed at the universe and the market it was designed for.",
     items: [
+      {
+        name: "AI rollup targets — two buyers, scored separately",
+        trust: "computed",
+        detail:
+          "Who the AI buyers are shopping for. Two buyers want opposite things and the screen refuses to average them. A lab buys delivery capacity — OpenAI's DeployCo acquired an AI consultancy for roughly 150 engineers — so it wants revenue per head high and technical. An AI-enabled services roll-up buys cash-generating operators and compresses the labour cost, so it wants revenue per head low, because that is where the compressible cost sits. The same number scores in both directions, which is why there are two scores and not one. Measured: revenue per employee, the wedge between gross and operating margin (delivery labour as a share of revenue, the spread a buyer claims to close), capex intensity, cash conversion, leverage, insider holding, and industry fragmentation counted over the universe actually being screened — the one measure here most published screens do not bother to compute. The a16z two-paths argument is carried as a warning rather than a score: a software company neither growing 10 points faster nor rebuilt for 40% operating margins is flagged as the comfortable middle, which is a reason not to own it rather than a reason to buy it.",
+      },
+      {
+        name: "Whether AI actually compresses a given business",
+        trust: "judged",
+        detail:
+          "Not scored, and deliberately. The rollup screen measures the shape of a business that could be compressed — labour-heavy, asset-light, fragmented, cash-generative. Whether it actually compresses depends on how documented the work is, how much of the delivery is judgment a customer is paying a person for, whether customers accept being served by a machine, whether the people who know how it works stay after the sale, and whether the seller will sell at all. None of that is on a data feed. Turning it into a number would produce a score that looks like the others and means nothing, so every row carries the list of what was not checked instead.",
+      },
       {
         name: "Yartseva multibagger — S&P SmallCap 600",
         trust: "computed",
@@ -513,7 +525,7 @@ export const GAPS: [string, string][] = [
   ],
   [
     "The second act is the whole judgment and no screen makes it",
-    "Three of the five screens are missing their most important section by construction, and each says so on every row. Bolton's catalyst, the Kiyohara P/E tier and the founder's stake, and Ellenbogen's Act 2 all need a person to read a business rather than a feed to return a field. A name that passes any of those screens has cleared the arithmetic half of a framework whose author says the other half is what decides the answer.",
+    "Three of the six screens are missing their most important section by construction, and each says so on every row. Bolton's catalyst, the Kiyohara P/E tier and the founder's stake, and Ellenbogen's Act 2 all need a person to read a business rather than a feed to return a field. A name that passes any of those screens has cleared the arithmetic half of a framework whose author says the other half is what decides the answer.",
   ],
   [
     "Institutional selling is not tracked",

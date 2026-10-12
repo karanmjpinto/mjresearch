@@ -40,6 +40,7 @@ SCREEN_PROSE = {
     "bolton-contrarian": "Bolton",
     "kiyohara-handbook": "Kiyohara",
     "ellenbogen-two-act": "Ellenbogen",
+    "ai-rollup": "rollup",
 }
 
 

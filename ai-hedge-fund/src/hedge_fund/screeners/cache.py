@@ -65,6 +65,7 @@ SCREENS = (
     "bolton-contrarian",
     "kiyohara-handbook",
     "ellenbogen-two-act",
+    "ai-rollup",
 )
 
 
