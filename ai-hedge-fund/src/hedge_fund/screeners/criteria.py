@@ -44,6 +44,7 @@ from hedge_fund.screeners import (
 )
 from hedge_fund.screeners import (
     ellenbogen_two_act as et,
+    ai_rollup as ar,
 )
 from hedge_fund.screeners import (
     kiyohara_handbook as kh,
@@ -172,6 +173,34 @@ def _ellenbogen() -> dict[str, Any]:
     }
 
 
+def _ai_rollup() -> dict[str, Any]:
+    return {
+        **_shared(),
+        "services_industries": ar.SERVICES_INDUSTRIES,
+        "software_industries": ar.SOFTWARE_INDUSTRIES,
+        "cap_band_by_currency": ar.CAP_BAND_BY_CURRENCY,
+        "max_capex_to_revenue": ar.MAX_CAPEX_TO_REVENUE,
+        "max_net_debt_to_ebitda": ar.MAX_NET_DEBT_TO_EBITDA,
+        "rollup_rev_per_employee_best": ar.ROLLUP_REV_PER_EMPLOYEE_BEST,
+        "rollup_rev_per_employee_worst": ar.ROLLUP_REV_PER_EMPLOYEE_WORST,
+        "lab_rev_per_employee_best": ar.LAB_REV_PER_EMPLOYEE_BEST,
+        "lab_rev_per_employee_worst": ar.LAB_REV_PER_EMPLOYEE_WORST,
+        "wedge_best": ar.WEDGE_BEST,
+        "wedge_worst": ar.WEDGE_WORST,
+        "fragmentation_best": ar.FRAGMENTATION_BEST,
+        "fragmentation_worst": ar.FRAGMENTATION_WORST,
+        "insider_best": ar.INSIDER_BEST,
+        "insider_worst": ar.INSIDER_WORST,
+        "fcf_conversion_best": ar.FCF_CONVERSION_BEST,
+        "fcf_conversion_worst": ar.FCF_CONVERSION_WORST,
+        # Flagged rather than scored, and still fingerprinted: moving either
+        # changes which rows carry the a16z warning, and a cache whose flags
+        # were set under a different definition is what this hash is for.
+        "middle_max_growth": ar.MIDDLE_MAX_GROWTH,
+        "middle_max_operating_margin": ar.MIDDLE_MAX_OPERATING_MARGIN,
+    }
+
+
 #: Screen name (as the endpoint spells it) → the rules it applies.
 #:
 #: Callables rather than literals so the values are read from the modules at
@@ -183,6 +212,7 @@ REGISTRY: dict[str, Any] = {
     "bolton-contrarian": _bolton,
     "kiyohara-handbook": _kiyohara,
     "ellenbogen-two-act": _ellenbogen,
+    "ai-rollup": _ai_rollup,
 }
 
 

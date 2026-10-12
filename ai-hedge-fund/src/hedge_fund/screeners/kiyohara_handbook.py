@@ -112,6 +112,16 @@ MIN_MARKET_CAP_BY_CURRENCY: dict[str, float] = {
     "EUR": 60_000_000,
     "GBP": 50_000_000,
     "HKD": 500_000_000,
+    #: The same six markets the compounder band covers. `ZAC` rather than
+    #: `ZAR` because Yahoo quotes Johannesburg in cents while reporting
+    #: market cap in rand — the floor below is rand. See
+    #: `CAP_BAND_BY_CURRENCY` in the compounder for the worked example.
+    "ZAC": 1_200_000_000,
+    "IDR": 1_000_000_000_000,
+    "SAR": 250_000_000,
+    "MYR": 280_000_000,
+    "THB": 2_100_000_000,
+    "CLP": 60_000_000_000,
 }
 
 #: What he says to ignore, kept as data so the test can assert the screen

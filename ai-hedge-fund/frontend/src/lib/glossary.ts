@@ -1,7 +1,7 @@
 /**
  * Every term the app uses that a reader could reasonably not know.
  *
- * One file, for two reasons. The same word appears on four screens and has to
+ * One file, for two reasons. The same word appears on six screens and has to
  * mean the same thing on all of them; and a definition written next to the
  * component that needs it gets copied, drifts, and ends up contradicting
  * itself. Improving an explanation should be one edit.
@@ -243,6 +243,13 @@ export const GLOSSARY = {
     why: "He ran T. Rowe Price New Horizons at 19.2% a year, and over 90% of that came from 20 compounders held longer than four years. His study of the market found about 40 companies in any decade compound at 20%, out of roughly 4,000, and about 80% of them start as small caps — so the value of the framework is almost entirely in where it points and what it refuses.",
     careful:
       "The second act is missing and that is the whole point. Act 1 — product-market fit, a large market, working unit economics — leaves a financial trace, and that trace is what is scored. Act 2 is a new product, a new market, or becoming something fundamentally larger, and it is a judgment about something that does not exist yet. Every row records that it was never checked, as was whether this is a founder on their second act. The drawdown from the five-year high is reported and deliberately unscored: his research found a compounder falls about 62% in one of its ten good years, so a deep fall is where his question gets asked, not an answer to it. One more gap worth knowing: his compounder is a ten-year fact, and this provider returns four or five annual columns for a small cap, so the growth rate is usually a three- or four-year CAGR — a weaker claim, and every row says how many years it had.",
+  },
+  "screen-ai-rollup": {
+    term: "AI rollup targets",
+    what: "Two scores for two buyers who want opposite things. A lab buys delivery capacity — OpenAI's DeployCo acquired an AI consultancy for roughly 150 engineers — so it wants revenue per head high and technical. An AI-enabled roll-up buys cash-generating operators and compresses the labour cost, so it wants revenue per head low, because low is where the compressible cost sits. The same measure scores in both directions, which is why there are two numbers and no average.",
+    why: "Both trades are live and they are not the same trade. DeployCo is backed with over $4bn alongside TPG, Bain, Brookfield, Goldman, McKinsey and Capgemini; General Catalyst and Thrive Holdings have been explicit about buying traditional services firms and rebuilding operations with AI, preferring smaller operators because the efficiency delta after automation is largest where the operation was least industrialised. A screen that averaged the two would rank a business neither buyer wants above one that a single buyer wants badly.",
+    careful:
+      "Whether AI actually compresses a given business is not computable and is not scored. It depends on how documented the work is, how much of the delivery is judgment a customer is paying a person for, whether customers accept being served by a machine, whether the people who know how it works stay after the sale, and whether the seller will sell at all. Every row lists those as unchecked. The industry filter is coarse too — matched on the label a provider reports, so a software company whose revenue is two-thirds implementation services reads as software. The a16z two-paths argument is carried as the comfortable-middle flag and is a warning about owning a company, not a reason to buy it: the essay is about public software choosing growth or margin, and says nothing about acquisitions.",
   },
   "screen-universe": {
     term: "Universe",

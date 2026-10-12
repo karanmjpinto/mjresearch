@@ -53,6 +53,53 @@ And the three that were rejected, so nobody rebuilds them:
                      403. Deferred rather than routed around, because the
                      obvious workarounds are third-party re-publications of
                      exactly the kind that killed the Russell 2000 loader.
+
+Six Global South markets were added next, and getting them needed a different
+mechanism — which is the interesting part, so it is recorded here rather than
+rediscovered.
+
+**Every one of these exchanges blocks automated access.** The IDX securities
+JSON, the JSE company list, Saudi Exchange, Bursa Malaysia and the Santiago
+and Bogota exchanges all answer HTTP 403, with or without a browser User-Agent
+and Referer. Two did answer — PSE Edge serves a clean paginated directory of
+283 Philippine companies, and the SET publishes 930 Thai listings as an HTML
+file with a banner row — so the obvious move was to parse those two and give
+up on the rest.
+
+That would have been the wrong move, and the Philippines is why. **Yahoo
+carries no PSE data at all**: `SM.PS`, `SM.PH`, `SM.PSE` and every other
+spelling return "Quote not found", and the only Philippine instrument Yahoo
+knows is the US ADR. A loader built on PSE Edge would have returned 283
+symbols that each fetch nothing — and this module's whole doctrine is that
+such a universe is worse than an absent one, because every name reads
+downstream as "screened and did not qualify" rather than "never priced".
+
+So the universe comes from the same vendor as the fundamentals instead.
+`yf.screen` with an `EquityQuery` region filter enumerates a market, and the
+guarantee that buys is exact: a name is in the universe *because* Yahoo
+prices it, so the universe and the data cannot disagree. An exchange's own
+list is more authoritative about what is listed and worth less here, because
+being listed is not the property the screen needs.
+
+Counts observed when these were added (Oct 2026), with the floor set at a
+$50m-equivalent market cap to drop shells:
+
+  za_all  242    id_all  837    sa_all  361
+  my_all  882    th_all 1722    cl_all  103
+
+And the three that are not here, because the region query returns **zero**:
+the Philippines, Peru and Colombia. Yahoo does not cover the Manila, Lima or
+Bogota exchanges. For the Philippines that is doubly confirmed — a real
+exchange directory of 283 companies exists and not one of them resolves.
+These are not deferred pending a better parse; there is no data behind them.
+
+One trap, specific to Johannesburg and nasty because it is silent. Yahoo
+reports JSE prices **in cents** and labels the currency `ZAc`, while
+reporting `marketCap` **in rand**. Naspers: price 72,169 (`ZAc`), shares
+747,161,004, and a reported cap of 539,912,273,920 — which is
+(price / 100) x shares, not price x shares. Any size band keyed on `ZAC`
+must therefore be written in rand, and anything that multiplies a JSE price
+by a share count is wrong by 100x. See `CAP_BAND_BY_CURRENCY`.
 """
 
 from __future__ import annotations
@@ -71,22 +118,35 @@ logger = logging.getLogger(__name__)
 
 _WIKI_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
-# (id, label, description, approx_count for UI)
+#: (id, label, description, approx_count for UI, currency)
+#:
+#: `currency` is the code Yahoo returns for a quote in that market, AFTER the
+#: `.upper()` every band lookup applies — which is why Johannesburg is `ZAC`
+#: and not `ZAR`. It is declared here rather than inferred so that the screens
+#: can assert, in a test, that every shipped universe has a size band. That
+#: assertion used to be a hand-written set of six currency codes, and it had
+#: already drifted: it claimed to cover "the eight shipped universes" while
+#: listing six currencies, and would not have noticed a seventh market
+#: arriving with no band — the exact failure that made every Swedish company
+#: fail `cap_band_unknown_currency`.
 UNIVERSE_META: list[dict[str, Any]] = [
     {
         "id": "sp500",
+        "currency": "USD",
         "label": "S&P 500",
         "description": "S&P 500 constituents (datasets.org CSV, updated periodically).",
         "approx_count": 503,
     },
     {
         "id": "sp400",
+        "currency": "USD",
         "label": "S&P MidCap 400",
         "description": "Mid-caps, roughly $7bn to $20bn. Below the 500, above the 600.",
         "approx_count": 400,
     },
     {
         "id": "sp600",
+        "currency": "USD",
         "label": "S&P SmallCap 600",
         "description": (
             "Small-caps, roughly $1bn to $7bn — where a company can still "
@@ -97,6 +157,7 @@ UNIVERSE_META: list[dict[str, Any]] = [
     },
     {
         "id": "jp_mid_small",
+        "currency": "JPY",
         "label": "Japan mid & small",
         "description": (
             "TOPIX Mid400 plus Small 1 — the mid and small Japanese companies "
@@ -107,6 +168,7 @@ UNIVERSE_META: list[dict[str, Any]] = [
     },
     {
         "id": "uk_mid",
+        "currency": "GBP",
         "label": "UK mid (FTSE 250)",
         "description": (
             "The 250 companies below the FTSE 100 — the British mid-cap band, "
@@ -116,6 +178,7 @@ UNIVERSE_META: list[dict[str, Any]] = [
     },
     {
         "id": "de_mid",
+        "currency": "EUR",
         "label": "Germany mid (MDAX)",
         "description": (
             "The 50 German mid caps below the DAX. Small by index count, but "
@@ -125,6 +188,7 @@ UNIVERSE_META: list[dict[str, Any]] = [
     },
     {
         "id": "ca_all",
+        "currency": "CAD",
         "label": "Canada (TSX operating cos)",
         "description": (
             "Toronto-listed operating companies, from the exchange's own "
@@ -135,6 +199,7 @@ UNIVERSE_META: list[dict[str, Any]] = [
     },
     {
         "id": "au_all",
+        "currency": "AUD",
         "label": "Australia (ASX listed)",
         "description": (
             "Every ASX-listed company, from the exchange's own CSV. Mostly "
@@ -142,6 +207,68 @@ UNIVERSE_META: list[dict[str, Any]] = [
             "run is the slowest — expect to wait on the data provider."
         ),
         "approx_count": 1900,
+    },
+    {
+        "id": "za_all",
+        "currency": "ZAC",
+        "label": "South Africa (JSE)",
+        "description": (
+            "Johannesburg-listed companies. English filings under IFRS with "
+            "Big-4 audits, and a small-cap tail that domestic pension money "
+            "has been leaving for years — obscure but checkable."
+        ),
+        "approx_count": 242,
+    },
+    {
+        "id": "id_all",
+        "currency": "IDR",
+        "label": "Indonesia (IDX)",
+        "description": (
+            "Jakarta-listed companies. Family-controlled groups and heavy "
+            "related-party dealing, so governance is the work here, not the "
+            "arithmetic."
+        ),
+        "approx_count": 837,
+    },
+    {
+        "id": "sa_all",
+        "currency": "SAR",
+        "label": "Saudi Arabia (Tadawul)",
+        "description": (
+            "Riyadh-listed companies. Retail-dominated order flow and a "
+            "state hand in much of the index; the riyal is pegged, so the "
+            "size band needs no FX view."
+        ),
+        "approx_count": 361,
+    },
+    {
+        "id": "my_all",
+        "currency": "MYR",
+        "label": "Malaysia (Bursa)",
+        "description": (
+            "Kuala Lumpur-listed companies, quoted by numeric code rather than letters."
+        ),
+        "approx_count": 882,
+    },
+    {
+        "id": "th_all",
+        "currency": "THB",
+        "label": "Thailand (SET + mai)",
+        "description": (
+            "Bangkok-listed companies, both boards. The largest universe "
+            "here after Australia, so a full run is slow."
+        ),
+        "approx_count": 1722,
+    },
+    {
+        "id": "cl_all",
+        "currency": "CLP",
+        "label": "Chile (Santiago)",
+        "description": (
+            "Santiago-listed companies. A small market — a hundred names — "
+            "and a few of them quote in dollars rather than pesos."
+        ),
+        "approx_count": 103,
     },
 ]
 
@@ -420,6 +547,97 @@ def fetch_ca_all() -> list[str]:
     return out
 
 
+#: Market-cap floor for the region queries, in the quote currency's own
+#: units — so this is deliberately loose. It exists to drop shells and
+#: suspended listings, not to size-band anything: the screens own their own
+#: bands, and applying a second one here would hide companies from a screen
+#: that had not chosen to exclude them.
+_REGION_CAP_FLOOR = 50_000_000
+
+#: Yahoo region codes for the markets enumerated through the screener rather
+#: than through an exchange file. See the module docstring for why these do
+#: not come from the exchanges themselves, and for the three neighbouring
+#: markets that are absent because Yahoo has no data behind them.
+YAHOO_REGIONS: dict[str, tuple[str, int]] = {
+    "za_all": ("za", 242),
+    "id_all": ("id", 837),
+    "sa_all": ("sa", 361),
+    "my_all": ("my", 882),
+    "th_all": ("th", 1722),
+    "cl_all": ("cl", 103),
+}
+
+
+def fetch_yahoo_region(region: str, expected: int) -> list[str]:
+    """Every equity Yahoo prices in one market, paged out of its screener.
+
+    The symbols arrive already suffixed (`SHP.JO`, `BBCA.JK`), so they are
+    not put through `exchange_symbol` — that function appends a suffix and
+    would produce `SHP-JO.JO`. They are passed through unchanged apart from
+    case, which is the one thing the screener is inconsistent about.
+
+    `quoteType` is checked rather than trusted. The region filter returns
+    equities, but Yahoo classifies some funds and trusts as equities on
+    smaller exchanges, and the Toronto loader above exists entirely because
+    1,500 of 2,305 rows were not companies.
+    """
+    import yfinance as yf
+    from yfinance import EquityQuery as Q
+
+    out: list[str] = []
+    offset = 0
+    total: int | None = None
+
+    # 25 pages of 100 is 2,500 names, comfortably above the largest market
+    # here (Thailand, ~1,722) and a hard stop against a paging bug.
+    for _ in range(25):
+        query = Q(
+            "and",
+            [Q("eq", ["region", region]), Q("gt", ["intradaymarketcap", _REGION_CAP_FLOOR])],
+        )
+        page: dict[str, Any] | None = None
+        for attempt in range(3):
+            try:
+                page = yf.screen(query, size=100, offset=offset)
+                break
+            except Exception as exc:  # noqa: BLE001 — transient, retried below
+                if attempt == 2:
+                    raise ValueError(
+                        f"Yahoo region screen for {region!r} failed after 3 attempts: {exc}"
+                    ) from exc
+                time.sleep(2)
+
+        quotes = (page or {}).get("quotes") or []
+        total = (page or {}).get("total", total)
+        for q in quotes:
+            sym = str(q.get("symbol") or "").strip().upper()
+            if sym and q.get("quoteType") == "EQUITY":
+                out.append(sym)
+        if len(quotes) < 100:
+            break
+        offset += 100
+        time.sleep(0.6)
+
+    out = _dedupe(out)
+
+    # The same guard the JPX, ASX and TSX loaders carry, and for the same
+    # reason: a market that quietly returns a tenth of itself reads as a
+    # market where nothing qualified.
+    if len(out) < expected * 0.5:
+        raise ValueError(
+            f"Yahoo region {region!r} yielded only {len(out)} equities "
+            f"(expected ~{expected}, screener reported total={total}) "
+            "— the region code or the screener response shape may have changed"
+        )
+    return out
+
+
+def _region_loader(universe_id: str) -> Any:
+    """A zero-argument loader for one region, for the LOADERS table."""
+    region, expected = YAHOO_REGIONS[universe_id]
+    return lambda: fetch_yahoo_region(region, expected)
+
+
 #: Module-level rather than built inside `load_universe`, so that the one
 #: invariant that actually broke here is testable: every universe advertised in
 #: UNIVERSE_META must have a loader, and every loader must be advertised. The
@@ -435,6 +653,7 @@ LOADERS: dict[str, Any] = {
     "de_mid": fetch_de_mid,
     "ca_all": fetch_ca_all,
     "au_all": fetch_au_all,
+    **{uid: _region_loader(uid) for uid in YAHOO_REGIONS},
 }
 
 

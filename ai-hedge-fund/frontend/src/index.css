@@ -125,6 +125,48 @@
   --c-verdigris-paper: 43% 0.078 178; /* 6.25:1 */
   --c-aluminium: 55% 0.01 80; /* silver enamel */
 
+  /* ── Provenance: how far a figure is from being a fact ────────────────
+   *
+   * The four trust levels are an ORDINAL scale, not four identities:
+   * computed -> model chooses/code computes -> model-written -> model
+   * judgment is a single axis, increasing distance from something you can
+   * re-derive. That distinction decides how it is coloured.
+   *
+   * Treated as four categorical hues it fails on its own terms. Run against
+   * the categorical checks, the shipped `-paper` values put model-written
+   * and model judgment at a normal-vision delta-E of 11.3 — under the 15
+   * floor, so a reader with full colour vision cannot reliably separate the
+   * two segments that matter most on this bar: prose from opinion.
+   *
+   * As an ordinal ramp the right check is lightness monotonicity instead,
+   * and these are stepped to pass it: 0.38 < 0.45 < 0.52 < 0.59, measuring
+   * 7.18:1, 6.11:1, 4.52:1 and 3.58:1 on linen. Solid and dark is the thing
+   * you can check; pale is the thing you cannot — which is the argument the
+   * whole app makes, carried by the one encoding that survives being
+   * photocopied.
+   *
+   * Kept separate from `--c-oxide` and friends on purpose. Those are the
+   * desk's paint, used in forty places; these mean one specific thing, and
+   * re-stepping them must not repaint a button.  */
+  --c-prov-computed: 38% 0.11 178;
+  --c-prov-chosen: 45% 0.17 258;
+  --c-prov-written: 52% 0.14 72;
+  --c-prov-judged: 59% 0.18 32;
+
+  /* ── Sequential: one hue, light to dark, for magnitude ────────────────
+   *
+   * Score on the outlier map is a quantity, not an identity, so it gets a
+   * ramp rather than a set of hues — and a ramp is checked on lightness
+   * monotonicity, which these satisfy by construction (0.86 down to 0.34).
+   * Cobalt because the categorical slots already spend oxide on loss and
+   * cadmium on caution, and a magnitude ramp must not borrow a colour that
+   * already means something.  */
+  --c-seq-1: 86% 0.045 258;
+  --c-seq-2: 73% 0.085 258;
+  --c-seq-3: 60% 0.125 258;
+  --c-seq-4: 47% 0.165 258;
+  --c-seq-5: 34% 0.145 258;
+
   /* ── One light, declared once ──────────────────────────────────────────
    *
    * The idea is borrowed from Ambient CSS: instead of every component
@@ -210,6 +252,15 @@
   --verdigris: oklch(var(--c-verdigris));
   --aluminium: oklch(var(--c-aluminium));
   --oxide-paper: oklch(var(--c-oxide-paper));
+  --prov-computed: oklch(var(--c-prov-computed));
+  --prov-chosen: oklch(var(--c-prov-chosen));
+  --prov-written: oklch(var(--c-prov-written));
+  --prov-judged: oklch(var(--c-prov-judged));
+  --seq-1: oklch(var(--c-seq-1));
+  --seq-2: oklch(var(--c-seq-2));
+  --seq-3: oklch(var(--c-seq-3));
+  --seq-4: oklch(var(--c-seq-4));
+  --seq-5: oklch(var(--c-seq-5));
   --cadmium-paper: oklch(var(--c-cadmium-paper));
   --cobalt-paper: oklch(var(--c-cobalt-paper));
   --verdigris-paper: oklch(var(--c-verdigris-paper));
@@ -276,6 +327,24 @@
     --c-cobalt: 58% 0.174 258;
     --c-verdigris: 58% 0.088 178;
     --c-aluminium: 72% 0.012 80;
+
+    /* The same ordinal ramp against enamel black: 0.58 < 0.66 < 0.74 < 0.82,
+     * measuring 4.52:1, 5.90:1, 7.87:1 and 9.39:1 on ink. Re-stepped rather
+     * than inverted — the order has to stay solid-to-faint in both themes,
+     * and on a dark ground "faint" is lighter, not darker. */
+    --c-prov-computed: 58% 0.09 178;
+    --c-prov-chosen: 66% 0.14 258;
+    --c-prov-written: 74% 0.15 78;
+    --c-prov-judged: 82% 0.14 32;
+
+    /* Re-stepped against ink, not inverted: a magnitude ramp on a dark
+     * ground still runs faint to strong, so the steps brighten rather than
+     * darken. Monotonic 0.34 -> 0.86 the other way. */
+    --c-seq-1: 34% 0.06 258;
+    --c-seq-2: 46% 0.10 258;
+    --c-seq-3: 58% 0.14 258;
+    --c-seq-4: 70% 0.13 258;
+    --c-seq-5: 86% 0.09 258;
 
     --light-shade: oklch(8% 0.01 60 / 0.55);
     --light-sheen: oklch(96% 0.012 84 / 0.06);

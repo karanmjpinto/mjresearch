@@ -78,6 +78,28 @@ CAP_BAND_BY_CURRENCY: dict[str, tuple[float, float]] = {
     "DKK": (3_500_000_000, 140_000_000_000),
     "NOK": (5_000_000_000, 200_000_000_000),
     "CHF": (400_000_000, 16_000_000_000),
+    #: --- Global South, added with the six region universes ---
+    #:
+    #: Same $500m-$20bn band, converted at round rates for the same reason
+    #: the developed entries are round: this is a band boundary, not a
+    #: valuation, and a pretend-precise rate would imply FX error could move
+    #: a company between "mid cap" and "mega cap".
+    #:
+    #: `ZAC`, not `ZAR`, and the difference is the whole trap. Yahoo quotes
+    #: Johannesburg **in cents** and labels the currency `ZAc`, while
+    #: reporting `marketCap` **in rand**. Naspers: price 72,169, shares
+    #: 747,161,004, cap 539,912,273,920 — which is (price / 100) x shares.
+    #: So this entry is keyed on what `cap_band` actually receives after
+    #: `.upper()`, and its numbers are rand, because the field it is
+    #: compared against is rand. Anything here that multiplies a JSE price
+    #: by a share count is wrong by 100x; this band is not that, and the
+    #: next person to add a price-based rule needs to know it.
+    "ZAC": (9_000_000_000, 360_000_000_000),
+    "IDR": (8_000_000_000_000, 320_000_000_000_000),
+    "SAR": (1_900_000_000, 75_000_000_000),  # pegged at 3.75, so no FX view
+    "MYR": (2_100_000_000, 84_000_000_000),
+    "THB": (16_000_000_000, 640_000_000_000),
+    "CLP": (475_000_000_000, 19_000_000_000_000),
 }
 
 #: --- The reinvestment leg ---

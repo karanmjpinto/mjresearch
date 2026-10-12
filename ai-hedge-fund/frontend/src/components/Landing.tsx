@@ -8,6 +8,8 @@ import {
 import { Link } from "react-router-dom";
 import clsx from "clsx";
 
+import { APP_HOME } from "@/lib/sections";
+
 import {
   DensityPlate,
   GlyphPlate,
@@ -88,7 +90,7 @@ const MORE = [
   },
   {
     n: "07",
-    title: "Five screens, already run",
+    title: "Six screens, already run",
     body: "Multibagger, compounder, Bolton contrarian, Kiyohara's Japan handbook and Ellenbogen's two acts — computed ahead of time, and dated.",
   },
   {
@@ -455,7 +457,7 @@ export function Landing() {
                 Reference
               </Link>
               <Link
-                to="/dashboard"
+                to={APP_HOME}
                 className="bg-enamel px-4 py-2 text-on-accent-light transition-colors hover:bg-oxide-paper"
               >
                 Open&nbsp;→
@@ -528,7 +530,7 @@ export function Landing() {
                   </p>
                   <div className="mt-2xl flex flex-wrap items-center gap-sm font-display text-label uppercase tracking-marker">
                     <Link
-                      to="/dashboard"
+                      to={APP_HOME}
                       className="bg-enamel px-6 py-3.5 text-on-accent-light transition-all duration-300 ease-out-expo hover:bg-oxide-paper"
                     >
                       Open the app
@@ -859,7 +861,7 @@ export function Landing() {
                 </h2>
                 <div className="mt-2xl flex flex-wrap items-center gap-sm font-display text-label uppercase tracking-marker">
                   <Link
-                    to="/dashboard"
+                    to={APP_HOME}
                     className="bg-enamel px-6 py-3.5 text-on-accent-light transition-all duration-300 ease-out-expo hover:bg-oxide-paper"
                   >
                     Open the app

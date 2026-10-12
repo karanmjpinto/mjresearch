@@ -8,6 +8,7 @@ import { JoinView } from "@/components/JoinView";
 import { Landing } from "@/components/Landing";
 import { MemberGate } from "@/components/MemberGate";
 import { DEFAULT_SCREENER_ID } from "@/config/screeners";
+import { APP_HOME } from "@/lib/sections";
 
 /**
  * Landing, the two gates and JoinView are imported eagerly: they are the first
@@ -24,6 +25,18 @@ import { DEFAULT_SCREENER_ID } from "@/config/screeners";
  * fail to arrive and a bare Suspense would wait on it for ever. See that
  * component: the usual cause is a deploy, and the cure is a reload.
  */
+const AppHome = lazy(() =>
+  import("@/components/AppHome").then((m) => ({ default: m.AppHome })),
+);
+const EvaluateView = lazy(() =>
+  import("@/components/EvaluateView").then((m) => ({ default: m.EvaluateView })),
+);
+const FindView = lazy(() =>
+  import("@/components/SectionHub").then((m) => ({ default: m.FindView })),
+);
+const ManageView = lazy(() =>
+  import("@/components/SectionHub").then((m) => ({ default: m.ManageView })),
+);
 const AnalysisView = lazy(() =>
   import("@/components/AnalysisView").then((m) => ({ default: m.AnalysisView })),
 );
@@ -174,6 +187,13 @@ export default function App() {
 function AppRoutes() {
   return (
     <Routes>
+      {/* The four sections. These are the front door; every route below
+          them is unchanged and still resolves, so no inbound link breaks. */}
+      <Route path="/app" element={<AppHome />} />
+      <Route path="/find" element={<FindView />} />
+      <Route path="/evaluate" element={<EvaluateView />} />
+      <Route path="/manage" element={<ManageView />} />
+
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/plan/:ticker?" element={<AnalysisView />} />
       <Route path="/research/:ticker?" element={<ResearchReport />} />
@@ -192,7 +212,11 @@ function AppRoutes() {
       <Route path="/decide/:ticker?" element={<DecideView />} />
       <Route path="/autoresearch" element={<AutoResearchView />} />
       <Route path="/setup" element={<SetupView />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* Unknown routes land on the chooser rather than the dashboard. The
+          dashboard is one of fifteen screens and answers one of four
+          questions; dropping someone there after a typo asserts it is the
+          app, which is the framing this restructure removes. */}
+      <Route path="*" element={<Navigate to={APP_HOME} replace />} />
     </Routes>
   );
 }

@@ -18,6 +18,32 @@ export type ScreenerCriteriaSection = {
   items: string[];
 };
 
+/**
+ * The backend screen names, written once.
+ *
+ * This union was spelled out by hand in three files — here, in
+ * `ScreenResults`'s props, and in its glossary sibling — so adding a screen
+ * meant finding all three, and missing one produced a type error two
+ * components away from the change that caused it. The list of screens has
+ * exactly one home and this is it; everything else imports.
+ */
+export type ScreenName =
+  | "yartseva"
+  | "acquisition-compounder"
+  | "bolton-contrarian"
+  | "kiyohara-handbook"
+  | "ellenbogen-two-act"
+  | "ai-rollup";
+
+/** The glossary term that explains each screen, same reasoning as above. */
+export type ScreenInfoTerm =
+  | "screen-yartseva"
+  | "screen-acquisition"
+  | "screen-bolton"
+  | "screen-kiyohara"
+  | "screen-ellenbogen"
+  | "screen-ai-rollup";
+
 export type ScreenerViewDef = {
   id: string;
   label: string;
@@ -38,21 +64,11 @@ export type ScreenerViewDef = {
    * the `else` silently claimed every new screen was the compounder. Carrying
    * the real name as data makes adding a screen a row rather than a branch.
    */
-  screenId?:
-    | "yartseva"
-    | "acquisition-compounder"
-    | "bolton-contrarian"
-    | "kiyohara-handbook"
-    | "ellenbogen-two-act";
+  screenId?: ScreenName;
   /** Highest attainable score, for the result bars. */
   scoreMax?: number;
   /** Glossary term for the results heading. */
-  infoTerm?:
-    | "screen-yartseva"
-    | "screen-acquisition"
-    | "screen-bolton"
-    | "screen-kiyohara"
-    | "screen-ellenbogen";
+  infoTerm?: ScreenInfoTerm;
   /** Heading and blurb for the pre-computed results panel. */
   resultsTitle?: string;
   resultsBlurb?: string;
@@ -75,6 +91,30 @@ export type ScreenerViewDef = {
 };
 
 export const SCREENER_VIEWS: ScreenerViewDef[] = [
+  {
+    id: "ai_rollup",
+    screenId: "ai-rollup",
+    scoreMax: 50,
+    infoTerm: "screen-ai-rollup",
+    label: "AI Rollup Targets",
+    resultsTitle: "Who the AI buyers are shopping for",
+    resultsBlurb:
+      "Two buyers want opposite things, so there are two scores and no average. A lab buys delivery capacity — OpenAI's DeployCo acquired an AI consultancy for roughly 150 engineers — and wants revenue per head high and technical. An AI-enabled roll-up buys cash-generating operators to compress the labour cost, and wants revenue per head low, because that is where the compressible cost is. The bar is the roll-up score out of 50; the lab score sits beside it and frequently disagrees. What neither score can tell you is whether AI actually compresses this particular business — that is listed as unchecked on every row.",
+    description:
+      "Who gets bought, by the two buyers who are actually buying. Hard filters on industry, a deliberately low size ceiling (above roughly $8bn you are describing an acquirer, not a target), asset intensity and existing leverage. Then two separate scores out of 50 — roll-up fit and lab fit — built from revenue per employee, the wedge between gross and operating margin, cash conversion, balance sheet, insider holding, and industry fragmentation counted over the universe being screened. The a16z two-paths argument rides along as a warning rather than a score: software that is neither growing 10 points faster nor rebuilt for 40% operating margins is flagged as the comfortable middle, which is a reason not to own it rather than a reason to buy it.",
+    usesApi: true,
+    criteria: [
+      "Industry: matched against a services allowlist on the label a provider reports. Coarse by admission — a software company whose revenue is two-thirds implementation reads as software here",
+      "Size: roughly $50m to $8bn equivalent, in the currency the company is quoted in. The ceiling is the opinionated number — a roll-up buyer wants an operator small enough that the post-automation delta is large and the cheque is writable",
+      "Asset intensity: capex below 12% of revenue, so the price is for cash flows rather than for plant",
+      "Leverage: net debt below 4x EBITDA, because a roll-up is serviced out of the target's own cash",
+      "Headcount must be reported. Without it there is no labour intensity, and labour intensity is the whole screen — refused rather than scored as zero, which would read as a business with no staff",
+      "Roll-up score: labour intensity 10, margin wedge 10, fragmentation 8, cash conversion 8, balance sheet 8, owner-operator 6",
+      "Lab score: revenue per head read the other way up, a bonus for IT services and consulting shells, and growth",
+      "NOT scored: whether the work is documented well enough for a model to learn it, how much of the delivery is judgment a customer is paying a person for, whether customers accept being served by a machine, whether the people who know how it works stay, and whether the seller will sell at all",
+    ],
+    plays: [],
+  },
   {
     id: "yartseva",
     screenId: "yartseva",
@@ -106,7 +146,7 @@ export const SCREENER_VIEWS: ScreenerViewDef[] = [
       "The quality screen on this desk. Every name here cleared the hard filters — a return on capital above 12%, cash conversion above 80%, and a share count that is flat or falling — and sits inside the small and mid-cap band. The bar is its ten-factor score out of 50. The tenth factor is the reinvestment runway: not what the capital already deployed earns, but what the business can compound at from its own cash. Pick a universe to run it somewhere else.",
     label: "Quality Compounder",
     description:
-      "The compounder test, in Akre's three legs: an extraordinary business, management who do not dilute you, and somewhere to put the next dollar at the same rate. Hard filters on growth, ROIC, FCF conversion, leverage, margin trend and dilution, then a ten-factor score out of 50. Bounded to small and mid caps and runnable on any of the eight universes. Data via yfinance; short histories fall back to span CAGR — verify in filings.",
+      "The compounder test, in Akre's three legs: an extraordinary business, management who do not dilute you, and somewhere to put the next dollar at the same rate. Hard filters on growth, ROIC, FCF conversion, leverage, margin trend and dilution, then a ten-factor score out of 50. Bounded to small and mid caps and runnable on any of the fourteen universes. Data via yfinance; short histories fall back to span CAGR — verify in filings.",
     usesApi: true,
     criteria: [
       "Size: roughly $500m to $20bn, applied in the currency the company reports in rather than converted at an invented rate. A company whose currency has no band is refused rather than waved through",

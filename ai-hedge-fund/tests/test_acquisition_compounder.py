@@ -384,8 +384,28 @@ def test_every_universe_currency_has_a_band():
     A universe whose currency has no band is a region where the size filter
     silently refuses every company — the screen runs, costs the full wait, and
     returns an empty list that reads as "nothing qualified".
+
+    Derived from `UNIVERSE_META` rather than hand-written. The hand-written
+    version was a set of six currency codes describing "the eight shipped
+    universes", which is already a contradiction, and it could not fail when
+    a new market arrived — which is how Sweden reached production with no
+    band and refused every Stockholm company on a filter nobody had set.
     """
-    # The currencies the eight shipped universes quote in.
-    needed = {"USD", "JPY", "GBP", "EUR", "CAD", "AUD"}
-    missing = needed - set(CAP_BAND_BY_CURRENCY)
-    assert not missing, f"universes quote in {sorted(missing)} with no cap band"
+    from hedge_fund.data.universes import UNIVERSE_META
+
+    declared = {u["id"]: u["currency"] for u in UNIVERSE_META}
+    missing = {uid: ccy for uid, ccy in declared.items() if ccy not in CAP_BAND_BY_CURRENCY}
+    assert not missing, f"universes with no cap band: {missing}"
+
+
+def test_every_universe_declares_a_currency():
+    """A universe with no declared currency slips past the band test.
+
+    The check above can only see what is declared, so the declaration itself
+    has to be mandatory — otherwise adding a market and forgetting the field
+    silently restores the gap the check exists to close.
+    """
+    from hedge_fund.data.universes import UNIVERSE_META
+
+    undeclared = [u["id"] for u in UNIVERSE_META if not u.get("currency")]
+    assert not undeclared, f"universes with no declared currency: {undeclared}"

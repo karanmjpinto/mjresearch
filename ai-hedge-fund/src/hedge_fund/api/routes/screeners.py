@@ -364,6 +364,7 @@ DEFAULT_UNIVERSE_FOR: dict[str, str] = {
     # shelf. The mid-cap index is the other half of his book — the two-thirds
     # already in Act 2 — and is worth running by hand.
     "ellenbogen-two-act": "sp600",
+    "ai-rollup": "sp600",
 }
 
 #: Fallback for anything not named above.
@@ -395,6 +396,7 @@ SCREEN_FIELDS: dict[str, ScreenFields] = {
     "bolton-contrarian": ScreenFields("passed", "composite", "failures"),
     "kiyohara-handbook": ScreenFields("passed", "composite", "failures"),
     "ellenbogen-two-act": ScreenFields("passed", "composite", "failures"),
+    "ai-rollup": ScreenFields("passed", "rollup_score", "failures"),
 }
 
 
