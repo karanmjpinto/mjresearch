@@ -475,3 +475,69 @@ def count_peers_in_band(snapshots: list[RollupSnapshot]) -> dict[str, int]:
         key = s.industry.strip().lower()
         counts[key] = counts.get(key, 0) + 1
     return counts
+
+
+def _row(r: RollupResult) -> dict[str, Any]:
+    return {
+        "ticker": r.ticker,
+        "passed": r.passed,
+        "failures": r.failures,
+        "rollup_score": r.rollup_score,
+        "lab_score": r.lab_score,
+        "comfortable_middle": r.comfortable_middle,
+        "peers_in_band": r.peers_in_band,
+        "scores": r.scores,
+        "snapshot": r.snapshot,
+        "unchecked": list(r.unchecked),
+        "error": r.error,
+    }
+
+
+def run_ai_rollup_for_ticker(ticker: str) -> dict[str, Any]:
+    """One name, scored without its fragmentation component.
+
+    Fragmentation is a property of the shelf, not of the company standing on
+    it, so it cannot be known from a single ticker — the runner that the
+    refresh script fans out over the universe has no idea what else is in
+    that universe. The component is therefore left unscored here and filled
+    in by `finalise_run` once the whole pass has landed.
+
+    Scored as absent rather than as zero. Zero is a claim that the industry
+    has no other listed operators in the band, which is the opposite of what
+    "not yet counted" means, and it is the difference between a name that
+    cannot be rolled up and one nobody has measured.
+    """
+    return _row(evaluate(fetch_rollup_snapshot(ticker), peers_in_band=None))
+
+
+def finalise_run(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Fill in fragmentation once the whole universe has been fetched.
+
+    The second pass the per-ticker runner cannot do. Snapshots are rebuilt
+    from the rows rather than re-fetched: the data is already on disk, and
+    going back to the provider for several hundred names to recount
+    something already in hand would double the slowest part of the run.
+
+    Rows that errored are passed through untouched. A name whose fetch failed
+    has no industry and no market cap, so it cannot contribute to a peer
+    count and must not be re-scored into looking as though it could.
+    """
+    snaps: list[RollupSnapshot] = []
+    for row in rows:
+        snap_d = row.get("snapshot")
+        if row.get("error") or not isinstance(snap_d, dict):
+            continue
+        snaps.append(RollupSnapshot(**{k: v for k, v in snap_d.items() if k != "error"}))
+
+    peers = count_peers_in_band(snaps)
+    by_ticker = {s.ticker: s for s in snaps}
+
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        snap = by_ticker.get(str(row.get("ticker") or ""))
+        if snap is None:
+            out.append(row)
+            continue
+        key = (snap.industry or "").strip().lower()
+        out.append(_row(evaluate(snap, peers_in_band=peers.get(key))))
+    return out

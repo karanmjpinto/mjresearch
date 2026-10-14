@@ -1597,6 +1597,29 @@ export const api = {
     );
   },
 
+  /** Start a screen in the background. Returns at once; poll `getScreenJobs`. */
+  startScreenJob: (screen: string, universe?: string) =>
+    postJSON<{
+      started: boolean;
+      screen: string;
+      universe: string;
+      total: number;
+    }>(`/screeners/jobs/${encodeURIComponent(screen)}`, { universe: universe ?? null }),
+
+  /** What is running right now, and how far through. */
+  getScreenJobs: () =>
+    fetchJSON<{
+      busy: boolean;
+      running: {
+        screen: string;
+        universe: string;
+        done: number;
+        total: number;
+        started_at: string;
+        error?: string | null;
+      }[];
+    }>("/screeners/jobs"),
+
   getFactorThemes: () => fetchJSON<FactorThemesResponse>("/factors/themes"),
 
   getThemeFactors: (theme: string) =>

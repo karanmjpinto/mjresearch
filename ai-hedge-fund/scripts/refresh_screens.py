@@ -54,6 +54,10 @@ from hedge_fund.screeners.acquisition_compounder import (
     run_acquisition_compounder_for_ticker,
 )
 from hedge_fund.screeners.yartseva import run_yartseva_for_ticker
+from hedge_fund.screeners.ai_rollup import (
+    finalise_run as finalise_ai_rollup,
+    run_ai_rollup_for_ticker,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 log = logging.getLogger("refresh")
@@ -64,6 +68,23 @@ RUNNERS = {
     "bolton-contrarian": run_bolton_contrarian_for_ticker,
     "kiyohara-handbook": run_kiyohara_handbook_for_ticker,
     "ellenbogen-two-act": run_ellenbogen_two_act_for_ticker,
+    "ai-rollup": run_ai_rollup_for_ticker,
+}
+
+#: Screens needing a pass over the finished run, not just over each name.
+#:
+#: Everything else here is embarrassingly parallel: a row depends on one
+#: ticker and nothing else, which is why the runner is fanned out over a
+#: thread pool and the results are simply collected. The rollup screen
+#: breaks that assumption once, for one measure — fragmentation is how many
+#: in-band peers share an industry, which is a property of the universe and
+#: unknowable from inside a single ticker's row.
+#:
+#: Registered as a hook rather than special-cased in `run_screen`, so the
+#: parallel path stays the same shape for every screen and the knowledge of
+#: *why* this one needs a second pass lives in the screen that needs it.
+FINALISERS = {
+    "ai-rollup": finalise_ai_rollup,
 }
 
 #: Imported from the API so the script and the page it feeds cannot drift.
@@ -161,6 +182,11 @@ def run_screen(screen: str, tickers: list[str], workers: int) -> list[dict]:
                     rate,
                     left,
                 )
+
+    finalise = FINALISERS.get(screen)
+    if finalise is not None:
+        log.info("  %s: second pass over %d rows", screen, len(out))
+        out = finalise(out)
     return out
 
 
@@ -200,6 +226,21 @@ def fill_errors(screen: str, universe: str, workers: int) -> int:
             recovered += 1
         if not r.get("error") or t not in by_ticker:
             by_ticker[t] = r
+
+    # Re-finalise over the MERGED set, not the handful that was refetched.
+    # `run_screen` already ran the hook over the recovered names alone, and
+    # for a run-level measure that answer is wrong by construction: counting
+    # in-band peers across seven rescued rows says an industry has seven
+    # operators in it. The full set is only assembled here, so this is the
+    # only place the count can be right.
+    merged_finalise = FINALISERS.get(screen)
+    if merged_finalise is not None:
+        log.info("  %s: re-finalising over %d merged rows", screen, len(by_ticker))
+        by_ticker = {
+            str(r.get("ticker")): r
+            for r in merged_finalise(list(by_ticker.values()))
+            if r.get("ticker")
+        }
 
     cache.write(
         screen,
