@@ -196,6 +196,18 @@ export const SECTIONS: DocSection[] = [
         detail:
           "The autoresearch proposer invents rules to test. What it invents is not reproducible; what happens to the rule afterwards is entirely deterministic.",
       },
+      {
+        name: "Committee A/B test — the gate",
+        trust: "computed",
+        detail:
+          "A command-line check for a change to the committee's dissent thresholds or its rebuttal and synthesis rules. The current committee and the changed one both read the same frozen company snapshot, and each final answer is put through the numeric verifier and the golden set's pass/fail rules. A side that fails is reported as failed. Nothing about this step is an opinion, and it runs only when someone runs it — never on a request.",
+      },
+      {
+        name: "Committee A/B test — which answer is better",
+        trust: "judged",
+        detail:
+          "Only when both answers clear the gate, one model is shown the two as 'Answer A' and 'Answer B', in a random order and with nothing that says which is which, and asked which is the better analysis and why. That preference is an opinion from the same kind of model that wrote the answers. It is printed for a person to read; it does not pick a winner, and it changes nothing in the app.",
+      },
     ],
   },
   {
@@ -306,9 +318,17 @@ export const SECTIONS: DocSection[] = [
       "Seventeen investors are available; seven speak by default, chosen to disagree for different reasons.",
     body: [
       "Each investor is a prompt built from a stored profile: who they are, how they think, and the concrete tests they apply. The app shows you those tests next to their verdict, and both come from the same source — a description kept separately from the instruction would eventually tell you an investor weighs one thing while the model had been told to weigh another.",
-      "The default committee is Buffett, Munger, Lynch, Fisher, Li Lu, Lou and Kiyohara. Each covers an axis the others do not: durable economics at a sensible price, the inversion of what would make it a bad business, growth a generalist can actually understand, the qualitative checks no feed carries, a concentrated owner's view, deep work on very few names, and the Japanese small-cap register and balance sheet. Four of the seven made their records outside the United States, which matters on a desk that screens fourteen universes across twelve currencies. A committee of near-duplicates produces a confident consensus that reflects one way of looking, which is worse than a narrower claim honestly made.",
+      "The default committee is Buffett, Munger, Lynch, Fisher, Li Lu, Lou and Kiyohara. Each covers an axis the others do not: durable economics at a sensible price, the inversion of what would make it a bad business, growth a generalist can actually understand, the qualitative checks no feed carries, a concentrated owner's view, deep work on very few names, and the Japanese small-cap register and balance sheet. Four of the seven made their records outside the United States, which matters on a desk that screens sixteen universes across thirteen currencies. A committee of near-duplicates produces a confident consensus that reflects one way of looking, which is worse than a narrower claim honestly made.",
       "It used to be Buffett, Graham, Wood, Burry, Bolton, Druckenmiller and Damodaran, which was the right committee for a different desk. Three of those seven answered questions this one does not ask — what is the disruption thesis, what is the liquidity regime, what does the multiple imply — and two of the three were top-down voices reviewing a bottom-up screen. All seventeen investors are still there and still individually selectable; this is only who speaks when you do not choose.",
       "Read the spread, not the average. Seven investors agreeing tells you less than two of them disagreeing for a reason you had not considered.",
+      "The committee's own rules are now tested rather than just edited. How wide a split sends the investors back for a second round, what they are told in that round, and what the synthesis is told are held as one small object, so a changed version can be run beside the current one on the same frozen company and the two answers compared. The idea is borrowed from Sakana AI's MASS (Multi-Agent Self-Supervision), which describes a team of agents as roles, instructions, contracts and hops, has a model compare two results to decide which workflow is better, and reports that the gain came from the contracts and the hops rather than the roles. Two things are taken from it: treating the contract and hop values as data, and the side-by-side comparison. Two are deliberately left out: the loop that rewrites the workflow by itself, and the step that retrains the model on its own best runs. One thing is added that MASS does not have, because its tasks have no checkable answer and these do in part — both answers must clear the numeric verifier and the golden-set rules before any model is asked for an opinion. With five companies to compare on and no signal for whether a call was right, an automatic loop here would learn the five companies; so a person runs the comparison, reads it, and decides.",
+    ],
+    sources: [
+      {
+        label:
+          "Sakana AI, Recursive Self-Improvement through Multi-Agent Self-Supervision (MASS) — the source of the contract-and-hop framing and the pairwise comparison",
+        url: "https://pub.sakana.ai/mass/",
+      },
     ],
   },
   {
@@ -477,7 +497,11 @@ export const GAPS: [string, string][] = [
   ],
   [
     "Only the single-investor path is measured",
-    "Twenty cases with pass/fail rules score one investor at a time against frozen company snapshots: whether the answer is well-formed, whether its figures come from the data it was given, and whether the investor's own framework actually applied. The committee — where investors read each other and can revise — is not covered, and it is the path where a prompt change turned the designated bear from a strong sell into a strong buy. Treat a passing score as evidence about one analysis, not about the committee's spread.",
+    "Twenty cases with pass/fail rules score one investor at a time against frozen company snapshots: whether the answer is well-formed, whether its figures come from the data it was given, and whether the investor's own framework actually applied. The committee — where investors read each other and can revise — has no such score, and it is the path where a prompt change turned the designated bear from a strong sell into a strong buy. Treat a passing score as evidence about one analysis, not about the committee's spread.",
+  ],
+  [
+    "The committee comparison ends in an opinion with no outcome behind it",
+    "The A/B test for a committee change is hard up to a point and soft after it. The hard part is the gate: a changed committee whose answer contradicts its own snapshot, or breaks the output rules, is reported as failed and goes no further. The soft part is the preference between two answers that both pass, which is the model's own view of the model's own work — the two share blind spots, so an error both would make is one neither will flag. Nothing ties that preference to what the share price did next, because nothing here knows whether a call was right. It is also five companies. A change the evaluator prefers on all five has been preferred five times, not shown to be better; and there is deliberately no loop that applies the preferred version, because a loop steered by this signal would drift towards answers the model likes to read.",
   ],
   [
     "The factor tilt measures less than JKP do",
@@ -493,7 +517,7 @@ export const GAPS: [string, string][] = [
   ],
   [
     "Verification has real gaps",
-    "Numeric claims are only checked for metrics the verifier knows about. Anything outside that set counts as unverifiable, not verified, and qualitative claims are not checked at all.",
+    "Numeric claims are only checked for metrics the verifier knows about. Anything outside that set counts as unverifiable, not verified, and qualitative claims are not checked at all. The check works by finding a metric's name and reading the number beside it, and that pairing is a set of rules rather than an understanding of the sentence: a number is not read across a line or sentence break, a multiple is not taken for a price, 'below 40' is tested as a bound, and a figure given for peers or an industry average is marked unverifiable because the snapshot holds nothing to test it against. Those rules were added after the first committee comparison, where all ten contradictions the verifier reported on five companies were its own misreadings. They make a false alarm less likely; they also mean a wrong number phrased in a way the rules do not expect is passed over in silence, and an invented peer figure is not caught here at all.",
   ],
   [
     "Regime labels look backwards",
@@ -520,8 +544,8 @@ export const GAPS: [string, string][] = [
     "Valuation scoring uses fixed thresholds rather than sector-relative ones, so a utility and a software company are judged on the same scale.",
   ],
   [
-    "Fourteen universes load, and three neighbours cannot",
-    "The S&P 500, MidCap 400 and SmallCap 600; TOPIX Mid400 and Small 1 as one Japanese band; the FTSE 250 and the MDAX; every listed company on the Toronto and Australian exchanges; and six Global South markets — South Africa, Indonesia, Saudi Arabia, Malaysia, Thailand and Chile. The NASDAQ-100, Dow and Russell 2000 loaders all broke upstream when their sources changed shape, and were removed rather than left as options that can only fail — so did the Nikkei 225, which is why Japan comes from the Tokyo exchange's own listing file. Three more were probed and refused: the SDAX article lists German small caps with no ticker column, the STOXX Europe 600 table renders 467 of 600 constituents without saying so, and the Indian index publisher answers its own constituent file with a 403. The six Global South markets come from the price vendor's own region index rather than from their exchanges, every one of which blocks automated access — which also guarantees that a name in the universe is one the data layer can actually price. The Philippines, Peru and Colombia are absent for the opposite reason: the vendor has no data behind them at all. For the Philippines that is doubly confirmed, because the Manila exchange does publish a clean directory of 283 companies and not one of them resolves. Every market outside the fourteen is a short curated watchlist, not an index.",
+    "Sixteen universes load, and three neighbours cannot",
+    "The S&P 500, MidCap 400 and SmallCap 600; TOPIX Mid400 and Small 1 as one Japanese band; the FTSE 250 and the MDAX; every listed company on the Toronto and Australian exchanges; and seven Global South markets — South Africa, Indonesia, Saudi Arabia, Malaysia, Thailand, Chile and South Korea, the last split into its main board and both boards together. The NASDAQ-100, Dow and Russell 2000 loaders all broke upstream when their sources changed shape, and were removed rather than left as options that can only fail — so did the Nikkei 225, which is why Japan comes from the Tokyo exchange's own listing file. Three more were probed and refused: the SDAX article lists German small caps with no ticker column, the STOXX Europe 600 table renders 467 of 600 constituents without saying so, and the Indian index publisher answers its own constituent file with a 403. The six Global South markets come from the price vendor's own region index rather than from their exchanges, every one of which blocks automated access — which also guarantees that a name in the universe is one the data layer can actually price. The Philippines, Peru and Colombia are absent for the opposite reason: the vendor has no data behind them at all. For the Philippines that is doubly confirmed, because the Manila exchange does publish a clean directory of 283 companies and not one of them resolves. Every market outside the sixteen is a short curated watchlist, not an index.",
   ],
   [
     "The second act is the whole judgment and no screen makes it",

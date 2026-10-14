@@ -122,6 +122,7 @@ MIN_MARKET_CAP_BY_CURRENCY: dict[str, float] = {
     "MYR": 280_000_000,
     "THB": 2_100_000_000,
     "CLP": 60_000_000_000,
+    "KRW": 95_000_000_000,
 }
 
 #: What he says to ignore, kept as data so the test can assert the screen

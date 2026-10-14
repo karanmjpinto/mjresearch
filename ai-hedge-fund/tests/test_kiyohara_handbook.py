@@ -171,8 +171,12 @@ def test_an_unknown_currency_is_refused_rather_than_converted():
     Applying the yen floor to a dollar quote rejects everything; applying the
     dollar floor to a won quote admits every micro-cap. So the screen says it
     cannot judge the size instead of inventing a rate.
+
+    `XTS` is the ISO 4217 code reserved for testing. This used a real
+    currency and broke when that market was added, which is a correct
+    failure and a pointless one to keep repairing.
     """
-    r = score_kiyohara_handbook(_handbook_candidate(currency="KRW"))
+    r = score_kiyohara_handbook(_handbook_candidate(currency="XTS"))
     assert "size_floor_unknown_currency" in r.failures
 
 

@@ -109,9 +109,15 @@ def test_an_unlisted_currency_is_refused_not_waved_through():
 
     Refusing names it. Defaulting to the dollar band, or to no band at all,
     would let an entire market through on a filter nobody checked.
+
+    `XTS` rather than a real code. This test used KRW and broke the day Korea
+    was added as a universe — which is the correct failure, and a tedious one
+    to keep hitting. XTS is reserved by ISO 4217 for exactly this: a currency
+    that cannot ever be a real market, so the test keeps asserting the
+    behaviour rather than the current contents of the band table.
     """
-    assert cap_band("KRW") is None
-    r = score_acquisition_compounder(_compounder(currency="KRW"))
+    assert cap_band("XTS") is None
+    r = score_acquisition_compounder(_compounder(currency="XTS"))
     assert "cap_band_unknown_currency" in r.stage1_failures
 
     assert cap_band(None) is None

@@ -146,7 +146,7 @@ export const SCREENER_VIEWS: ScreenerViewDef[] = [
       "The quality screen on this desk. Every name here cleared the hard filters — a return on capital above 12%, cash conversion above 80%, and a share count that is flat or falling — and sits inside the small and mid-cap band. The bar is its ten-factor score out of 50. The tenth factor is the reinvestment runway: not what the capital already deployed earns, but what the business can compound at from its own cash. Pick a universe to run it somewhere else.",
     label: "Quality Compounder",
     description:
-      "The compounder test, in Akre's three legs: an extraordinary business, management who do not dilute you, and somewhere to put the next dollar at the same rate. Hard filters on growth, ROIC, FCF conversion, leverage, margin trend and dilution, then a ten-factor score out of 50. Bounded to small and mid caps and runnable on any of the fourteen universes. Data via yfinance; short histories fall back to span CAGR — verify in filings.",
+      "The compounder test, in Akre's three legs: an extraordinary business, management who do not dilute you, and somewhere to put the next dollar at the same rate. Hard filters on growth, ROIC, FCF conversion, leverage, margin trend and dilution, then a ten-factor score out of 50. Bounded to small and mid caps and runnable on any of the sixteen universes. Data via yfinance; short histories fall back to span CAGR — verify in filings.",
     usesApi: true,
     criteria: [
       "Size: roughly $500m to $20bn, applied in the currency the company reports in rather than converted at an invented rate. A company whose currency has no band is refused rather than waved through",
