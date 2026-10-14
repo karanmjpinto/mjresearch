@@ -17,6 +17,13 @@ from hedge_fund.data.universes import list_universe_meta, load_universe
 from hedge_fund.screeners import cache as screen_cache
 from hedge_fund.screeners.acquisition_compounder import run_acquisition_compounder_for_ticker
 from hedge_fund.screeners.yartseva import run_yartseva_for_ticker
+from hedge_fund.screeners.bolton_contrarian import run_bolton_contrarian_for_ticker
+from hedge_fund.screeners.ellenbogen_two_act import run_ellenbogen_two_act_for_ticker
+from hedge_fund.screeners.kiyohara_handbook import run_kiyohara_handbook_for_ticker
+from hedge_fund.screeners.ai_rollup import (
+    finalise_run as finalise_ai_rollup,
+    run_ai_rollup_for_ticker,
+)
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -219,6 +226,23 @@ _jobs: dict[str, dict[str, Any]] = {}
 _RUNNERS: dict[str, Any] = {
     "yartseva": run_yartseva_for_ticker,
     "acquisition-compounder": run_acquisition_compounder_for_ticker,
+    "bolton-contrarian": run_bolton_contrarian_for_ticker,
+    "kiyohara-handbook": run_kiyohara_handbook_for_ticker,
+    "ellenbogen-two-act": run_ellenbogen_two_act_for_ticker,
+    "ai-rollup": run_ai_rollup_for_ticker,
+}
+
+#: Screens needing a pass over the finished run, not just over each name.
+#:
+#: Mirrors `FINALISERS` in `scripts/refresh_screens.py` and exists for the
+#: same reason: the rollup screen's fragmentation measure counts in-band
+#: peers sharing an industry, which is a property of the universe and
+#: unknowable from inside one ticker's row. Without this the button would
+#: write a cache whose fragmentation column is empty, while the script
+#: writes one where it is filled — the same screen with two different
+#: answers depending on which way you asked for it.
+_FINALISERS: dict[str, Any] = {
+    "ai-rollup": finalise_ai_rollup,
 }
 
 
@@ -300,6 +324,10 @@ async def start_screen_job(screen: str, req: ScreenJobRequest) -> dict[str, Any]
             for t in tickers:
                 results.append(await asyncio.to_thread(runner, t))
                 job["done"] = len(results)
+
+            finalise = _FINALISERS.get(screen)
+            if finalise is not None:
+                results = await asyncio.to_thread(finalise, results)
             # Written through the same cache every other reader uses, so the
             # run is complete-or-absent rather than half-visible.
             screen_cache.write(

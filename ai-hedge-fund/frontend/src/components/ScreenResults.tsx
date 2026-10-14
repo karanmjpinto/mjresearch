@@ -1,4 +1,5 @@
 import type { ScreenName, ScreenInfoTerm } from "@/config/screeners";
+import { RefreshScreenButton } from "./RefreshScreenButton";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api, type ScreenRow } from "@/lib/api";
@@ -122,6 +123,9 @@ export function ScreenResults({
                 : `Built ${Math.round(d.age_days ?? 0)} days ago`}
               {d.stale && " · worth refreshing"}
             </p>
+            <div className="mt-xs flex justify-end">
+              <RefreshScreenButton screen={screen} universe={uni} />
+            </div>
             {/* A second kind of stale, and the more dangerous one, because a
               * recent date actively argues against it. These rows were scored
               * by rules the screen no longer applies: when the market-cap band
@@ -194,10 +198,18 @@ export function ScreenResults({
       )}
 
       {d?.available === false && (
-        /* Not an error state. Nothing has been computed yet, and the fix is one
-         * command rather than a button — the run takes minutes, and a web
-         * request that holds a connection open that long is a worse design
-         * than telling someone what to type. */
+        /* Not an error state. Nothing has been computed yet.
+         *
+         * This used to carry only the command, on the reasoning that a run
+         * takes minutes and a web request holding a connection open that
+         * long is a worse design than telling someone what to type. The
+         * first half is still true and the second no longer applies:
+         * `POST /screeners/jobs/{screen}` starts the run and returns at
+         * once, and `GET /screeners/jobs` reports `done` and `total` — the
+         * endpoints existed before the button did. So both are offered. The
+         * command is still the honest answer for an unattended run and for
+         * whatever CI does; the button is the one that works on a phone,
+         * which is where this app is meant to be read. */
         <div className="border border-dashed border-ink-line bg-ink-raised p-md">
           <p className="font-display text-label uppercase tracking-label text-cadmium">
             Nothing computed yet
@@ -205,7 +217,13 @@ export function ScreenResults({
           <p className="mt-xs max-w-measure text-body-sm text-on-ink-soft">
             {d.reason}
           </p>
-          <pre className="mt-sm overflow-x-auto border border-ink-line bg-ink p-sm font-display text-label text-on-ink-soft">
+          <div className="mt-sm">
+            <RefreshScreenButton screen={screen} universe={uni} />
+          </div>
+          <p className="mt-sm text-body-xs text-on-ink-faint">
+            Or, to run it unattended:
+          </p>
+          <pre className="mt-2xs overflow-x-auto border border-ink-line bg-ink p-sm font-display text-label text-on-ink-soft">
             {d.refresh_command}
           </pre>
         </div>
