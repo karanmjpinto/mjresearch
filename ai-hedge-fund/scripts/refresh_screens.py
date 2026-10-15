@@ -92,6 +92,25 @@ FINALISERS = {
 #: "nothing computed yet" with a cache sitting right there on disk.
 DEFAULT_UNIVERSE_FOR = api_defaults
 
+#: Above this share of unfetchable names, a run is not a screen of the
+#: market — it is a screen of whatever the provider felt like answering.
+#:
+#: The preflight catches a provider that is down before the run starts. It
+#: cannot catch one that starts answering and then throttles partway, which
+#: is the commoner failure and the one that produces a confident-looking
+#: file. Korea on both boards came back 1,793 errored of 2,555 — 70% — and
+#: was written without complaint, while the same screen over the 818-name
+#: main board an hour earlier errored on none. The cliff is throughput, not
+#: the market.
+#:
+#: The cache is still written, because `--fill` reads it to know which
+#: names to retry and refusing the write would strip the only route back.
+#: What changes is that the run reports failure: a non-zero exit so cron
+#: and CI notice, and a line saying which remedy to reach for. The page
+#: already shows the unfetchable count beside the build date, so a reader
+#: is not misled — but nobody was being told.
+MAX_ERROR_RATE = 0.25
+
 #: Enough to be fast, few enough not to get throttled. See the module note.
 #: Eight against the full S&P 500 drew rate limiting on about one name in
 #: seven, so the default is lower and `--fill` exists to mop up the rest.
@@ -352,6 +371,21 @@ def main() -> int:
             duration_s=time.time() - started,
         )
         log.info("  -> %s", path)
+
+        errored = sum(1 for r in results if r.get("error"))
+        rate = errored / len(results) if results else 0.0
+        if rate > MAX_ERROR_RATE:
+            log.error(
+                "  %s/%s: %d of %d names (%.0f%%) could not be fetched — this cache "
+                "is not a screen of the market. Recover with `--fill --workers 2`, "
+                "or re-run the whole universe at fewer workers.",
+                screen,
+                universe,
+                errored,
+                len(results),
+                rate * 100,
+            )
+            rc |= 1
 
     return rc
 
