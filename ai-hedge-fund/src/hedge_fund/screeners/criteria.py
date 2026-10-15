@@ -76,6 +76,7 @@ def _compounder() -> dict[str, Any]:
         "max_net_debt_to_ebitda": ac.MAX_NET_DEBT_TO_EBITDA,
         "min_interest_coverage": ac.MIN_INTEREST_COVERAGE,
         "max_share_cagr_5y": ac.MAX_SHARE_CAGR_5Y,
+        "max_fcf_to_ebitda": ac.MAX_FCF_TO_EBITDA,
         "cap_band_by_currency": ac.CAP_BAND_BY_CURRENCY,
         "min_ic_growth_for_roiic": ac.MIN_IC_GROWTH_FOR_ROIIC,
         "reinvest_score_lo": ac.REINVEST_SCORE_LO,
