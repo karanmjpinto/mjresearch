@@ -66,6 +66,7 @@ SCREENS = (
     "kiyohara-handbook",
     "ellenbogen-two-act",
     "ai-rollup",
+    "cambrian-scarcity",
 )
 
 

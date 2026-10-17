@@ -20,6 +20,7 @@ from hedge_fund.screeners.yartseva import run_yartseva_for_ticker
 from hedge_fund.screeners.bolton_contrarian import run_bolton_contrarian_for_ticker
 from hedge_fund.screeners.ellenbogen_two_act import run_ellenbogen_two_act_for_ticker
 from hedge_fund.screeners.kiyohara_handbook import run_kiyohara_handbook_for_ticker
+from hedge_fund.screeners.cambrian_scarcity import run_cambrian_scarcity_for_ticker
 from hedge_fund.screeners.ai_rollup import (
     finalise_run as finalise_ai_rollup,
     run_ai_rollup_for_ticker,
@@ -230,6 +231,7 @@ _RUNNERS: dict[str, Any] = {
     "kiyohara-handbook": run_kiyohara_handbook_for_ticker,
     "ellenbogen-two-act": run_ellenbogen_two_act_for_ticker,
     "ai-rollup": run_ai_rollup_for_ticker,
+    "cambrian-scarcity": run_cambrian_scarcity_for_ticker,
 }
 
 #: Screens needing a pass over the finished run, not just over each name.
@@ -393,6 +395,10 @@ DEFAULT_UNIVERSE_FOR: dict[str, str] = {
     # already in Act 2 — and is worth running by hand.
     "ellenbogen-two-act": "sp600",
     "ai-rollup": "sp600",
+    # Not a preference: the segments are the thesis, and no index carries
+    # them. The curated list also holds the software and fabless contrasts
+    # the segment dot plot compares against.
+    "cambrian-scarcity": "ai_supply_chain",
 }
 
 #: Fallback for anything not named above.
@@ -425,6 +431,7 @@ SCREEN_FIELDS: dict[str, ScreenFields] = {
     "kiyohara-handbook": ScreenFields("passed", "composite", "failures"),
     "ellenbogen-two-act": ScreenFields("passed", "composite", "failures"),
     "ai-rollup": ScreenFields("passed", "rollup_score", "failures"),
+    "cambrian-scarcity": ScreenFields("passed", "composite", "failures"),
 }
 
 

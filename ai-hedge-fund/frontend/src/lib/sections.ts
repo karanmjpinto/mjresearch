@@ -80,7 +80,7 @@ export const SECTIONS: readonly Section[] = [
         to: "/screeners",
         label: "From a screen",
         blurb:
-          "Six scored screens over fourteen universes. Quality compounders, multibaggers, the Japan handbook, two-act turnarounds, and who the AI buyers are shopping for.",
+          "Six scored screens over sixteen universes. Quality compounders, multibaggers, the Japan handbook, two-act turnarounds, and who the AI buyers are shopping for.",
         status: "live",
       },
     ],

@@ -261,6 +261,30 @@ UNIVERSE_META: list[dict[str, Any]] = [
         "approx_count": 1722,
     },
     {
+        "id": "kr_kospi",
+        "currency": "KRW",
+        "label": "South Korea (KOSPI)",
+        "description": (
+            "Seoul's main board. The deepest governance discount in a "
+            "developed-ish market: half the listed companies trade below "
+            "book, and the controlling families have had a tax reason to "
+            "prefer it that way."
+        ),
+        "approx_count": 785,
+    },
+    {
+        "id": "kr_all",
+        "currency": "KRW",
+        "label": "South Korea (KOSPI + KOSDAQ)",
+        "description": (
+            "Both Seoul boards. KOSDAQ is three times the main board by "
+            "count and carries the speculative tail — the most-traded, "
+            "least-profitable quarter of the Korean market has lost money "
+            "persistently. The largest universe here; a full run is slow."
+        ),
+        "approx_count": 2642,
+    },
+    {
         "id": "cl_all",
         "currency": "CLP",
         "label": "Chile (Santiago)",
@@ -269,6 +293,21 @@ UNIVERSE_META: list[dict[str, Any]] = [
             "and a few of them quote in dollars rather than pesos."
         ),
         "approx_count": 103,
+    },
+    {
+        "id": "ai_supply_chain",
+        # Every name carries its own currency and each screen's band is keyed
+        # on it, so there is no one currency to declare. The band test skips
+        # "multi" rather than pretend it is one market.
+        "currency": "multi",
+        "label": "AI supply chain (curated)",
+        "description": (
+            "Wafers, memory, capacitors and foundries across Japan, Korea, "
+            "Taiwan, Europe and the US, plus fabless and software names as "
+            "the contrast. Curated, not an index — no index carries these "
+            "segments. Built for the Cambrian scarcity screen."
+        ),
+        "approx_count": 37,
     },
 ]
 
@@ -558,17 +597,44 @@ _REGION_CAP_FLOOR = 50_000_000
 #: than through an exchange file. See the module docstring for why these do
 #: not come from the exchanges themselves, and for the three neighbouring
 #: markets that are absent because Yahoo has no data behind them.
-YAHOO_REGIONS: dict[str, tuple[str, int]] = {
-    "za_all": ("za", 242),
-    "id_all": ("id", 837),
-    "sa_all": ("sa", 361),
-    "my_all": ("my", 882),
-    "th_all": ("th", 1722),
-    "cl_all": ("cl", 103),
+#: `(region code, expected count, exchange suffix or None)`.
+#:
+#: The suffix exists for Korea and would exist for anywhere else that runs
+#: two boards under one region code. Yahoo returns Seoul as `.KS` (KOSPI,
+#: the main board) and `.KQ` (KOSDAQ, the venture board) under one `kr`, and
+#: they are not the same shelf: KOSDAQ is three times the size by count and
+#: is where the speculative tail lives. Keeping them separate means a run
+#: can be pointed at the main board without paying for 1,715 names it did
+#: not want, and the split is a filter rather than two loaders.
+YAHOO_REGIONS: dict[str, tuple[str, int, str | None]] = {
+    "za_all": ("za", 242, None),
+    "id_all": ("id", 837, None),
+    "sa_all": ("sa", 361, None),
+    "my_all": ("my", 882, None),
+    "th_all": ("th", 1722, None),
+    "cl_all": ("cl", 103, None),
+    "kr_kospi": ("kr", 700, ".KS"),
+    "kr_all": ("kr", 2300, None),
 }
 
+#: Korean preferred lines, which Yahoo labels in the name: `005935.KS` comes
+#: back as "SamsungElec(1P)" beside "SamsungElec" at `005930.KS`.
+#:
+#: They have to go, and the reason is specific to a quality screen rather
+#: than general tidiness. A preferred line is the same business listed
+#: twice, so leaving them in means the same company can occupy two rows of
+#: a ranked list, and a sector or concentration check counts one holding as
+#: two. On the main board they are 12% of the names.
+#:
+#: Matched on the name rather than on the code convention — last digit 5, 7
+#: or 9, or a trailing letter — because the convention is a convention and
+#: the label is a statement. The TSX loader above makes the same choice for
+#: the same reason: an issuer that says what it is beats a pattern that
+#: usually means it.
+_KR_PREFERRED = re.compile(r"\(\d*P\)\s*$|\(우[A-Z]?\)\s*$")
 
-def fetch_yahoo_region(region: str, expected: int) -> list[str]:
+
+def fetch_yahoo_region(region: str, expected: int, suffix: str | None = None) -> list[str]:
     """Every equity Yahoo prices in one market, paged out of its screener.
 
     The symbols arrive already suffixed (`SHP.JO`, `BBCA.JK`), so they are
@@ -588,9 +654,12 @@ def fetch_yahoo_region(region: str, expected: int) -> list[str]:
     offset = 0
     total: int | None = None
 
-    # 25 pages of 100 is 2,500 names, comfortably above the largest market
-    # here (Thailand, ~1,722) and a hard stop against a paging bug.
-    for _ in range(25):
+    # 40 pages of 100 is 4,000 names, comfortably above the largest market
+    # here (Korea, ~2,642 across both boards) and a hard stop against a
+    # paging bug. It was 25, which silently truncated Korea at 2,500 —
+    # under the 50% floor guard, so it would have raised rather than lied,
+    # but only by luck of where the cap fell.
+    for _ in range(40):
         query = Q(
             "and",
             [Q("eq", ["region", region]), Q("gt", ["intradaymarketcap", _REGION_CAP_FLOOR])],
@@ -611,8 +680,13 @@ def fetch_yahoo_region(region: str, expected: int) -> list[str]:
         total = (page or {}).get("total", total)
         for q in quotes:
             sym = str(q.get("symbol") or "").strip().upper()
-            if sym and q.get("quoteType") == "EQUITY":
-                out.append(sym)
+            if not sym or q.get("quoteType") != "EQUITY":
+                continue
+            if suffix and not sym.endswith(suffix):
+                continue
+            if region == "kr" and _KR_PREFERRED.search(str(q.get("shortName") or "")):
+                continue
+            out.append(sym)
         if len(quotes) < 100:
             break
         offset += 100
@@ -632,10 +706,17 @@ def fetch_yahoo_region(region: str, expected: int) -> list[str]:
     return out
 
 
+def _ai_supply_chain() -> list[str]:
+    # Imported late: the list lives with the screen whose segments it is.
+    from hedge_fund.screeners.cambrian_scarcity import fetch_ai_supply_chain
+
+    return fetch_ai_supply_chain()
+
+
 def _region_loader(universe_id: str) -> Any:
     """A zero-argument loader for one region, for the LOADERS table."""
-    region, expected = YAHOO_REGIONS[universe_id]
-    return lambda: fetch_yahoo_region(region, expected)
+    region, expected, suffix = YAHOO_REGIONS[universe_id]
+    return lambda: fetch_yahoo_region(region, expected, suffix)
 
 
 #: Module-level rather than built inside `load_universe`, so that the one
@@ -654,6 +735,7 @@ LOADERS: dict[str, Any] = {
     "ca_all": fetch_ca_all,
     "au_all": fetch_au_all,
     **{uid: _region_loader(uid) for uid in YAHOO_REGIONS},
+    "ai_supply_chain": _ai_supply_chain,
 }
 
 

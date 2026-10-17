@@ -505,6 +505,27 @@ function reason(r: ScreenRow): string {
     bits.push("transition candidate — not a buy");
   }
 
+  /* Cambrian scarcity: the multiple the thesis is about, and the torque behind
+   * it. Torque runs to triple figures as profit nears zero, which is a real
+   * reading and an unreadable number, so it caps in the text. */
+  const mult = snap.revenue_multiple;
+  if (typeof snap.segment === "string" && typeof mult === "number" && Number.isFinite(mult)) {
+    bits.push(`${snap.segment} · ${mult.toFixed(1)}x forward revenue`);
+    const dol = snap.torque;
+    if (typeof dol === "number" && Number.isFinite(dol)) {
+      bits.push(`torque ${dol > 20 ? ">20" : dol.toFixed(1)}x`);
+    } else if (typeof snap.torque_unmeasured_reason === "string") {
+      bits.push(`torque not measured (${snap.torque_unmeasured_reason.replace(/_/g, " ")})`);
+    }
+    const idle = snap.idle_gap_pp;
+    if (typeof idle === "number" && Number.isFinite(idle) && idle >= 1) {
+      bits.push(`margin ${idle.toFixed(0)}pp below its best year`);
+    }
+  }
+  if (top.price_taker_tension === true) {
+    bits.push("price-taker, against desk principle");
+  }
+
   const flags = r.red_flags;
   if (Array.isArray(flags) && flags.length > 0) {
     bits.push(`${flags.length} red flag${flags.length === 1 ? "" : "s"}`);

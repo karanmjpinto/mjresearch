@@ -109,9 +109,15 @@ def test_an_unlisted_currency_is_refused_not_waved_through():
 
     Refusing names it. Defaulting to the dollar band, or to no band at all,
     would let an entire market through on a filter nobody checked.
+
+    `XTS` rather than a real code. This test used KRW and broke the day Korea
+    was added as a universe — which is the correct failure, and a tedious one
+    to keep hitting. XTS is reserved by ISO 4217 for exactly this: a currency
+    that cannot ever be a real market, so the test keeps asserting the
+    behaviour rather than the current contents of the band table.
     """
-    assert cap_band("KRW") is None
-    r = score_acquisition_compounder(_compounder(currency="KRW"))
+    assert cap_band("XTS") is None
+    r = score_acquisition_compounder(_compounder(currency="XTS"))
     assert "cap_band_unknown_currency" in r.stage1_failures
 
     assert cap_band(None) is None
@@ -393,7 +399,9 @@ def test_every_universe_currency_has_a_band():
     """
     from hedge_fund.data.universes import UNIVERSE_META
 
-    declared = {u["id"]: u["currency"] for u in UNIVERSE_META}
+    # "multi" is a curated cross-market list: each name is banded on its own
+    # quote currency, and an unbanded one is refused on its row.
+    declared = {u["id"]: u["currency"] for u in UNIVERSE_META if u["currency"] != "multi"}
     missing = {uid: ccy for uid, ccy in declared.items() if ccy not in CAP_BAND_BY_CURRENCY}
     assert not missing, f"universes with no cap band: {missing}"
 
@@ -409,3 +417,73 @@ def test_every_universe_declares_a_currency():
 
     undeclared = [u["id"] for u in UNIVERSE_META if not u.get("currency")]
     assert not undeclared, f"universes with no declared currency: {undeclared}"
+
+
+def test_cash_from_working_capital_refuses_the_roic_level_rather_than_crediting_it():
+    """FCF above EBITDA means the customer funded the balance sheet.
+
+    Hyundai Rotem (064350.KS) scored 44/50 and tier `elite` on the Korean
+    main board with a 78% ROIC, because the Polish defence order book pays
+    in advance. Those advances make working capital deeply negative, which
+    collapses invested capital — the denominator of ROIC.
+
+    Refused, not failed. A business funded by customer advances is not a bad
+    business; it is one whose return on capital cannot be read this year, so
+    both flattered legs score at the neutral midpoint and the row says why.
+    """
+    rotem = _compounder(
+        currency="KRW",
+        market_cap=10_619_545_714_688,
+        roic=0.783,
+        fcf_conversion=2.02,
+    )
+    rotem.ebitda_ttm = 1_145_422_023_000
+    rotem.fcf_to_ebitda = 1_633_770_561_000 / 1_145_422_023_000  # 1.43x
+
+    r = score_acquisition_compounder(rotem)
+    assert r.roic_level_measured is False
+    assert "working capital" in (r.roic_level_unmeasured_reason or "")
+    assert r.scores["roic"] == 3, "a refused level must not score full marks"
+    assert r.scores["fcf_conversion"] == 3, "the same windfall must not be counted twice"
+
+
+def test_a_business_that_funds_its_own_working_capital_is_scored_normally():
+    """The gate must not quietly neutralise every good company.
+
+    FCF below EBITDA is the ordinary case — depreciation and tax sit between
+    them — so a high ROIC there is a real reading and has to keep its marks.
+    Hyosung Heavy, the other Korean pass, runs 0.57x and scores on merit.
+    """
+    normal = _compounder(currency="KRW", market_cap=19_880_566_849_536, roic=0.194)
+    normal.ebitda_ttm = 896_415_305_200
+    normal.fcf_to_ebitda = 513_419_161_060 / 896_415_305_200  # 0.57x
+
+    r = score_acquisition_compounder(normal)
+    assert r.roic_level_measured is True
+    assert r.roic_level_unmeasured_reason is None
+
+    # Deliberately NOT asserting a score of 3 here. A 19.4% ROIC scores 3 on
+    # the 0.08-0.25 band anyway, which is the same number the refusal
+    # produces — so that assertion would pass whether or not the gate fired
+    # and would prove nothing. The marks are checked below at a level where
+    # refused and scored cannot be confused.
+    strong = _compounder(roic=0.30)
+    strong.ebitda_ttm = 1_000
+    strong.fcf_to_ebitda = 0.6
+    assert score_acquisition_compounder(strong).scores["roic"] == 5
+
+    refused = _compounder(roic=0.30)
+    refused.ebitda_ttm = 1_000
+    refused.fcf_to_ebitda = 1.43
+    assert score_acquisition_compounder(refused).scores["roic"] == 3
+
+
+def test_a_missing_ebitda_leaves_the_level_measured():
+    """No EBITDA is not evidence of a working-capital windfall.
+
+    Refusing the ROIC whenever the ratio cannot be computed would silently
+    neutralise every company with a gap in its income statement, which is a
+    far larger set than the one this gate is for.
+    """
+    r = score_acquisition_compounder(_compounder(roic=0.22))
+    assert r.roic_level_measured is True

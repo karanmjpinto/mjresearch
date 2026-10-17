@@ -13,6 +13,7 @@ import { PersonaOpinionGrid, humanizePersonaId } from "./PersonaOpinionCards";
 import { YartsevaPanel } from "./YartsevaPanel";
 import { AcquisitionCompounderPanel } from "./AcquisitionCompounderPanel";
 import { ScreenResults } from "./ScreenResults";
+import { CambrianThesis } from "./CambrianThesis";
 
 function tickerLooksValid(t: string): boolean {
   const s = t.trim();
@@ -196,6 +197,8 @@ export function ScreenersView() {
             </Link>
           ))}
         </div>
+
+        {active.id === "cambrian_scarcity" && <CambrianThesis />}
 
         {active.usesApi && active.screenId && (
           <ScreenResults

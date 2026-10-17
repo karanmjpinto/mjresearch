@@ -30,6 +30,39 @@ MAX_NET_DEBT_TO_EBITDA = 3.0
 MIN_INTEREST_COVERAGE = 4.0
 MAX_SHARE_CAGR_5Y = 0.02
 
+#: Free cash flow above EBITDA is not a conversion rate. It is a working
+#: capital release, and it has to be refused rather than rewarded.
+#:
+#: EBITDA is cash earnings before the balance sheet moves. A business cannot
+#: out-earn it from operations, so FCF above it means the cash came from
+#: somewhere other than this year's trading: customers paid in advance,
+#: payables stretched, inventory ran down. All three are real cash and none
+#: is a repeatable return on the business.
+#:
+#: **Found by running the Korean main board, not by a test.** Hyundai Rotem
+#: (064350.KS) scored 44/50 and tier `elite` on a 78% ROIC and 488% return on
+#: incremental capital. It builds rolling stock and tanks, and the Polish
+#: defence order book pays up front. Those advances make working capital
+#: deeply negative, which collapses invested capital, which is the
+#: denominator of both ratios. Implied invested capital came to 1.0tn won on
+#: 6.3tn of revenue — six turns of asset efficiency for a heavy manufacturer.
+#:
+#: The existing fix for this family does not catch it. The ellenbogen screen
+#: refuses the ROIC level when `invested_capital / revenue` falls under
+#: `MIN_IC_TO_REVENUE_TO_JUDGE_ROIC = 0.10`; Rotem sits at 0.163, comfortably
+#: clear. The detectable signal here is the cash flow statement rather than
+#: the balance sheet.
+#:
+#: 1.1 rather than 1.0 because a single clean year can brush past parity on
+#: timing alone, and this should catch a funding pattern rather than a good
+#: quarter.
+#:
+#: Note this is NOT the screen's `fcf_conversion`, which is FCF over *net
+#: income* and is legitimately above 1 for most companies because
+#: depreciation is added back. Rotem reads 202% on that measure and 143% on
+#: this one. Conflating the two is how this gate gets set at the wrong level.
+MAX_FCF_TO_EBITDA = 1.1
+
 #: The size band this screen is for, in the currency the company is *quoted*
 #: in — not the one it reports accounts in. See `snap.currency` for why those
 #: differ and what reading the wrong one cost.
@@ -100,6 +133,7 @@ CAP_BAND_BY_CURRENCY: dict[str, tuple[float, float]] = {
     "MYR": (2_100_000_000, 84_000_000_000),
     "THB": (16_000_000_000, 640_000_000_000),
     "CLP": (475_000_000_000, 19_000_000_000_000),
+    "KRW": (700_000_000_000, 29_000_000_000_000),
 }
 
 #: --- The reinvestment leg ---
@@ -486,6 +520,8 @@ class AcquisitionSnapshot:
     revenue_yoy: float | None = None
     roic: float | None = None
     fcf_conversion: float | None = None
+    #: FCF over EBITDA. Above 1.1 the cash came from working capital.
+    fcf_to_ebitda: float | None = None
     gross_margin_trend_ok: bool | None = None
     operating_margin_trend_ok: bool | None = None
     net_debt_to_ebitda: float | None = None
@@ -656,6 +692,9 @@ def fetch_acquisition_snapshot(ticker: str) -> AcquisitionSnapshot:
         snap.revenue_ttm = rev_ttm
         snap.ebitda_ttm = _sum_q(q_inc, "EBITDA", 0, 4)
 
+        if fcf_ttm is not None and snap.ebitda_ttm and snap.ebitda_ttm > 0:
+            snap.fcf_to_ebitda = fcf_ttm / snap.ebitda_ttm
+
         if fcf_ttm is not None and ni_ttm is not None and abs(ni_ttm) > 1e-6:
             snap.fcf_conversion = fcf_ttm / ni_ttm
         elif fcf_ttm is not None and ni_ttm is not None and abs(ni_ttm) <= 1e-6:
@@ -790,6 +829,11 @@ class AcquisitionResult:
     ticker: str
     stage1_passed: bool
     stage1_failures: list[str] = field(default_factory=list)
+    #: False when the cash flow statement says the return on capital cannot
+    #: be read this year. Reported rather than silently scored — a reader
+    #: deciding whether to act on a 78% ROIC needs to know it was refused.
+    roic_level_measured: bool = True
+    roic_level_unmeasured_reason: str | None = None
     tier2_passed: bool = False
     red_flags: list[str] = field(default_factory=list)
     industry_avoid: bool = False
@@ -945,8 +989,35 @@ def score_acquisition_compounder(snap: AcquisitionSnapshot) -> AcquisitionResult
 
     # 10-factor score 1–5 each (50 max) — uses available data; management/industry fragmentation are proxies
     s_org = _score_1_5(snap.revenue_yoy, 0.0, 0.20)
-    s_roic = _score_1_5(snap.roic, 0.08, 0.25)
-    s_fcf = _score_1_5(snap.fcf_conversion, 0.5, 1.2)
+
+    # Both legs that the customer's cash flatters are refused together, and
+    # scored at the neutral midpoint rather than at zero or at full marks.
+    #
+    # Neither failed nor credited is the same contract the ellenbogen screen
+    # uses for an unmeasurable ROIC level, and it is the honest one: a
+    # business funded by customer advances is not a bad business, and on this
+    # evidence it is not a demonstrably good one either. It cannot be ranked
+    # against a company that financed its own working capital, so the screen
+    # declines to rank it rather than inventing a placing.
+    #
+    # The cash conversion score goes with it. FCF over net income is the
+    # measure being scored, and when the cash came from the balance sheet
+    # that ratio is reporting the same windfall a second time.
+    cash_from_working_capital = (
+        snap.fcf_to_ebitda is not None and snap.fcf_to_ebitda > MAX_FCF_TO_EBITDA
+    )
+    if cash_from_working_capital:
+        r.roic_level_measured = False
+        r.roic_level_unmeasured_reason = (
+            f"free cash flow is {snap.fcf_to_ebitda:.2f}x EBITDA, so the cash came from "
+            "working capital rather than from trading. The same negative working "
+            "capital shrinks invested capital, which is the denominator of ROIC."
+        )
+        s_roic = 3
+        s_fcf = 3
+    else:
+        s_roic = _score_1_5(snap.roic, 0.08, 0.25)
+        s_fcf = _score_1_5(snap.fcf_conversion, 0.5, 1.2)
     s_bs = _score_leverage_nd_ebitda(snap.net_debt_to_ebitda)
     s_acq = 3  # discipline — not observable in price data
     if snap.operating_margin_trend_ok is True:

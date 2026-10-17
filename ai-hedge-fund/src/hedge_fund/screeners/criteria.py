@@ -45,6 +45,7 @@ from hedge_fund.screeners import (
 from hedge_fund.screeners import (
     ellenbogen_two_act as et,
     ai_rollup as ar,
+    cambrian_scarcity as cs,
 )
 from hedge_fund.screeners import (
     kiyohara_handbook as kh,
@@ -76,6 +77,7 @@ def _compounder() -> dict[str, Any]:
         "max_net_debt_to_ebitda": ac.MAX_NET_DEBT_TO_EBITDA,
         "min_interest_coverage": ac.MIN_INTEREST_COVERAGE,
         "max_share_cagr_5y": ac.MAX_SHARE_CAGR_5Y,
+        "max_fcf_to_ebitda": ac.MAX_FCF_TO_EBITDA,
         "cap_band_by_currency": ac.CAP_BAND_BY_CURRENCY,
         "min_ic_growth_for_roiic": ac.MIN_IC_GROWTH_FOR_ROIIC,
         "reinvest_score_lo": ac.REINVEST_SCORE_LO,
@@ -201,6 +203,30 @@ def _ai_rollup() -> dict[str, Any]:
     }
 
 
+def _cambrian() -> dict[str, Any]:
+    return {
+        **_shared(),
+        # The universe membership decides which names pass the physical
+        # filter, so moving a ticker between segments is a rule change.
+        "segment_by_ticker": cs.SEGMENT_BY_TICKER,
+        "physical_segments": cs.PHYSICAL_SEGMENTS,
+        "physical_industries": cs.PHYSICAL_INDUSTRIES,
+        "min_ppe_to_revenue": cs.MIN_PPE_TO_REVENUE,
+        "plant_off_balance_sheet": cs.PLANT_OFF_BALANCE_SHEET,
+        "multiple_best": cs.MULTIPLE_BEST,
+        "multiple_worst": cs.MULTIPLE_WORST,
+        "torque_best": cs.TORQUE_BEST,
+        "torque_worst": cs.TORQUE_WORST,
+        "idle_gap_best_pp": cs.IDLE_GAP_BEST_PP,
+        "idle_gap_worst_pp": cs.IDLE_GAP_WORST_PP,
+        "demand_best": cs.DEMAND_BEST,
+        "demand_worst": cs.DEMAND_WORST,
+        "leverage_best": cs.LEVERAGE_BEST,
+        "leverage_worst": cs.LEVERAGE_WORST,
+        "weights": cs.WEIGHTS,
+    }
+
+
 #: Screen name (as the endpoint spells it) → the rules it applies.
 #:
 #: Callables rather than literals so the values are read from the modules at
@@ -213,6 +239,7 @@ REGISTRY: dict[str, Any] = {
     "kiyohara-handbook": _kiyohara,
     "ellenbogen-two-act": _ellenbogen,
     "ai-rollup": _ai_rollup,
+    "cambrian-scarcity": _cambrian,
 }
 
 

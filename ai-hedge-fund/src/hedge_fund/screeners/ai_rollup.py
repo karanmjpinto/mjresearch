@@ -147,6 +147,7 @@ CAP_BAND_BY_CURRENCY: dict[str, tuple[float, float]] = {
     "MYR": (210_000_000, 34_000_000_000),
     "THB": (1_600_000_000, 256_000_000_000),
     "CLP": (47_500_000_000, 7_600_000_000_000),
+    "KRW": (70_000_000_000, 11_600_000_000_000),
 }
 
 #: Capex over revenue. Above this the business is buying plant, and the
