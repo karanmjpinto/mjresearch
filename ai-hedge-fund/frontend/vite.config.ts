@@ -138,6 +138,13 @@ export default defineConfig(({ command }) => ({
   },
   server: {
     port: FRONTEND_PORT,
+    /* A phone on the same Wi-Fi can reach this machine by its Bonjour name as
+     * well as by its address, and the name survives the router handing out a
+     * new address tomorrow. Vite rejects any Host header it does not know, so
+     * without this the phone gets "Blocked request" and nothing else. Scoped
+     * to .local: that is mDNS only, so it does not weaken the rebinding
+     * protection the check exists for. */
+    allowedHosts: [".local"],
     proxy: {
       "/api": {
         target: `http://127.0.0.1:${BACKEND_PORT}`,
