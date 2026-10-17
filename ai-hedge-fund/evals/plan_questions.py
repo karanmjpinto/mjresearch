@@ -36,16 +36,17 @@ CAPABILITIES: dict[str, str | None] = {
     "data_quality_flags": "risk_flags",
     "market_regime": "regime_clustering",
     "composite_view": "weighted_conviction",
-    # --- not provided yet ------------------------------------------------
-    "margin_trend": None,  # gross / operating margin over several years
-    "revenue_growth_history": None,  # multi-year revenue path, not one ratio
-    "cash_conversion": None,  # free cash flow against earnings
-    "balance_sheet_strength": None,  # net debt, interest cover
-    "capital_return": None,  # buybacks, dividends, share count
-    "peer_comparison": None,  # the same measure across named peers
-    "event_study": None,  # how the price moved around a class of event
-    "macro_sensitivity": None,  # exposure to rates, oil, the dollar
-    "operating_leverage": None,  # profit response to volume
+    # --- from the annual statements, added in Phase 2 ---------------------
+    "margin_trend": "margin_trend",
+    "revenue_growth_history": "revenue_growth",
+    "cash_conversion": "cash_conversion",
+    "balance_sheet_strength": "balance_sheet",
+    "capital_return": "capital_return",
+    "operating_leverage": "operating_leverage",
+    # --- comparisons with something outside the company, Phase 2 ---------
+    "peer_comparison": "peer_comparison",
+    "event_study": "event_study",
+    "macro_sensitivity": "macro_sensitivity",
 }
 
 

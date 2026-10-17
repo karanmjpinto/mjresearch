@@ -494,3 +494,16 @@ def test_a_figure_said_twice_still_owns_its_number():
 def test_a_quoted_field_name_is_read_as_the_metric():
     """Observed: "pe_ratio=38.68714" reported as citing nothing."""
     assert _claim("Valuation is stretched (pe_ratio=7.3).", "pe_ratio", BIND).verdict == "verified"
+
+
+def test_a_word_naming_two_things_is_right_about_the_computed_one():
+    """'A beta of 0.12' to gas is the factor beta, not the market beta."""
+    snap = {"fundamentals": {"beta": 0.32}, "computed": {"factor_beta_pct": 0.122}}
+    v = verify_analysis({"investment_thesis": "It shows a low beta of 0.122 to gas prices."}, snap)
+    assert v["status"] == "clean"
+
+
+def test_a_number_matching_nothing_related_still_fails():
+    snap = {"fundamentals": {"beta": 0.32}, "computed": {"factor_beta_pct": 0.122}}
+    v = verify_analysis({"investment_thesis": "It shows a low beta of 0.9 to gas prices."}, snap)
+    assert v["status"] == "mismatch"

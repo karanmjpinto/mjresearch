@@ -51,7 +51,7 @@ def test_question_ids_are_unique_and_tickers_are_frozen_fixtures():
 def test_coverage_counts_a_question_only_when_every_need_is_met():
     cov = coverage()
     assert cov["covered"] == sum(1 for q in QUESTIONS if covered(q))
-    assert 0 < cov["share"] < 1  # the set must contain both kinds to measure anything
+    assert 0 < cov["share"] <= 1
 
 
 def test_agreement_is_the_share_matching_the_most_common_result():

@@ -47,6 +47,9 @@ async def assemble_research_snapshot(
     with capture() as prov:
         fundamentals = ds.get_fundamentals(ticker)
         technicals = ds.get_technical_indicators(ticker)
+        # In the snapshot, not fetched by the metrics that read it, so a run is
+        # reproducible from the snapshot alone and a replay sees the same years.
+        statements = ds.get_statements(ticker, end_date=end_date)
 
         df = ds.get_price_history(ticker, days=price_days, end_date=end_date)
         # Window length is price_days; the *_30d key names in `price_summary`
@@ -73,6 +76,7 @@ async def assemble_research_snapshot(
         "price": price_summary,
         "fundamentals": fundamentals,
         "technicals": technicals,
+        "statements": statements,
         "news": news_list,
         "news_sentiment": news_sentiment,
         "provenance": provenance,

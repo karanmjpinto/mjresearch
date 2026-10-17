@@ -1,6 +1,6 @@
 """Measure the plan pipeline the way Bridgewater measures PAT.
 
-    uv run python scripts/run_plan_eval.py --capture-prices   # once: freeze prices
+    uv run python scripts/run_plan_eval.py --capture          # once: freeze inputs
     uv run python scripts/run_plan_eval.py                    # 30 questions x 5 runs
     uv run python scripts/run_plan_eval.py --repeats 3 --limit 6   # a quick look
     uv run python scripts/run_plan_eval.py --coverage         # no model calls
@@ -18,9 +18,10 @@ plan pipeline, on inputs that do not move:
   coverage              share of the question set the metric catalog can
                         answer at all (see evals/plan_questions.py)
 
-Inputs are frozen twice over: the snapshots in evals/fixtures/*.json, and a
-price history per fixture in evals/fixtures/prices/, served instead of the live
-provider. A run on Monday and a run on Friday then see identical data, so any
+Inputs are frozen twice over: the snapshots in evals/fixtures/*.json, and
+everything the plan fetches at execution time — price history, the macro
+factors, peer sets and peer fundamentals — under evals/fixtures/{prices,macro,
+peers}/, served instead of the live provider. A run on Monday and a run on Friday then see identical data, so any
 difference between them belongs to the model or the code.
 
 Not CI: it costs model time and its output is a measurement, not a pass/fail.
@@ -53,47 +54,94 @@ from evals.plan_questions import QUESTIONS, coverage  # noqa: E402
 PRICES = fixtures.DIR / "prices"
 RESULTS = ROOT / "evals" / "results"
 
-#: Long enough for every metric's default window, including the 252-day
-#: momentum lookback and the regime clustering's history.
-PRICE_DAYS = 760
+#: Long enough for every metric's default window, including the event study's
+#: five years.
+PRICE_DAYS = 1900
+
+#: Named in the question set ("compare with Microsoft and Alphabet"), so their
+#: fundamentals are frozen beside the fixtures' own peer sets.
+NAMED_PEERS = ("MSFT", "GOOGL", "NKE")
+
+MACRO = fixtures.DIR / "macro"
+PEERS = fixtures.DIR / "peers"
+
+
+def _cut(df: pd.DataFrame, end: str | None) -> pd.DataFrame:
+    """Drop rows after the fixture's date, so every input describes one moment."""
+    return df if not end else df[[str(i)[:10] <= str(end)[:10] for i in df.index]]
 
 
 class FrozenPrices:
-    """Serves the captured history in place of the live data service."""
+    """Serves the captured inputs in place of the live data service:
+    price history, the macro factors, peer sets and peer fundamentals."""
 
     def __init__(self) -> None:
         self._frames: dict[str, pd.DataFrame] = {}
+        self._peers = (
+            json.loads((PEERS / "peers.json").read_text())
+            if (PEERS / "peers.json").is_file()
+            else {}
+        )
+        f = PEERS / "fundamentals.json"
+        self._fundamentals = json.loads(f.read_text()) if f.is_file() else {}
+
+    def _csv(self, path: Path) -> pd.DataFrame:
+        key = str(path)
+        if key not in self._frames:
+            if not path.is_file():
+                raise FileNotFoundError(f"{path.name} not frozen; run with --capture")
+            self._frames[key] = pd.read_csv(path, index_col=0, parse_dates=True)
+        return self._frames[key]
 
     def get_price_history(
         self, ticker: str, days: int = 365, end_date: Any = None, **_: Any
     ) -> pd.DataFrame:
-        t = ticker.upper()
-        if t not in self._frames:
-            path = PRICES / f"{t}.csv"
-            if not path.is_file():
-                raise FileNotFoundError(f"no frozen prices for {t}; run with --capture-prices")
-            self._frames[t] = pd.read_csv(path, index_col=0, parse_dates=True)
-        return self._frames[t].tail(int(days))
+        return self._csv(PRICES / f"{ticker.upper()}.csv").tail(int(days))
+
+    def get_macro_data(self, series_id: str, days: int = 365 * 5) -> pd.DataFrame:
+        df = self._csv(MACRO / f"{series_id}.csv")
+        start = df.index.max() - pd.Timedelta(days=int(days))
+        return df[df.index >= start]
+
+    def get_peers(self, ticker: str) -> dict[str, Any]:
+        return {"metrics": self._peers.get(ticker.upper(), {})}
+
+    def get_fundamentals(self, ticker: str) -> dict[str, Any]:
+        return self._fundamentals.get(ticker.upper(), {})
 
 
-def capture_prices() -> int:
+def capture() -> int:
+    """Freeze every input the plan can fetch, cut at the fixtures' date."""
     from hedge_fund.data.service import get_data_service
+    from hedge_fund.plan.market_metrics import FACTORS
 
-    PRICES.mkdir(parents=True, exist_ok=True)
+    for d in (PRICES, MACRO, PEERS):
+        d.mkdir(parents=True, exist_ok=True)
     ds = get_data_service()
     tickers = sorted({q.ticker for q in QUESTIONS})
+    end = (fixtures.load(tickers[0]).get("price") or {}).get("window_end")
     for t in tickers:
         df = ds.get_price_history(t, days=PRICE_DAYS)
         if df is None or df.empty:
             print(f"  {t:6s} FAILED: no history")
             continue
-        # Cut at the day the snapshot was taken, so prices and fundamentals
-        # describe the same moment rather than a month apart.
-        end = (fixtures.load(t).get("price") or {}).get("window_end")
-        if end:
-            df = df[[str(i)[:10] <= str(end)[:10] for i in df.index]]
+        df = _cut(df, (fixtures.load(t).get("price") or {}).get("window_end"))
         df.to_csv(PRICES / f"{t}.csv")
-        print(f"  {t:6s} {len(df)} rows")
+        print(f"  {t:6s} {len(df)} price rows")
+    for f in FACTORS.values():
+        df = _cut(ds.get_macro_data(f.fred, days=PRICE_DAYS), end)
+        df.to_csv(MACRO / f"{f.fred}.csv")
+        print(f"  {f.fred:10s} {len(df)} rows")
+    peers: dict[str, Any] = {}
+    names: set[str] = set(NAMED_PEERS) | set(tickers)
+    for t in tickers:
+        found = ds.get_peers(t)
+        peers[t] = dict(getattr(found, "metrics", None) or {})
+        print(f"  {t:6s} peers {sorted(peers[t])}")
+    (PEERS / "peers.json").write_text(json.dumps(peers, indent=1, default=str))
+    funds = {n: ds.get_fundamentals(n) for n in sorted(names)}
+    (PEERS / "fundamentals.json").write_text(json.dumps(funds, indent=1, default=str))
+    print(f"  fundamentals for {sorted(funds)}")
     return 0
 
 
@@ -175,7 +223,7 @@ async def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    ap.add_argument("--capture-prices", action="store_true", help="freeze price history and exit")
+    ap.add_argument("--capture", action="store_true", help="freeze every fetched input and exit")
     ap.add_argument("--coverage", action="store_true", help="report coverage only, no model calls")
     ap.add_argument("--repeats", type=int, default=5)
     ap.add_argument("--limit", type=int, default=None, help="only the first N questions")
@@ -187,8 +235,8 @@ async def main() -> int:
     )
     args = ap.parse_args()
 
-    if args.capture_prices:
-        return capture_prices()
+    if args.capture:
+        return capture()
 
     cov = coverage()
     print(

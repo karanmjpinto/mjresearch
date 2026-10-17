@@ -48,6 +48,7 @@ from hedge_fund.plan.prompts import (
     build_planner_prompt,
 )
 from hedge_fund.plan.executor import SHARED_VALUE_CACHE
+from hedge_fund.plan.registry import field_units
 from hedge_fund.plan.schema import Clarification
 from hedge_fund.runs import RunRecord, save_run
 
@@ -368,6 +369,7 @@ async def run_plan_analysis(
     fact_specs = specs_for_facts(
         execution["facts"],
         [n.get("values") or {} for n in execution["nodes"] if n["status"] == "ok"],
+        field_units(),
     )
 
     narrated = await _narrate(system, user)

@@ -598,8 +598,36 @@ def _read_bound(hit: _NumberHit) -> str | None:
 _DIRECTIONAL_WORDS = ("drawdown", "return", "momentum", "change")
 
 
+def _related_computed(
+    spec: MetricSpec, snapshot: dict[str, Any], stated: float
+) -> tuple[str, float] | None:
+    """A computed field of the same family that the stated number matches.
+
+    A word in prose can name more than one thing once a plan has run: "a beta
+    of 0.12" to gas is `factor_beta_pct`, not the market beta, and "gross
+    margin up 3.87 pp" is `gross_margin_change_pp`, not the margin. A number
+    that matches a computed field whose name carries the same word or stem is
+    right about that field. A number matching nothing related still fails.
+    """
+    computed = snapshot.get("computed")
+    if not isinstance(computed, dict):
+        return None
+    stem = spec.name.removesuffix("_pct")
+    for key, value in computed.items():
+        if key == spec.name or isinstance(value, bool):
+            continue
+        if not (key.startswith(stem + "_") or stem in key.split("_")):
+            continue
+        actual = _as_float(value)
+        if actual is not None and _matches(spec, stated, actual)[0]:
+            return key, actual
+    return None
+
+
 def specs_for_facts(
-    facts: dict[str, Any], node_values: list[dict[str, Any]] | None = None
+    facts: dict[str, Any],
+    node_values: list[dict[str, Any]] | None = None,
+    units: dict[str, str] | None = None,
 ) -> tuple[MetricSpec, ...]:
     """One spec per numeric field a plan computed, so the prose can be checked
     against the plan's own outputs and not only against the snapshot.
@@ -638,7 +666,9 @@ def specs_for_facts(
             "paths": (f"computed.{key}",),
             # Relative, so "52.4" and "52.38" both read as 52.38095.
             "tolerance_pct": 1.0,
-            "unit": "%" if pct else "",
+            # The metric's declared unit wins: "$44bn of net debt" is only read
+            # as `net_debt` when the field says it is an amount of currency.
+            "unit": (units or {}).get(key) or ("%" if pct else ""),
             "directional": any(w in key for w in _DIRECTIONAL_WORDS),
             "alternatives": tuple(x for x in others.get(key, []) if x != _as_float(value)),
         }
@@ -779,6 +809,11 @@ def extract_claims(
                 if _matches(spec, stated, alt)[0]:
                     ok, delta, note, actual = True, None, "matches another step's value", alt
                     break
+        if not ok:
+            related = _related_computed(spec, snapshot, stated)
+            if related is not None:
+                ok, delta, actual = True, None, related[1]
+                note = f"matches computed {related[0]}"
         claims.append(
             Claim(
                 metric=spec.name,
