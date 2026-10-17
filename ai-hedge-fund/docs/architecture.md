@@ -227,10 +227,13 @@ Measured on 17 October 2026, qwen3:30b, 30 questions × 5 runs
 | errored runs | 16 of 150 | 5 of 150 |
 | questions the catalog can answer | 14 of 30 | 14 of 30 |
 
-Every remaining disagreement is the first pass of a question against its later
-passes; passes two to five agree completely. The likely cause is the model
-server matching a prompt it cached on the first pass, so `--unload-between-passes`
-stops the model before each pass to measure only cold calls.
+Every remaining disagreement was the first pass of a question against its later
+passes; passes two to five agreed completely. The cause is the model server
+matching a prompt it cached on an earlier pass. With `--unload-between-passes`,
+which stops the model before each pass so every call is cold, both agreements
+are **100%** across all 145 completed runs (`plan-20261017T190020Z.json`;
+grounded 86.2%, first draft 79.3%, the same five errored runs). The pipeline is
+reproducible; the residue was the server's cache.
 
 ## API
 
