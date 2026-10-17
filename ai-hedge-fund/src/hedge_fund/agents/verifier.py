@@ -72,6 +72,10 @@ class MetricSpec:
     # bare number nearby is far more often something else — an RSI reading, the
     # ends of a price range — than a change. Require the percent to be written.
     needs_percent: bool = False
+    # Other true values for the same field. A plan can compute one field twice
+    # — `annualized_return_pct` over 90 and 365 days — and a quote of either
+    # is correct, while the fact table can hold only one of them.
+    alternatives: tuple[float, ...] = ()
 
 
 METRIC_SPECS: tuple[MetricSpec, ...] = (
@@ -589,7 +593,66 @@ def _read_bound(hit: _NumberHit) -> str | None:
     return None
 
 
-def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
+#: Words in a computed field's name that mean its sign is written as a verb
+#: ("fell 12%") rather than a minus, as for the hand-written drawdown spec.
+_DIRECTIONAL_WORDS = ("drawdown", "return", "momentum", "change")
+
+
+def specs_for_facts(
+    facts: dict[str, Any], node_values: list[dict[str, Any]] | None = None
+) -> tuple[MetricSpec, ...]:
+    """One spec per numeric field a plan computed, so the prose can be checked
+    against the plan's own outputs and not only against the snapshot.
+
+    The plan's fields are typed and named — `recent_volatility_pct` — which is
+    exactly what a checker needs. Without this, a thesis quoting "recent
+    volatility of 26.73%" correctly was reported as citing nothing, because the
+    hand-written specs only know snapshot metrics. On the 30-question eval that
+    blind spot was most of the gap between the grounded rate and the truth.
+
+    A field a hand-written spec already reads is skipped, so the specific
+    aliases and tolerances in `METRIC_SPECS` keep priority.
+    """
+    known = {p.split(".", 1)[1] for s in METRIC_SPECS for p in s.paths if p.startswith("computed.")}
+    known |= {s.name for s in METRIC_SPECS}
+    others: dict[str, list[float]] = {}
+    for values in node_values or []:
+        for k, val in values.items():
+            f = _as_float(val)
+            if f is not None and not isinstance(val, bool):
+                others.setdefault(k, []).append(f)
+    out: list[MetricSpec] = []
+    for key, value in facts.items():
+        if key in known or isinstance(value, bool) or _as_float(value) is None:
+            continue
+        # A one-word field — `high`, `low`, `observations` — is an ordinary
+        # word in prose. "the P/E is very high at 45.8" read as the 52-week high.
+        if "_" not in key:
+            continue
+        pct = key.endswith("_pct")
+        natural = tuple(
+            dict.fromkeys((key.replace("_", " "), key.removesuffix("_pct").replace("_", " ")))
+        )
+        common: dict[str, Any] = {
+            "name": key,
+            "paths": (f"computed.{key}",),
+            # Relative, so "52.4" and "52.38" both read as 52.38095.
+            "tolerance_pct": 1.0,
+            "unit": "%" if pct else "",
+            "directional": any(w in key for w in _DIRECTIONAL_WORDS),
+            "alternatives": tuple(x for x in others.get(key, []) if x != _as_float(value)),
+        }
+        # The field's own name, as narrators often quote it: "x_pct=29.21".
+        out.append(MetricSpec(aliases=(key,), **common))
+        # Its name in words. A percentage must then be written as one, or
+        # "recent volatility ratio (0.868)" reads as recent volatility.
+        out.append(MetricSpec(aliases=natural, needs_percent=pct, **common))
+    return tuple(out)
+
+
+def extract_claims(
+    text: str, snapshot: dict[str, Any], extra_specs: tuple[MetricSpec, ...] = ()
+) -> list[Claim]:
     """Find metric claims in prose and check each against the snapshot.
 
     Longer aliases are resolved first so a specific metric ("30-day high") claims
@@ -601,8 +664,11 @@ def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
     lowered = text.lower()
 
     occurrences: list[tuple[int, int, int, MetricSpec]] = []
-    for spec in METRIC_SPECS:
-        for alias in spec.aliases:
+    for spec in METRIC_SPECS + extra_specs:
+        # A narrator shown field names quotes them: "pe_ratio=38.69". A name
+        # with an underscore is never an ordinary word, so it is always an alias.
+        names = spec.aliases + ((spec.name,) if "_" in spec.name else ())
+        for alias in dict.fromkeys(names):
             for m in re.finditer(_alias_pattern(alias), lowered):
                 occurrences.append((len(alias), m.start(), m.end(), spec))
     # Longest alias wins; ties resolve left to right for stable output.
@@ -614,7 +680,13 @@ def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
     claims: list[Claim] = []
     seen: set[tuple[str, float]] = set()
 
-    for _length, start, end, spec in occurrences:
+    # Two passes: every name first takes the number written after it, and only
+    # names still without one may read backwards, among numbers nobody took.
+    # One pass let a long alias read backwards before the owner of the number
+    # read forwards: in "PEG ratio (2.67) suggests the stock is trading at a
+    # premium", "trading at" took 2.67 as the share price.
+    passes = [(True, o) for o in occurrences] + [(False, o) for o in occurrences]
+    for forward_only, (_length, start, end, spec) in passes:
         if _overlaps((start, end), claimed_aliases):
             continue
         # A number already claimed by a more specific metric is skipped, not
@@ -624,6 +696,9 @@ def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
                 c
                 for c in _number_candidates(text, end, start, spec, alias_spans)
                 if not _overlaps(c.span, claimed_numbers)
+                # The first pass takes only a forward figure about this company;
+                # a peer figure waits, so "7.3x P/E vs industry ~25x" keeps 7.3.
+                and (not forward_only or (c.after and not c.other_subject))
             ),
             None,
         )
@@ -642,6 +717,11 @@ def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
 
         dedupe = (spec.name, round(stated, 6))
         if dedupe in seen:
+            # The same figure said twice is one claim, but its number is still
+            # this metric's. Left unclaimed, a later name read it backwards:
+            # a second "PEG (2.67)" became a share price of 2.67.
+            claimed_aliases.append((start, end))
+            claimed_numbers.append(hit.span)
             continue
 
         claimed_aliases.append((start, end))
@@ -694,6 +774,11 @@ def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
             note = f"read as {'an upper' if bound == 'upper' else 'a lower'} bound"
         else:
             ok, delta, note = _matches(spec, stated, actual)
+        if not ok:
+            for alt in spec.alternatives:
+                if _matches(spec, stated, alt)[0]:
+                    ok, delta, note, actual = True, None, "matches another step's value", alt
+                    break
         claims.append(
             Claim(
                 metric=spec.name,
@@ -715,7 +800,11 @@ def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
 TEXT_FIELDS = ("investment_thesis", "bull_case", "bear_case")
 
 
-def verify_analysis(analysis: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
+def verify_analysis(
+    analysis: dict[str, Any],
+    snapshot: dict[str, Any],
+    extra_specs: tuple[MetricSpec, ...] = (),
+) -> dict[str, Any]:
     """Verify every numeric claim in an analysis against its snapshot."""
     if not isinstance(analysis, dict):
         return VerificationReport(status="no_claims", messages=["no analysis to verify"]).as_dict()
@@ -726,7 +815,7 @@ def verify_analysis(analysis: dict[str, Any], snapshot: dict[str, Any]) -> dict[
         parts.extend(str(r) for r in risks)
     text = "\n".join(p for p in parts if p)
 
-    claims = extract_claims(text, snapshot)
+    claims = extract_claims(text, snapshot, extra_specs)
     verified = sum(1 for c in claims if c.verdict == "verified")
     mismatched = [c for c in claims if c.verdict == "mismatch"]
     unverifiable = sum(1 for c in claims if c.verdict == "unverifiable")

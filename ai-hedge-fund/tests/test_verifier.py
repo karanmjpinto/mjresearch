@@ -438,3 +438,59 @@ def test_a_number_goes_to_the_metric_named_nearest_to_it():
     text = "The price is near a 30-day low with oversold technicals (RSI=20.84)"
     assert _verdicts(text, snap) == {"rsi_14": "verified"}
     assert _claim("Near its 30-day low ($70.10)", "low_30d", snap).verdict == "mismatch"
+
+
+# --- Checking prose against the plan's own computed fields ---------------
+
+from hedge_fund.agents.verifier import specs_for_facts  # noqa: E402
+
+PLAN_FACTS = {"recent_volatility_pct": 26.73, "volatility_ratio": 0.868, "regime": "normal"}
+
+
+def test_a_computed_field_quoted_correctly_is_verified_not_ignored():
+    """Observed on the eval: a correct thesis reported as citing nothing."""
+    text = "Recent volatility of 26.73% sits below its baseline."
+    v = verify_analysis(
+        {"investment_thesis": text}, {"computed": PLAN_FACTS}, specs_for_facts(PLAN_FACTS)
+    )
+    assert v["status"] == "clean" and v["verified"] == 1
+
+
+def test_a_computed_field_quoted_wrongly_is_a_mismatch():
+    text = "Recent volatility of 41.5% is elevated."
+    v = verify_analysis(
+        {"investment_thesis": text}, {"computed": PLAN_FACTS}, specs_for_facts(PLAN_FACTS)
+    )
+    assert v["status"] == "mismatch"
+
+
+def test_fact_specs_skip_text_and_fields_a_hand_written_spec_owns():
+    names = {s.name for s in specs_for_facts({**PLAN_FACTS, "rsi_14": 44.0, "flag": True})}
+    assert names == {"recent_volatility_pct", "volatility_ratio"}
+
+
+def test_a_number_belongs_to_the_name_before_it_not_a_later_name_reading_back():
+    """'PEG ratio (2.67) ... trading at a premium': 2.67 is not the share price."""
+    text = "The PEG ratio (2.67) suggests the stock is trading at a premium."
+    claims = {c.metric: c for c in extract_claims(text, BIND)}
+    assert "price" not in claims
+
+
+def test_one_word_fields_and_unmarked_percentages_are_not_read_as_facts():
+    facts = {"high": 340.0, "recent_volatility_pct": 26.73, "volatility_ratio": 0.868}
+    text = "The P/E is very high at 45.8. The recent volatility ratio (0.868) is low."
+    v = verify_analysis({"investment_thesis": text}, {"computed": facts}, specs_for_facts(facts))
+    assert v["mismatched"] == 0
+
+
+def test_a_figure_said_twice_still_owns_its_number():
+    text = (
+        "PEG ratio (2.67) is high. A PEG ratio (2.67) suggests the stock is trading at a premium."
+    )
+    claims = extract_claims(text, BIND)
+    assert not [c for c in claims if c.metric == "price"]
+
+
+def test_a_quoted_field_name_is_read_as_the_metric():
+    """Observed: "pe_ratio=38.68714" reported as citing nothing."""
+    assert _claim("Valuation is stretched (pe_ratio=7.3).", "pe_ratio", BIND).verdict == "verified"

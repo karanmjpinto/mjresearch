@@ -45,6 +45,9 @@ system computes them. Anything you assert about values would be discarded.
 
 Rules:
 - Use ONLY metric ids from the catalog. Never invent a metric or a parameter.
+- If no metric measures what the question asks, do not invent one. Plan the
+  closest metrics the catalog does have, and say in their `why` what the
+  catalog cannot measure. The answer will then state the gap honestly.
 - Give every node a short, unique id and a one-line `why`.
 - Set `depends_on` for any node that reads another node's outputs (see "reads
   outputs of" in the catalog). Order otherwise does not matter.
@@ -125,10 +128,14 @@ Computed results — these are the only figures you may cite:
 Produce a single JSON object with these keys (exact names):
 conviction_score (int 0-100),
 stance (string: BUY|HOLD|SELL|WATCH),
-investment_thesis (string),
-bull_case (string),
-bear_case (string),
+investment_thesis (string: 3 to 6 sentences that answer the question, quoting
+  the computed values each point rests on; say which needed values are missing),
+bull_case (string: 1 to 3 sentences),
+bear_case (string: 1 to 3 sentences),
 key_risks (array of strings),
-time_horizon (string),
+time_horizon (string, for example "6-12 months"),
 confidence_in_data (int 1-5)
+
+Every string must be written out. An empty field is not a cautious answer, it is
+no answer: when the values are thin, say what they show and what is missing.
 """

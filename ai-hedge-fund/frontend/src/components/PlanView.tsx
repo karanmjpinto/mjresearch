@@ -431,6 +431,14 @@ export function PlanView({
                   </span>
                 )}
                 {verification && <VerificationBadge v={verification} />}
+                {/* The first draft failed the check and the second passed it.
+                 * Said out loud: a corrected answer and a clean first draft
+                 * are both trustworthy, but they are not the same event. */}
+                {result.evaluation?.repair?.kept === "repaired" && (
+                  <span className="bg-ink-line px-2.5 py-1.5 font-display text-label uppercase tracking-[0.12em] text-on-ink-soft">
+                    corrected once by the checker
+                  </span>
+                )}
                 {result.evaluation?.narrative_grounded === false &&
                   verification?.status === "no_claims" && (
                     <span className="rounded-md border border-cadmium/30 bg-cadmium/10 px-2.5 py-1 text-xs font-medium text-cadmium">

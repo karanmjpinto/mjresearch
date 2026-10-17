@@ -35,3 +35,14 @@ def isolated_db(tmp_path, monkeypatch):
     yield factory
 
     engine.dispose()
+
+
+@pytest.fixture(autouse=True)
+def _empty_node_cache():
+    """The plan's node cache lives for the process, so one test's values would
+    otherwise be another test's cache hits."""
+    from hedge_fund.plan.executor import SHARED_VALUE_CACHE
+
+    SHARED_VALUE_CACHE.clear()
+    yield
+    SHARED_VALUE_CACHE.clear()
