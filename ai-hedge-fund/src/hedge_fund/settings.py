@@ -140,6 +140,11 @@ class Settings(BaseSettings):
     # good. A cheaper model there buys more experiments per hour, and the
     # trials-adjusted hurdle is what protects the result either way.
     llm_proposer_model: str | None = None
+    # The committee A/B test asks one model which of two gated answers is
+    # better. That is an opinion and is labelled as one; it runs only from
+    # scripts/run_committee_ab.py, never on a request. A larger model is worth
+    # it here for the same reason it is on the synthesis.
+    llm_evaluator_model: str | None = None
 
     # When the committee splits materially, put the analysts back in the room
     # once before synthesizing. Costs a second round of calls on contested

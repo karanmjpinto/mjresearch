@@ -119,6 +119,8 @@ def model_for_role(role: str | None) -> str | None:
         return settings.llm_synthesis_model or None
     if role == "proposer":
         return settings.llm_proposer_model or None
+    if role == "evaluator":
+        return settings.llm_evaluator_model or None
     return None
 
 

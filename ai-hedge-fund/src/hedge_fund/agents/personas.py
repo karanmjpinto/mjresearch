@@ -317,9 +317,9 @@ Rules for this round:
 """
 
 
-def get_rebuttal_system_prompt(persona_id: str) -> str:
+def get_rebuttal_system_prompt(persona_id: str, rules: str = REBUTTAL_RULES) -> str:
     """Persona style + JSON rules + the rebuttal round's additional rules."""
-    return f"{get_persona_system_prompt(persona_id)}\n{REBUTTAL_RULES.strip()}"
+    return f"{get_persona_system_prompt(persona_id)}\n{rules.strip()}"
 
 
 def build_rebuttal_user_prompt(

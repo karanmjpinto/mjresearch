@@ -33,7 +33,6 @@ from hedge_fund.agents.llm import (
 )
 from hedge_fund.agents.personas import (
     SHARED_ANALYST_SYSTEM,
-    SYNTHESIS_SYSTEM,
     build_pm_synthesis_user_prompt,
     build_rebuttal_user_prompt,
     get_persona_lens,
@@ -43,6 +42,7 @@ from hedge_fund.agents.personas import (
 from hedge_fund.agents.prompts import RESEARCH_SYSTEM, build_user_prompt
 from hedge_fund.agents.schemas import ResearchAnalysisOutput
 from hedge_fund.agents.verifier import verify_analysis
+from hedge_fund.agents.workflow import DEFAULT_WORKFLOW, CommitteeWorkflow
 from hedge_fund.runs import RunRecord, save_run
 from hedge_fund.settings import settings
 
@@ -230,9 +230,11 @@ async def run_pm_synthesis(
     ticker: str,
     data_snapshot: dict[str, Any],
     persona_results: list[dict[str, Any]],
+    workflow: CommitteeWorkflow | None = None,
 ) -> dict[str, Any]:
     """Combine persona analyses into one ResearchAnalysisOutput-shaped result."""
-    system, notes = _assemble_system_prompt(SYNTHESIS_SYSTEM, ticker=ticker, persona_id=None)
+    wf = workflow or DEFAULT_WORKFLOW
+    system, notes = _assemble_system_prompt(wf.synthesis_system, ticker=ticker, persona_id=None)
     bundle, _truncation = truncate_context_with_manifest(data_snapshot)
     persona_json = json.dumps(persona_results, ensure_ascii=False, default=str)
     user_msg = build_pm_synthesis_user_prompt(ticker.upper(), persona_json) + (
@@ -302,10 +304,13 @@ async def _rebut_one(
     own_analysis: dict[str, Any],
     peer_views: str,
     contention: str,
+    rebuttal_rules: str,
 ) -> dict[str, Any]:
     """One persona's second look. Same snapshot, plus what the others concluded."""
     system, notes = _assemble_system_prompt(
-        get_rebuttal_system_prompt(persona_id), ticker=ticker, persona_id=persona_id
+        get_rebuttal_system_prompt(persona_id, rebuttal_rules),
+        ticker=ticker,
+        persona_id=persona_id,
     )
     bundle, _truncation = truncate_context_with_manifest(snapshot)
     own = json.dumps(own_analysis, ensure_ascii=False, default=str)
@@ -335,6 +340,7 @@ async def _run_rebuttal_round(
     snapshot: dict[str, Any],
     committee: list[dict[str, Any]],
     dissent: dict[str, Any],
+    workflow: CommitteeWorkflow,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Re-run every persona that produced a view, showing it the others'.
 
@@ -353,6 +359,7 @@ async def _run_rebuttal_round(
             own_analysis=c["analysis"],
             peer_views=_peer_summary(committee, c["persona_id"]),
             contention=contention,
+            rebuttal_rules=workflow.rebuttal_rules,
         )
         for c in respondents
     ]
@@ -407,13 +414,22 @@ async def run_committee_analysis(
     ticker: str,
     data_snapshot: dict[str, Any],
     persona_ids: list[str],
+    workflow: CommitteeWorkflow | None = None,
+    *,
+    persist: bool = True,
 ) -> dict[str, Any]:
     """Run personas concurrently against one frozen snapshot, then synthesize.
 
     Every persona reads the same immutable snapshot, so a disagreement between
     them is a difference of judgement rather than a difference of data — which it
     would silently become if each re-fetched and a cache expired mid-fan-out.
+
+    ``workflow`` carries the dissent thresholds and the rebuttal and synthesis
+    rules. Omitted, the shipped defaults apply and the run is the one this
+    function always made. ``persist=False`` skips the run store, for a
+    comparison that must leave nothing behind.
     """
+    wf = workflow or DEFAULT_WORKFLOW
     if not persona_ids:
         return {"error": "invalid_committee", "message": "committee_personas is empty"}
 
@@ -467,7 +483,7 @@ async def run_committee_analysis(
     # analysts back in the room first and let the split either resolve or harden.
     # Only the verdict of the *second* round reaches the PM.
     first_round = [{**c, "round": 1} for c in committee]
-    dissent_first = summarize_dissent(committee)
+    dissent_first = summarize_dissent(committee, wf)
     refinement: dict[str, Any] = {
         "triggered": False,
         "enabled": bool(settings.committee_refine_on_dissent),
@@ -479,12 +495,12 @@ async def run_committee_analysis(
         refinement["reason"] = _describe_contention(dissent_first)
         refinement["triggered"] = True
         committee, round2 = await _run_rebuttal_round(
-            ticker, data_snapshot, committee, dissent_first
+            ticker, data_snapshot, committee, dissent_first, wf
         )
         successes = [c for c in committee if isinstance(c.get("analysis"), dict)]
         usages.extend(c["usage"] for c in round2 if c.get("usage"))
 
-    dissent_final = summarize_dissent(committee)
+    dissent_final = summarize_dissent(committee, wf)
     if refinement["triggered"]:
         revised = [c["persona_id"] for c in round2 if c.get("revised")]
         spread_before = dissent_first.get("conviction_spread")
@@ -518,7 +534,7 @@ async def run_committee_analysis(
     synth_input = [
         {"persona_id": c["persona_id"], "analysis": c.get("analysis")} for c in successes
     ]
-    synth = await run_pm_synthesis(ticker, data_snapshot, synth_input)
+    synth = await run_pm_synthesis(ticker, data_snapshot, synth_input, wf)
 
     out: dict[str, Any] = {
         "committee": committee,
@@ -531,6 +547,10 @@ async def run_committee_analysis(
     if "error" not in synth and synth.get("usage"):
         usages.append(synth["usage"])
     out["usage_total"] = usages
+
+    if not persist:
+        out["run_uid"] = None
+        return out
 
     out["run_uid"] = save_run(
         RunRecord(
@@ -555,13 +575,16 @@ async def run_committee_analysis(
     return out
 
 
-def summarize_dissent(committee: list[dict[str, Any]]) -> dict[str, Any]:
+def summarize_dissent(
+    committee: list[dict[str, Any]], workflow: CommitteeWorkflow | None = None
+) -> dict[str, Any]:
     """Quantify committee disagreement instead of leaving it inside the prose.
 
     A synthesis that reconciles a 40-point conviction spread deserves to be read
     differently from one where every persona already agreed, and that distinction
     is lost once it has been flattened into a single number.
     """
+    wf = workflow or DEFAULT_WORKFLOW
     scores: list[int] = []
     stances: dict[str, int] = {}
     for entry in committee:
@@ -589,5 +612,7 @@ def summarize_dissent(committee: list[dict[str, Any]]) -> dict[str, Any]:
         "unanimous_stance": len(stances) == 1,
         # A spread this wide means the personas are not analysing the same
         # question; the synthesis is averaging away a real disagreement.
-        "material_disagreement": spread >= 30 or len(stances) > 2,
+        "material_disagreement": (
+            spread >= wf.dissent_spread_threshold or len(stances) > wf.dissent_max_stances
+        ),
     }
