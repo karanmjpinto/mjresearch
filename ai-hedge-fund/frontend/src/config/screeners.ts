@@ -33,7 +33,8 @@ export type ScreenName =
   | "bolton-contrarian"
   | "kiyohara-handbook"
   | "ellenbogen-two-act"
-  | "ai-rollup";
+  | "ai-rollup"
+  | "cambrian-scarcity";
 
 /** The glossary term that explains each screen, same reasoning as above. */
 export type ScreenInfoTerm =
@@ -42,7 +43,8 @@ export type ScreenInfoTerm =
   | "screen-bolton"
   | "screen-kiyohara"
   | "screen-ellenbogen"
-  | "screen-ai-rollup";
+  | "screen-ai-rollup"
+  | "screen-cambrian";
 
 export type ScreenerViewDef = {
   id: string;
@@ -91,6 +93,32 @@ export type ScreenerViewDef = {
 };
 
 export const SCREENER_VIEWS: ScreenerViewDef[] = [
+  {
+    id: "cambrian_scarcity",
+    screenId: "cambrian-scarcity",
+    scoreMax: 100,
+    infoTerm: "screen-cambrian",
+    label: "AI Supply-Chain Scarcity",
+    resultsTitle: "The scarce physical inputs, ranked",
+    resultsBlurb:
+      "Cambrian's thesis as a list: wafer, memory, capacitor and foundry makers that own their factories, scored on how cheap they are on forward revenue, how much operating leverage sits in the plant, how far margins are below their own best year, whether demand is arriving, and whether the balance sheet survives the cycle coming back. Fabless and software names are in the universe so the chart can compare them; they cannot pass. Whether a company's buyers are price-inelastic — the trait Cambrian calls key — is listed as unchecked on every row.",
+    description:
+      "After Cambrian Capital's September 2026 thesis: as compute gets more valuable, value flows to the scarce physical inputs that make it, and many of those still trade at 1–5x revenue while software trades at 13–100x. Hard filters on segment and on owning factories (net plant at least 0.2x revenue, which is what separates a fab from a fabless designer). Then 100 points: revenue multiple 35, operating leverage 20, idle capacity 15, demand arriving 15, balance sheet 15. Read with the thesis panel above, which carries Cambrian's own segment estimates.",
+    usesApi: true,
+    criteria: [
+      "Segment: wafers, memory, capacitors or foundries, from a curated list. Off the list, the industry label must be semiconductors, semiconductor materials or electronic components",
+      "Owns factories: net plant at least 0.2x annual revenue. Makers run 0.37–0.82, the fabless designers 0.04–0.12. Sandisk is exempt by name: its fabs sit in the Kioxia joint venture, off its balance sheet",
+      "Revenue multiple: market cap over next-twelve-month consensus revenue, calendarised from two fiscal years. Converted at a quoted FX rate when the listing quotes and reports in different currencies — the provider's own ratio is 8x too high for Hong Kong-listed foundries",
+      "Revenue multiple, 35 points: full marks at 2x, none at 8x",
+      "Operating leverage, 20 points: contribution over operating profit, with depreciation and operating expense treated as fixed. Cambrian's own example gives 4.7, which is +47% profit on +10% volume. A loss-maker scores the midpoint, not the maximum",
+      "Idle capacity, 15 points: how far the operating margin is below its best year in the provider's four or five years of history",
+      "Demand arriving, 15 points: forward revenue over trailing",
+      "Survives a cycle, 15 points: net debt over EBITDA, full marks at net cash, none at 3x",
+      "Memory rows carry a flag: spot-priced memory is a price-taker, which this desk's own principles exclude. Cambrian's answer is that inelastic buyers now set the price — a judgment, so it is flagged and not resolved",
+      "NOT scored: whether customers are price-inelastic, real line utilisation, whether supply really cannot scale, the AI timeline itself, and how much of a conglomerate's revenue is the segment",
+    ],
+    plays: [],
+  },
   {
     id: "ai_rollup",
     screenId: "ai-rollup",
@@ -146,7 +174,7 @@ export const SCREENER_VIEWS: ScreenerViewDef[] = [
       "The quality screen on this desk. Every name here cleared the hard filters — a return on capital above 12%, cash conversion above 80%, and a share count that is flat or falling — and sits inside the small and mid-cap band. The bar is its ten-factor score out of 50. The tenth factor is the reinvestment runway: not what the capital already deployed earns, but what the business can compound at from its own cash. Pick a universe to run it somewhere else.",
     label: "Quality Compounder",
     description:
-      "The compounder test, in Akre's three legs: an extraordinary business, management who do not dilute you, and somewhere to put the next dollar at the same rate. Hard filters on growth, ROIC, FCF conversion, leverage, margin trend and dilution, then a ten-factor score out of 50. Bounded to small and mid caps and runnable on any of the sixteen universes. Data via yfinance; short histories fall back to span CAGR — verify in filings.",
+      "The compounder test, in Akre's three legs: an extraordinary business, management who do not dilute you, and somewhere to put the next dollar at the same rate. Hard filters on growth, ROIC, FCF conversion, leverage, margin trend and dilution, then a ten-factor score out of 50. Bounded to small and mid caps and runnable on any of the seventeen universes. Data via yfinance; short histories fall back to span CAGR — verify in filings.",
     usesApi: true,
     criteria: [
       "Size: roughly $500m to $20bn, applied in the currency the company reports in rather than converted at an invented rate. A company whose currency has no band is refused rather than waved through",

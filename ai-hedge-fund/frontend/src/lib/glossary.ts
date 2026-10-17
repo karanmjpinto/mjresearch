@@ -251,6 +251,13 @@ export const GLOSSARY = {
     careful:
       "Whether AI actually compresses a given business is not computable and is not scored. It depends on how documented the work is, how much of the delivery is judgment a customer is paying a person for, whether customers accept being served by a machine, whether the people who know how it works stay after the sale, and whether the seller will sell at all. Every row lists those as unchecked. The industry filter is coarse too — matched on the label a provider reports, so a software company whose revenue is two-thirds implementation services reads as software. The a16z two-paths argument is carried as the comfortable-middle flag and is a warning about owning a company, not a reason to buy it: the essay is about public software choosing growth or margin, and says nothing about acquisitions.",
   },
+  "screen-cambrian": {
+    term: "AI supply-chain scarcity",
+    what: "Cambrian Capital's thesis as a screen: makers of wafers, memory, capacitors and chips that own their factories, scored on revenue multiple, operating leverage, idle capacity, arriving demand and balance sheet. Out of 100.",
+    why: "Their argument is that as compute gets more valuable, the value flows to the scarce physical inputs, and that those inputs still trade at a fraction of software's revenue multiple. Low margins and idle plant read as torque rather than weakness, which is why the multiple is on revenue and not on earnings.",
+    careful:
+      "This is a bet on a fast AI timeline, stated as one. If AI demand slows, idle capacity is idle capacity and low margins are low margins — the same numbers that score well here are the ones a cyclical bust is made of. Price sensitivity of buyers, which Cambrian calls the key trait, is per buyer group in their own estimates and is not scored per company. Memory is a commodity price-taker, which this desk's principles exclude; the rows say so.",
+  },
   "screen-universe": {
     term: "Universe",
     what: "The list of companies a screen was run against — by default the S&P 500.",

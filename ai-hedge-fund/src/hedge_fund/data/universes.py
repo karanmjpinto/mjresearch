@@ -294,6 +294,21 @@ UNIVERSE_META: list[dict[str, Any]] = [
         ),
         "approx_count": 103,
     },
+    {
+        "id": "ai_supply_chain",
+        # Every name carries its own currency and each screen's band is keyed
+        # on it, so there is no one currency to declare. The band test skips
+        # "multi" rather than pretend it is one market.
+        "currency": "multi",
+        "label": "AI supply chain (curated)",
+        "description": (
+            "Wafers, memory, capacitors and foundries across Japan, Korea, "
+            "Taiwan, Europe and the US, plus fabless and software names as "
+            "the contrast. Curated, not an index — no index carries these "
+            "segments. Built for the Cambrian scarcity screen."
+        ),
+        "approx_count": 37,
+    },
 ]
 
 _CACHE: dict[str, tuple[float, list[str]]] = {}
@@ -691,6 +706,13 @@ def fetch_yahoo_region(region: str, expected: int, suffix: str | None = None) ->
     return out
 
 
+def _ai_supply_chain() -> list[str]:
+    # Imported late: the list lives with the screen whose segments it is.
+    from hedge_fund.screeners.cambrian_scarcity import fetch_ai_supply_chain
+
+    return fetch_ai_supply_chain()
+
+
 def _region_loader(universe_id: str) -> Any:
     """A zero-argument loader for one region, for the LOADERS table."""
     region, expected, suffix = YAHOO_REGIONS[universe_id]
@@ -713,6 +735,7 @@ LOADERS: dict[str, Any] = {
     "ca_all": fetch_ca_all,
     "au_all": fetch_au_all,
     **{uid: _region_loader(uid) for uid in YAHOO_REGIONS},
+    "ai_supply_chain": _ai_supply_chain,
 }
 
 

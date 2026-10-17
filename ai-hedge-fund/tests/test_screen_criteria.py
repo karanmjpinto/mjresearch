@@ -27,6 +27,7 @@ SCREEN_MODULES = {
     "bolton-contrarian": "bolton_contrarian",
     "kiyohara-handbook": "kiyohara_handbook",
     "ellenbogen-two-act": "ellenbogen_two_act",
+    "cambrian-scarcity": "cambrian_scarcity",
 }
 
 #: Module-level constants that do not change what the screen returns, so they

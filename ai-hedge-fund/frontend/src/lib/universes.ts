@@ -43,6 +43,12 @@ export const FALLBACK_UNIVERSES: ScreenerUniverseMeta[] = [
     description: "",
     approx_count: 1900,
   },
+  {
+    id: "ai_supply_chain",
+    label: "AI supply chain (curated)",
+    description: "",
+    approx_count: 37,
+  },
 ];
 
 /**
@@ -78,4 +84,7 @@ export const DEFAULT_UNIVERSE_FOR: Record<string, string> = {
    * 600 is the cheapest shelf to find them on; the screen's own band goes
    * well below it, so any universe is fair game. */
   "ai-rollup": "sp600",
+  /* The segments are the thesis and no index carries them; the curated list
+   * also holds the software and fabless contrasts the dot plot needs. */
+  "cambrian-scarcity": "ai_supply_chain",
 };

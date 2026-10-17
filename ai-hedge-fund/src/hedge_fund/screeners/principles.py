@@ -295,6 +295,33 @@ REGISTRY: tuple[Principle, ...] = (
         ),
     ),
     Principle(
+        id="price-inelastic-customers",
+        statement=(
+            "I want customers who keep buying when the price rises, because they decide "
+            "how far a price can go and when it starts to move."
+        ),
+        kind="judgment",
+        enforced=(
+            "NOT COMPUTABLE per company. Price sensitivity is a property of who buys, and "
+            "no feed carries a customer list with each buyer's input share of cost and "
+            "operating margin. Cambrian Capital's estimate is per buyer group — roughly "
+            "half of memory demand cuts volume at a +15-25% price rise, about a twentieth "
+            "of wafer demand only at +50-140% — and the scarcity screen's thesis panel "
+            "shows it as theirs. A segment figure copied onto every company in the segment "
+            "would rank nothing, so it goes to the committee instead.\n\n"
+            "It is also the condition under which `no-commodity-price-takers` can be "
+            "relaxed: a spot-priced business is not a price-taker if its buyers, not the "
+            "cycle, set the price. The scarcity screen flags every memory row so that "
+            "argument is made by a person, not assumed by the screen."
+        ),
+        why=(
+            "An input that is a small share of a high-margin buyer's cost can reprice "
+            "many times over before the buyer walks away; the same input sold to a "
+            "4%-margin assembler cannot move 20%. That difference decides pricing power "
+            "more than market share does, and it is invisible in the seller's own accounts."
+        ),
+    ),
+    Principle(
         id="concentration",
         statement="I would rather own my tenth best idea twice than my twentieth at all.",
         kind="threshold",

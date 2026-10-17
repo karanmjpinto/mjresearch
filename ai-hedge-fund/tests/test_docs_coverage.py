@@ -41,6 +41,7 @@ SCREEN_PROSE = {
     "kiyohara-handbook": "Kiyohara",
     "ellenbogen-two-act": "Ellenbogen",
     "ai-rollup": "rollup",
+    "cambrian-scarcity": "Cambrian",
 }
 
 

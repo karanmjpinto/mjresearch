@@ -54,6 +54,7 @@ from hedge_fund.screeners.acquisition_compounder import (
     run_acquisition_compounder_for_ticker,
 )
 from hedge_fund.screeners.yartseva import run_yartseva_for_ticker
+from hedge_fund.screeners.cambrian_scarcity import run_cambrian_scarcity_for_ticker
 from hedge_fund.screeners.ai_rollup import (
     finalise_run as finalise_ai_rollup,
     run_ai_rollup_for_ticker,
@@ -69,6 +70,7 @@ RUNNERS = {
     "kiyohara-handbook": run_kiyohara_handbook_for_ticker,
     "ellenbogen-two-act": run_ellenbogen_two_act_for_ticker,
     "ai-rollup": run_ai_rollup_for_ticker,
+    "cambrian-scarcity": run_cambrian_scarcity_for_ticker,
 }
 
 #: Screens needing a pass over the finished run, not just over each name.
@@ -133,6 +135,8 @@ PREFLIGHT_TICKERS = ("AAPL", "MSFT", "JNJ")
 #: provider being offline, which aborts the run.
 PREFLIGHT_TICKERS_FOR = {
     "kiyohara-handbook": ("7203.T", "6301.T", "8058.T"),
+    # Makers the screen is about, so a refusal means the provider, not the rule.
+    "cambrian-scarcity": ("MU", "6981.T", "2330.TW"),
 }
 
 

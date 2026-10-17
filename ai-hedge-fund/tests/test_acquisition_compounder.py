@@ -399,7 +399,9 @@ def test_every_universe_currency_has_a_band():
     """
     from hedge_fund.data.universes import UNIVERSE_META
 
-    declared = {u["id"]: u["currency"] for u in UNIVERSE_META}
+    # "multi" is a curated cross-market list: each name is banded on its own
+    # quote currency, and an unbanded one is refused on its row.
+    declared = {u["id"]: u["currency"] for u in UNIVERSE_META if u["currency"] != "multi"}
     missing = {uid: ccy for uid, ccy in declared.items() if ccy not in CAP_BAND_BY_CURRENCY}
     assert not missing, f"universes with no cap band: {missing}"
 
