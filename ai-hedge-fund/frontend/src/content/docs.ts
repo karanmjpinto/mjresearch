@@ -185,6 +185,18 @@ export const SECTIONS: DocSection[] = [
           "Written over computed results. The wording varies between runs even with greedy, seeded sampling, because no provider guarantees identical output. Numbers inside it are verified afterwards.",
       },
       {
+        name: "How stable the plan pipeline is",
+        trust: "computed",
+        detail:
+          "Measured, the way Bridgewater measures its PAT analyst at 95% output determinism. Thirty research questions on five frozen companies, five runs each, on the local model: the same question gave the same plan 95.9% of the time and the same conclusion — stance, conviction and verification status — 96.6%. The prose checked clean against the computed values in 86.9% of runs, 80.0% on the first draft. Before this work the same suite read 88.5%, 91.5% and 57.5%; most of the difference was the checker, which could not read the plan's own outputs and reported correct answers as citing nothing. The questions, the frozen inputs and the script are in the repo (scripts/run_plan_eval.py), so the figure can be re-run rather than taken on trust.",
+      },
+      {
+        name: "Sending a draft back once",
+        trust: "computed",
+        detail:
+          "The check and the correction are code; only the rewrite is the model's. A plan the validator rejects goes back to the planner once with the validator's list of problems. A thesis that is empty, contradicts a computed value, or cites none of them goes back to the narrator once, with the excerpt, the number written and the correct value. The rewrite is checked again and the better-checked draft is kept, so a repair cannot make a run worse; the plan view says 'corrected once by the checker' when the second draft won. One retry, never a loop: a stage that fails twice is reported as failing. Two planner slips the harness fixes itself without asking the model, and says so: a dependency written as a metric's name instead of the step's, and a step the plan depended on but forgot to schedule. The empty-thesis check exists because the narrator once returned every field blank — valid JSON, nothing for the number check to catch, and it read as a cautious HOLD.",
+      },
+      {
         name: "Investor opinions and the committee verdict",
         trust: "judged",
         detail:
@@ -559,6 +571,10 @@ export const GAPS: [string, string][] = [
   [
     "Scoring bands are absolute",
     "Valuation scoring uses fixed thresholds rather than sector-relative ones, so a utility and a software company are judged on the same scale.",
+  ],
+  [
+    "The plan can answer about half of the questions asked of it",
+    "Of the thirty eval questions, the metric catalog has everything needed for fourteen. The rest need a measure no metric provides yet: revenue growth over several years, margin trend, cash conversion, sensitivity to rates or a commodity, buybacks and dividends, a peer comparison, balance-sheet strength, an event study, operating leverage. For those the planner now uses the closest metrics it has and the answer says what is missing, rather than inventing a step; one question, on operating leverage, still fails to plan. Read a plan answer to such a question as partial.",
   ],
   [
     "Seventeen universes load, and three neighbours cannot",
