@@ -102,6 +102,13 @@ nearest number, and compares against the snapshot within a per-metric tolerance.
 Longer aliases resolve first so a specific metric claims its number before a
 generic one; each number is consumed once; direction words set the sign.
 
+Binding is constrained so a number is not read against the wrong name: the
+search stays inside the alias's own sentence or line; a number written as a
+multiple, a percentage, or a currency amount is only offered to a metric of that
+kind; window lengths ("30-day") and digits inside a metric's own name are not
+values; a comparator between name and number ("RSI below 40") is tested as a
+bound; and a figure attributed to peers or an average is `unverifiable`.
+
 Anything it cannot map is reported as `unverifiable`, never as passing — silence
 about a claim must not look like a passing check.
 

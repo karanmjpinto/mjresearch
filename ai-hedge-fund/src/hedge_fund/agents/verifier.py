@@ -68,6 +68,10 @@ class MetricSpec:
     # to pick the sign up from the surrounding verb.
     directional: bool = False
     unit: str = ""
+    # For a metric whose alias is an ordinary word ("momentum", "30-day"), a
+    # bare number nearby is far more often something else — an RSI reading, the
+    # ends of a price range — than a change. Require the percent to be written.
+    needs_percent: bool = False
 
 
 METRIC_SPECS: tuple[MetricSpec, ...] = (
@@ -148,6 +152,7 @@ METRIC_SPECS: tuple[MetricSpec, ...] = (
         tolerance_abs=0.6,
         directional=True,
         unit="%",
+        needs_percent=True,
     ),
     MetricSpec(
         "high_30d",
@@ -215,6 +220,7 @@ METRIC_SPECS: tuple[MetricSpec, ...] = (
         tolerance_abs=0.6,
         directional=True,
         unit="%",
+        needs_percent=True,
     ),
     MetricSpec(
         "max_drawdown_pct",
@@ -370,6 +376,13 @@ class _NumberHit:
     distance: int
     # Whether the sign was written in the text rather than inferred from prose.
     signed: bool = False
+    # The words between the metric name and the number, lowercased. Where the
+    # reading of the number is decided: "below 40" and "industry average of 25".
+    between: str = ""
+    # True when the number follows the metric name, the usual order.
+    after: bool = True
+    # The figure describes peers or an average rather than this company.
+    other_subject: bool = False
 
 
 # Prose usually writes the metric before its value ("P/E ratio of 31.2"), but not
@@ -377,46 +390,162 @@ class _NumberHit:
 # the common order win without ruling out the reversed one.
 BACKWARD_PENALTY = 8
 
+# Where one statement ends and the next begins: a line break (the fields of an
+# analysis and its risk bullets are joined with one) or the end of a sentence.
+# A metric name is never read against a number on the far side of either.
+# Observed: "Price near 52-week high with limited downside buffer" followed on
+# the next line by "Elevated RSI (69.3)" reported a 52-week high of 6.
+_BOUNDARY = re.compile(r"\n|[.!?;](?=\s+[A-Z(])")
 
-def _number_candidates(text: str, alias_end: int, alias_start: int) -> list[_NumberHit]:
-    """Numbers near an alias, best reading first."""
+# A number that counts time is a window, not a value: the 30 in "30-day", the
+# 14 in "14-day RSI", the 3 in "over 3 years".
+_DURATION = re.compile(r"\s*-?\s*(?:day|week|month|quarter|year|yr)s?\b|\s*d\b", re.IGNORECASE)
+
+_PERCENT_WORD = re.compile(r"\s*(?:percent|pct|percentage)", re.IGNORECASE)
+
+# Words that say the figure belongs to something other than the company:
+# "vs industry average of ~25x", "peers trade at higher PEG ratios (1.5-2)".
+# Read between the metric and its number.
+_OTHER_SUBJECT = re.compile(
+    r"\b(?:peers?|industry|sector|competitors?|rivals?|average|median|typical(?:ly)?|"
+    r"historical(?:ly)?|benchmark)\b"
+)
+# The narrower set read *before* the metric name. "average" is left out there:
+# it is half of "50-day moving average", which routinely precedes another metric.
+_OTHER_SUBJECT_BEFORE = re.compile(r"\b(?:peers?|industry|sector|competitors?|rivals?)\b")
+
+# "RSI below 40" states a bound, not a value, and is true of an RSI of 35.56.
+_UPPER_BOUND = re.compile(r"\b(?:below|under|less than|lower than|at most|no more than)\b|<")
+_LOWER_BOUND = re.compile(
+    r"\b(?:above|more than|greater than|higher than|at least|exceeds?|exceeding)\b|>"
+)
+
+
+def _segment(text: str, alias_start: int, alias_end: int) -> tuple[int, int]:
+    """The statement an alias sits in: from the previous boundary to the next."""
+    seg_start = 0
+    for m in _BOUNDARY.finditer(text, 0, alias_start):
+        seg_start = m.end()
+    nxt = _BOUNDARY.search(text, alias_end)
+    return seg_start, (nxt.start() if nxt else len(text))
+
+
+def _unit_fits(spec: MetricSpec, m: re.Match[str], text: str) -> bool:
+    """Whether a number is written as the kind of thing this metric is.
+
+    "Trading at 7.3x P/E" is a multiple, so it is not the share price however
+    close it sits to "trading at". Without this the price claimed 7.3, and the
+    P/E was left to take the next number along — the industry's.
+    """
+    suffix = (m.group("suffix") or "").lower()
+    if suffix == "x" and spec.unit not in ("x", ""):
+        return False
+    if suffix == "%" and spec.unit != "%":
+        return False
+    if m.group("currency") and spec.unit != "currency":
+        return False
+    if spec.needs_percent and suffix != "%" and not _PERCENT_WORD.match(text, m.end()):
+        return False
+    return True
+
+
+def _is_value(m: re.Match[str], text: str, alias_spans: list[tuple[int, int]]) -> bool:
+    """Rule out digits that are not a stated value at all."""
+    start, end = m.start("value"), m.end("value")
+    # The tail of a longer number the search window cut in half.
+    if start > 0 and text[start - 1].isdigit():
+        return False
+    if start > 1 and text[start - 1] in ".," and text[start - 2].isdigit():
+        return False
+    if _DURATION.match(text, end):
+        return False
+    # Part of a metric's own name: the 50 in "SMA 50", the 52 in "52-week high".
+    return not _overlaps((start, end), alias_spans)
+
+
+def _alias_between(lo: int, hi: int, alias_spans: list[tuple[int, int]]) -> bool:
+    """Whether some metric's name sits wholly inside text[lo:hi]."""
+    return any(lo <= s and e <= hi for s, e in alias_spans)
+
+
+def _number_candidates(
+    text: str,
+    alias_end: int,
+    alias_start: int,
+    spec: MetricSpec,
+    alias_spans: list[tuple[int, int]],
+) -> list[_NumberHit]:
+    """Numbers near an alias, best reading first.
+
+    Searched within the alias's own statement, and on the whole text rather
+    than a slice of it, so a number at the edge of the window is read entire
+    or not at all.
+    """
+    seg_start, seg_end = _segment(text, alias_start, alias_end)
+    # Only the alias's own clause: in "below sector average (~15x), forward PE
+    # (10.19x)" the sector belongs to the figure before the comma.
+    lead = text[max(seg_start, alias_start - PROXIMITY_CHARS) : alias_start].lower()
+    lead = re.split(r"[,;:()]", lead)[-1]
+    subject_before = bool(_OTHER_SUBJECT_BEFORE.search(lead))
     candidates: list[_NumberHit] = []
 
-    after = text[alias_end : alias_end + PROXIMITY_CHARS]
-    m = _NUMBER.search(after)
-    if m and m.group("value"):
+    for m in _NUMBER.finditer(text, alias_end, seg_end):
+        if m.start("value") - alias_end >= PROXIMITY_CHARS:
+            break
+        if not _is_value(m, text, alias_spans) or not _unit_fits(spec, m, text):
+            continue
         value = _parse_number(m)
-        if value is not None:
-            abs_start = alias_end + m.start()
-            candidates.append(
-                _NumberHit(
-                    value=value,
-                    excerpt=text[max(0, alias_start - 15) : alias_end + m.end() + 2].strip(),
-                    span=(abs_start, alias_end + m.end()),
-                    distance=m.start(),
-                    signed=bool(m.group("sign")),
-                )
+        if value is None:
+            continue
+        if _alias_between(alias_end, m.start(), alias_spans):
+            # Another metric is named nearer the number, so it is that one's:
+            # "near a 30-day low with oversold technicals (RSI=20.84)".
+            break
+        between = text[alias_end : m.start()].lower()
+        candidates.append(
+            _NumberHit(
+                value=value,
+                excerpt=text[max(0, alias_start - 15) : m.end() + 2].strip(),
+                span=(m.start(), m.end()),
+                distance=m.start() - alias_end,
+                signed=bool(m.group("sign")),
+                between=between,
+                after=True,
+                other_subject=subject_before or bool(_OTHER_SUBJECT.search(between)),
             )
+        )
+        break
 
-    before_start = max(0, alias_start - PROXIMITY_CHARS)
-    before = text[before_start:alias_start]
-    hits = [m for m in _NUMBER.finditer(before) if m.group("value")]
-    if hits:
+    before_start = max(seg_start, alias_start - PROXIMITY_CHARS)
+    hits = [
+        m
+        for m in _NUMBER.finditer(text, before_start, alias_start)
+        if _is_value(m, text, alias_spans) and _unit_fits(spec, m, text)
+    ]
+    if hits and not _alias_between(hits[-1].end(), alias_start, alias_spans):
         m = hits[-1]
         value = _parse_number(m)
         if value is not None:
-            abs_start = before_start + m.start()
+            between = text[m.end() : alias_start].lower()
+            # What the number itself was introduced as: "sector average (~15x)".
+            intro = text[max(seg_start, m.start() - 25) : m.start()].lower()
             candidates.append(
                 _NumberHit(
                     value=value,
-                    excerpt=text[abs_start : alias_end + 5].strip(),
-                    span=(abs_start, before_start + m.end()),
-                    distance=(len(before) - m.end()) + BACKWARD_PENALTY,
+                    excerpt=text[m.start() : alias_end + 5].strip(),
+                    span=(m.start(), m.end()),
+                    distance=(alias_start - m.end()) + BACKWARD_PENALTY,
                     signed=bool(m.group("sign")),
+                    between=between,
+                    after=False,
+                    other_subject=bool(
+                        _OTHER_SUBJECT.search(between) or _OTHER_SUBJECT_BEFORE.search(intro)
+                    ),
                 )
             )
 
-    return sorted(candidates, key=lambda c: c.distance)
+    # A figure about this company beats a nearer one about its peers.
+    return sorted(candidates, key=lambda c: (c.other_subject, c.distance))
 
 
 def _within_tolerance(spec: MetricSpec, stated: float, actual: float) -> tuple[bool, float | None]:
@@ -449,6 +578,17 @@ def _overlaps(span: tuple[int, int], taken: list[tuple[int, int]]) -> bool:
     return any(not (span[1] <= s or span[0] >= e) for s, e in taken)
 
 
+def _read_bound(hit: _NumberHit) -> str | None:
+    """ "upper", "lower", or None when the number is stated as a value."""
+    if not hit.after:
+        return None
+    if _UPPER_BOUND.search(hit.between):
+        return "upper"
+    if _LOWER_BOUND.search(hit.between):
+        return "lower"
+    return None
+
+
 def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
     """Find metric claims in prose and check each against the snapshot.
 
@@ -468,6 +608,7 @@ def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
     # Longest alias wins; ties resolve left to right for stable output.
     occurrences.sort(key=lambda o: (-o[0], o[1]))
 
+    alias_spans = [(o[1], o[2]) for o in occurrences]
     claimed_aliases: list[tuple[int, int]] = []
     claimed_numbers: list[tuple[int, int]] = []
     claims: list[Claim] = []
@@ -481,7 +622,7 @@ def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
         hit = next(
             (
                 c
-                for c in _number_candidates(text, end, start)
+                for c in _number_candidates(text, end, start, spec, alias_spans)
                 if not _overlaps(c.span, claimed_numbers)
             ),
             None,
@@ -507,6 +648,23 @@ def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
         claimed_numbers.append(hit.span)
         seen.add(dedupe)
 
+        if hit.other_subject:
+            # Not a claim about this company, so the snapshot cannot contradict
+            # it — and cannot confirm it either. Reported, not dropped: silence
+            # about a figure must never look like a passing check.
+            claims.append(
+                Claim(
+                    metric=spec.name,
+                    stated=stated,
+                    actual=None,
+                    verdict="unverifiable",
+                    excerpt=hit.excerpt,
+                    unit=spec.unit,
+                    note="describes peers or an average, not this company",
+                )
+            )
+            continue
+
         actual: float | None = None
         for path in spec.paths:
             actual = _as_float(_resolve(snapshot, path))
@@ -527,7 +685,15 @@ def extract_claims(text: str, snapshot: dict[str, Any]) -> list[Claim]:
             )
             continue
 
-        ok, delta, note = _matches(spec, stated, actual)
+        bound = _read_bound(hit) if not spec.directional else None
+        if bound is not None:
+            # "below 40" is true of 35.56 and false of 44; nearness is not the test.
+            holds = actual < stated if bound == "upper" else actual > stated
+            ok, delta, note = _matches(spec, stated, actual)
+            ok, delta = (ok or holds), (None if holds else delta)
+            note = f"read as {'an upper' if bound == 'upper' else 'a lower'} bound"
+        else:
+            ok, delta, note = _matches(spec, stated, actual)
         claims.append(
             Claim(
                 metric=spec.name,
