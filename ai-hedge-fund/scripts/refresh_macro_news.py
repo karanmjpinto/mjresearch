@@ -147,7 +147,10 @@ def _spf_sheets(path: Path) -> dict[str, pd.DataFrame]:
         rows = list(wb[name].iter_rows(values_only=True))
         df = pd.DataFrame(rows[1:], columns=rows[0]).replace("#N/A", np.nan)
         df.index = pd.PeriodIndex(
-            [pd.Period(f"{int(y)}Q{int(q)}") for y, q in zip(df["YEAR"], df["QUARTER"], strict=True)],
+            [
+                pd.Period(f"{int(y)}Q{int(q)}")
+                for y, q in zip(df["YEAR"], df["QUARTER"], strict=True)
+            ],
             freq="Q",
         )
         out[name] = df.apply(pd.to_numeric, errors="coerce")
