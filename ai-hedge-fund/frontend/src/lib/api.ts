@@ -536,7 +536,17 @@ export interface PlanResult {
   stance: string | null;
   analysis: string | null;
   ai_full?: Record<string, unknown>;
-  evaluation?: { notes?: string[]; narrative_grounded?: boolean };
+  evaluation?: {
+    notes?: string[];
+    narrative_grounded?: boolean;
+    /** Present when the checker sent the prose back once with its findings. */
+    repair?: {
+      trigger: "mismatch" | "no_claims";
+      kept: "repaired" | "original";
+      before: { mismatched: number; status: string };
+      after?: { mismatched: number; status: string };
+    };
+  };
   verification?: Verification;
   plan?: {
     question: string;

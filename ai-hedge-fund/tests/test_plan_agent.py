@@ -237,7 +237,7 @@ async def test_plan_override_skips_replanning(monkeypatch):
     calls = _stub_llm(monkeypatch)
     out = await _run(monkeypatch, plan_override=PLAN_JSON)
 
-    assert [c["role"] for c in calls] == ["narrator"], "planner should not have been called"
+    assert "planner" not in [c["role"] for c in calls], "planner should not have been called"
     assert out["execution"]["ok_count"] == 3
 
 
@@ -358,3 +358,162 @@ async def test_a_rehydrated_snapshot_hashes_identically(monkeypatch, isolated_db
     digest = get_run(out["run_uid"])["snapshot_sha256"]
 
     assert snapshot_hash(get_snapshot(digest)) == digest
+
+
+async def test_a_second_request_reuses_the_first_requests_node_values(monkeypatch):
+    """The cache is shared across requests, so re-running a plan is cheap."""
+    _stub_llm(monkeypatch)
+    first = await _run(monkeypatch)
+    _stub_llm(monkeypatch)
+    second = await _run(monkeypatch)
+    assert first["execution"]["cache_hits"] == 0
+    # `weighted_conviction` reads other nodes' facts, so it always recomputes.
+    assert second["execution"]["cache_hits"] == 2
+    assert second["analysis"]["conviction_score"] == first["analysis"]["conviction_score"]
+
+
+# ----------------------------------------------------------------------
+# Repair: the harness finds the fault, the model gets one retry
+# ----------------------------------------------------------------------
+
+GROUNDED = {**NARRATIVE, "investment_thesis": "A P/E ratio of 31.2 leaves little room. " * 3}
+WRONG = {**NARRATIVE, "investment_thesis": "A P/E ratio of 45.0 leaves little room. " * 3}
+
+
+def _stub_sequence(monkeypatch, planner=(PLAN_JSON,), narrator=(GROUNDED,)):
+    """Each role answers from its own list in order, repeating the last."""
+    calls: list[dict] = []
+
+    async def fake_call_json(system, user, schema=None):
+        role = "planner" if "planning stage" in system else "narrator"
+        seen = sum(1 for c in calls if c["role"] == role)
+        calls.append({"role": role, "user": user})
+        answers = planner if role == "planner" else narrator
+        return LLMResult(
+            content=json.dumps(answers[min(seen, len(answers) - 1)]),
+            model="stub:test",
+            params={"temperature": 0.0, "seed": 7},
+            prompt_sha256="h" * 64,
+        )
+
+    monkeypatch.setattr(plan_agent, "call_json", fake_call_json)
+    return calls
+
+
+async def test_a_clean_narrative_is_not_sent_back(monkeypatch):
+    calls = _stub_sequence(monkeypatch)
+    out = await _run(monkeypatch)
+    assert [c["role"] for c in calls] == ["planner", "narrator"]
+    assert out["repair"] is None
+
+
+async def test_a_wrong_number_goes_back_once_with_the_correct_value(monkeypatch):
+    calls = _stub_sequence(monkeypatch, narrator=(WRONG, GROUNDED))
+    out = await _run(monkeypatch)
+
+    retry = [c for c in calls if c["role"] == "narrator"][1]["user"]
+    assert "you wrote 45" in retry and "31.2" in retry
+    assert out["repair"]["kept"] == "repaired"
+    assert out["repair"]["before"]["mismatched"] == 1
+    assert out["repair"]["after"]["mismatched"] == 0
+    assert out["verification"]["status"] == "clean"
+
+
+async def test_a_repair_that_does_not_help_keeps_the_original(monkeypatch):
+    calls = _stub_sequence(monkeypatch, narrator=(WRONG, WRONG))
+    out = await _run(monkeypatch)
+    assert sum(1 for c in calls if c["role"] == "narrator") == 2  # one retry, no loop
+    assert out["repair"]["kept"] == "original"
+    assert out["evaluation"]["narrative_grounded"] is False
+
+
+async def test_a_rejected_plan_goes_back_once_with_the_validators_problems(monkeypatch):
+    bad = {"nodes": [{"id": "a", "metric": "invented_metric"}]}
+    calls = _stub_sequence(monkeypatch, planner=(bad, PLAN_JSON))
+    out = await _run(monkeypatch)
+
+    retry = [c for c in calls if c["role"] == "planner"][1]["user"]
+    assert "unknown metric" in retry
+    assert "error" not in out
+    assert out["evaluation"]["plan_repair"]["first_error"] == "plan_invalid"
+
+
+async def test_a_plan_rejected_twice_is_an_error_not_a_loop(monkeypatch):
+    bad = {"nodes": [{"id": "a", "metric": "invented_metric"}]}
+    calls = _stub_sequence(monkeypatch, planner=(bad,))
+    out = await _run(monkeypatch)
+    assert sum(1 for c in calls if c["role"] == "planner") == 2
+    assert out["error"] == "plan_invalid"
+    assert out["repair"]["attempted"] is True
+
+
+async def test_an_empty_thesis_goes_back_even_though_it_is_valid_json(monkeypatch):
+    """Observed live: every string empty, a HOLD, and nothing for a check to catch."""
+    empty = {**NARRATIVE, "investment_thesis": "", "bull_case": "", "bear_case": ""}
+    calls = _stub_sequence(monkeypatch, narrator=(empty, GROUNDED))
+    out = await _run(monkeypatch)
+    retry = [c for c in calls if c["role"] == "narrator"][1]["user"]
+    assert "left the thesis empty" in retry
+    assert out["repair"]["trigger"] == "empty"
+    assert out["repair"]["kept"] == "repaired"
+
+
+async def test_a_dependency_written_as_a_metric_name_is_resolved_by_the_harness(monkeypatch):
+    """Seen on the eval: depends_on "valuation_score" when the node is "val"."""
+    plan = {
+        "nodes": [
+            {"id": "val", "metric": "valuation_score"},
+            {"id": "mom", "metric": "momentum"},
+            {
+                "id": "conv",
+                "metric": "weighted_conviction",
+                "depends_on": ["valuation_score", "mom"],
+            },
+        ]
+    }
+    calls = _stub_sequence(monkeypatch, planner=(plan,))
+    out = await _run(monkeypatch)
+    assert sum(1 for c in calls if c["role"] == "planner") == 1  # no model call spent on it
+    assert out["evaluation"]["plan_fixes"] == [
+        {"node": "conv", "wrote": "valuation_score", "resolved_to": "val"}
+    ]
+
+
+def test_a_value_matching_any_step_is_verified():
+    """Two windows, two true values: quoting either is correct."""
+    from hedge_fund.agents.verifier import specs_for_facts, verify_analysis
+
+    facts = {"annualized_return_pct": 49.42}
+    nodes = [{"annualized_return_pct": 49.42}, {"annualized_return_pct": 52.46}]
+    text = "A 52.46% annualized return over the year."
+    v = verify_analysis(
+        {"investment_thesis": text}, {"computed": facts}, specs_for_facts(facts, nodes)
+    )
+    assert v["status"] == "clean"
+
+
+async def test_a_producer_the_plan_forgot_is_added_when_it_needs_no_parameters(monkeypatch):
+    """Seen on the eval: conviction depending on "valuation_score", no such step."""
+    plan = {
+        "nodes": [
+            {"id": "mom", "metric": "momentum"},
+            {
+                "id": "conv",
+                "metric": "weighted_conviction",
+                "depends_on": ["valuation_score", "mom"],
+            },
+        ]
+    }
+    _stub_sequence(monkeypatch, planner=(plan,))
+    out = await _run(monkeypatch)
+    assert "error" not in out
+    assert {"node": "conv", "wrote": "valuation_score", "added_step": "valuation_score"} in (
+        out["evaluation"]["plan_fixes"]
+    )
+    assert "valuation_score" in [n["metric"] for n in out["execution"]["nodes"]]
+
+
+async def test_an_unknown_dependency_is_still_rejected(monkeypatch):
+    plan = {"nodes": [{"id": "conv", "metric": "weighted_conviction", "depends_on": ["made_up"]}]}
+    _stub_sequence(monkeypatch, planner=(plan,))
+    assert (await _run(monkeypatch))["error"] == "plan_invalid"

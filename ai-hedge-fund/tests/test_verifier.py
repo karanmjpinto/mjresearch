@@ -307,3 +307,190 @@ def test_real_bear_case_verifies_cleanly():
     claims = extract_claims(text, snap)
     assert claims, "expected claims to be found"
     assert [c for c in claims if c.verdict == "mismatch"] == []
+
+
+# ----------------------------------------------------------------------
+# Binding a number to the wrong metric. Every "false alarm" case below is prose
+# a live committee wrote on a frozen fixture, which the verifier reported as a
+# contradiction when the prose was right. Each is paired with the real error it
+# must still catch, so the fix cannot be a quiet loosening.
+
+BIND = {
+    "price": {"current": 17.04, "change_30d_pct": -16.4},
+    "fundamentals": {
+        "pe_ratio": 7.3133,
+        "peg_ratio": 3.9244,
+        "price_to_book": 0.7231,
+        "dividend_yield": 4.91,
+        "52w_high": 344.57,
+    },
+    "technicals": {"rsi_14": 35.56, "sma_200": 17.2},
+}
+
+
+def test_a_number_on_the_next_line_belongs_to_the_next_statement():
+    text = "Price near 52-week high with limited downside buffer\nElevated RSI (35.5) signals risk"
+    claims = extract_claims(text, BIND)
+    assert [c.metric for c in claims] == ["rsi_14"]
+    assert claims[0].verdict == "verified"
+
+
+def test_a_wrong_52_week_high_in_its_own_statement_is_still_caught():
+    claim = _claim("The 52-week high of $6 leaves little buffer", "week52_high", BIND)
+    assert claim.verdict == "mismatch"
+
+
+def test_a_number_in_the_next_sentence_belongs_to_the_next_sentence():
+    text = "It offers a high dividend yield. The low price-to-book ratio (0.72) adds support."
+    claims = extract_claims(text, BIND)
+    assert {c.metric: c.verdict for c in claims} == {"price_to_book": "verified"}
+
+
+def test_a_multiple_is_not_the_share_price():
+    """ "Trading at 7.3x P/E" — the price took 7.3 and the P/E took the industry's 25."""
+    text = "Trading at 7.3x P/E vs industry average of ~25x, and 0.72x price-to-book"
+    claims = {c.metric: c for c in extract_claims(text, BIND)}
+    assert "price" not in claims
+    assert claims["pe_ratio"].stated == 7.3 and claims["pe_ratio"].verdict == "verified"
+
+
+def test_a_wrong_price_and_a_wrong_multiple_are_still_caught():
+    assert _claim("Trading at $7.30 after the sell-off", "price", BIND).verdict == "mismatch"
+    assert _claim("On a P/E of 25x the stock is dear", "pe_ratio", BIND).verdict == "mismatch"
+
+
+def test_a_peer_figure_is_unverifiable_not_a_contradiction():
+    text = "PEG ratio of 3.92 is rich. Sector peers trade at higher PEG ratios (e.g., 1.5-2.0)"
+    claims = [c for c in extract_claims(text, BIND) if c.metric == "peg_ratio"]
+    by_value = {c.stated: c for c in claims}
+    assert by_value[3.92].verdict == "verified"
+    assert by_value[1.5].verdict == "unverifiable"
+    assert "peers" in by_value[1.5].note
+
+
+def test_a_moving_average_before_a_metric_is_not_a_peer_average():
+    """ "average" before the metric name is half of "moving average", not a comparison."""
+    snap = {"technicals": {"sma_50": 40.97, "sma_200": 43.79}}
+    text = "Below its 50-day moving average of 40.97 and 200-day moving average of 43.79"
+    assert _verdicts(text, snap) == {"sma_50": "verified", "sma_200": "verified"}
+
+
+def test_a_bound_is_checked_as_a_bound():
+    assert _claim("Weak technicals (RSI below 40)", "rsi_14", BIND).verdict == "verified"
+    assert _claim("Weak technicals (RSI below 40)", "rsi_14", BIND).note == "read as an upper bound"
+    assert _claim("RSI above 30 shows no capitulation", "rsi_14", BIND).verdict == "verified"
+
+
+def test_a_false_bound_is_still_caught():
+    assert _claim("Deeply oversold (RSI below 30)", "rsi_14", BIND).verdict == "mismatch"
+    assert _claim("Overbought with RSI above 70", "rsi_14", BIND).verdict == "mismatch"
+
+
+def test_a_bound_word_before_the_metric_does_not_make_its_value_a_bound():
+    """ "Price below 200-day SMA ($17.20)" states the SMA; it does not bound it."""
+    claim = _claim("Price below 200-day SMA ($17.20)", "sma_200", BIND)
+    assert claim.verdict == "verified" and claim.note is None
+    assert _claim("Price below 200-day SMA ($19.90)", "sma_200", BIND).verdict == "mismatch"
+
+
+def test_a_price_range_is_not_a_30_day_change():
+    text = "High volatility with 30-day range (95.98-118.20) persists"
+    assert "change_30d_pct" not in _verdicts(text, BIND)
+
+
+def test_a_wrong_30_day_change_with_its_percent_is_still_caught():
+    assert _claim("Fell 4% over the past month", "change_30d_pct", BIND).verdict == "mismatch"
+    assert _claim("Fell 16.4% over the past month", "change_30d_pct", BIND).verdict == "verified"
+
+
+def test_a_window_length_is_not_a_value():
+    text = "Given current price action over 30 days, caution is warranted"
+    assert "price" not in _verdicts(text, BIND)
+    assert _claim("The 14-day RSI of 35.6 is weak", "rsi_14", BIND).stated == 35.6
+
+
+def test_an_indicator_reading_is_not_a_momentum_percentage():
+    snap = {"computed": {"momentum_pct": -8.88}, "technicals": {"rsi_14": 20.84}}
+    text = "Technicals show bearish momentum (RSI=20.84)"
+    assert _verdicts(text, snap) == {"rsi_14": "verified"}
+    assert _claim("Negative price momentum (-3.1%)", "momentum_pct", snap).verdict == "mismatch"
+
+
+def test_a_number_past_the_search_window_is_not_read_in_half():
+    """The window used to be a slice, so "(69.3)" at its edge was read as 6."""
+    text = "Price near 52-week high with limited downside buffer and elevated RSI (69.3)"
+    claims = extract_claims(text, {"fundamentals": {"52w_high": 344.57}})
+    assert all(c.stated != 6.0 for c in claims)
+
+
+def test_a_peer_figure_before_a_comma_does_not_taint_the_next_metric():
+    snap = {"fundamentals": {"pe_ratio": 7.64, "forward_pe": 10.188}}
+    text = "A P/E ratio (7.64x) significantly below sector average (~15x), forward PE (10.19x)"
+    claims = {c.metric: c for c in extract_claims(text, snap)}
+    assert claims["pe_ratio"].stated == 7.64 and claims["pe_ratio"].verdict == "verified"
+    assert claims["forward_pe"].stated == 10.19 and claims["forward_pe"].verdict == "verified"
+    wrong = "A P/E ratio (7.64x) below sector average (~15x), forward PE (14.0x)"
+    assert _claim(wrong, "forward_pe", snap).verdict == "mismatch"
+
+
+def test_a_number_goes_to_the_metric_named_nearest_to_it():
+    snap = {"price": {"low_30d": 88.65}, "technicals": {"rsi_14": 20.84}}
+    text = "The price is near a 30-day low with oversold technicals (RSI=20.84)"
+    assert _verdicts(text, snap) == {"rsi_14": "verified"}
+    assert _claim("Near its 30-day low ($70.10)", "low_30d", snap).verdict == "mismatch"
+
+
+# --- Checking prose against the plan's own computed fields ---------------
+
+from hedge_fund.agents.verifier import specs_for_facts  # noqa: E402
+
+PLAN_FACTS = {"recent_volatility_pct": 26.73, "volatility_ratio": 0.868, "regime": "normal"}
+
+
+def test_a_computed_field_quoted_correctly_is_verified_not_ignored():
+    """Observed on the eval: a correct thesis reported as citing nothing."""
+    text = "Recent volatility of 26.73% sits below its baseline."
+    v = verify_analysis(
+        {"investment_thesis": text}, {"computed": PLAN_FACTS}, specs_for_facts(PLAN_FACTS)
+    )
+    assert v["status"] == "clean" and v["verified"] == 1
+
+
+def test_a_computed_field_quoted_wrongly_is_a_mismatch():
+    text = "Recent volatility of 41.5% is elevated."
+    v = verify_analysis(
+        {"investment_thesis": text}, {"computed": PLAN_FACTS}, specs_for_facts(PLAN_FACTS)
+    )
+    assert v["status"] == "mismatch"
+
+
+def test_fact_specs_skip_text_and_fields_a_hand_written_spec_owns():
+    names = {s.name for s in specs_for_facts({**PLAN_FACTS, "rsi_14": 44.0, "flag": True})}
+    assert names == {"recent_volatility_pct", "volatility_ratio"}
+
+
+def test_a_number_belongs_to_the_name_before_it_not_a_later_name_reading_back():
+    """'PEG ratio (2.67) ... trading at a premium': 2.67 is not the share price."""
+    text = "The PEG ratio (2.67) suggests the stock is trading at a premium."
+    claims = {c.metric: c for c in extract_claims(text, BIND)}
+    assert "price" not in claims
+
+
+def test_one_word_fields_and_unmarked_percentages_are_not_read_as_facts():
+    facts = {"high": 340.0, "recent_volatility_pct": 26.73, "volatility_ratio": 0.868}
+    text = "The P/E is very high at 45.8. The recent volatility ratio (0.868) is low."
+    v = verify_analysis({"investment_thesis": text}, {"computed": facts}, specs_for_facts(facts))
+    assert v["mismatched"] == 0
+
+
+def test_a_figure_said_twice_still_owns_its_number():
+    text = (
+        "PEG ratio (2.67) is high. A PEG ratio (2.67) suggests the stock is trading at a premium."
+    )
+    claims = extract_claims(text, BIND)
+    assert not [c for c in claims if c.metric == "price"]
+
+
+def test_a_quoted_field_name_is_read_as_the_metric():
+    """Observed: "pe_ratio=38.68714" reported as citing nothing."""
+    assert _claim("Valuation is stretched (pe_ratio=7.3).", "pe_ratio", BIND).verdict == "verified"

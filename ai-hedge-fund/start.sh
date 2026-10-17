@@ -2,7 +2,8 @@
 #
 # Start the whole stack: FastAPI on :8000, Vite on :5173.
 #
-#   ./start.sh
+#   ./start.sh            desk only, on this machine
+#   ./start.sh --phone    desk plus a URL your phone can open on the same Wi-Fi
 #
 # Ctrl-C stops both. Nothing is hosted — the API, the SQLite book and the model
 # all run here, which is why this script exists rather than a deploy.
@@ -16,16 +17,26 @@ cd "$(dirname "$0")"
 BACKEND_PORT="${BACKEND_PORT:-8000}"
 FRONTEND_PORT="${FRONTEND_PORT:-5173}"
 
+# --phone puts the UI on every interface so a phone on the same Wi-Fi can reach
+# it. The API stays on 127.0.0.1 either way: the UI proxies /api from this
+# machine, so the phone never needs a route to the backend, and binding it
+# would expose the book and the model to the whole network for no gain.
+PHONE=0
+
 while [ $# -gt 0 ]; do
   case "$1" in
     --api-port) BACKEND_PORT="$2"; shift 2 ;;
     --ui-port)  FRONTEND_PORT="$2"; shift 2 ;;
+    --phone)    PHONE=1; shift ;;
     -h|--help)
       cat <<'USAGE'
-Usage: ./start.sh [--api-port N] [--ui-port N]
+Usage: ./start.sh [--phone] [--api-port N] [--ui-port N]
 
 Starts the FastAPI backend and the Vite dev server, then stops both on Ctrl-C.
 Defaults: API 8000, UI 5173. The UI proxies /api to whichever API port is set.
+
+--phone also serves the UI on this machine's Wi-Fi address and prints the URL
+to open on the phone. The API is never exposed; the UI proxies to it locally.
 USAGE
       exit 0 ;;
     *) printf 'Unknown argument: %s (try --help)\n' "$1" >&2; exit 2 ;;
@@ -58,8 +69,11 @@ else
   warn "Everything except AI research still works."
 fi
 
+# -sTCP:LISTEN matters: without it this matches *any* socket on the port,
+# including a long-dead browser connection in CLOSED state, and the script
+# then refuses to start over a port that is in fact free.
 for port in "$BACKEND_PORT" "$FRONTEND_PORT"; do
-  if lsof -ti tcp:"$port" >/dev/null 2>&1; then
+  if lsof -ti tcp:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
     die "Port $port is in use. Either free it (lsof -ti tcp:$port | xargs kill) or pick another:  ./start.sh --api-port 8010 --ui-port 5174"
   fi
 done
@@ -87,12 +101,42 @@ for _ in $(seq 1 60); do
   sleep 1
 done
 
+LAN_IP=""
+if [ "$PHONE" = "1" ]; then
+  # Try the interface that carries the default route first, then the usual
+  # hardware ones. Only enN is considered: with a VPN connected the default
+  # route is a utunN tunnel, and the address on that side of the tunnel is not
+  # one the phone on this Wi-Fi can reach.
+  LAN_DEFAULT="$(route -n get default 2>/dev/null | awk '/interface:/{print $2}')"
+  for iface in "$LAN_DEFAULT" en0 en1 en2; do
+    case "$iface" in en[0-9]*) ;; *) continue ;; esac
+    LAN_IP="$(ipconfig getifaddr "$iface" 2>/dev/null || true)"
+    [ -n "$LAN_IP" ] && break
+  done
+  [ -n "$LAN_IP" ] || warn "No Wi-Fi address found — is this machine on a network?"
+fi
+
 say "Starting UI on :$FRONTEND_PORT"
-(cd frontend && npm run dev) &
+if [ "$PHONE" = "1" ]; then
+  (cd frontend && npm run dev -- --host 0.0.0.0) &
+else
+  (cd frontend && npm run dev) &
+fi
 PIDS+=($!)
 
 printf '\n'
 say "Open  http://localhost:$FRONTEND_PORT"
+if [ -n "$LAN_IP" ]; then
+  printf '\n'
+  printf '  \033[1;32mOn your phone, same Wi-Fi:  http://%s:%s\033[0m\n' "$LAN_IP" "$FRONTEND_PORT"
+  LAN_NAME="$(scutil --get LocalHostName 2>/dev/null || true)"
+  if [ -n "$LAN_NAME" ]; then
+    # The name holds when the router hands out a different address, so this is
+    # the one worth saving to the home screen.
+    printf '  \033[1;32mor, address-proof:          http://%s.local:%s\033[0m\n' "$LAN_NAME" "$FRONTEND_PORT"
+  fi
+  printf '  Then Share -> Add to Home Screen to get an app icon.\n'
+fi
 say "API   http://127.0.0.1:$BACKEND_PORT/api/health"
 printf '  Ctrl-C to stop both.\n\n'
 

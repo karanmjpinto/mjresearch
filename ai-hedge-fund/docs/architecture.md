@@ -76,6 +76,10 @@ ambiguity resolved here is one that cannot resurface as a wrong number later.
 
 Node values are content-addressed by `(snapshot, metric, params)`, so editing one
 node does not re-run the others — which is what makes iterating on a plan cheap.
+The cache (`SHARED_VALUE_CACHE`) lives for the process and is shared across
+requests, bounded at 1,024 entries with the oldest evicted. It used to be a
+fresh dict per request, so the keys were right and nothing ever hit. Nodes that
+read other nodes' facts (`consumes`) are never cached.
 
 A failing node degrades the plan rather than aborting it: the node carries its
 error, dependants are skipped, and independent work still computes. A partial
@@ -102,8 +106,62 @@ nearest number, and compares against the snapshot within a per-metric tolerance.
 Longer aliases resolve first so a specific metric claims its number before a
 generic one; each number is consumed once; direction words set the sign.
 
+Binding is constrained so a number is not read against the wrong name: the
+search stays inside the alias's own sentence or line; a number written as a
+multiple, a percentage, or a currency amount is only offered to a metric of that
+kind; window lengths ("30-day") and digits inside a metric's own name are not
+values; a comparator between name and number ("RSI below 40") is tested as a
+bound; and a figure attributed to peers or an average is `unverifiable`.
+
+Binding runs in two passes. Every name first takes the number written after
+it, and only names still without one may read backwards, among numbers nobody
+took. In one pass a long alias could read backwards before the owner of the
+number read forwards — "PEG ratio (2.67) suggests the stock is trading at a
+premium" gave a share price of 2.67. A figure repeated later still owns its
+number, and a field name the narrator quotes literally (`pe_ratio=38.69`) is an
+alias of its metric.
+
 Anything it cannot map is reported as `unverifiable`, never as passing — silence
 about a claim must not look like a passing check.
+
+In the plan pipeline the verifier also checks the plan's own outputs.
+`specs_for_facts` builds one spec per numeric field the plan computed — the
+fields are typed and named, `recent_volatility_pct`, which is what a checker
+needs — so "recent volatility of 26.73%" is checked against the value the
+executor produced. Before this the hand-written specs knew only snapshot
+metrics, and on the first full eval most theses that quoted computed values
+correctly were reported as citing nothing. One-word fields (`high`, `low`) are
+skipped because they are ordinary words, a percentage field read by its name in
+words must be written as a percentage, and a field the plan computed twice
+(`annualized_return_pct` over two windows) accepts either true value.
+
+### Repair: the checker sends work back once
+
+The model proposes; code decides what is wrong and says so. Two stages get one
+retry each (`MAX_REPAIRS = 1`), and the correction is written by code, not by a
+second model:
+
+- **Planner.** A plan the validator rejects goes back with the validator's own
+  list of problems ("unknown metric", a parameter out of range). A second
+  rejection is an error, not a loop. Recorded as `evaluation.plan_repair`.
+  Two mistakes the harness fixes itself, without a model call, and records as
+  `evaluation.plan_fixes`: a dependency written as a metric name is pointed at
+  the one step running that metric, and a dependency on a metric no step runs
+  adds that step — only when it is a registered metric that needs no
+  parameters, so nothing the model did not choose is guessed.
+- **Narrator.** The prose goes back when the thesis is empty, when a number
+  contradicts a computed value (the retry quotes the excerpt, the number written
+  and the correct one), or when it cites no computed value at all. The retry is
+  verified again and the better-checked version is kept — fewer wrong numbers
+  first, then citing something — so a repair can never make a run worse. Both
+  verdicts are recorded as `evaluation.repair`, and the plan view says
+  "corrected once by the checker" when the second draft won.
+
+The empty-thesis trigger exists because of a live failure on the AAPL fixture:
+under constrained decoding at temperature 0 the narrator returned every string
+empty, which is valid JSON, cites nothing for the verifier to catch, and reads
+as a cautious HOLD. The narrator prompt now says what each field must contain;
+the trigger is the net under it.
 
 ### Recorded runs (`runs/`)
 
@@ -141,6 +199,41 @@ determinism — batching, quantisation and hardware all leak in — so the goal 
 is narrower and achievable: pin and record the inputs, so any remaining variance
 is attributable rather than ambient. The structural fix is the plan pipeline,
 where the numbers do not come from the model at all.
+
+It is also measured, the way Bridgewater measures PAT (95% output determinism on
+their suite). `scripts/run_plan_eval.py` runs the thirty questions in
+`evals/plan_questions.py` five times each against frozen snapshots and frozen
+price histories (`evals/fixtures/prices/`), and reports plan agreement,
+conclusion agreement (stance, conviction and verification status), the grounded
+rate before and after repair, and coverage: the share of the questions whose
+every needed capability has a registered metric. Results land in
+`evals/results/plan-*.json`.
+
+The script asks the questions round robin, never one twice in a row. The first
+baseline asked each five times consecutively, and in 14 of the 15 questions
+whose plans disagreed, only the first run differed: the model server reuses
+the previous prompt's cache, and a warm repeat is computed differently from a
+cold call. A user asks once, so the cold path is what is measured.
+
+Measured on 17 October 2026, qwen3:30b, 30 questions × 5 runs
+(`evals/results/plan-20261017T180758Z.json`):
+
+| | first baseline | after Phase 1 |
+|---|---|---|
+| same plan from the same question | 88.5% | 95.9% |
+| same conclusion from the same inputs | 91.5% | 96.6% |
+| prose checks clean against computed values | 57.5% | 86.9% |
+| clean on the first draft, before any repair | 56.7% | 80.0% |
+| errored runs | 16 of 150 | 5 of 150 |
+| questions the catalog can answer | 14 of 30 | 14 of 30 |
+
+Every remaining disagreement was the first pass of a question against its later
+passes; passes two to five agreed completely. The cause is the model server
+matching a prompt it cached on an earlier pass. With `--unload-between-passes`,
+which stops the model before each pass so every call is cold, both agreements
+are **100%** across all 145 completed runs (`plan-20261017T190020Z.json`;
+grounded 86.2%, first draft 79.3%, the same five errored runs). The pipeline is
+reproducible; the residue was the server's cache.
 
 ## API
 
@@ -186,6 +279,12 @@ If that changes, auth comes first, not after.
 - Committee mode still runs full-freedom personas. Turning personas into weight
   profiles over the plan's dimension scores would make committee conviction as
   auditable as the plan's, and is not done.
+- The metric catalog answers 14 of the 30 eval questions. The rest are blocked
+  by capabilities no metric provides yet — revenue growth history, margin
+  trend, cash conversion, macro sensitivity, capital return, peer comparison,
+  balance-sheet strength, event studies and operating leverage. The tally is
+  `coverage()` in `evals/plan_questions.py`.
+- The committee path has no repair loop; only the plan pipeline does.
 - `research_run_retention` trimming exists (`prune_runs`) but is not scheduled.
 - The frontend covers the plan pipeline and the older committee path, but there
   is no UI for run history, run comparison, or methodology notes — those are API

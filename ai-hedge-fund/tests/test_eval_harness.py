@@ -106,6 +106,23 @@ def test_grounding_catches_a_figure_that_is_not_in_the_snapshot():
     assert not g.no_invented_magnitudes(invented, ctx).passed
 
 
+def test_grounding_treats_a_year_the_snapshot_never_states_as_invented():
+    """Observed on the AAPL fixture: "revenue (416B in FY2023)".
+
+    The 416B is in the snapshot. The year is not — the snapshot is dated 2026
+    and gives no fiscal period for that figure, so the model supplied one from
+    memory, and the wrong one. Flagging "2023" looked like a grader that cannot
+    tell a year from a magnitude; it was the grader catching a period nobody
+    gave the model. A year the snapshot does state passes.
+    """
+    ctx = {"snapshot_text": '{"revenue": 416161000000.0, "end_date": "2026-09-17"}'}
+    remembered = answer(investment_thesis="Revenue of 416B in FY2023 is durable. " + "A" * 220)
+    stated = answer(investment_thesis="Revenue of 416B as of 2026 is durable. " + "A" * 220)
+    verdict = g.no_invented_magnitudes(remembered, ctx)
+    assert not verdict.passed and "2023" in verdict.reason
+    assert g.no_invented_magnitudes(stated, ctx).passed
+
+
 def test_grounding_ignores_ordinary_small_numbers():
     """ "a 3-year horizon" is prose, not a claim about the data."""
     ctx = {"snapshot_text": '{"pe": 7.06}'}

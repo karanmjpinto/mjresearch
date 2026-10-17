@@ -16,6 +16,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import time
+from collections import OrderedDict
 from typing import Any
 
 import pandas as pd
@@ -69,6 +70,38 @@ class PlanContext:
         """
         for key, value in values.items():
             self.facts.setdefault(key, value)
+
+
+class NodeValueCache(OrderedDict[str, dict[str, Any]]):
+    """Node values shared across requests, oldest evicted first.
+
+    The cache was always keyed for sharing — (snapshot, metric, parameters) —
+    but every request built its own empty dict, so "edit one node and re-run"
+    still recomputed the whole plan. One instance per process fixes that. It is
+    bounded because the key includes the snapshot hash, so every new day of
+    prices is a new set of keys and an unbounded dict would only grow.
+    """
+
+    def __init__(self, maxsize: int = 1024) -> None:
+        super().__init__()
+        self.maxsize = maxsize
+
+    def get(self, key: str, default: Any = None) -> Any:
+        if key not in self:
+            return default
+        self.move_to_end(key)
+        # A copy, so a caller that edits its result cannot change the next one.
+        return dict(self[key])
+
+    def __setitem__(self, key: str, value: dict[str, Any]) -> None:
+        super().__setitem__(key, value)
+        self.move_to_end(key)
+        while len(self) > self.maxsize:
+            self.popitem(last=False)
+
+
+#: The process's node cache. Plan runs use it unless handed their own.
+SHARED_VALUE_CACHE = NodeValueCache()
 
 
 def _node_cache_key(snapshot_digest: str, metric_id: str, params: dict[str, Any]) -> str:

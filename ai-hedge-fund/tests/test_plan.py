@@ -357,3 +357,22 @@ def test_rendered_facts_disclose_unconfirmed_defaults():
     )
     text = render_facts_for_prompt(_run(plan))
     assert "default, not confirmed by the user" in text
+
+
+def test_the_shared_cache_is_bounded_and_evicts_the_oldest():
+    from hedge_fund.plan.executor import NodeValueCache
+
+    c = NodeValueCache(maxsize=2)
+    c["a"], c["b"] = {"x": 1}, {"x": 2}
+    c.get("a")  # touched, so "b" is now the oldest
+    c["c"] = {"x": 3}
+    assert list(c) == ["a", "c"]
+
+
+def test_a_cached_value_cannot_be_edited_through_a_caller():
+    from hedge_fund.plan.executor import NodeValueCache
+
+    c = NodeValueCache()
+    c["k"] = {"x": 1}
+    c.get("k")["x"] = 99
+    assert c.get("k") == {"x": 1}
