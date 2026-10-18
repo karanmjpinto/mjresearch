@@ -176,7 +176,13 @@ export const SECTIONS: DocSection[] = [
         name: "Which metrics to compute",
         trust: "chosen-then-computed",
         detail:
-          "The planner picks from a fixed catalogue of registered metrics and emits a typed plan. It sees names, not numbers. An edited plan can be replayed without re-planning, which is how you hold the choice fixed and vary nothing else.",
+          "The planner picks from a fixed catalogue of registered metrics and emits a typed plan. It sees names, not numbers. An edited plan can be replayed without re-planning, which is how you hold the choice fixed and vary nothing else. The catalogue has twenty-four metrics: price and risk, valuation, four to five years of annual statements (revenue growth, margin trend, cash conversion, balance sheet, capital return, operating leverage), sensitivity to and event studies around four macro factors — the ten-year yield, natural gas, oil and the dollar — and comparison with peers, named or standard.",
+      },
+      {
+        name: "Formulas the planner writes",
+        trust: "chosen-then-computed",
+        detail:
+          "When no metric measures what was asked, the planner may write a formula — the share of free cash flow paid as dividends, years of cash flow to repay the net debt — over the statement series and values other steps computed. The model chooses the formula; code checks it before anything runs and computes it. It is a small language, not code: ten functions, arithmetic, and names, with anything else refused at plan time. This is the one place a model decides how a number is calculated, so the formula is shown on the step, exactly as written, beside its value. Units are checked too: adding dollars to a percentage, or dividing an amount by a percentage, is refused before it runs — on the first eval such a formula printed −114,984,155,152% and was cited as a finding. A formula still wrong after one repair is dropped and the rest of the plan runs; the answer says which measure is missing.",
       },
       {
         name: "The investment thesis, risks and narration",

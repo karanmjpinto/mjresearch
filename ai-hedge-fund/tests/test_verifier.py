@@ -507,3 +507,11 @@ def test_a_number_matching_nothing_related_still_fails():
     snap = {"fundamentals": {"beta": 0.32}, "computed": {"factor_beta_pct": 0.122}}
     v = verify_analysis({"investment_thesis": "It shows a low beta of 0.9 to gas prices."}, snap)
     assert v["status"] == "mismatch"
+
+
+def test_digits_inside_a_name_are_not_a_value():
+    """Observed: 'bvps_change_3y (formula_value=57.04)' read as 3."""
+    snap = {"computed": {"formula_value": 57.036}}
+    text = "Book value per share rose: bvps_change_3y (formula_value=57.04)."
+    v = verify_analysis({"investment_thesis": text}, snap, specs_for_facts(snap["computed"]))
+    assert v["mismatched"] == 0

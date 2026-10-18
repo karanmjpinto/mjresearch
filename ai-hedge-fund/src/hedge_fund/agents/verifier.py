@@ -463,6 +463,17 @@ def _is_value(m: re.Match[str], text: str, alias_spans: list[tuple[int, int]]) -
         return False
     if _DURATION.match(text, end):
         return False
+    # Digits glued to letters are part of a name, not a value: "bvps_change_3y",
+    # "momentum_252". A scale or unit the pattern read ("5B", "2x") is not this.
+    if start > 0 and (text[start - 1].isalpha() or text[start - 1] == "_"):
+        return False
+    if (
+        end < len(text)
+        and (text[end].isalpha() or text[end] == "_")
+        and not m.group("scale")
+        and not m.group("suffix")
+    ):
+        return False
     # Part of a metric's own name: the 50 in "SMA 50", the 52 in "52-week high".
     return not _overlaps((start, end), alias_spans)
 
@@ -622,6 +633,47 @@ def _related_computed(
         if actual is not None and _matches(spec, stated, actual)[0]:
             return key, actual
     return None
+
+
+def _formula_value_citations(text: str, snapshot: dict[str, Any]) -> list[Claim]:
+    """A formula's result quoted in the narrator's own words.
+
+    A formula is named by the planner — `total_debt_change_3y_pct` — and no
+    narrator writes that name; it writes "debt rose 59.17% in three years". So
+    when the prose names nothing the checker knows, an exact quote of a formula
+    result counts as citing it. Exact means at least three significant figures
+    and within half a percent, so "3 years" or "2x" cannot match by accident.
+    Only formula results, and only as a fallback: it never overrides a mismatch.
+    """
+    computed = snapshot.get("computed")
+    names = snapshot.get("formula_names") or []
+    if not isinstance(computed, dict) or not names:
+        return []
+    targets = [(n, _as_float(computed.get(n))) for n in names]
+    out: list[Claim] = []
+    for m in re.finditer(r"-?\d[\d,]*\.?\d*", text):
+        raw = m.group(0).replace(",", "")
+        digits = raw.replace("-", "").replace(".", "").lstrip("0")
+        if len(digits) < 3:
+            continue
+        try:
+            stated = float(raw)
+        except ValueError:
+            continue
+        for name, actual in targets:
+            if actual and abs(abs(stated) - abs(actual)) <= abs(actual) * 0.005:
+                out.append(
+                    Claim(
+                        metric=name,
+                        stated=stated,
+                        actual=actual,
+                        verdict="verified",
+                        excerpt=text[max(0, m.start() - 30) : m.end() + 10].strip(),
+                        note="formula result quoted in words",
+                    )
+                )
+                break
+    return out
 
 
 def specs_for_facts(
@@ -851,6 +903,8 @@ def verify_analysis(
     text = "\n".join(p for p in parts if p)
 
     claims = extract_claims(text, snapshot, extra_specs)
+    if not claims:
+        claims = _formula_value_citations(text, snapshot)
     verified = sum(1 for c in claims if c.verdict == "verified")
     mismatched = [c for c in claims if c.verdict == "mismatch"]
     unverifiable = sum(1 for c in claims if c.verdict == "unverifiable")

@@ -910,3 +910,4 @@ register(
 # import. Imported last, because they use the helpers and `register` above.
 import hedge_fund.plan.statement_metrics  # noqa: E402,F401
 import hedge_fund.plan.market_metrics  # noqa: E402,F401
+import hedge_fund.plan.formula_metric  # noqa: E402,F401

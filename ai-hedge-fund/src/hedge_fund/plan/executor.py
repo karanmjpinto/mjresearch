@@ -105,6 +105,10 @@ class PlanContext:
         """
         for key, value in values.items():
             self.facts.setdefault(key, value)
+        # A formula's value is filed under the name the planner gave it too, so
+        # a later formula, the narrator and the claim checker can all use it.
+        if isinstance(values.get("formula_name"), str):
+            self.facts.setdefault(values["formula_name"], values.get("formula_value"))
 
 
 class NodeValueCache(OrderedDict[str, dict[str, Any]]):

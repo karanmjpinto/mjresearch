@@ -47,6 +47,8 @@ CAPABILITIES: dict[str, str | None] = {
     "peer_comparison": "peer_comparison",
     "event_study": "event_study",
     "macro_sensitivity": "macro_sensitivity",
+    # --- anything else: a planner-written formula, Phase 2 ----------------
+    "custom_formula": "formula",
 }
 
 
@@ -222,6 +224,55 @@ QUESTIONS: tuple[Question, ...] = (
     Question("tap-momentum", "TAP", "Has momentum turned?", ("price_trend", "trend_state")),
     Question(
         "tap-sentiment", "TAP", "What is the market saying about it in the news?", ("news_tone",)
+    ),
+    # --- no metric answers these directly: the planner must write a formula ---
+    Question(
+        "aapl-equity-per-share",
+        "AAPL",
+        "Has book value per share grown over the last three years?",
+        ("custom_formula",),
+    ),
+    Question(
+        "aapl-dividend-share",
+        "AAPL",
+        "What share of free cash flow was paid out as dividends last year?",
+        ("custom_formula",),
+    ),
+    Question(
+        "kss-payback",
+        "KSS",
+        "How many years of free cash flow would it take to repay the net debt?",
+        ("custom_formula", "balance_sheet_strength"),
+    ),
+    Question(
+        "kss-interest-burden",
+        "KSS",
+        "How much of operating profit is eaten by interest?",
+        ("custom_formula",),
+    ),
+    Question(
+        "lulu-capex-vs-sales",
+        "LULU",
+        "Is capital spending growing faster than revenue?",
+        ("custom_formula", "revenue_growth_history"),
+    ),
+    Question(
+        "exe-debt-trend",
+        "EXE",
+        "How fast has total debt changed over three years?",
+        ("custom_formula",),
+    ),
+    Question(
+        "tap-profit-vs-sales",
+        "TAP",
+        "Has operating profit grown faster than revenue over three years?",
+        ("custom_formula", "revenue_growth_history"),
+    ),
+    Question(
+        "lulu-cash-per-share",
+        "LULU",
+        "How much free cash flow does each share earn now, against three years ago?",
+        ("custom_formula",),
     ),
 )
 

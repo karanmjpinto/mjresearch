@@ -45,9 +45,14 @@ system computes them. Anything you assert about values would be discarded.
 
 Rules:
 - Use ONLY metric ids from the catalog. Never invent a metric or a parameter.
-- If no metric measures what the question asks, do not invent one. Plan the
-  closest metrics the catalog does have, and say in their `why` what the
-  catalog cannot measure. The answer will then state the gap honestly.
+- Most questions need no formula. Only if no metric measures what the
+  question asks, write a `formula` step over
+  the statement series and the values other steps compute — for example
+  pct(abs(latest(dividends)), latest(free_cash_flow)) for the share of free
+  cash flow paid as dividends. Prefer a metric whenever one fits. A formula
+  that uses another step's value must depend on that step.
+- If neither a metric nor a formula can measure it, do not invent a metric.
+  Plan the closest metrics and say in their `why` what cannot be measured.
 - Give every node a short, unique id and a one-line `why`.
 - Set `depends_on` for any node that reads another node's outputs (see "reads
   outputs of" in the catalog). Order otherwise does not matter.
@@ -100,6 +105,9 @@ Absolute rules:
 - Output valid JSON matching the schema exactly. No markdown fences.
 - stance must be one of: BUY, HOLD, SELL, WATCH.
 - Keep key_risks to specific, material risks grounded in the computed values.
+- Write for a person, not a program: "book value per share rose 57.04% over
+  three years", never "bvps_change_3y_pct=57.04". Field names stay out of the
+  prose; the values and their units go in.
 """
 
 

@@ -18,6 +18,7 @@ to a sampling decision.
 from __future__ import annotations
 
 import logging
+import re
 import time
 from typing import Any
 
@@ -128,7 +129,131 @@ def resolve_dependency_names(plan: AnalysisPlan) -> list[dict[str, str]]:
             ids.add(dep)
             by_metric[dep] = [dep]
             fixes.append({"node": n.id, "wrote": dep, "added_step": dep})
+
+    fixes.extend(_formula_dependencies(plan))
     return fixes
+
+
+def _formula_dependencies(plan: AnalysisPlan) -> list[dict[str, str]]:
+    """Add the dependency a formula needs but the planner did not write.
+
+    A formula naming `gross_margin_pct` reads it from the step that computes
+    it, so it must run after that step. When exactly one other step produces
+    the name, the harness adds the edge — the dependency analysis PAT runs on
+    its generated code — and records it. An ambiguous name is left alone.
+    """
+    import ast
+
+    from hedge_fund.plan import get_metric
+    from hedge_fund.plan.formula import FUNCTIONS, SERIES, candidates, rename
+    from hedge_fund.plan.types import MetricError
+
+    producers: dict[str, list[str]] = {}
+    for n in plan.nodes:
+        try:
+            names = {f.name for f in get_metric(n.metric).outputs}
+        except MetricError:
+            continue
+        if n.metric == "formula" and isinstance(n.params.get("name"), str):
+            names.add(n.params["name"])
+        for name in names:
+            producers.setdefault(name, []).append(n.id)
+
+    fixes: list[dict[str, str]] = []
+    for n in plan.nodes:
+        # The unit only labels the result. Seen on the eval: unit "boolean" for
+        # a comparison, which failed the whole plan over a display label.
+        unit = n.params.get("unit") if n.metric == "formula" else None
+        if unit is not None and unit not in ("%", "x", "currency", "number"):
+            n.params["unit"] = "number"
+            fixes.append({"node": n.id, "wrote": f"unit {unit}", "resolved_to": "unit number"})
+        expr = n.params.get("expression") if n.metric == "formula" else None
+        if not isinstance(expr, str):
+            continue
+        try:
+            used = {
+                x.id
+                for x in ast.walk(ast.parse(expr, mode="eval"))
+                if isinstance(x, ast.Name) and x.id not in SERIES and x.id not in FUNCTIONS
+            }
+        except SyntaxError:
+            continue  # the validator reports it
+        # A name nothing produces, with exactly one obvious meaning — "fcf" for
+        # free_cash_flow — is corrected here. Seen on the eval: the model was
+        # told "did you mean free_cash_flow?" and wrote "fcf" again. Two
+        # plausible meanings and the validator rejects it instead.
+        known = set(SERIES) | set(producers)
+        for name in sorted(used):
+            if name in known:
+                continue
+            hits = candidates(name, known)
+            if len(hits) == 1:
+                expr = rename(expr, name, hits[0])
+                n.params["expression"] = expr
+                fixes.append({"node": n.id, "wrote": name, "resolved_to": hits[0]})
+                used.discard(name)
+                if hits[0] not in SERIES:
+                    used.add(hits[0])
+        for name in sorted(used):
+            src = [p for p in producers.get(name, []) if p != n.id]
+            if len(src) == 1 and src[0] not in n.depends_on:
+                n.depends_on.append(src[0])
+                fixes.append({"node": n.id, "uses": name, "added_dependency": src[0]})
+    return fixes
+
+
+def _drop_bad_formulas(
+    content: str, failure: dict[str, Any]
+) -> tuple[AnalysisPlan | None, list[dict[str, str]]]:
+    """The plan without the formula steps it could not get right, or None.
+
+    Seen on the eval: given formulas, the planner started writing them for
+    questions a metric already answered — and getting them wrong — so one bad
+    formula failed a plan whose eight other steps were fine. A formula is the
+    one step the model writes itself, so after its repair it is the one step
+    the harness may drop: it and anything depending on it go, the rest runs,
+    and the answer is told what could not be computed. Any other problem still
+    fails the plan, because dropping a chosen metric would change the question.
+    """
+    if failure.get("error") != "plan_invalid":
+        return None, []
+    try:
+        plan = AnalysisPlan.model_validate_json(content)
+    except Exception:
+        return None, []
+    resolve_dependency_names(plan)
+    by_id = {n.id: n for n in plan.nodes}
+    reasons: dict[str, str] = {}
+    for problem in failure.get("problems") or []:
+        m = re.match(r"node '([^']+)'", problem)
+        if not m or m.group(1) not in by_id or by_id[m.group(1)].metric != "formula":
+            return None, []  # a non-formula problem: not ours to drop
+        reasons[m.group(1)] = problem
+    bad = set(reasons)
+    if not bad:
+        return None, []
+    changed = True
+    while changed:  # dependants of a dropped step go too
+        changed = False
+        for n in plan.nodes:
+            if n.id not in bad and any(d in bad for d in n.depends_on):
+                bad.add(n.id)
+                changed = True
+    plan.nodes = [n for n in plan.nodes if n.id not in bad]
+    if not plan.nodes:
+        return None, []
+    try:
+        validate_plan(plan)
+    except PlanValidationError:
+        return None, []
+    return plan, [
+        {
+            "node": nid,
+            "dropped": "formula could not be validated",
+            "reason": reasons.get(nid, "depends on a dropped step"),
+        }
+        for nid in sorted(bad)
+    ]
 
 
 def _parse_plan(
@@ -157,8 +282,8 @@ def _plan_repair_prompt(user: str, rejected: str, failure: dict[str, Any]) -> st
         f"{user}\n\nYour previous plan was rejected by the validator before anything ran:\n"
         f"{listed}\n\nThe rejected plan was:\n{rejected[:4000]}\n\n"
         "Return a corrected plan. Use only metrics and parameters from the catalog. "
-        "If nothing in the catalog measures what was asked, plan the closest metrics it "
-        "has and say in their `why` what it cannot measure."
+        "If no metric measures what was asked, write a `formula` step; if a formula "
+        "cannot either, plan the closest metrics and say in their `why` what is missing."
     )
 
 
@@ -194,7 +319,11 @@ async def build_plan(
             break
         assert failure is not None
         if attempt == MAX_REPAIRS:
-            return None, {**failure, "repair": repair}
+            plan, dropped = _drop_bad_formulas(result.content, failure)
+            if plan is None:
+                return None, {**failure, "repair": repair}
+            fixes = [*resolve_dependency_names(plan), *dropped]
+            break
         repair = {
             "attempted": True,
             "first_error": failure["error"],
@@ -235,6 +364,17 @@ async def _narrate(system: str, user: str) -> dict[str, Any]:
 #: constrained decoding at temperature 0 the narrator returned every string
 #: empty, which is valid JSON, cites nothing, and reads as a cautious HOLD.
 MIN_THESIS_CHARS = 80
+
+
+def _formula_units(execution: dict[str, Any]) -> dict[str, str]:
+    """A formula's unit, filed under the name it was given, for the checker."""
+    out: dict[str, str] = {}
+    for n in execution["nodes"]:
+        v = n.get("values") or {}
+        if n["status"] == "ok" and isinstance(v.get("formula_name"), str):
+            unit = v.get("formula_unit") or ""
+            out[v["formula_name"]] = "" if unit == "number" else unit
+    return out
 
 
 def _repair_trigger(
@@ -365,11 +505,15 @@ async def run_plan_analysis(
     user = build_narrator_prompt(ticker.upper(), question, facts_block, data_snapshot)
     # Claims are checked against the computed facts as well as the raw snapshot,
     # since the narrator was told to cite the former.
-    checked_against = {**data_snapshot, "computed": execution["facts"]}
+    checked_against = {
+        **data_snapshot,
+        "computed": execution["facts"],
+        "formula_names": list(_formula_units(execution)),
+    }
     fact_specs = specs_for_facts(
         execution["facts"],
         [n.get("values") or {} for n in execution["nodes"] if n["status"] == "ok"],
-        field_units(),
+        {**field_units(), **_formula_units(execution)},
     )
 
     narrated = await _narrate(system, user)
@@ -434,6 +578,12 @@ async def run_plan_analysis(
         evaluation["plan_repair"] = plan_meta["repair"]
     if plan_meta.get("harness_fixes"):
         evaluation["plan_fixes"] = plan_meta["harness_fixes"]
+        dropped = [f["node"] for f in plan_meta["harness_fixes"] if "dropped" in f]
+        if dropped:
+            evaluation.setdefault("notes", []).append(
+                f"{len(dropped)} formula step(s) could not be validated and were dropped: "
+                + ", ".join(dropped)
+            )
         evaluation.setdefault("notes", []).append(
             f"the harness pointed {len(plan_meta['harness_fixes'])} dependency name(s) "
             "at the step that computes them"

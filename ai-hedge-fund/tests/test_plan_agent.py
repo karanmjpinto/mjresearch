@@ -517,3 +517,37 @@ async def test_an_unknown_dependency_is_still_rejected(monkeypatch):
     plan = {"nodes": [{"id": "conv", "metric": "weighted_conviction", "depends_on": ["made_up"]}]}
     _stub_sequence(monkeypatch, planner=(plan,))
     assert (await _run(monkeypatch))["error"] == "plan_invalid"
+
+
+async def test_a_formula_still_wrong_after_repair_is_dropped_and_the_rest_runs(monkeypatch):
+    """Seen on the eval: one bad formula failed a plan whose other steps were fine."""
+    bad = {
+        "nodes": [
+            {"id": "val", "metric": "valuation_score"},
+            {
+                "id": "f",
+                "metric": "formula",
+                "params": {"name": "x_pct", "expression": "made_up / 2"},
+            },
+            {
+                "id": "g",
+                "metric": "formula",
+                "depends_on": ["f"],
+                "params": {"name": "y_pct", "expression": "x_pct * 2"},
+            },
+        ]
+    }
+    calls = _stub_sequence(monkeypatch, planner=(bad,))
+    out = await _run(monkeypatch)
+    assert "error" not in out
+    assert sum(1 for c in calls if c["role"] == "planner") == 2  # one repair, then the drop
+    assert [n["node_id"] for n in out["execution"]["nodes"]] == ["val"]
+    dropped = {f["node"] for f in out["evaluation"]["plan_fixes"] if "dropped" in f}
+    assert dropped == {"f", "g"}
+    assert any("could not be validated and were dropped" in n for n in out["evaluation"]["notes"])
+
+
+async def test_a_bad_ordinary_metric_is_still_a_failure_not_dropped(monkeypatch):
+    bad = {"nodes": [{"id": "a", "metric": "price_window", "params": {"days": -5}}]}
+    _stub_sequence(monkeypatch, planner=(bad,))
+    assert (await _run(monkeypatch))["error"] == "plan_invalid"
