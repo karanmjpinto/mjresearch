@@ -365,6 +365,15 @@ def _read_direction(text: str, number_start: int, alias_start: int) -> int:
     """Return -1, +1, or 0 for the direction stated near a number."""
     window_start = max(0, min(number_start, alias_start) - 40)
     window = text[window_start : max(number_start, alias_start)].lower()
+    # Not past the start of the clause: in "minimal downside pressure, while the
+    # annualized return of 49.42%", the downside belongs to the clause before.
+    head = min(number_start, alias_start) - window_start
+    cut = max(
+        window.rfind(sep, 0, head)
+        for sep in (",", ";", " while ", " but ", " whereas ", " however ")
+    )
+    if cut >= 0:
+        window = window[cut + 1 :]
     neg = max((window.rfind(w) for w in _NEGATIVE_WORDS), default=-1)
     pos = max((window.rfind(w) for w in _POSITIVE_WORDS), default=-1)
     if neg < 0 and pos < 0:
@@ -537,7 +546,13 @@ def _number_candidates(
         for m in _NUMBER.finditer(text, before_start, alias_start)
         if _is_value(m, text, alias_spans) and _unit_fits(spec, m, text)
     ]
-    if hits and not _alias_between(hits[-1].end(), alias_start, alias_spans):
+    # Not across a parenthesis: in "(4.86% latest growth) and gross margin" the
+    # figure belongs to what is inside the brackets.
+    if (
+        hits
+        and not _alias_between(hits[-1].end(), alias_start, alias_spans)
+        and not re.search(r"[()]", text[hits[-1].end() : alias_start])
+    ):
         m = hits[-1]
         value = _parse_number(m)
         if value is not None:
@@ -610,7 +625,7 @@ _DIRECTIONAL_WORDS = ("drawdown", "return", "momentum", "change")
 
 
 def _related_computed(
-    spec: MetricSpec, snapshot: dict[str, Any], stated: float
+    spec: MetricSpec, snapshot: dict[str, Any], stated: float, excerpt: str = ""
 ) -> tuple[str, float] | None:
     """A computed field of the same family that the stated number matches.
 
@@ -623,14 +638,34 @@ def _related_computed(
     computed = snapshot.get("computed")
     if not isinstance(computed, dict):
         return None
+    # The same field computed by several steps: "252-day momentum of -21.54%"
+    # when the 90-day step filed its value first.
+    for actual in (snapshot.get("computed_all") or {}).get(spec.name, []):
+        if _matches(spec, stated, actual)[0]:
+            return spec.name, actual
     stem = spec.name.removesuffix("_pct")
+    words = set(re.findall(r"[a-z]+", excerpt.lower()))
     for key, value in computed.items():
         if key == spec.name or isinstance(value, bool):
             continue
-        if not (key.startswith(stem + "_") or stem in key.split("_")):
+        key_words = [w for w in key.split("_") if w not in ("pct", "pp")]
+        family = key.startswith(stem + "_") or stem in key.split("_")
+        # "calm regime volatility of 23.39%" is calm_volatility_pct: every word
+        # of the field's name is in the phrase, and it ends like the alias.
+        named = (
+            bool(key_words)
+            and key_words[-1] == stem.split("_")[-1]
+            and all(w in words for w in key_words)
+        )
+        if not (family or named):
             continue
         actual = _as_float(value)
-        if actual is not None and _matches(spec, stated, actual)[0]:
+        if actual is None:
+            continue
+        # A change is often written with its sign as a verb: "declined by 1.37".
+        if _matches(spec, stated, actual)[0] or (
+            "change" in key and _matches(spec, abs(stated), abs(actual))[0]
+        ):
             return key, actual
     return None
 
@@ -862,7 +897,7 @@ def extract_claims(
                     ok, delta, note, actual = True, None, "matches another step's value", alt
                     break
         if not ok:
-            related = _related_computed(spec, snapshot, stated)
+            related = _related_computed(spec, snapshot, stated, hit.excerpt)
             if related is not None:
                 ok, delta, actual = True, None, related[1]
                 note = f"matches computed {related[0]}"

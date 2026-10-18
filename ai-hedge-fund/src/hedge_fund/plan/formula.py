@@ -87,15 +87,25 @@ def _not_positive(name: str, w: list[float], what: str) -> MetricError:
     return MetricError(f"{name} is not positive {what}, so it is undefined{hint}")
 
 
+#: Cash outflows reported negative. Their growth means growth in the amount
+#: spent, so change() and cagr() read them as magnitudes. Seen on the eval:
+#: "is capex growing faster than revenue" failed on a negative base.
+OUTFLOWS = frozenset({"capex", "buybacks", "dividends"})
+
+
+def _magnitudes(w: list[float], name: str) -> list[float]:
+    return [abs(v) for v in w] if name in OUTFLOWS and all(v <= 0 for v in w) else w
+
+
 def _change(s: list[float | None], name: str, n: int) -> float:
-    w = _window(s, n, name)
+    w = _magnitudes(_window(s, n, name), name)
     if w[-1] <= 0:
         raise _not_positive(name, w, f"{n} year(s) back")
     return (w[0] / w[-1] - 1) * 100
 
 
 def _cagr(s: list[float | None], name: str, n: int) -> float:
-    w = _window(s, n, name)
+    w = _magnitudes(_window(s, n, name), name)
     if w[0] <= 0 or w[-1] <= 0:
         raise _not_positive(name, w, "at both ends")
     growth: float = (w[0] / w[-1]) ** (1 / n)

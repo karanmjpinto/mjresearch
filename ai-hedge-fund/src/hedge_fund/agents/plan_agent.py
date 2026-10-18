@@ -366,6 +366,18 @@ async def _narrate(system: str, user: str) -> dict[str, Any]:
 MIN_THESIS_CHARS = 80
 
 
+def _all_values(execution: dict[str, Any]) -> dict[str, list[float]]:
+    """Every numeric value each field took across the plan's steps."""
+    out: dict[str, list[float]] = {}
+    for n in execution["nodes"]:
+        if n["status"] != "ok":
+            continue
+        for k, v in (n.get("values") or {}).items():
+            if isinstance(v, (int, float)) and not isinstance(v, bool):
+                out.setdefault(k, []).append(float(v))
+    return out
+
+
 def _formula_units(execution: dict[str, Any]) -> dict[str, str]:
     """A formula's unit, filed under the name it was given, for the checker."""
     out: dict[str, str] = {}
@@ -509,6 +521,7 @@ async def run_plan_analysis(
         **data_snapshot,
         "computed": execution["facts"],
         "formula_names": list(_formula_units(execution)),
+        "computed_all": _all_values(execution),
     }
     fact_specs = specs_for_facts(
         execution["facts"],

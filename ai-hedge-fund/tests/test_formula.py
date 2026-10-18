@@ -221,9 +221,14 @@ def test_an_unambiguous_wrong_name_is_corrected_and_an_ambiguous_one_is_not():
     validate_plan(plan)
 
 
-def test_a_negative_series_says_to_negate_it():
-    with pytest.raises(MetricError, match="use -capex"):
-        evaluate("change(capex, 1)", {"capex": [-10.0, -8.0, -7.0]}, {})
+def test_an_outflow_grows_by_the_amount_spent():
+    """Capex is reported negative; its growth is growth in spending."""
+    assert evaluate("change(capex, 1)", {"capex": [-10.0, -8.0, -7.0]}, {}) == pytest.approx(25.0)
+
+
+def test_another_negative_series_says_to_negate_it():
+    with pytest.raises(MetricError, match="use -net_income"):
+        evaluate("change(net_income, 1)", {"net_income": [-10.0, -8.0, -7.0]}, {})
 
 
 # --- units: the formulas that parsed, ran, and meant nothing -------------

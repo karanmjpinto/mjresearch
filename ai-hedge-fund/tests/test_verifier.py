@@ -515,3 +515,43 @@ def test_digits_inside_a_name_are_not_a_value():
     text = "Book value per share rose: bvps_change_3y (formula_value=57.04)."
     v = verify_analysis({"investment_thesis": text}, snap, specs_for_facts(snap["computed"]))
     assert v["mismatched"] == 0
+
+
+def test_a_field_named_in_full_by_the_phrase_is_the_one_meant():
+    snap = {"computed": {"regime_volatility_pct": 21.27, "calm_volatility_pct": 23.39}}
+    text = "It sits in a calm regime volatility of 23.39% this year."
+    v = verify_analysis({"investment_thesis": text}, snap, specs_for_facts(snap["computed"]))
+    assert v["mismatched"] == 0
+
+
+def test_a_change_written_with_a_verb_matches_by_magnitude():
+    snap = {"computed": {"operating_margin_pct": 19.91, "operating_margin_change_pp": -1.37}}
+    text = "Operating margin has declined by 1.37 percentage points since 2022."
+    v = verify_analysis({"investment_thesis": text}, snap, specs_for_facts(snap["computed"]))
+    assert v["mismatched"] == 0
+
+
+def test_a_figure_inside_brackets_is_not_read_backwards_by_the_next_name():
+    snap = {"computed": {"gross_margin_pct": 56.6}}
+    text = "Growth slowed (4.86% latest growth) and gross margin trends held."
+    v = verify_analysis({"investment_thesis": text}, snap, specs_for_facts(snap["computed"]))
+    assert v["mismatched"] == 0
+
+
+def test_a_field_computed_by_two_steps_accepts_either():
+    snap = {
+        "technicals": {},
+        "computed": {"momentum_pct": -8.24},
+        "computed_all": {"momentum_pct": [-8.24, -21.54]},
+    }
+    text = "The 252-day momentum is a more severe -21.54% decline."
+    v = verify_analysis({"investment_thesis": text}, snap)
+    assert v["mismatched"] == 0
+
+
+def test_direction_is_read_from_the_claims_own_clause():
+    """Observed: 'downside pressure, while the annualized return of 49.42%' read as -49.42."""
+    snap = {"computed": {"annualized_return_pct": 49.42}}
+    text = "Minimal downside pressure, while the annualized return of 49.42% demonstrates strength."
+    v = verify_analysis({"investment_thesis": text}, snap, specs_for_facts(snap["computed"]))
+    assert v["status"] == "clean"
