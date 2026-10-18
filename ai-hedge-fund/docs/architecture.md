@@ -301,6 +301,22 @@ are **100%** across all 145 completed runs (`plan-20261017T190020Z.json`;
 grounded 86.2%, first draft 79.3%, the same five errored runs). The pipeline is
 reproducible; the residue was the server's cache.
 
+After Phase 2 — statements, nine metrics, formulas — on 38 questions, eight of
+which need a formula (`plan-20261018T023005Z.json`, every call cold):
+
+| | Phase 1 (30 q) | Phase 2 (38 q) |
+|---|---|---|
+| same plan / same conclusion | 100% / 100% | 100% / 100% |
+| prose checks clean | 86.2% | 97.3% |
+| clean on the first draft | 79.3% | 94.6% |
+| errored runs | 5 of 150 | 5 of 190 |
+| questions the catalog can answer | 14 of 30 | 38 of 38 |
+
+The two questions not clean are honest: one narrator did its own arithmetic
+("exceeds the operating margin by 15.0%") and the checker caught it, and one
+asks about news the frozen fixture does not have. The planner asked no
+clarifying question on any of the 190 runs, which is the next thing to look at.
+
 ## API
 
 | Method | Path | Purpose |
@@ -345,11 +361,12 @@ If that changes, auth comes first, not after.
 - Committee mode still runs full-freedom personas. Turning personas into weight
   profiles over the plan's dimension scores would make committee conviction as
   auditable as the plan's, and is not done.
-- The metric catalog answers 14 of the 30 eval questions. The rest are blocked
-  by capabilities no metric provides yet — revenue growth history, margin
-  trend, cash conversion, macro sensitivity, capital return, peer comparison,
-  balance-sheet strength, event studies and operating leverage. The tally is
-  `coverage()` in `evals/plan_questions.py`.
+- Coverage is 38 of 38 on the eval set, which says the set is too easy, not
+  that the catalog is complete. Formulas cover only annual statements and
+  computed values: no quarterly data, no price series inside a formula.
+- Macro factors and peer multiples are fetched at execution time, not frozen in
+  the snapshot, so replaying an old run can see newer values for them.
+- The planner never asked a clarifying question on 190 eval runs.
 - The committee path has no repair loop; only the plan pipeline does.
 - `research_run_retention` trimming exists (`prune_runs`) but is not scheduled.
 - The frontend covers the plan pipeline and the older committee path, but there
