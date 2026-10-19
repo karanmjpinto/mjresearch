@@ -50,6 +50,7 @@ from hedge_fund.screeners import (
 from hedge_fund.screeners import (
     kiyohara_handbook as kh,
 )
+from hedge_fund.data import capital_cycle as cc
 from hedge_fund.screeners import (
     yartseva as yz,
 )
@@ -224,6 +225,18 @@ def _cambrian() -> dict[str, Any]:
         "leverage_best": cs.LEVERAGE_BEST,
         "leverage_worst": cs.LEVERAGE_WORST,
         "weights": cs.WEIGHTS,
+        # The capital-cycle flag is set from these, so moving one relabels rows.
+        "capital_cycle": {
+            k: getattr(cc, k)
+            for k in (
+                "BUILDING",
+                "REPLACING",
+                "SHIFT",
+                "MARGIN_PEAK_PP",
+                "MARGIN_TROUGH_PP",
+                "ISSUING_PCT",
+            )
+        },
     }
 
 

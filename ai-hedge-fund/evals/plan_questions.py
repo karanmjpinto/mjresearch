@@ -43,6 +43,7 @@ CAPABILITIES: dict[str, str | None] = {
     "balance_sheet_strength": "balance_sheet",
     "capital_return": "capital_return",
     "operating_leverage": "operating_leverage",
+    "capital_cycle": "capital_cycle",
     # --- comparisons with something outside the company, Phase 2 ---------
     "peer_comparison": "peer_comparison",
     "event_study": "event_study",
@@ -224,6 +225,19 @@ QUESTIONS: tuple[Question, ...] = (
     Question("tap-momentum", "TAP", "Has momentum turned?", ("price_trend", "trend_state")),
     Question(
         "tap-sentiment", "TAP", "What is the market saying about it in the news?", ("news_tone",)
+    ),
+    # --- the capital-cycle question, Hosking's lens --------------------------
+    Question(
+        "exe-capital-cycle",
+        "EXE",
+        "Is capital flooding into this business or leaving it?",
+        ("capital_cycle",),
+    ),
+    Question(
+        "lulu-capital-cycle",
+        "LULU",
+        "Are its margins at a cyclical peak that new investment will compete away?",
+        ("capital_cycle", "margin_trend"),
     ),
     # --- no metric answers these directly: the planner must write a formula ---
     Question(
