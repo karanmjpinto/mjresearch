@@ -525,6 +525,12 @@ function reason(r: ScreenRow): string {
   if (top.price_taker_tension === true) {
     bits.push("price-taker, against desk principle");
   }
+  /* The counter-thesis on the same row: capital arriving is Hosking's sell
+   * signal on exactly the names this screen likes for scarcity. */
+  const cycle = snap.capital_cycle as Record<string, unknown> | null | undefined;
+  if (cycle && typeof cycle.capital_cycle === "string" && cycle.capital_cycle !== "mixed") {
+    bits.push(`capital ${cycle.capital_cycle}: ${String(cycle.capital_cycle_evidence ?? "")}`);
+  }
 
   const flags = r.red_flags;
   if (Array.isArray(flags) && flags.length > 0) {

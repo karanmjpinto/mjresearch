@@ -441,3 +441,54 @@ register(
         fn=_operating_leverage,
     )
 )
+
+
+# ----------------------------------------------------------------------
+# capital cycle
+# ----------------------------------------------------------------------
+
+
+def _capital_cycle(ctx: Any) -> dict[str, Any]:
+    from hedge_fund.data.capital_cycle import read
+
+    out = read(_table(ctx))
+    if out is None:
+        raise MetricError("too few years of capex, margins or shares to read a capital cycle")
+    return out
+
+
+register(
+    Metric(
+        id="capital_cycle",
+        label="Capital cycle",
+        description="Whether capital is arriving in or leaving the business, the capital-cycle "
+        "test: capex against depreciation now and three years ago, the margin against its own "
+        "average, and share issuance. 'arriving' is the classic warning — high returns pulling in "
+        "the supply that competes them away; 'leaving' is the classic opportunity.",
+        tier="transform",
+        outputs=(
+            FieldSpec("capital_cycle", "string", "arriving, leaving or mixed"),
+            FieldSpec(
+                "capex_to_depreciation",
+                "number",
+                "Capex over depreciation, latest year; above 1 the asset base is growing",
+            ),
+            FieldSpec(
+                "capex_to_depreciation_prior",
+                "number",
+                "Capex over depreciation about three years earlier",
+            ),
+            FieldSpec(
+                "margin_vs_average_pp",
+                "number",
+                "Latest operating margin minus its average over the years reported, in points",
+            ),
+            FieldSpec(
+                "share_growth_pct_per_year", "number", "Annual change in shares outstanding", "%"
+            ),
+            FieldSpec("capital_cycle_evidence", "string", "The signals behind the reading"),
+        ),
+        notes="A description of where capital is flowing, not a forecast of when it turns.",
+        fn=_capital_cycle,
+    )
+)

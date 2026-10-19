@@ -65,6 +65,18 @@ reconcilable only if Cambrian's point 4 holds — that the buyer, not the cycle,
 now sets the price. That is a judgment, so the screen does not resolve it; the
 `price_taker_tension` flag marks every memory row so the conflict is read
 rather than discovered.
+
+THE CAPITAL-CYCLE COUNTER-THESIS
+
+Hosking Partners' Q3 2026 note reads the same industry the other way: it is
+still selling memory, because the profits are "super-normal" and capital is
+arriving. Each row carries `data/capital_cycle.py`'s reading — capex against
+depreciation, its direction, the margin against its own average, share
+issuance — and `capital_arriving` when the signals agree. On the October 2026
+accounts SK hynix ran capex at 2.1x depreciation with a margin 30 points above
+its own average, while SUMCO and Siltronic were back to replacing what wears
+out at margins below theirs: the two theses agree on wafers and disagree on
+memory. Shown, not scored, for the same reason the tension flag is.
 """
 
 from __future__ import annotations
@@ -232,7 +244,10 @@ class ScarcitySnapshot:
     torque_unmeasured_reason: str | None = None
     demand_growth: float | None = None
     net_debt_to_ebitda: float | None = None
-    trailing_pe: float | None = None
+    #: Capital-cycle reading from the annual statements. Shown, never scored:
+    #: it is the counter-thesis, and a screen that quietly weighted it would
+    #: be neither Cambrian's nor Hosking's.
+    capital_cycle: dict[str, Any] | None = None
     years_of_history: int = 0
     error: str | None = None
 
@@ -245,6 +260,7 @@ class ScarcityResult:
     composite: float = 0.0
     scores: dict[str, float] = field(default_factory=dict)
     price_taker_tension: bool = False
+    capital_arriving: bool = False
     snapshot: dict[str, Any] = field(default_factory=dict)
     unchecked: tuple[str, ...] = UNCHECKABLE_BY_DESIGN
     error: str | None = None
@@ -348,7 +364,6 @@ def fetch_scarcity_snapshot(ticker: str) -> ScarcitySnapshot:
         snap.financial_currency = (
             info.get("financialCurrency") or ""
         ).upper() or snap.quote_currency
-        snap.trailing_pe = _f(info.get("trailingPE"))
         snap.operating_margin = _f(info.get("operatingMargins"))
         snap.revenue_ttm = _f(info.get("totalRevenue"))
 
@@ -396,6 +411,11 @@ def fetch_scarcity_snapshot(ticker: str) -> ScarcitySnapshot:
         snap.torque, snap.torque_unmeasured_reason = torque_of(
             gp[0] if gp else None, da[0] if da else None, ebits[0] if ebits else None
         )
+
+        from hedge_fund.data.capital_cycle import read as read_cycle
+        from hedge_fund.data.statements import fetch_statements
+
+        snap.capital_cycle = read_cycle(fetch_statements(sym))
 
         ppe = _row_series(bs, "Net PPE")
         if ppe and revs and revs[0] > 0:
@@ -447,6 +467,7 @@ def evaluate(snap: ScarcitySnapshot) -> ScarcityResult:
         )
 
     r.price_taker_tension = snap.segment == "memory"
+    r.capital_arriving = (snap.capital_cycle or {}).get("capital_cycle") == "arriving"
     r.passed = not fails
     if not r.passed:
         return r
@@ -486,6 +507,7 @@ def _row(r: ScarcityResult) -> dict[str, Any]:
         "composite": r.composite,
         "scores": r.scores,
         "price_taker_tension": r.price_taker_tension,
+        "capital_arriving": r.capital_arriving,
         "snapshot": r.snapshot,
         "unchecked": list(r.unchecked),
         "error": r.error,

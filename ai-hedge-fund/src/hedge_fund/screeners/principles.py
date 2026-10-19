@@ -322,6 +322,29 @@ REGISTRY: tuple[Principle, ...] = (
         ),
     ),
     Principle(
+        id="capital-leaving-not-arriving",
+        statement=(
+            "I would rather buy where capital is leaving an industry than where it is "
+            "arriving, because today's high returns are tomorrow's new supply."
+        ),
+        kind="judgment",
+        enforced=(
+            "PARTLY. The reading is computed — `data/capital_cycle.py` reads capex against "
+            "depreciation, its direction, the margin against its own average and share "
+            "issuance from the annual statements, and reports arriving, leaving or mixed. It "
+            "is a plan metric and a flag on the AI supply-chain screen. What is not computed "
+            "is whether this time supply really cannot follow, which is the opposing thesis "
+            "(Cambrian's), so the reading informs the decision and filters nothing."
+        ),
+        why=(
+            "The capital-cycle school — Marathon, Hosking Partners — made its record on it: "
+            "Hosking bought oil tankers in 2017 as capital fled (the basket is up about 440% "
+            "since) and trims them now that the order book is growing. Its Q3 2026 note is "
+            "selling memory into super-normal margins while this desk's scarcity screen ranks "
+            "memory near the top; holding both views in the open is the point."
+        ),
+    ),
+    Principle(
         id="concentration",
         statement="I would rather own my tenth best idea twice than my twentieth at all.",
         kind="threshold",

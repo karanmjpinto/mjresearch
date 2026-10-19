@@ -76,13 +76,15 @@ register(Metric(
 Outputs are validated against the signature, so a metric that returns a field it
 did not declare fails loudly rather than reaching the prompt.
 
-Twenty-four metrics today, in four modules:
+Twenty-five metrics today, in four modules:
 
 - `plan/registry.py` — price, technicals, valuation, risk, regimes, news, and the
   weighted conviction score.
 - `plan/statement_metrics.py` — revenue growth, margin trend, cash conversion,
-  balance sheet, capital return, operating leverage. "Latest" means the latest
-  year; an older year never stands in for a missing one.
+  balance sheet, capital return, operating leverage, and the capital cycle
+  (`data/capital_cycle.py`: capex against depreciation and its direction, margin
+  against its own average, share issuance → arriving, leaving or mixed). "Latest"
+  means the latest year; an older year never stands in for a missing one.
 - `plan/market_metrics.py` — macro sensitivity and event studies against four
   FRED factors (the 10-year yield, Henry Hub gas, WTI oil, the broad dollar),
   and peer comparison against the peer set or named tickers. A yield's move is
@@ -367,6 +369,12 @@ If that changes, auth comes first, not after.
 - Macro factors and peer multiples are fetched at execution time, not frozen in
   the snapshot, so replaying an old run can see newer values for them.
 - The planner never asked a clarifying question on 190 eval runs.
+- The capital-cycle reading is one company's accounts, while the cycle itself
+  is an industry fact — a tanker fleet's order book, a region's refining
+  capacity. On Hosking's own holdings it agrees where company capex is the
+  supply (DHT and International Seaways read arriving, which is why Hosking is
+  trimming them) and misses where the constraint is industry-wide (Motor Oil
+  reads arriving on its own capex, while Hosking holds it for the industry's).
 - The committee path has no repair loop; only the plan pipeline does.
 - `research_run_retention` trimming exists (`prune_runs`) but is not scheduled.
 - The frontend covers the plan pipeline and the older committee path, but there
