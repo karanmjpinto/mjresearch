@@ -36,6 +36,14 @@ The unit of analysis. Fetched once, then frozen: every persona in a committee
 reads the same object, so a disagreement between them is a difference of
 judgement rather than of data. It carries its own provenance.
 
+It carries four or five years of annual statements too (`data/statements.py`):
+income, cash-flow and balance-sheet lines as named series, newest first, one
+value per year with `None` where the provider had none, so position i always
+means the same year. Share counts are split-adjusted, and with an as-of date a
+year is used only after its accounts would have been public (period end plus 90
+days). The statements are in the snapshot rather than fetched by the metrics
+that read them, so a run is reproducible from its snapshot alone.
+
 ### Provenance (`data/provenance.py`)
 
 A fallback chain can change data sources between two otherwise identical runs.
@@ -67,6 +75,64 @@ register(Metric(
 
 Outputs are validated against the signature, so a metric that returns a field it
 did not declare fails loudly rather than reaching the prompt.
+
+Twenty-four metrics today, in four modules:
+
+- `plan/registry.py` — price, technicals, valuation, risk, regimes, news, and the
+  weighted conviction score.
+- `plan/statement_metrics.py` — revenue growth, margin trend, cash conversion,
+  balance sheet, capital return, operating leverage. "Latest" means the latest
+  year; an older year never stands in for a missing one.
+- `plan/market_metrics.py` — macro sensitivity and event studies against four
+  FRED factors (the 10-year yield, Henry Hub gas, WTI oil, the broad dollar),
+  and peer comparison against the peer set or named tickers. A yield's move is
+  measured in points, a price's in percent, so every beta has a unit. These
+  fetch at execution time, like price history, cut at the as-of date.
+- `plan/formula_metric.py` — the formula step, below.
+
+### Formulas (`plan/formula.py`)
+
+PAT's planner writes code for each step, which is where its breadth comes from.
+Here the planner writes a formula instead — `pct(abs(latest(dividends)),
+latest(free_cash_flow))` — over two kinds of name: a statement series, which may
+only appear inside a function, and a value an earlier step computed. Nothing is
+passed to `eval`. The expression is parsed and only numbers, names, `+ - * /`,
+unary minus and the ten functions (`latest prior mean total change cagr slope
+ratio pct abs`) are allowed; attribute access, subscripts, keywords, comparisons,
+strings and unknown names are rejected at plan time, with a message the planner's
+repair can act on. That rejection is the static-analysis pass PAT runs on its
+generated code, over a smaller and safer language.
+
+The check is two passes. The first is structure, above. The second is units:
+every series and every computed field declares one (currency, shares, %, or a
+plain number), so the arithmetic is checked for meaning. Adding unlike units,
+dividing an amount by a percentage or a percentage by an amount, and `pct()` of
+unlike things are refused; currency over shares is per share, and a P/E over a
+growth rate (a PEG) passes. The unit pass exists because two formulas on the
+eval had valid syntax and no meaning — dollars of buybacks over a percentage
+return printed −114,984,155,152% — and reached the analysis as findings.
+
+A formula still invalid after the planner's one repair is dropped, with any
+step depending on it, and the rest of the plan runs; the answer is told which
+measure could not be computed. Only formula steps are dropped this way, because
+they are the one step the model writes itself: a bad choice of metric still
+fails the plan, since dropping it would change the question.
+
+Two conveniences are normalised before the check, because the model writes them
+naturally and the meaning is unambiguous: `step.field` reads that field, and
+`latest(x)` of a computed value is the value. A bare series in arithmetic means
+its latest year, and inside a function series combine year by year —
+`change(equity / shares, 3)` is the change in book value per share. An unknown
+unit label is reset to `number` by the harness rather than failing the plan.
+
+A formula may read another step's value only if it depends on that step; when
+exactly one step produces the name, the harness adds the missing dependency and
+records it. A formula's result is filed under its own name, so later formulas,
+the narrator and the claim checker can all use it, and a missing input fails the
+step rather than counting as zero. Because a formula's name is the planner's and
+no narrator writes it, the checker also accepts an exact quote of a formula
+result in the narrator's own words — three significant figures or more, within
+half a percent — and only when the prose names nothing else it can check.
 
 ### Plan (`plan/schema.py`, `plan/executor.py`)
 
@@ -235,6 +301,22 @@ are **100%** across all 145 completed runs (`plan-20261017T190020Z.json`;
 grounded 86.2%, first draft 79.3%, the same five errored runs). The pipeline is
 reproducible; the residue was the server's cache.
 
+After Phase 2 — statements, nine metrics, formulas — on 38 questions, eight of
+which need a formula (`plan-20261018T023005Z.json`, every call cold):
+
+| | Phase 1 (30 q) | Phase 2 (38 q) |
+|---|---|---|
+| same plan / same conclusion | 100% / 100% | 100% / 100% |
+| prose checks clean | 86.2% | 97.3% |
+| clean on the first draft | 79.3% | 94.6% |
+| errored runs | 5 of 150 | 5 of 190 |
+| questions the catalog can answer | 14 of 30 | 38 of 38 |
+
+The two questions not clean are honest: one narrator did its own arithmetic
+("exceeds the operating margin by 15.0%") and the checker caught it, and one
+asks about news the frozen fixture does not have. The planner asked no
+clarifying question on any of the 190 runs, which is the next thing to look at.
+
 ## API
 
 | Method | Path | Purpose |
@@ -279,11 +361,12 @@ If that changes, auth comes first, not after.
 - Committee mode still runs full-freedom personas. Turning personas into weight
   profiles over the plan's dimension scores would make committee conviction as
   auditable as the plan's, and is not done.
-- The metric catalog answers 14 of the 30 eval questions. The rest are blocked
-  by capabilities no metric provides yet — revenue growth history, margin
-  trend, cash conversion, macro sensitivity, capital return, peer comparison,
-  balance-sheet strength, event studies and operating leverage. The tally is
-  `coverage()` in `evals/plan_questions.py`.
+- Coverage is 38 of 38 on the eval set, which says the set is too easy, not
+  that the catalog is complete. Formulas cover only annual statements and
+  computed values: no quarterly data, no price series inside a formula.
+- Macro factors and peer multiples are fetched at execution time, not frozen in
+  the snapshot, so replaying an old run can see newer values for them.
+- The planner never asked a clarifying question on 190 eval runs.
 - The committee path has no repair loop; only the plan pipeline does.
 - `research_run_retention` trimming exists (`prune_runs`) but is not scheduled.
 - The frontend covers the plan pipeline and the older committee path, but there

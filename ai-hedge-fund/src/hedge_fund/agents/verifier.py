@@ -365,6 +365,15 @@ def _read_direction(text: str, number_start: int, alias_start: int) -> int:
     """Return -1, +1, or 0 for the direction stated near a number."""
     window_start = max(0, min(number_start, alias_start) - 40)
     window = text[window_start : max(number_start, alias_start)].lower()
+    # Not past the start of the clause: in "minimal downside pressure, while the
+    # annualized return of 49.42%", the downside belongs to the clause before.
+    head = min(number_start, alias_start) - window_start
+    cut = max(
+        window.rfind(sep, 0, head)
+        for sep in (",", ";", " while ", " but ", " whereas ", " however ")
+    )
+    if cut >= 0:
+        window = window[cut + 1 :]
     neg = max((window.rfind(w) for w in _NEGATIVE_WORDS), default=-1)
     pos = max((window.rfind(w) for w in _POSITIVE_WORDS), default=-1)
     if neg < 0 and pos < 0:
@@ -463,6 +472,17 @@ def _is_value(m: re.Match[str], text: str, alias_spans: list[tuple[int, int]]) -
         return False
     if _DURATION.match(text, end):
         return False
+    # Digits glued to letters are part of a name, not a value: "bvps_change_3y",
+    # "momentum_252". A scale or unit the pattern read ("5B", "2x") is not this.
+    if start > 0 and (text[start - 1].isalpha() or text[start - 1] == "_"):
+        return False
+    if (
+        end < len(text)
+        and (text[end].isalpha() or text[end] == "_")
+        and not m.group("scale")
+        and not m.group("suffix")
+    ):
+        return False
     # Part of a metric's own name: the 50 in "SMA 50", the 52 in "52-week high".
     return not _overlaps((start, end), alias_spans)
 
@@ -526,7 +546,13 @@ def _number_candidates(
         for m in _NUMBER.finditer(text, before_start, alias_start)
         if _is_value(m, text, alias_spans) and _unit_fits(spec, m, text)
     ]
-    if hits and not _alias_between(hits[-1].end(), alias_start, alias_spans):
+    # Not across a parenthesis: in "(4.86% latest growth) and gross margin" the
+    # figure belongs to what is inside the brackets.
+    if (
+        hits
+        and not _alias_between(hits[-1].end(), alias_start, alias_spans)
+        and not re.search(r"[()]", text[hits[-1].end() : alias_start])
+    ):
         m = hits[-1]
         value = _parse_number(m)
         if value is not None:
@@ -598,8 +624,97 @@ def _read_bound(hit: _NumberHit) -> str | None:
 _DIRECTIONAL_WORDS = ("drawdown", "return", "momentum", "change")
 
 
+def _related_computed(
+    spec: MetricSpec, snapshot: dict[str, Any], stated: float, excerpt: str = ""
+) -> tuple[str, float] | None:
+    """A computed field of the same family that the stated number matches.
+
+    A word in prose can name more than one thing once a plan has run: "a beta
+    of 0.12" to gas is `factor_beta_pct`, not the market beta, and "gross
+    margin up 3.87 pp" is `gross_margin_change_pp`, not the margin. A number
+    that matches a computed field whose name carries the same word or stem is
+    right about that field. A number matching nothing related still fails.
+    """
+    computed = snapshot.get("computed")
+    if not isinstance(computed, dict):
+        return None
+    # The same field computed by several steps: "252-day momentum of -21.54%"
+    # when the 90-day step filed its value first.
+    for actual in (snapshot.get("computed_all") or {}).get(spec.name, []):
+        if _matches(spec, stated, actual)[0]:
+            return spec.name, actual
+    stem = spec.name.removesuffix("_pct")
+    words = set(re.findall(r"[a-z]+", excerpt.lower()))
+    for key, value in computed.items():
+        if key == spec.name or isinstance(value, bool):
+            continue
+        key_words = [w for w in key.split("_") if w not in ("pct", "pp")]
+        family = key.startswith(stem + "_") or stem in key.split("_")
+        # "calm regime volatility of 23.39%" is calm_volatility_pct: every word
+        # of the field's name is in the phrase, and it ends like the alias.
+        named = (
+            bool(key_words)
+            and key_words[-1] == stem.split("_")[-1]
+            and all(w in words for w in key_words)
+        )
+        if not (family or named):
+            continue
+        actual = _as_float(value)
+        if actual is None:
+            continue
+        # A change is often written with its sign as a verb: "declined by 1.37".
+        if _matches(spec, stated, actual)[0] or (
+            "change" in key and _matches(spec, abs(stated), abs(actual))[0]
+        ):
+            return key, actual
+    return None
+
+
+def _formula_value_citations(text: str, snapshot: dict[str, Any]) -> list[Claim]:
+    """A formula's result quoted in the narrator's own words.
+
+    A formula is named by the planner — `total_debt_change_3y_pct` — and no
+    narrator writes that name; it writes "debt rose 59.17% in three years". So
+    when the prose names nothing the checker knows, an exact quote of a formula
+    result counts as citing it. Exact means at least three significant figures
+    and within half a percent, so "3 years" or "2x" cannot match by accident.
+    Only formula results, and only as a fallback: it never overrides a mismatch.
+    """
+    computed = snapshot.get("computed")
+    names = snapshot.get("formula_names") or []
+    if not isinstance(computed, dict) or not names:
+        return []
+    targets = [(n, _as_float(computed.get(n))) for n in names]
+    out: list[Claim] = []
+    for m in re.finditer(r"-?\d[\d,]*\.?\d*", text):
+        raw = m.group(0).replace(",", "")
+        digits = raw.replace("-", "").replace(".", "").lstrip("0")
+        if len(digits) < 3:
+            continue
+        try:
+            stated = float(raw)
+        except ValueError:
+            continue
+        for name, actual in targets:
+            if actual and abs(abs(stated) - abs(actual)) <= abs(actual) * 0.005:
+                out.append(
+                    Claim(
+                        metric=name,
+                        stated=stated,
+                        actual=actual,
+                        verdict="verified",
+                        excerpt=text[max(0, m.start() - 30) : m.end() + 10].strip(),
+                        note="formula result quoted in words",
+                    )
+                )
+                break
+    return out
+
+
 def specs_for_facts(
-    facts: dict[str, Any], node_values: list[dict[str, Any]] | None = None
+    facts: dict[str, Any],
+    node_values: list[dict[str, Any]] | None = None,
+    units: dict[str, str] | None = None,
 ) -> tuple[MetricSpec, ...]:
     """One spec per numeric field a plan computed, so the prose can be checked
     against the plan's own outputs and not only against the snapshot.
@@ -638,7 +753,9 @@ def specs_for_facts(
             "paths": (f"computed.{key}",),
             # Relative, so "52.4" and "52.38" both read as 52.38095.
             "tolerance_pct": 1.0,
-            "unit": "%" if pct else "",
+            # The metric's declared unit wins: "$44bn of net debt" is only read
+            # as `net_debt` when the field says it is an amount of currency.
+            "unit": (units or {}).get(key) or ("%" if pct else ""),
             "directional": any(w in key for w in _DIRECTIONAL_WORDS),
             "alternatives": tuple(x for x in others.get(key, []) if x != _as_float(value)),
         }
@@ -779,6 +896,11 @@ def extract_claims(
                 if _matches(spec, stated, alt)[0]:
                     ok, delta, note, actual = True, None, "matches another step's value", alt
                     break
+        if not ok:
+            related = _related_computed(spec, snapshot, stated, hit.excerpt)
+            if related is not None:
+                ok, delta, actual = True, None, related[1]
+                note = f"matches computed {related[0]}"
         claims.append(
             Claim(
                 metric=spec.name,
@@ -816,6 +938,8 @@ def verify_analysis(
     text = "\n".join(p for p in parts if p)
 
     claims = extract_claims(text, snapshot, extra_specs)
+    if not claims:
+        claims = _formula_value_citations(text, snapshot)
     verified = sum(1 for c in claims if c.verdict == "verified")
     mismatched = [c for c in claims if c.verdict == "mismatch"]
     unverifiable = sum(1 for c in claims if c.verdict == "unverifiable")

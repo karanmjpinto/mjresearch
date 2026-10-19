@@ -494,3 +494,64 @@ def test_a_figure_said_twice_still_owns_its_number():
 def test_a_quoted_field_name_is_read_as_the_metric():
     """Observed: "pe_ratio=38.68714" reported as citing nothing."""
     assert _claim("Valuation is stretched (pe_ratio=7.3).", "pe_ratio", BIND).verdict == "verified"
+
+
+def test_a_word_naming_two_things_is_right_about_the_computed_one():
+    """'A beta of 0.12' to gas is the factor beta, not the market beta."""
+    snap = {"fundamentals": {"beta": 0.32}, "computed": {"factor_beta_pct": 0.122}}
+    v = verify_analysis({"investment_thesis": "It shows a low beta of 0.122 to gas prices."}, snap)
+    assert v["status"] == "clean"
+
+
+def test_a_number_matching_nothing_related_still_fails():
+    snap = {"fundamentals": {"beta": 0.32}, "computed": {"factor_beta_pct": 0.122}}
+    v = verify_analysis({"investment_thesis": "It shows a low beta of 0.9 to gas prices."}, snap)
+    assert v["status"] == "mismatch"
+
+
+def test_digits_inside_a_name_are_not_a_value():
+    """Observed: 'bvps_change_3y (formula_value=57.04)' read as 3."""
+    snap = {"computed": {"formula_value": 57.036}}
+    text = "Book value per share rose: bvps_change_3y (formula_value=57.04)."
+    v = verify_analysis({"investment_thesis": text}, snap, specs_for_facts(snap["computed"]))
+    assert v["mismatched"] == 0
+
+
+def test_a_field_named_in_full_by_the_phrase_is_the_one_meant():
+    snap = {"computed": {"regime_volatility_pct": 21.27, "calm_volatility_pct": 23.39}}
+    text = "It sits in a calm regime volatility of 23.39% this year."
+    v = verify_analysis({"investment_thesis": text}, snap, specs_for_facts(snap["computed"]))
+    assert v["mismatched"] == 0
+
+
+def test_a_change_written_with_a_verb_matches_by_magnitude():
+    snap = {"computed": {"operating_margin_pct": 19.91, "operating_margin_change_pp": -1.37}}
+    text = "Operating margin has declined by 1.37 percentage points since 2022."
+    v = verify_analysis({"investment_thesis": text}, snap, specs_for_facts(snap["computed"]))
+    assert v["mismatched"] == 0
+
+
+def test_a_figure_inside_brackets_is_not_read_backwards_by_the_next_name():
+    snap = {"computed": {"gross_margin_pct": 56.6}}
+    text = "Growth slowed (4.86% latest growth) and gross margin trends held."
+    v = verify_analysis({"investment_thesis": text}, snap, specs_for_facts(snap["computed"]))
+    assert v["mismatched"] == 0
+
+
+def test_a_field_computed_by_two_steps_accepts_either():
+    snap = {
+        "technicals": {},
+        "computed": {"momentum_pct": -8.24},
+        "computed_all": {"momentum_pct": [-8.24, -21.54]},
+    }
+    text = "The 252-day momentum is a more severe -21.54% decline."
+    v = verify_analysis({"investment_thesis": text}, snap)
+    assert v["mismatched"] == 0
+
+
+def test_direction_is_read_from_the_claims_own_clause():
+    """Observed: 'downside pressure, while the annualized return of 49.42%' read as -49.42."""
+    snap = {"computed": {"annualized_return_pct": 49.42}}
+    text = "Minimal downside pressure, while the annualized return of 49.42% demonstrates strength."
+    v = verify_analysis({"investment_thesis": text}, snap, specs_for_facts(snap["computed"]))
+    assert v["status"] == "clean"

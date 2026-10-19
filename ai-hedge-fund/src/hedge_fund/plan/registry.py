@@ -40,6 +40,11 @@ def all_metrics() -> list[Metric]:
     return sorted(_REGISTRY.values(), key=lambda m: (m.tier, m.id))
 
 
+def field_units() -> dict[str, str]:
+    """Each output field's declared unit, for the claim checker."""
+    return {f.name: f.unit for m in _REGISTRY.values() for f in m.outputs if f.unit}
+
+
 def catalog() -> list[dict[str, Any]]:
     """Every metric signature — this is what the planner model is shown."""
     return [m.signature() for m in all_metrics()]
@@ -899,3 +904,10 @@ register(
         notes="Run after the dimension metrics it depends on; it reads their outputs.",
     )
 )
+
+
+# Metrics over the annual statements live in their own module and register on
+# import. Imported last, because they use the helpers and `register` above.
+import hedge_fund.plan.statement_metrics  # noqa: E402,F401
+import hedge_fund.plan.market_metrics  # noqa: E402,F401
+import hedge_fund.plan.formula_metric  # noqa: E402,F401

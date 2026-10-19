@@ -304,7 +304,37 @@ function FlagList({ flags }: { flags: string }) {
  * A node's values: one headline, the composite shape where the fields describe
  * one, then the remainder as a scanned grid.
  */
+/**
+ * A formula the planner wrote: the result under the name it was given, and
+ * the formula itself beneath it, exactly as written. This is the one step
+ * where a model chose how a number is calculated, so the calculation is
+ * shown rather than summarised.
+ */
+function FormulaReadout({ values }: { values: Record<string, unknown> }) {
+  const value = values.formula_value;
+  const unit = values.formula_unit;
+  const suffix = unit === "%" || unit === "x" ? unit : "";
+  return (
+    <div className="mt-sm border-l-2 border-ink-line pl-sm">
+      <div className="flex flex-wrap items-baseline gap-x-sm gap-y-2xs">
+        <span className="font-display text-display-sm tabular text-bone">
+          {typeof value === "number" ? formatNumber(value, { unit: suffix }) : "—"}
+        </span>
+        <span className="font-display text-label uppercase tracking-label text-on-ink-faint">
+          {String(values.formula_name ?? "")}
+        </span>
+      </div>
+      <code className="mt-2xs block break-words font-mono text-label text-on-ink-soft">
+        = {String(values.formula_expression ?? "")}
+      </code>
+    </div>
+  );
+}
+
 export function NodeReadout({ values }: { values: Record<string, unknown> }) {
+  if (typeof values.formula_expression === "string") {
+    return <FormulaReadout values={values} />;
+  }
   const entries = Object.entries(values).filter(
     ([, v]) => v !== null && v !== undefined,
   );

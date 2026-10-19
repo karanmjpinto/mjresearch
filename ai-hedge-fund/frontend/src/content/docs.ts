@@ -176,7 +176,13 @@ export const SECTIONS: DocSection[] = [
         name: "Which metrics to compute",
         trust: "chosen-then-computed",
         detail:
-          "The planner picks from a fixed catalogue of registered metrics and emits a typed plan. It sees names, not numbers. An edited plan can be replayed without re-planning, which is how you hold the choice fixed and vary nothing else.",
+          "The planner picks from a fixed catalogue of registered metrics and emits a typed plan. It sees names, not numbers. An edited plan can be replayed without re-planning, which is how you hold the choice fixed and vary nothing else. The catalogue has twenty-four metrics: price and risk, valuation, four to five years of annual statements (revenue growth, margin trend, cash conversion, balance sheet, capital return, operating leverage), sensitivity to and event studies around four macro factors — the ten-year yield, natural gas, oil and the dollar — and comparison with peers, named or standard.",
+      },
+      {
+        name: "Formulas the planner writes",
+        trust: "chosen-then-computed",
+        detail:
+          "When no metric measures what was asked, the planner may write a formula — the share of free cash flow paid as dividends, years of cash flow to repay the net debt — over the statement series and values other steps computed. The model chooses the formula; code checks it before anything runs and computes it. It is a small language, not code: ten functions, arithmetic, and names, with anything else refused at plan time. This is the one place a model decides how a number is calculated, so the formula is shown on the step, exactly as written, beside its value. Units are checked too: adding dollars to a percentage, or dividing an amount by a percentage, is refused before it runs — on the first eval such a formula printed −114,984,155,152% and was cited as a finding. A formula still wrong after one repair is dropped and the rest of the plan runs; the answer says which measure is missing.",
       },
       {
         name: "The investment thesis, risks and narration",
@@ -188,7 +194,7 @@ export const SECTIONS: DocSection[] = [
         name: "How stable the plan pipeline is",
         trust: "computed",
         detail:
-          "Measured, the way Bridgewater measures its PAT analyst at 95% output determinism. Thirty research questions on five frozen companies, five runs each, on the local model: the same question gave the same plan 95.9% of the time and the same conclusion — stance, conviction and verification status — 96.6%. Every disagreement was a first run against later ones, caused by the model server reusing a cached prompt; with the model unloaded before each pass so every call is cold, both figures were 100%. The prose checked clean against the computed values in 86.9% of runs, 80.0% on the first draft. Before this work the same suite read 88.5%, 91.5% and 57.5%; most of the difference was the checker, which could not read the plan's own outputs and reported correct answers as citing nothing. The questions, the frozen inputs and the script are in the repo (scripts/run_plan_eval.py), so the figure can be re-run rather than taken on trust.",
+          "Measured, the way Bridgewater measures its PAT analyst at 95% output determinism. Thirty research questions on five frozen companies, five runs each, on the local model: the same question gave the same plan 95.9% of the time and the same conclusion — stance, conviction and verification status — 96.6%. Every disagreement was a first run against later ones, caused by the model server reusing a cached prompt; with the model unloaded before each pass so every call is cold, both figures were 100%. After the statements, the nine new metrics and formulas, on 38 questions: still 100% and 100%, with 97.3% of runs checking clean and 94.6% clean on the first draft. The prose checked clean against the computed values in 86.9% of runs, 80.0% on the first draft. Before this work the same suite read 88.5%, 91.5% and 57.5%; most of the difference was the checker, which could not read the plan's own outputs and reported correct answers as citing nothing. The questions, the frozen inputs and the script are in the repo (scripts/run_plan_eval.py), so the figure can be re-run rather than taken on trust.",
       },
       {
         name: "Sending a draft back once",
@@ -573,8 +579,8 @@ export const GAPS: [string, string][] = [
     "Valuation scoring uses fixed thresholds rather than sector-relative ones, so a utility and a software company are judged on the same scale.",
   ],
   [
-    "The plan can answer about half of the questions asked of it",
-    "Of the thirty eval questions, the metric catalog has everything needed for fourteen. The rest need a measure no metric provides yet: revenue growth over several years, margin trend, cash conversion, sensitivity to rates or a commodity, buybacks and dividends, a peer comparison, balance-sheet strength, an event study, operating leverage. For those the planner now uses the closest metrics it has and the answer says what is missing, rather than inventing a step; one question, on operating leverage, still fails to plan. Read a plan answer to such a question as partial.",
+    "Formulas reach only annual statements, and some data is fetched live",
+    "The plan can now answer all thirty-eight eval questions — which says the questions are too easy, not that the catalogue is complete. Formulas read annual statements and values other steps computed; there is no quarterly data and no price series inside a formula. Macro factors and peer multiples are fetched when a plan runs rather than frozen in the snapshot, so replaying an old run can see newer values for them. And on 190 eval runs the planner never asked a clarifying question, so the methodology choices it could have raised were made silently on their defaults.",
   ],
   [
     "Seventeen universes load, and three neighbours cannot",

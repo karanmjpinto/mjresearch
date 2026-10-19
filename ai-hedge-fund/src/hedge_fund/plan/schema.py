@@ -115,6 +115,26 @@ def topological_order(plan: AnalysisPlan) -> list[PlanNode]:
     return ordered
 
 
+def _values_from(plan: AnalysisPlan, node_ids: list[str]) -> dict[str, str]:
+    """The value names the given nodes compute, with each one's declared unit:
+    their outputs, plus a formula's own name and the unit it was given."""
+    from hedge_fund.plan.registry import get_metric
+    from hedge_fund.plan.types import MetricError
+
+    names: dict[str, str] = {}
+    for n in plan.nodes:
+        if n.id not in node_ids:
+            continue
+        try:
+            names |= {f.name: f.unit for f in get_metric(n.metric).outputs}
+        except MetricError:
+            continue
+        if isinstance(n.params.get("name"), str):
+            unit = n.params.get("unit") or ""
+            names[n.params["name"]] = "" if unit == "number" else str(unit)
+    return names
+
+
 def validate_plan(plan: AnalysisPlan) -> AnalysisPlan:
     """Static checks before anything executes: ids, metrics, params, and the DAG.
 
@@ -143,9 +163,13 @@ def validate_plan(plan: AnalysisPlan) -> AnalysisPlan:
             problems.append(f"node '{node.id}': {e}")
             continue
         try:
-            metric.coerce_params(node.params)
+            params = metric.coerce_params(node.params)
         except MetricError as e:
             problems.append(f"node '{node.id}': {e}")
+        else:
+            if metric.check is not None:
+                upstream = _values_from(plan, node.depends_on)
+                problems.extend(f"node '{node.id}': {p}" for p in metric.check(params, upstream))
 
         for dep in node.depends_on:
             if dep not in seen and dep not in {n.id for n in plan.nodes}:

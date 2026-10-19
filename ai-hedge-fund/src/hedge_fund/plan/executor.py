@@ -62,6 +62,41 @@ class PlanContext:
         self._frames[days] = df
         return df
 
+    def macro_series(self, series_id: str, days: int) -> pd.Series:
+        """One FRED series, cut at the as-of date so a backtest never sees ahead."""
+        if self._ds is None:
+            raise MetricError("no data service available to load macro data")
+        try:
+            df = self._ds.get_macro_data(series_id, days=int(days))
+        except Exception as e:
+            raise MetricError(f"macro series {series_id} fetch failed: {e}") from e
+        if df is None or df.empty:
+            raise MetricError(f"macro series {series_id} returned no data")
+        s = pd.to_numeric(df.iloc[:, 0], errors="coerce").dropna()
+        s.index = pd.to_datetime(s.index).tz_localize(None)
+        if self._end_date is not None:
+            s = s[s.index <= pd.Timestamp(self._end_date)]
+        return s
+
+    def peer_metrics(self, tickers: list[str] | None = None) -> dict[str, dict[str, Any]]:
+        """Valuation fields per company, the target included.
+
+        Named peers are fetched one by one; otherwise the data layer's peer set,
+        which is curated where a curated set exists. Either way the target is a
+        key, so a comparison reads it from the same source as its peers.
+        """
+        if self._ds is None:
+            raise MetricError("no data service available to load peers")
+        try:
+            if tickers:
+                names = [self.ticker, *[t for t in tickers if t.upper() != self.ticker]]
+                return {t.upper(): dict(self._ds.get_fundamentals(t.upper()) or {}) for t in names}
+            found = self._ds.get_peers(self.ticker)
+        except Exception as e:
+            raise MetricError(f"peer fetch failed: {e}") from e
+        metrics = getattr(found, "metrics", None) or (found or {}).get("metrics") or {}
+        return {str(k).upper(): dict(v or {}) for k, v in metrics.items()}
+
     def absorb(self, values: dict[str, Any]) -> None:
         """Merge a node's outputs into the flat fact table.
 
@@ -70,6 +105,10 @@ class PlanContext:
         """
         for key, value in values.items():
             self.facts.setdefault(key, value)
+        # A formula's value is filed under the name the planner gave it too, so
+        # a later formula, the narrator and the claim checker can all use it.
+        if isinstance(values.get("formula_name"), str):
+            self.facts.setdefault(values["formula_name"], values.get("formula_value"))
 
 
 class NodeValueCache(OrderedDict[str, dict[str, Any]]):

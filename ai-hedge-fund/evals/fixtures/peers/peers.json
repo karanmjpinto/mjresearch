@@ -1,0 +1,343 @@
+{
+ "AAPL": {
+  "AAPL": {
+   "pe_ratio": 39.38761,
+   "forward_pe": 35.85982,
+   "price_to_book": 46.66576,
+   "dividend_yield": 0.31,
+   "beta": 1.069,
+   "market_cap": 5012516765696
+  },
+  "MSFT": {
+   "pe_ratio": 29.473536,
+   "forward_pe": 22.302853,
+   "price_to_book": 8.881894,
+   "dividend_yield": 0.74,
+   "beta": 1.099,
+   "market_cap": 3928485003264
+  },
+  "GOOGL": {
+   "pe_ratio": 17.089312,
+   "forward_pe": 22.276,
+   "price_to_book": 6.6918817,
+   "dividend_yield": 0.26,
+   "beta": 1.211,
+   "market_cap": 4165393448960
+  },
+  "SONY": {
+   "pe_ratio": 20.561981,
+   "forward_pe": 20.907562,
+   "price_to_book": 2.758781,
+   "dividend_yield": 0.64,
+   "beta": 0.814,
+   "market_cap": 145260412928
+  },
+  "DELL": {
+   "pe_ratio": 26.262207,
+   "forward_pe": 15.094515,
+   "price_to_book": -202.56053,
+   "dividend_yield": 0.56,
+   "beta": 1.442,
+   "market_cap": 287202967552
+  },
+  "HPQ": {
+   "pe_ratio": 11.454199,
+   "forward_pe": 9.538188,
+   "price_to_book": -294.2157,
+   "dividend_yield": 4.0,
+   "beta": 1.19,
+   "market_cap": 27062747136
+  },
+  "QCOM": {
+   "pe_ratio": 19.920137,
+   "forward_pe": 16.88979,
+   "price_to_book": 6.5773687,
+   "dividend_yield": 2.14,
+   "beta": 1.651,
+   "market_cap": 183785848832
+  }
+ },
+ "EXE": {
+  "EXE": {
+   "pe_ratio": 8.052587,
+   "forward_pe": 10.247921,
+   "price_to_book": 1.1277996,
+   "profit_margin": 0.2197,
+   "return_on_equity": 0.14893,
+   "revenue_growth": -0.106,
+   "dividend_yield": 2.46,
+   "beta": 0.395,
+   "market_cap": 21624770560.0
+  },
+  "APA": {
+   "pe_ratio": 10.391121,
+   "forward_pe": 10.35849,
+   "price_to_book": 2.4548,
+   "profit_margin": 0.19564,
+   "return_on_equity": 0.26659,
+   "revenue_growth": 0.092,
+   "dividend_yield": 2.03,
+   "beta": 0.421,
+   "market_cap": 17219778560.0
+  },
+  "AR": {
+   "pe_ratio": 11.106322,
+   "forward_pe": 8.354733,
+   "price_to_book": 1.4337118,
+   "profit_margin": 0.18746,
+   "return_on_equity": 0.14216,
+   "revenue_growth": 0.126,
+   "dividend_yield": 0.0,
+   "beta": 0.544,
+   "market_cap": 11882518528.0
+  },
+  "AMPY": {
+   "pe_ratio": 8.686275,
+   "forward_pe": 4.140187,
+   "price_to_book": 0.4165883,
+   "profit_margin": 0.10618,
+   "return_on_equity": 0.05322,
+   "revenue_growth": -0.229,
+   "dividend_yield": 0.0,
+   "beta": 0.076,
+   "market_cap": 183652064.0
+  },
+  "AGIG": {
+   "pe_ratio": null,
+   "forward_pe": -3.952381,
+   "price_to_book": 1.2928349,
+   "profit_margin": 0.0,
+   "return_on_equity": -1.9302499,
+   "revenue_growth": 3.044,
+   "dividend_yield": 0.0,
+   "beta": null,
+   "market_cap": 36644764.0
+  },
+  "ALTX": {
+   "pe_ratio": null,
+   "forward_pe": null,
+   "price_to_book": 2.0,
+   "profit_margin": 0.0,
+   "return_on_equity": -0.06587,
+   "revenue_growth": 0.25,
+   "dividend_yield": 0.0,
+   "beta": 0.497,
+   "market_cap": 2573157.0
+  },
+  "RKDA": {
+   "pe_ratio": null,
+   "forward_pe": -0.12875001,
+   "price_to_book": 0.56827587,
+   "profit_margin": -2.34534,
+   "return_on_equity": -4.30933,
+   "revenue_growth": -0.008,
+   "dividend_yield": 0.0,
+   "beta": 0.553,
+   "market_cap": 397037.0
+  }
+ },
+ "KSS": {
+  "KSS": {
+   "pe_ratio": 9.638392,
+   "forward_pe": 13.814594,
+   "price_to_book": 0.5853328,
+   "profit_margin": 0.0175,
+   "return_on_equity": 0.06671,
+   "revenue_growth": -0.009,
+   "dividend_yield": 2.32,
+   "beta": 1.351,
+   "market_cap": 2447797504.0
+  },
+  "BURL": {
+   "pe_ratio": 23.599281,
+   "forward_pe": 19.199198,
+   "price_to_book": 8.240314,
+   "profit_margin": 0.0585,
+   "return_on_equity": 0.41412997,
+   "revenue_growth": 0.11,
+   "dividend_yield": 0.0,
+   "beta": 1.427,
+   "market_cap": 16499039232.0
+  },
+  "M": {
+   "pe_ratio": 8.791208,
+   "forward_pe": 10.074298,
+   "price_to_book": 1.271995,
+   "profit_margin": 0.03292,
+   "return_on_equity": 0.15993,
+   "revenue_growth": 0.012,
+   "dividend_yield": 3.19,
+   "beta": 1.465,
+   "market_cap": 6268239360.0
+  }
+ },
+ "LULU": {
+  "LULU": {
+   "pe_ratio": 7.99177,
+   "forward_pe": 11.230354,
+   "price_to_book": 2.2634032,
+   "profit_margin": 0.12782,
+   "return_on_equity": 0.30898002,
+   "revenue_growth": -0.043,
+   "dividend_yield": 0.0,
+   "beta": 0.922,
+   "market_cap": 11246702592.0
+  },
+  "AS": {
+   "pe_ratio": 31.6,
+   "forward_pe": 18.203207,
+   "price_to_book": 2.5470898,
+   "profit_margin": 0.07349,
+   "return_on_equity": 0.091479994,
+   "revenue_growth": 0.321,
+   "dividend_yield": 0.0,
+   "beta": 2.029,
+   "market_cap": 17466296320.0
+  },
+  "LEVI": {
+   "pe_ratio": 13.447369,
+   "forward_pe": 12.277604,
+   "price_to_book": 3.2454748,
+   "profit_margin": 0.08828,
+   "return_on_equity": 0.26245,
+   "revenue_growth": 0.043,
+   "dividend_yield": 3.13,
+   "beta": 1.317,
+   "market_cap": 7838121472.0
+  },
+  "GIL": {
+   "pe_ratio": 31.25191,
+   "forward_pe": 7.6216073,
+   "price_to_book": 2.2695272,
+   "profit_margin": 0.0127799995,
+   "return_on_equity": 0.08677,
+   "revenue_growth": 0.723,
+   "dividend_yield": 2.43,
+   "beta": 1.141,
+   "market_cap": 7581753856.0
+  },
+  "ZGN": {
+   "pe_ratio": 36.885715,
+   "forward_pe": 21.564547,
+   "price_to_book": 2.9766228,
+   "profit_margin": 0.0398,
+   "return_on_equity": 0.08725,
+   "revenue_growth": 0.064,
+   "dividend_yield": 1.06,
+   "beta": 0.907,
+   "market_cap": 3471361792.0
+  },
+  "FIGS": {
+   "pe_ratio": 57.939396,
+   "forward_pe": 50.1653,
+   "price_to_book": 7.163732,
+   "profit_margin": 0.0872,
+   "return_on_equity": 0.14762,
+   "revenue_growth": 0.288,
+   "dividend_yield": 0.0,
+   "beta": 1.066,
+   "market_cap": 3176601600.0
+  },
+  "COLM": {
+   "pe_ratio": 15.707572,
+   "forward_pe": 14.393859,
+   "price_to_book": 1.9229048,
+   "profit_margin": 0.06047,
+   "return_on_equity": 0.12658,
+   "revenue_growth": 0.015,
+   "dividend_yield": 1.99,
+   "beta": 0.929,
+   "market_cap": 3079782400.0
+  },
+  "UA": {
+   "pe_ratio": null,
+   "forward_pe": 12.184211,
+   "price_to_book": 1.3924812,
+   "profit_margin": -0.09989,
+   "return_on_equity": -0.29825002,
+   "revenue_growth": -0.032,
+   "dividend_yield": 0.0,
+   "beta": 1.617,
+   "market_cap": 1988795904.0
+  },
+  "GIII": {
+   "pe_ratio": 9.2443,
+   "forward_pe": 11.851962,
+   "price_to_book": 0.66305315,
+   "profit_margin": 0.047509998,
+   "return_on_equity": 0.07677,
+   "revenue_growth": -0.096,
+   "dividend_yield": 1.41,
+   "beta": 1.28,
+   "market_cap": 1216835200.0
+  },
+  "CRI": {
+   "pe_ratio": 5.8675375,
+   "forward_pe": 8.85327,
+   "price_to_book": 1.1238967,
+   "profit_margin": 0.06547,
+   "return_on_equity": 0.20742,
+   "revenue_growth": 0.052,
+   "dividend_yield": 3.18,
+   "beta": 0.838,
+   "market_cap": 1154566784.0
+  },
+  "GOOS": {
+   "pe_ratio": 19.707317,
+   "forward_pe": 9.860873,
+   "price_to_book": 2.1298587,
+   "profit_margin": 0.036960002,
+   "return_on_equity": 0.121829994,
+   "revenue_growth": 0.103,
+   "dividend_yield": 0.0,
+   "beta": 1.72,
+   "market_cap": 789097728.0
+  }
+ },
+ "TAP": {
+  "TAP": {
+   "pe_ratio": null,
+   "forward_pe": 8.184008,
+   "price_to_book": 0.7299054,
+   "profit_margin": -0.20808001,
+   "return_on_equity": -0.19466,
+   "revenue_growth": -0.033,
+   "dividend_yield": 4.86,
+   "beta": 0.43,
+   "market_cap": 7368659456.0
+  },
+  "BUDFF": {
+   "pe_ratio": 17.721985,
+   "forward_pe": null,
+   "price_to_book": 1.7339323,
+   "profit_margin": 0.14896,
+   "return_on_equity": 0.11392,
+   "revenue_growth": 0.11,
+   "dividend_yield": 1.64,
+   "beta": 0.779,
+   "market_cap": 161921466368.0
+  },
+  "TAP-A": {
+   "pe_ratio": null,
+   "forward_pe": null,
+   "price_to_book": 0.7299054,
+   "profit_margin": -0.20808001,
+   "return_on_equity": -0.19466,
+   "revenue_growth": -0.033,
+   "dividend_yield": 4.86,
+   "beta": 0.43,
+   "market_cap": 7368659456.0
+  },
+  "SAM": {
+   "pe_ratio": null,
+   "forward_pe": 17.887651,
+   "price_to_book": 2.5509644,
+   "profit_margin": -0.03639,
+   "return_on_equity": -0.08614001,
+   "revenue_growth": -0.033,
+   "dividend_yield": 0.0,
+   "beta": 0.819,
+   "market_cap": 1860941824.0
+  }
+ }
+}

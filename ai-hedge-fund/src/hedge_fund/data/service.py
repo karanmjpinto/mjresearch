@@ -74,6 +74,12 @@ class DataService:
             return {"ticker": ticker, "error": "no data"}
         return result
 
+    def get_statements(self, ticker: str, end_date: date | None = None) -> dict:
+        """Annual statements as aligned, named series. See `data/statements.py`."""
+        from hedge_fund.data.statements import fetch_statements
+
+        return fetch_statements(ticker, end_date=end_date)
+
     def get_technical_indicators(self, ticker: str, days: int = 365) -> dict:
         """RSI, MACD, SMA, Bollinger Bands, ATR for a ticker."""
         result = self.registry.get(DataCategory.TECHNICALS, ticker, days=days)

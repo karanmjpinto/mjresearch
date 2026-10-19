@@ -36,16 +36,19 @@ CAPABILITIES: dict[str, str | None] = {
     "data_quality_flags": "risk_flags",
     "market_regime": "regime_clustering",
     "composite_view": "weighted_conviction",
-    # --- not provided yet ------------------------------------------------
-    "margin_trend": None,  # gross / operating margin over several years
-    "revenue_growth_history": None,  # multi-year revenue path, not one ratio
-    "cash_conversion": None,  # free cash flow against earnings
-    "balance_sheet_strength": None,  # net debt, interest cover
-    "capital_return": None,  # buybacks, dividends, share count
-    "peer_comparison": None,  # the same measure across named peers
-    "event_study": None,  # how the price moved around a class of event
-    "macro_sensitivity": None,  # exposure to rates, oil, the dollar
-    "operating_leverage": None,  # profit response to volume
+    # --- from the annual statements, added in Phase 2 ---------------------
+    "margin_trend": "margin_trend",
+    "revenue_growth_history": "revenue_growth",
+    "cash_conversion": "cash_conversion",
+    "balance_sheet_strength": "balance_sheet",
+    "capital_return": "capital_return",
+    "operating_leverage": "operating_leverage",
+    # --- comparisons with something outside the company, Phase 2 ---------
+    "peer_comparison": "peer_comparison",
+    "event_study": "event_study",
+    "macro_sensitivity": "macro_sensitivity",
+    # --- anything else: a planner-written formula, Phase 2 ----------------
+    "custom_formula": "formula",
 }
 
 
@@ -221,6 +224,55 @@ QUESTIONS: tuple[Question, ...] = (
     Question("tap-momentum", "TAP", "Has momentum turned?", ("price_trend", "trend_state")),
     Question(
         "tap-sentiment", "TAP", "What is the market saying about it in the news?", ("news_tone",)
+    ),
+    # --- no metric answers these directly: the planner must write a formula ---
+    Question(
+        "aapl-equity-per-share",
+        "AAPL",
+        "Has book value per share grown over the last three years?",
+        ("custom_formula",),
+    ),
+    Question(
+        "aapl-dividend-share",
+        "AAPL",
+        "What share of free cash flow was paid out as dividends last year?",
+        ("custom_formula",),
+    ),
+    Question(
+        "kss-payback",
+        "KSS",
+        "How many years of free cash flow would it take to repay the net debt?",
+        ("custom_formula", "balance_sheet_strength"),
+    ),
+    Question(
+        "kss-interest-burden",
+        "KSS",
+        "How much of operating profit is eaten by interest?",
+        ("custom_formula",),
+    ),
+    Question(
+        "lulu-capex-vs-sales",
+        "LULU",
+        "Is capital spending growing faster than revenue?",
+        ("custom_formula", "revenue_growth_history"),
+    ),
+    Question(
+        "exe-debt-trend",
+        "EXE",
+        "How fast has total debt changed over three years?",
+        ("custom_formula",),
+    ),
+    Question(
+        "tap-profit-vs-sales",
+        "TAP",
+        "Has operating profit grown faster than revenue over three years?",
+        ("custom_formula", "revenue_growth_history"),
+    ),
+    Question(
+        "lulu-cash-per-share",
+        "LULU",
+        "How much free cash flow does each share earn now, against three years ago?",
+        ("custom_formula",),
     ),
 )
 

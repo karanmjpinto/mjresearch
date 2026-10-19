@@ -113,6 +113,10 @@ class Metric:
     # Node ids this metric consumes, by role. Empty means it reads only the snapshot.
     consumes: tuple[str, ...] = ()
     notes: str = ""
+    #: Plan-time check beyond parameter types: given the coerced parameters and
+    #: the value names the node's dependencies compute, return the problems.
+    #: The formula step uses it to reject a bad expression before anything runs.
+    check: Callable[[dict[str, Any], dict[str, str]], list[str]] | None = None
 
     def signature(self) -> dict[str, Any]:
         """The metric as a model sees it when writing a plan."""
