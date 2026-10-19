@@ -551,3 +551,23 @@ async def test_a_bad_ordinary_metric_is_still_a_failure_not_dropped(monkeypatch)
     bad = {"nodes": [{"id": "a", "metric": "price_window", "params": {"days": -5}}]}
     _stub_sequence(monkeypatch, planner=(bad,))
     assert (await _run(monkeypatch))["error"] == "plan_invalid"
+
+
+async def test_a_series_named_as_a_metric_becomes_its_latest_value(monkeypatch):
+    """Seen live on MSFT: {"metric": "free_cash_flow"} failed the whole plan."""
+    plan = {
+        "nodes": [
+            {"id": "fcf", "metric": "free_cash_flow"},
+            {"id": "val", "metric": "valuation_score"},
+        ]
+    }
+    _stub_sequence(monkeypatch, planner=(plan,))
+    out = await _run(monkeypatch)
+    assert "error" not in out
+    node = next(n for n in out["plan"]["nodes"] if n["id"] == "fcf")
+    assert node["metric"] == "formula" and node["params"]["expression"] == "latest(free_cash_flow)"
+    assert {
+        "node": "fcf",
+        "wrote": "metric free_cash_flow",
+        "resolved_to": "formula latest(free_cash_flow)",
+    } in (out["evaluation"]["plan_fixes"])

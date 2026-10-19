@@ -105,6 +105,29 @@ def resolve_dependency_names(plan: AnalysisPlan) -> list[dict[str, str]]:
     from hedge_fund.plan.types import MetricError
 
     fixes: list[dict[str, str]] = []
+    # A statement series named as a metric — `{"metric": "free_cash_flow"}` —
+    # means its latest value. Seen live on MSFT after phase 2 shipped: the
+    # repair fixed two such steps and left the third. Rewritten as a formula,
+    # which is what the step asked for, and recorded.
+    from hedge_fund.plan.formula import SERIES
+
+    for n in plan.nodes:
+        if n.metric in SERIES:
+            series = n.metric
+            name = n.id if re.fullmatch(r"[a-z][a-z0-9_]{0,63}", n.id) else series
+            n.metric = "formula"
+            n.params = {
+                "name": f"{name}_latest" if name == series else name,
+                "expression": f"latest({series})",
+                "unit": "currency" if SERIES[series].unit == "currency" else "number",
+            }
+            fixes.append(
+                {
+                    "node": n.id,
+                    "wrote": f"metric {series}",
+                    "resolved_to": f"formula latest({series})",
+                }
+            )
     ids = {n.id for n in plan.nodes}
     by_metric: dict[str, list[str]] = {}
     for n in plan.nodes:
