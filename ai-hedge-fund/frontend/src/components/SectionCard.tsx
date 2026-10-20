@@ -1,6 +1,22 @@
 import { Link } from "react-router-dom";
 import clsx from "clsx";
 
+/* Each door's plate in public/plates, keyed by route. Plates are drawn on
+ * linen and stay light in both themes, like the landing page's canvas. A
+ * route with no entry renders without one. */
+const PLATES: Readonly<Record<string, string>> = {
+  "/find": "find",
+  "/evaluate": "evaluate",
+  "/manage": "manage",
+  "/setup": "setup",
+  "/constraints": "constraints",
+  "/screeners": "screeners",
+  "/dashboard": "dashboard",
+  "/portfolio": "positions",
+  "/principles": "principles",
+  "/autoresearch": "autoresearch",
+};
+
 /**
  * One choice, rendered big enough to be the only thing you read.
  *
@@ -29,43 +45,60 @@ export function SectionCard({
   status = "live",
 }: SectionCardProps) {
   const planned = status === "planned";
+  const plate = PLATES[to];
 
   const body = (
-    <>
-      <div className="flex items-baseline gap-sm">
-        {num && (
-          <span
+    <div className="flex items-start gap-md">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-sm">
+          {num && (
+            <span
+              className={clsx(
+                "font-display text-label tabular tracking-marker",
+                planned ? "text-on-ink-faint" : "text-cadmium",
+              )}
+            >
+              {num}
+            </span>
+          )}
+          <h2
             className={clsx(
-              "font-display text-label tabular tracking-marker",
-              planned ? "text-on-ink-faint" : "text-cadmium",
+              "font-display text-display-sm",
+              planned ? "text-on-ink-faint" : "text-bone",
             )}
           >
-            {num}
-          </span>
-        )}
-        <h2
+            {label}
+          </h2>
+          {planned && (
+            <span className="font-display text-label uppercase tracking-marker text-on-ink-faint">
+              · soon
+            </span>
+          )}
+        </div>
+        <p
           className={clsx(
-            "font-display text-display-sm",
-            planned ? "text-on-ink-faint" : "text-bone",
+            "mt-xs max-w-[60ch] text-sm leading-relaxed",
+            planned ? "text-on-ink-faint" : "text-on-ink-soft",
           )}
         >
-          {label}
-        </h2>
-        {planned && (
-          <span className="font-display text-label uppercase tracking-marker text-on-ink-faint">
-            · soon
-          </span>
-        )}
+          {blurb}
+        </p>
       </div>
-      <p
-        className={clsx(
-          "mt-xs max-w-[60ch] text-sm leading-relaxed",
-          planned ? "text-on-ink-faint" : "text-on-ink-soft",
-        )}
-      >
-        {blurb}
-      </p>
-    </>
+      {plate && (
+        /* Decorative: the label already names the door, so alt is empty. */
+        <img
+          src={`/plates/${plate}.svg`}
+          alt=""
+          width={88}
+          height={88}
+          loading="lazy"
+          className={clsx(
+            "size-16 shrink-0 border border-ink-line sm:size-[88px]",
+            planned && "opacity-50 grayscale",
+          )}
+        />
+      )}
+    </div>
   );
 
   /* `no-tap-grow` matters and is not decoration. The coarse-pointer rule in
