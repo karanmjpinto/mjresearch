@@ -73,6 +73,45 @@ def test_narrow_agreement_is_not_material():
     assert agent.summarize_dissent(committee)["material_disagreement"] is False
 
 
+def test_a_blank_answer_is_not_a_vote():
+    """A score with no thesis dragged STRL's committee mean from 46 to 36."""
+    committee = [
+        {"persona_id": "a", "analysis": _analysis(62, "BUY")},
+        {"persona_id": "b", "analysis": _analysis(0, "SELL", thesis="")},
+        {"persona_id": "c", "analysis": _analysis(48, "HOLD")},
+    ]
+    dissent = agent.summarize_dissent(committee)
+    assert dissent["responded"] == 2
+    assert dissent["conviction_mean"] == 55.0
+
+
+@pytest.mark.asyncio
+async def test_blank_persona_is_recorded_as_failed_and_pm_gets_the_mean(
+    monkeypatch, no_persistence
+):
+    monkeypatch.setattr(settings, "committee_refine_on_dissent", False)
+    by_persona = {
+        "Warren Buffett": _analysis(62, "BUY"),
+        "Michael Burry": _analysis(0, "SELL", thesis=" "),
+        "Peter Lynch": _analysis(48, "HOLD"),
+    }
+    synthesis_prompts: list[str] = []
+
+    async def fake_call_json(system, user, schema=None, **kwargs):
+        if "portfolio manager" in system.lower():
+            synthesis_prompts.append(user)
+            return _result(_analysis(57, "BUY"))
+        return _result(next(v for k, v in by_persona.items() if k in system))
+
+    monkeypatch.setattr(agent, "call_json", fake_call_json)
+    out = await agent.run_committee_analysis(
+        "AAPL", SNAPSHOT, ["warren_buffett", "michael_burry", "peter_lynch"]
+    )
+    failed = [c for c in out["committee"] if "error" in c]
+    assert [c["error"]["error"] for c in failed] == ["empty_view"]
+    assert "Committee conviction: mean 55.0, range 48-62, from 2 analysts" in synthesis_prompts[0]
+
+
 # ----------------------------------------------------------------------
 # The rebuttal round
 
@@ -351,3 +390,35 @@ def test_agreeing_committee_reports_no_refinement_over_the_api(monkeypatch, no_p
     assert body["refinement"]["triggered"] is False
     assert body["committee_round1"] is None
     assert body["dissent_round1"] is None
+
+
+# ----------------------------------------------------------------------
+# Conviction is the sum of its factors
+
+
+def test_score_is_built_from_factors_not_taken_as_stated():
+    factors = [{"factor": "FCF yield 2.9%", "points": -4}, {"factor": "ROE 40%", "points": 11}]
+    assert agent.score_from_factors(75, factors) == 56
+    assert agent.score_from_factors(62, []) == 62, "no factors: the stated score stands"
+    assert agent.score_from_factors(50, [{"factor": "x", "points": 25}]) == 70, "one decisive point"
+    # NVDA's first live run: eight generous factors summed to 91 and pinned a
+    # straight sum at 100. Diminishing returns keep it off the rail.
+    assert agent.score_from_factors(96, [{"factor": "x", "points": 91}]) == 95
+    assert agent.score_from_factors(50, [{"factor": "x", "points": -25}] * 8) == 0
+
+
+@pytest.mark.asyncio
+async def test_committee_conviction_is_the_members_mean(monkeypatch, no_persistence):
+    monkeypatch.setattr(settings, "committee_refine_on_dissent", False)
+    pm = {**_analysis(100, "BUY"), "conviction_factors": [{"factor": "moat", "points": 20}]}
+
+    async def fake_call_json(system, user, schema=None, **kwargs):
+        if "portfolio manager" in system.lower():
+            return _result(pm)
+        return _result(_analysis(62 if "Warren Buffett" in system else 48, "HOLD"))
+
+    monkeypatch.setattr(agent, "call_json", fake_call_json)
+    out = await agent.run_committee_analysis("AAPL", SNAPSHOT, ["warren_buffett", "peter_lynch"])
+    synth = out["synthesis"]
+    assert synth["analysis"]["conviction_score"] == 55, "the PM wrote 100; the members average 55"
+    assert any("committee mean 55" in n for n in synth["evaluation"]["notes"])
