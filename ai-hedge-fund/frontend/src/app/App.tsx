@@ -55,6 +55,9 @@ const CaptureView = lazy(() =>
 const Dashboard = lazy(() =>
   import("@/components/Dashboard").then((m) => ({ default: m.Dashboard })),
 );
+const MemoView = lazy(() =>
+  import("@/components/MemoView").then((m) => ({ default: m.MemoView })),
+);
 const DecideView = lazy(() =>
   import("@/components/DecideView").then((m) => ({ default: m.DecideView })),
 );
@@ -210,6 +213,7 @@ function AppRoutes() {
       <Route path="/lens/:ticker?" element={<YourLensView />} />
       <Route path="/value/:ticker?" element={<ValueRiskView />} />
       <Route path="/decide/:ticker?" element={<DecideView />} />
+      <Route path="/memo/:ticker" element={<MemoView />} />
       <Route path="/autoresearch" element={<AutoResearchView />} />
       <Route path="/setup" element={<SetupView />} />
       {/* Unknown routes land on the chooser rather than the dashboard. The

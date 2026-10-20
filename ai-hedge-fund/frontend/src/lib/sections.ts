@@ -154,6 +154,7 @@ const EXTRA_ROUTES: Readonly<Record<string, SectionKey>> = {
   value: "evaluate",
   decide: "evaluate",
   capture: "evaluate",
+  memo: "evaluate",
   breadth: "manage",
   optimize: "manage",
 };

@@ -1410,6 +1410,18 @@ export const api = {
       `/runs?limit=${limit}${ticker ? `&ticker=${encodeURIComponent(ticker)}` : ""}`,
     ),
 
+  /** One run in full, including each committee member's own view. */
+  getRun: (runUid: string) =>
+    fetchJSON<{
+      run_uid: string;
+      mode: string;
+      model: string | null;
+      created_at: string;
+      output?: Partial<AiAnalysisBlock>;
+      verification?: RunVerification | null;
+      committee_detail?: CommitteeEntry[] | null;
+    }>(`/runs/${encodeURIComponent(runUid)}`),
+
   // --- Decisions ---
 
   sizePosition: (body: {
@@ -1935,6 +1947,23 @@ export interface AiAnalysisBlock {
   key_risks: string[];
   time_horizon: string;
   confidence_in_data: number;
+}
+
+/** Each number the prose stated, checked against the snapshot the run saw. */
+export interface RunVerification {
+  status: string;
+  checked: number;
+  verified: number;
+  mismatched: number;
+  unverifiable: number;
+  claims: {
+    metric: string;
+    stated: number;
+    actual?: number;
+    verdict: string;
+    excerpt?: string;
+    note?: string;
+  }[];
 }
 
 export type CommitteeEntry = {

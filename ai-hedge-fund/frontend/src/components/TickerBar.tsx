@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   DESTINATIONS,
   STAGES,
@@ -84,6 +84,24 @@ export function TickerBar() {
         </nav>
 
         <div className="ml-auto flex items-center gap-sm">
+          {/* The evaluation as a document to take away; the page prints to PDF. */}
+          <div className="flex items-center gap-2xs" aria-label="Download a memo">
+            <span className="font-display text-label uppercase tracking-label text-on-ink-faint">
+              Memo
+            </span>
+            <Link
+              to={`/memo/${encodeURIComponent(ticker)}?length=one`}
+              className="border border-ink-line px-2 py-1 font-display text-label uppercase tracking-label text-on-ink-soft transition-colors hover:border-cobalt hover:text-bone"
+            >
+              One-pager
+            </Link>
+            <Link
+              to={`/memo/${encodeURIComponent(ticker)}?length=full`}
+              className="border border-ink-line px-2 py-1 font-display text-label uppercase tracking-label text-on-ink-soft transition-colors hover:border-cobalt hover:text-bone"
+            >
+              Full
+            </Link>
+          </div>
           {others.length > 0 && (
             <div className="hidden items-center gap-2xs lg:flex">
               <span className="font-display text-label uppercase tracking-label text-on-ink-faint">

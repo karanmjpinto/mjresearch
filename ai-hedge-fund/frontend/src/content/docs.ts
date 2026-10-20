@@ -209,6 +209,18 @@ export const SECTIONS: DocSection[] = [
           "Each investor returns a stance and a conviction score in their own style; a synthesis step reconciles the disagreement. These run with full freedom rather than as weightings over computed dimensions, so unlike the plan pipeline they are not reproducible. Treat the spread between investors as the useful signal, not the headline number.",
       },
       {
+        name: "The downloadable memo",
+        trust: "written",
+        detail:
+          "A one-pager or a full memo for the name in Evaluate, printed to PDF from the browser. It quotes the newest saved model run and does not start one, so it costs nothing and its footer names the run, its date and its model. The stat block, the valuation table, peers and the earnings record are computed and pulled fresh; the thesis, cases, risks and each investor's view are that run's prose, and can state a figure the stat block contradicts. The full memo prints the claim check for the run, so you can see which of its numbers were verified. With no run on file the numbers still print and the prose sections say so.",
+      },
+      {
+        name: "The memo's “Is now the time?” read",
+        trust: "computed",
+        detail:
+          "Seven readings, each marked supports, mixed or against for someone buying today: price against its 50- and 200-day averages, RSI (30 and 70), where the price sits in its 52-week range (20% and 85%), distance from the peer-implied value (10%), upside to the analysts' average target (15%), whether the macro environment of the last four quarters matches the one the stock has done best in, and whether its volatility regime is calm. The one-line verdict is supports minus against. The thresholds are conventions, not fitted to returns, and the read says nothing about whether the thesis is right; a sound company can still say wait.",
+      },
+      {
         name: "Trading-rule hypotheses",
         trust: "judged",
         detail:

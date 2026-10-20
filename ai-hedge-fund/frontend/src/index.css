@@ -624,3 +624,46 @@ body {
     min-height: 44px;
   }
 }
+
+/* The memo prints as it reads, edge to edge: no page margin, so no white
+ * frame. The sheet carries the margin as padding instead, cloned onto every
+ * page it breaks across, and the brand is fixed so each page carries it. */
+@page {
+  margin: 0;
+}
+@media print {
+  html,
+  body {
+    background: oklch(var(--c-paper));
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .memo-sheet {
+    padding: 12mm 14mm 16mm;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .memo-band {
+    margin: -12mm -14mm 6mm;
+  }
+  .memo-brand {
+    position: fixed;
+    right: 14mm;
+    bottom: 6mm;
+    margin: 0;
+  }
+  /* In the one-pager the sources sit in the bottom margin beside the brand,
+   * out of the flow, so a long thesis cannot push them onto a second page. */
+  .memo-foot {
+    position: fixed;
+    left: 14mm;
+    right: 50mm;
+    bottom: 4mm;
+    margin: 0;
+    padding-top: 2mm;
+  }
+  /* A one-pager that runs to two pages is not one. */
+  .memo-one-page {
+    zoom: 0.7;
+  }
+}
