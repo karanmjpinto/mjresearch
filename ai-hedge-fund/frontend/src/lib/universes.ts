@@ -13,6 +13,14 @@ import type { ScreenerUniverseMeta } from "@/lib/api";
  *
  * So there is one copy, and it holds only universes that load. The server's
  * own list still wins whenever it arrives; this is the offline shape of it.
+ *
+ * It had drifted the other way too, which is the quieter failure. Eight
+ * universes were added and this was not updated, so the offline list offered
+ * half the desk and the missing half included every market outside the
+ * developed world. A fallback that is short is less obviously broken than one
+ * that is wrong, and just as misleading — `test_the_fallback_universe_list_is_complete`
+ * now derives the expected set from the backend rather than trusting this
+ * file to have been remembered.
  */
 export const FALLBACK_UNIVERSES: ScreenerUniverseMeta[] = [
   { id: "sp500", label: "S&P 500", description: "", approx_count: 503 },
@@ -43,6 +51,19 @@ export const FALLBACK_UNIVERSES: ScreenerUniverseMeta[] = [
     description: "",
     approx_count: 1900,
   },
+  { id: "za_all", label: "South Africa (JSE)", description: "", approx_count: 242 },
+  { id: "id_all", label: "Indonesia (IDX)", description: "", approx_count: 837 },
+  { id: "sa_all", label: "Saudi Arabia (Tadawul)", description: "", approx_count: 361 },
+  { id: "my_all", label: "Malaysia (Bursa)", description: "", approx_count: 882 },
+  { id: "th_all", label: "Thailand (SET + mai)", description: "", approx_count: 1722 },
+  { id: "kr_kospi", label: "South Korea (KOSPI)", description: "", approx_count: 785 },
+  {
+    id: "kr_all",
+    label: "South Korea (KOSPI + KOSDAQ)",
+    description: "",
+    approx_count: 2642,
+  },
+  { id: "cl_all", label: "Chile (Santiago)", description: "", approx_count: 103 },
   {
     id: "ai_supply_chain",
     label: "AI supply chain (curated)",
