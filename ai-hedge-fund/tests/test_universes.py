@@ -338,3 +338,37 @@ def test_every_default_universe_is_one_that_loads():
     for screen, uid in DEFAULT_UNIVERSE_FOR.items():
         assert uid in universes.LOADERS, f"{screen} defaults to unloadable {uid!r}"
     assert DEFAULT_UNIVERSE in universes.LOADERS
+
+
+def test_the_fallback_universe_list_is_complete():
+    """The offline dropdown has to offer every universe that loads.
+
+    `FALLBACK_UNIVERSES` is what the screener shows while the server's own
+    list is in flight or unreachable. It was written once against the eight
+    universes of the day and never updated, so after eight more were added
+    it silently offered half the desk — and the missing half was every
+    market outside the developed world.
+
+    A short fallback is less obviously broken than a wrong one and just as
+    misleading, which is why this is derived from `UNIVERSE_META` rather
+    than from anyone remembering. Parsed rather than imported, for the same
+    reason the default-universe test parses: the file is TypeScript, and a
+    hand-written Python mirror would be a third place to disagree.
+    """
+    import re
+    from pathlib import Path
+
+    from hedge_fund.data.universes import UNIVERSE_META
+
+    src = (
+        Path(__file__).resolve().parents[1] / "frontend" / "src" / "lib" / "universes.ts"
+    ).read_text(encoding="utf-8")
+    block = src.split("FALLBACK_UNIVERSES", 1)[1].split("];", 1)[0]
+    offered = set(re.findall(r'id:\s*"([a-z0-9_]+)"', block))
+
+    loads = {u["id"] for u in UNIVERSE_META}
+    missing = sorted(loads - offered)
+    phantom = sorted(offered - loads)
+
+    assert not missing, f"universes that load but are missing from the fallback: {missing}"
+    assert not phantom, f"fallback offers universes that do not load: {phantom}"
