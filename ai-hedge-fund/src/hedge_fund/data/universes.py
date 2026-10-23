@@ -309,6 +309,19 @@ UNIVERSE_META: list[dict[str, Any]] = [
         ),
         "approx_count": 37,
     },
+    {
+        "id": "bullpen_week",
+        "currency": "USD",
+        "label": "Buy-side this week (Bullpen.News)",
+        "description": (
+            "Every name the curated buy-side wrote about in the last week, from "
+            "the Bullpen.News feed: newsletters, fund letters and X accounts, "
+            "picked by hand. Not an index and not a recommendation — a list of "
+            "what serious people are reading, put through our own screens. "
+            "Rebuilt daily."
+        ),
+        "approx_count": 25,
+    },
 ]
 
 _CACHE: dict[str, tuple[float, list[str]]] = {}
@@ -713,6 +726,21 @@ def _ai_supply_chain() -> list[str]:
     return fetch_ai_supply_chain()
 
 
+def _bullpen_week() -> list[str]:
+    """Tickers from the Bullpen.News feed, in Yahoo's spelling.
+
+    Through the data service, so the feed is fetched once under the provider
+    rate limit and cache rather than by a second, unmetered path.
+    """
+    from hedge_fund.data.service import get_data_service
+
+    feed = get_data_service().get_commentary_feed()
+    if not feed:
+        raise ValueError("Bullpen.News feed unavailable")
+    # Bullpen writes share classes BRK.B; Yahoo writes BRK-B.
+    return _dedupe([normalize_yahoo_symbol(t) for item in feed for t in item.get("tickers") or []])
+
+
 def _region_loader(universe_id: str) -> Any:
     """A zero-argument loader for one region, for the LOADERS table."""
     region, expected, suffix = YAHOO_REGIONS[universe_id]
@@ -736,6 +764,7 @@ LOADERS: dict[str, Any] = {
     "au_all": fetch_au_all,
     **{uid: _region_loader(uid) for uid in YAHOO_REGIONS},
     "ai_supply_chain": _ai_supply_chain,
+    "bullpen_week": _bullpen_week,
 }
 
 

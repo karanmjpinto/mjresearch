@@ -272,6 +272,64 @@ export interface AnalystRating {
   source: string;
 }
 
+/** One curated buy-side item (Bullpen.News). `url` goes through Bullpen's own
+ *  redirect so the click is credited to them. */
+export interface BuySideItem {
+  title: string;
+  summary?: string | null;
+  published_at: string | null;
+  source: string | null;
+  source_type?: string | null;
+  url: string | null;
+  tags: string[];
+  /** Present on catalyst leads only: which Bolton catalyst the tag names. */
+  catalyst?: string[];
+}
+
+export interface BuySideWindow {
+  days: number;
+  /** Null when the window predates everything fetched: unknown, not zero. */
+  items: number | null;
+  sources: number | null;
+  /** False: Bullpen holds older items than were fetched, so this is a floor. */
+  complete: boolean;
+}
+
+export interface BuySideCommentary {
+  covered: boolean;
+  source: "bullpen.news";
+  /** Set when Bullpen could not be asked (rate limit, outage). */
+  unavailable?: string;
+  as_of?: string;
+  company?: string | null;
+  all_time_items?: number | null;
+  attention?: Record<"30d" | "90d" | "365d", BuySideWindow>;
+  letters?: {
+    count: number;
+    capped: boolean;
+    recent: { firm: string | null; period: string | null; period_end: string | null; url: string | null }[];
+  };
+  catalyst_leads?: BuySideItem[];
+  recent?: BuySideItem[];
+}
+
+export interface BuySideIdea {
+  ticker: string;
+  mentions: number;
+  sources: string[];
+  catalyst: string[];
+  /** Null when the US index lists could not be loaded. */
+  in_universe: boolean | null;
+  items: { title: string; url: string | null; published_at: string | null; source: string | null }[];
+}
+
+export interface BuySideIdeas {
+  source: "bullpen.news";
+  items: number;
+  window: { from: string | null; to: string | null };
+  ideas: BuySideIdea[];
+}
+
 export interface NewsSentiment {
   ticker: string;
   /** False when no provider key is configured. FinBERT headline sentiment is
@@ -1711,6 +1769,11 @@ export const api = {
     fetchJSON<{ articles: Record<string, unknown>[] }>(
       `/data/news?q=${encodeURIComponent(query)}&limit=${limit}`,
     ),
+
+  getCommentary: (ticker: string) =>
+    fetchJSON<BuySideCommentary>(`/data/commentary/${encodeURIComponent(ticker)}`),
+
+  getCommentaryIdeas: () => fetchJSON<BuySideIdeas>("/data/commentary/ideas"),
 
   // --- New data endpoints (13) ---
 

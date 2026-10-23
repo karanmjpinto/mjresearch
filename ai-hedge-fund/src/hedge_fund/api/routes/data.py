@@ -95,6 +95,47 @@ def get_news(q: str = Query(..., min_length=1), limit: int = Query(10, ge=1, le=
     return {"query": q, "count": len(results), "articles": results}
 
 
+#: Bullpen covers US listings, so "new to us" is judged against the US indices.
+_US_UNIVERSES = ("sp500", "sp400", "sp600")
+
+
+def _us_universe_symbols() -> set[str] | None:
+    from hedge_fund.data.universes import load_universe
+
+    known: set[str] = set()
+    try:
+        for uid in _US_UNIVERSES:
+            known.update(load_universe(uid))
+    except Exception:  # noqa: BLE001 — unknown is honest; a guess is not
+        return None
+    # Yahoo writes share classes BRK-B; Bullpen writes BRK.B.
+    return {s.replace("-", ".").upper() for s in known}
+
+
+@router.get("/commentary/ideas")
+def get_commentary_ideas():
+    """This week's curated buy-side ideas, grouped by ticker (Bullpen.News)."""
+    from hedge_fund.data.bullpen import ideas_from_feed
+
+    feed = _ds.get_commentary_feed()
+    if not feed:
+        raise HTTPException(503, "Bullpen.News feed unavailable")
+    ideas = ideas_from_feed(feed, known=_us_universe_symbols())
+    dates = sorted(i["published_at"] for i in feed if i.get("published_at"))
+    return {
+        "source": "bullpen.news",
+        "items": len(feed),
+        "window": {"from": dates[0] if dates else None, "to": dates[-1] if dates else None},
+        "ideas": ideas,
+    }
+
+
+@router.get("/commentary/{ticker}")
+def get_commentary(ticker: str):
+    """Who in the curated buy-side is writing about this name, and is it a catalyst story."""
+    return _ds.get_commentary(ticker)
+
+
 # ------------------------------------------------------------------
 # New endpoints — 13 additional data categories
 # ------------------------------------------------------------------

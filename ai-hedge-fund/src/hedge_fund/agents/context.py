@@ -92,11 +92,25 @@ def _drop_section(work: dict[str, Any], key: str) -> str | None:
     return f"dropped section: {key}"
 
 
+def _trim_commentary(work: dict[str, Any]) -> str | None:
+    """Keep the counts and who said what; drop the summaries, which are the bulk."""
+    com = work.get("commentary")
+    if not isinstance(com, dict):
+        return None
+    trimmed = 0
+    for key in ("recent", "catalyst_leads", "fund_letters_recent"):
+        for it in com.get(key) or []:
+            if isinstance(it, dict) and it.pop("summary", None) is not None:
+                trimmed += 1
+    return f"commentary: dropped {trimmed} summaries, kept titles and counts" if trimmed else None
+
+
 def _reduction_steps() -> list[Any]:
-    steps: list[Any] = [_collapse_provenance]
+    steps: list[Any] = [_collapse_provenance, _trim_commentary]
     steps += [lambda w, c=c: _cap_news(w, c) for c in NEWS_CAPS]
     steps.append(_shorten_long_strings)
     # Last resorts, most valuable last: sentiment metadata, then news entirely.
+    steps.append(lambda w: _drop_section(w, "commentary"))
     steps.append(lambda w: _drop_section(w, "news_sentiment"))
     steps.append(lambda w: _drop_section(w, "news"))
     steps.append(lambda w: _drop_section(w, "provenance"))

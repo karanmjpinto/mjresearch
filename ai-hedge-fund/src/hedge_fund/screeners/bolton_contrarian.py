@@ -24,6 +24,13 @@ reasoning is a value trap until someone finds the catalyst.** That judgment is
 the `anthony_bolton` persona's job on the research page, which is why the
 screen's output links there rather than ending in a verdict.
 
+What the screen *can* do is say whether anyone has written one up. For names
+that pass, it asks Bullpen.News for items tagged special situation, M&A or
+activism in the last six months and attaches them as `catalyst_leads`. A lead
+is a person's claim, not a catalyst: it is not scored, the composite does not
+move, and `catalyst_checked` stays False. It tells you which passing names
+someone has already done the reading on.
+
 Data via yfinance. Verify against filings before acting on any of it.
 """
 
@@ -245,6 +252,12 @@ class BoltonResult:
 
     #: Always False. The screen cannot see catalysts; see the module docstring.
     catalyst_checked: bool = False
+    #: Written-up catalysts from Bullpen.News, for passing names only. Leads,
+    #: not scores. None means not looked up; [] means looked and found none.
+    catalyst_leads: list[dict[str, Any]] | None = None
+    #: Curated buy-side items in the last 90 days — a second neglect reading.
+    #: Reported, not scored; None when not looked up.
+    buyside_items_90d: int | None = None
     snapshot: dict[str, Any] = field(default_factory=dict)
     error: str | None = None
 
@@ -431,6 +444,36 @@ def score_bolton_contrarian(snap: BoltonSnapshot) -> BoltonResult:
     return r
 
 
+#: How long a screen will queue for Bullpen's rate limit before giving up on
+#: one name's leads. Screens are batch jobs; a refusal is worse than a wait.
+LEADS_MAX_WAIT_S = 30.0
+
+
+def attach_catalyst_leads(r: BoltonResult, commentary: dict[str, Any]) -> BoltonResult:
+    """Copy written-up catalysts onto a result without touching its score."""
+    if commentary.get("unavailable"):
+        return r  # leave None: "not looked up" must not read as "none found"
+    r.catalyst_leads = [
+        {k: it.get(k) for k in ("title", "source", "published_at", "url", "catalyst")}
+        for it in commentary.get("catalyst_leads") or []
+    ]
+    window = (commentary.get("attention") or {}).get("90d") or {}
+    r.buyside_items_90d = window.get("items") if commentary.get("covered") else 0
+    return r
+
+
 def run_bolton_contrarian_for_ticker(ticker: str) -> dict[str, Any]:
     snap = fetch_bolton_snapshot(ticker)
-    return score_bolton_contrarian(snap).to_dict()
+    r = score_bolton_contrarian(snap)
+    # Only passing names: the leads matter there, and a 500-name screen must
+    # not become 500 requests to a site run by one person.
+    if r.passed:
+        from hedge_fund.data.service import get_data_service
+
+        try:
+            commentary = get_data_service().get_commentary(r.ticker, max_wait_s=LEADS_MAX_WAIT_S)
+        except Exception as exc:  # noqa: BLE001 — leads are optional, the screen is not
+            logger.warning("%s: catalyst leads unavailable (%s)", r.ticker, exc)
+        else:
+            attach_catalyst_leads(r, commentary)
+    return r.to_dict()

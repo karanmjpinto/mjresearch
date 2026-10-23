@@ -58,6 +58,12 @@
       "env_key": "FINANCIAL_DATASETS_API_KEY",
       "rate_limit_per_minute": 60,
       "categories": ["price", "fundamentals"]
+    },
+    "bullpen": {
+      "priority": 1,
+      "requires_key": false,
+      "rate_limit_per_minute": 20,
+      "categories": ["commentary"]
     }
   }
 }

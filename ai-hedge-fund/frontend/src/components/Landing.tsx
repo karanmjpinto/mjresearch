@@ -145,7 +145,7 @@ const LIMITATIONS = [
   ],
   [
     "No screen checks a catalyst",
-    "A passing name is a candidate for a question, not an answer. The Bolton screen says so on every row.",
+    "A passing name is a candidate for a question, not an answer. Bolton rows show written-up catalysts as leads, never as checks.",
   ],
   [
     "Committee mode is not audited",

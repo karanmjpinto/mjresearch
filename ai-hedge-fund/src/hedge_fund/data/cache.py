@@ -30,6 +30,7 @@ class DataCategory(str, Enum):
     SEC_FILINGS = "sec_filings"
     CONGRESSIONAL = "congressional"
     PEERS = "peers"
+    COMMENTARY = "commentary"
 
 
 # Default TTLs in seconds per category
@@ -51,6 +52,7 @@ DEFAULT_TTLS: dict[DataCategory, int] = {
     DataCategory.SEC_FILINGS: 86400,  # 24 hr
     DataCategory.CONGRESSIONAL: 86400,  # 24 hr
     DataCategory.PEERS: 86400,  # 24 hr
+    DataCategory.COMMENTARY: 21600,  # 6 hr — Bullpen asks to be read gently
 }
 
 
