@@ -7,13 +7,15 @@ Prompts here are original distillations for this codebase — see third_party/AT
 
 from __future__ import annotations
 
+from hedge_fund.agents.prompts import CONVICTION_RULE
+
 # Shared JSON/output rules (aligned with prompts.RESEARCH_SYSTEM)
-_JSON_RULES = """
+_JSON_RULES = f"""
 Rules:
 - Base conclusions ONLY on the market data provided in the user message. Do not invent prices, earnings, or events.
 - If data is missing or stale, say so explicitly and lower confidence_in_data.
 - Output valid JSON matching the schema exactly. No markdown fences.
-- conviction_score: 0=strong sell, 50=neutral, 100=strong buy (independent of stance label).
+{CONVICTION_RULE}
 - stance must be one of: BUY, HOLD, SELL, WATCH.
 - Keep key_risks to specific, material risks (max 12 short bullets).
 """
@@ -265,22 +267,27 @@ Rules:
 - Read the JSON of persona analyses and weigh agreements and disagreements fairly.
 - Do not invent facts; if personas conflict because data was thin, say so and lower confidence_in_data.
 - Output valid JSON matching the schema exactly. No markdown fences.
-- conviction_score: 0=strong sell, 50=neutral, 100=strong buy.
+- conviction_factors: the two to eight points that decided the committee, each with signed points (-25 to +25) as an analyst would weigh them.
+- conviction_score: the committee's mean conviction, given in the user message. Code sets it to that mean; your job is the reasoning, not the number. Bands: 0-15 will lose money, 16-35 do not own, 36-49 leaning against, 50 balanced, 51-64 leaning for, 65-84 good case with named risks, 85-100 exceptional.
 - stance must be one of: BUY, HOLD, SELL, WATCH.
 - investment_thesis must briefly cite which themes dominated (e.g. value vs growth) without naming people.
 - key_risks: up to 12 bullets combining the most material risks mentioned.
 """
 
 
-def build_pm_synthesis_user_prompt(ticker: str, persona_json: str) -> str:
+def build_pm_synthesis_user_prompt(
+    ticker: str, persona_json: str, conviction_line: str = ""
+) -> str:
     return f"""Ticker: {ticker}
 
 Synthesize the following persona-level JSON analyses into a single decision.
+{conviction_line}
 
 Persona analyses (JSON array of objects with persona_id and analysis, or error):
 {persona_json}
 
 Produce one JSON object with these keys (exact names):
+conviction_factors (array of {{factor, points}}),
 conviction_score (int 0-100),
 stance (string: BUY|HOLD|SELL|WATCH),
 investment_thesis (string),
@@ -346,6 +353,7 @@ fetched, so anything you cite must already be here):
 {bundle}
 
 Reconsider and output one JSON object with these keys (exact names):
+conviction_factors (array of {{factor, points}}),
 conviction_score (int 0-100),
 stance (string: BUY|HOLD|SELL|WATCH),
 investment_thesis (string),

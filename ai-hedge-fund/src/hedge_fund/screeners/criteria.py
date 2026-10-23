@@ -50,6 +50,7 @@ from hedge_fund.screeners import (
 from hedge_fund.screeners import (
     kiyohara_handbook as kh,
 )
+from hedge_fund.data import bullpen as bp
 from hedge_fund.data import capital_cycle as cc
 from hedge_fund.screeners import (
     yartseva as yz,
@@ -122,6 +123,11 @@ def _bolton() -> dict[str, Any]:
         "pref_short_interest": bc.PREF_SHORT_INTEREST,
         "low_analyst_coverage": bc.LOW_ANALYST_COVERAGE,
         "insider_lookback_days": bc.INSIDER_LOOKBACK_DAYS,
+        # Reported rather than scored, and still fingerprinted: which tags count
+        # as a lead changes which rows carry one.
+        "catalyst_lead_tags": sorted(bp.CATALYST_TAGS),
+        "catalyst_lookback_days": bp.CATALYST_LOOKBACK_DAYS,
+        "leads_max_wait_s": bc.LEADS_MAX_WAIT_S,
     }
 
 

@@ -20,6 +20,7 @@ import {
   type Dissent,
   type AiAnalysisBlock,
 } from "@/lib/api";
+import { BuySidePanel } from "./BuySidePanel";
 import { ChatInput } from "./ChatInput";
 import { ConvictionGauge } from "./ConvictionGauge";
 import { PriceChart } from "./PriceChart";
@@ -50,6 +51,7 @@ const TABS = [
   "Peers",
   "Backtest",
   "Sentiment",
+  "Buy-side",
   "Macro",
   "Institutional",
 ] as const;
@@ -620,6 +622,9 @@ export function ResearchReport() {
                 )}
               </div>
             )}
+
+            {/* BUY-SIDE TAB — curated commentary, Bullpen.News */}
+            {activeTab === "Buy-side" && <BuySidePanel ticker={ticker} />}
 
             {/* ================================================================ */}
             {/* MACRO TAB */}

@@ -173,6 +173,39 @@ class DataService:
         auto = self.registry.get(DataCategory.PEERS, ticker)
         return apply_curated(ticker, auto, fundamentals=self.get_fundamentals)
 
+    def get_commentary(
+        self, ticker: str, *, as_of: date | None = None, max_wait_s: float = 0.0
+    ) -> dict:
+        """Buy-side commentary on one name, summarised as of a date (Bullpen.News).
+
+        ``max_wait_s`` lets a batch caller (a screen) queue for the rate limit
+        instead of being refused. A refusal and "Bullpen has never heard of
+        this name" are different answers, so the result says which it was.
+        """
+        import time
+
+        from hedge_fund.data.bullpen import summarize_commentary
+
+        sym = ticker.strip().upper()
+        deadline = time.monotonic() + max_wait_s
+        while (wait := self.registry.limiter.wait_time("bullpen")) > 0:
+            if time.monotonic() + wait > deadline:
+                break
+            time.sleep(wait)
+        value, meta = self.registry.get_with_meta(DataCategory.COMMENTARY, sym)
+        summary = summarize_commentary(value, as_of=as_of)
+        # A 404 is recorded as "bullpen:no_data"; anything else is a failure to look.
+        refused = [a for a in meta.attempted if not a.endswith(":no_data")]
+        if value is None and (refused or not meta.attempted):
+            summary["unavailable"] = ", ".join(refused) or meta.error or "not fetched"
+        return summary
+
+    def get_commentary_feed(self) -> list[dict]:
+        """The last week of curated buy-side items, one row per item."""
+        from hedge_fund.data.bullpen import FEED_KEY
+
+        return self.registry.get(DataCategory.COMMENTARY, FEED_KEY) or []
+
     def get_provider_status(self) -> list[dict]:
         """Return status of all registered providers."""
         return self.registry.get_provider_status()

@@ -432,6 +432,22 @@ function reason(r: ScreenRow): string {
   if (typeof insider === "number" && insider > 0) {
     bits.push(`${insider} net insider buy${insider === 1 ? "" : "s"}`);
   }
+  /* Bolton's missing fifth section, as far as it can honestly go: whether
+   * anyone has written a catalyst up. Null means not looked up (a failing
+   * name, or Bullpen unreachable) and says nothing; an empty list means
+   * looked and found none, which is worth saying on a contrarian row. */
+  const leads = top.catalyst_leads as unknown as
+    | { catalyst?: string[] }[]
+    | null
+    | undefined;
+  if (Array.isArray(leads)) {
+    const kinds = [...new Set(leads.flatMap((l) => l.catalyst ?? []))];
+    bits.push(
+      kinds.length
+        ? `catalyst written up: ${kinds.join(", ")} (${leads.length})`
+        : "no catalyst written up",
+    );
+  }
 
   /* Kiyohara: the multiple he actually works from, and the two balance-sheet
    * facts behind it. `tiers_cleared` is the honest half of the P/E test — the

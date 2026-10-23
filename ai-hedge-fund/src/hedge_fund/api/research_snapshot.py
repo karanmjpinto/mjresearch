@@ -13,6 +13,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Any
 
+from hedge_fund.data.bullpen import commentary_for_model
 from hedge_fund.data.frames import close_series
 from hedge_fund.data.frames import price_summary as build_price_summary
 from hedge_fund.data.provenance import capture
@@ -68,6 +69,9 @@ async def assemble_research_snapshot(
         news_list = [{"title": n.get("title", ""), "date": str(n.get("date", ""))} for n in news]
         news_list, news_sentiment = await enrich_news_with_sentiment_async(news_list)
 
+        # As of the snapshot date, so a replay never reads its own future.
+        commentary = ds.get_commentary(ticker, as_of=end_date)
+
     provenance = prov.as_dict()
     data_quality = summarize_data_quality(provenance)
 
@@ -79,6 +83,7 @@ async def assemble_research_snapshot(
         "statements": statements,
         "news": news_list,
         "news_sentiment": news_sentiment,
+        "commentary": commentary_for_model(commentary),
         "provenance": provenance,
     }
     if end_date is not None:
@@ -93,6 +98,7 @@ async def assemble_research_snapshot(
         "technicals": technicals,
         "news": news_list,
         "news_sentiment": news_sentiment,
+        "commentary": commentary,
         "data_quality": data_quality,
     }
     return partial, data_snapshot

@@ -11,9 +11,10 @@ from __future__ import annotations
 
 import asyncio
 import json
+import math
 import logging
 import time
-from typing import Any
+from typing import Any, TypeGuard
 
 from hedge_fund.agents import memory
 from hedge_fund.agents.evaluation import evaluate_research
@@ -49,7 +50,19 @@ from hedge_fund.settings import settings
 logger = logging.getLogger(__name__)
 
 # Constrains generation to the analysis shape, not merely to valid JSON.
-ANALYSIS_SCHEMA = ResearchAnalysisOutput.model_json_schema()
+# Factors are required in what the model is asked for, but stay optional when
+# parsing: constrained decoding drops an optional field, and the first live
+# committee after they were added returned none from any analyst. Parsing
+# stays lenient so stored runs and the plan pipeline read as before.
+_schema = ResearchAnalysisOutput.model_json_schema()
+ANALYSIS_SCHEMA = {
+    **_schema,
+    "required": ["conviction_factors", *_schema.get("required", [])],
+    "properties": {
+        **_schema["properties"],
+        "conviction_factors": {**_schema["properties"]["conviction_factors"], "minItems": 2},
+    },
+}
 
 
 def _model_kwargs(role: str) -> dict[str, Any]:
@@ -82,14 +95,42 @@ def _assemble_system_prompt(
     return (base + section if section else base), notes
 
 
+#: How much net evidence it takes to move far from 50. With 60, one decisive
+#: factor (+25) lands near 70 and only overwhelming one-sided evidence nears
+#: 100. A straight sum saturated: the model weights generously, and on the
+#: first live run every NVDA analyst summed past 100.
+FACTOR_SCALE = 60.0
+
+
+def score_from_factors(stated: int, factors: list[dict[str, Any]]) -> int:
+    """The conviction the listed factors add up to, or the stated one when there are none.
+
+    The model weighs the points; the arithmetic is code, with diminishing
+    returns so a long one-sided list cannot pin the score to a rail.
+    """
+    if not factors:
+        return stated
+    net = sum(int(f["points"]) for f in factors)
+    return int(round(50 + 50 * math.tanh(net / FACTOR_SCALE)))
+
+
 def _finalize(
     parsed: Any,
     snapshot: dict[str, Any],
     result: LLMResult,
 ) -> dict[str, Any]:
     """Run every deterministic check over a parsed model output."""
+    computed = score_from_factors(
+        parsed.conviction_score, [f.model_dump() for f in parsed.conviction_factors]
+    )
+    stated = parsed.conviction_score
+    parsed = parsed.model_copy(update={"conviction_score": computed})
     analysis = parsed.model_dump()
     evaluation = evaluate_research(parsed, data_snapshot=snapshot)
+    if parsed.conviction_factors and computed != stated:
+        evaluation.setdefault("notes", []).append(
+            f"conviction recomputed from its factors: stated {stated}, factors give {computed}"
+        )
     evaluation["guardrail_warnings"] = validate_output(parsed)
     verification = verify_analysis(analysis, snapshot)
     if verification["status"] == "mismatch":
@@ -237,7 +278,17 @@ async def run_pm_synthesis(
     system, notes = _assemble_system_prompt(wf.synthesis_system, ticker=ticker, persona_id=None)
     bundle, _truncation = truncate_context_with_manifest(data_snapshot)
     persona_json = json.dumps(persona_results, ensure_ascii=False, default=str)
-    user_msg = build_pm_synthesis_user_prompt(ticker.upper(), persona_json) + (
+    # Left to itself the PM picked an anchor and ignored the spread: STRL's
+    # committee averaged 36 and the synthesis said 50. Hand it the arithmetic.
+    d = summarize_dissent(persona_results, wf)
+    conviction_line = (
+        f"Committee conviction: mean {d['conviction_mean']}, range "
+        f"{d['conviction_min']}-{d['conviction_max']}, from {d['responded']} analysts. "
+        "Start your conviction_score here."
+        if d.get("responded")
+        else ""
+    )
+    user_msg = build_pm_synthesis_user_prompt(ticker.upper(), persona_json, conviction_line) + (
         f"\n\nOriginal market data bundle (may be truncated):\n{bundle}"
     )
 
@@ -256,6 +307,17 @@ async def run_pm_synthesis(
         return {"error": "parse", "message": str(e)}
 
     out = _finalize(parsed, data_snapshot, result)
+    # The committee's number is its members' average. Asked to adjust from it,
+    # the PM listed the same absolute factors as an analyst and landed on 100;
+    # it reconciles the argument in prose, and the arithmetic stays code.
+    if d.get("responded"):
+        mean = int(round(d["conviction_mean"]))
+        if out["analysis"]["conviction_score"] != mean:
+            out["evaluation"].setdefault("notes", []).append(
+                f"conviction set to the committee mean {mean}; the PM wrote "
+                f"{out['analysis']['conviction_score']}"
+            )
+        out["analysis"]["conviction_score"] = mean
     out["methodology_note_ids"] = [n["id"] for n in notes]
     return out
 
@@ -456,6 +518,15 @@ async def run_committee_analysis(
             continue
         if "error" in one:
             committee.append({"persona_id": pid, "error": one})
+        elif not _has_view(one.get("analysis")):
+            # A blank answer is a failure, not a vote: Kiyohara on a US name
+            # returned 39 tokens of empty fields scored 0 in 13 of 23 committees.
+            committee.append(
+                {
+                    "persona_id": pid,
+                    "error": {"error": "empty_view", "message": "returned no reasoning"},
+                }
+            )
         else:
             committee.append(
                 {
@@ -532,7 +603,9 @@ async def run_committee_analysis(
             )
 
     synth_input = [
-        {"persona_id": c["persona_id"], "analysis": c.get("analysis")} for c in successes
+        {"persona_id": c["persona_id"], "analysis": c.get("analysis")}
+        for c in successes
+        if _has_view(c.get("analysis"))
     ]
     synth = await run_pm_synthesis(ticker, data_snapshot, synth_input, wf)
 
@@ -575,6 +648,11 @@ async def run_committee_analysis(
     return out
 
 
+def _has_view(analysis: Any) -> TypeGuard[dict[str, Any]]:
+    """True when an analysis says something: a score with no thesis is not a view."""
+    return isinstance(analysis, dict) and bool(str(analysis.get("investment_thesis") or "").strip())
+
+
 def summarize_dissent(
     committee: list[dict[str, Any]], workflow: CommitteeWorkflow | None = None
 ) -> dict[str, Any]:
@@ -589,7 +667,7 @@ def summarize_dissent(
     stances: dict[str, int] = {}
     for entry in committee:
         analysis = entry.get("analysis")
-        if not isinstance(analysis, dict):
+        if not _has_view(analysis):
             continue
         score = analysis.get("conviction_score")
         if isinstance(score, (int, float)):

@@ -10,6 +10,7 @@ from typing import Any
 
 import pandas as pd
 
+from hedge_fund.data.bullpen import commentary_for_model
 from hedge_fund.data.frames import price_summary as build_price_summary
 from hedge_fund.data.service import get_data_service
 from hedge_fund.nlp.news_sentiment import enrich_news_with_sentiment
@@ -98,7 +99,14 @@ def tool_research_snapshot(ticker: str) -> dict[str, Any]:
         "technicals": technicals,
         "news": enriched,
         "news_sentiment": ns_meta,
+        "commentary": commentary_for_model(ds.get_commentary(sym)),
     }
+
+
+def tool_commentary(ticker: str) -> dict[str, Any]:
+    """Curated buy-side commentary on one name: attention, catalyst leads, recent items."""
+    ds = get_data_service()
+    return {"ok": True, **ds.get_commentary(ticker.upper().strip())}
 
 
 # Registry for introspection (e.g. MCP or future agent setup)
@@ -108,5 +116,6 @@ AGENT_TOOLS: dict[str, Any] = {
     "technicals": tool_technicals,
     "bubble_detector": tool_bubble_detector,
     "news": tool_news,
+    "commentary": tool_commentary,
     "research_snapshot": tool_research_snapshot,
 }

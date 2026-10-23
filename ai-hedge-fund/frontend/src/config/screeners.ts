@@ -94,6 +94,35 @@ export type ScreenerViewDef = {
 
 export const SCREENER_VIEWS: ScreenerViewDef[] = [
   {
+    /* Not a screen of ours: the curated buy-side's week, then the Bolton
+     * screen over the same names. Visible even though Bolton is hidden,
+     * because here it answers a narrower question — which of the names other
+     * people are excited about also clear the cheap-unloved-solvent test. */
+    id: "buyside_ideas",
+    label: "Buy-side ideas",
+    description:
+      "Names the curated buy-side wrote about in the last week, from Bullpen.News's hand-picked newsletters, fund letters and X accounts — written-up catalysts first — and the Bolton screen run over the same list. The list is other people's opinion; the table is our arithmetic.",
+    criteriaSections: [
+      {
+        title: "Where the list comes from",
+        items: [
+          "The Bullpen.News RSS feed, about six days deep, read at most every six hours",
+          "Catalyst means Bullpen tagged the item special situation, M&A or activism — someone wrote it up, not that it is real",
+          "New means the name is outside the S&P 500, 400 and 600, so no screen here has seen it",
+        ],
+      },
+      {
+        title: "What the table under it is",
+        items: [
+          "The Bolton contrarian screen, unchanged, over the 'Buy-side this week' universe",
+          "Leads are attached to passing rows only and never change a score",
+        ],
+      },
+    ],
+    criteria: [],
+    plays: [],
+  },
+  {
     id: "cambrian_scarcity",
     screenId: "cambrian-scarcity",
     scoreMax: 100,
@@ -174,7 +203,7 @@ export const SCREENER_VIEWS: ScreenerViewDef[] = [
       "The quality screen on this desk. Every name here cleared the hard filters — a return on capital above 12%, cash conversion above 80%, and a share count that is flat or falling — and sits inside the small and mid-cap band. The bar is its ten-factor score out of 50. The tenth factor is the reinvestment runway: not what the capital already deployed earns, but what the business can compound at from its own cash. Pick a universe to run it somewhere else.",
     label: "Quality Compounder",
     description:
-      "The compounder test, in Akre's three legs: an extraordinary business, management who do not dilute you, and somewhere to put the next dollar at the same rate. Hard filters on growth, ROIC, FCF conversion, leverage, margin trend and dilution, then a ten-factor score out of 50. Bounded to small and mid caps and runnable on any of the seventeen universes. Data via yfinance; short histories fall back to span CAGR — verify in filings.",
+      "The compounder test, in Akre's three legs: an extraordinary business, management who do not dilute you, and somewhere to put the next dollar at the same rate. Hard filters on growth, ROIC, FCF conversion, leverage, margin trend and dilution, then a ten-factor score out of 50. Bounded to small and mid caps and runnable on any of the eighteen universes. Data via yfinance; short histories fall back to span CAGR — verify in filings.",
     usesApi: true,
     criteria: [
       "Size: roughly $500m to $20bn, applied in the currency the company reports in rather than converted at an invented rate. A company whose currency has no band is refused rather than waved through",
@@ -195,7 +224,7 @@ export const SCREENER_VIEWS: ScreenerViewDef[] = [
     infoTerm: "screen-bolton",
     resultsTitle: "S&P 500, ranked as contrarian candidates",
     resultsBlurb:
-      "Cheap, out of favour, and solvent enough to wait. These are not buys: Bolton's own rule is that cheap without a catalyst is a value trap, and the catalyst is the one part of his framework no data feed carries. Open a name and ask him.",
+      "Cheap, out of favour, and solvent enough to wait. These are not buys: Bolton's own rule is that cheap without a catalyst is a value trap, and the catalyst is the one part of his framework no data feed carries. Where the curated buy-side has written one up, the row says so. Open a name and ask him.",
     label: "Bolton Contrarian",
     description:
       "Anthony Bolton's special-situations framework, automated as far as it honestly can be: valuation, neglect, balance-sheet strength and stabilisation. The catalyst section is deliberately not scored — that judgment belongs to the Bolton persona on a company's own page.",
@@ -227,6 +256,7 @@ export const SCREENER_VIEWS: ScreenerViewDef[] = [
           "Catalysts — restructurings, spin-offs, hidden assets, legal overhangs lifting, earnings inflections — need reading, not arithmetic",
           "Institutional selling needs 13F history, which this app does not hold; only the current ownership level is used",
           "Every row is therefore a candidate for the question 'what changes this?', never an answer to it",
+          "Passing rows show catalysts the buy-side has written up on Bullpen.News (special situation, M&A, activism, last six months) as leads. They are not scored and do not mark the catalyst as checked",
         ],
       },
     ],

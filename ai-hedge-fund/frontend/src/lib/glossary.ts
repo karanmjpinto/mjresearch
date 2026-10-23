@@ -228,7 +228,7 @@ export const GLOSSARY = {
     what: "Anthony Bolton's special-situations framework, automated as far as it honestly goes: cheap on at least one multiple, sitting low in its own 52-week range, and generating enough cash to survive the wait. Scored out of 100 across valuation, neglect, balance sheet, insider buying and whether the fall has stopped.",
     why: "Bolton compounded at around 20% a year for 28 years by buying what the market had given up on. The measurable part of that — cheap, unloved, solvent — is exactly what a screen is good for.",
     careful:
-      "This list is not a list of buys, and the gap is the whole point. Bolton's framework has a fifth section — the catalyst — and he says cheap without one is a value trap. Restructurings, spin-offs, hidden assets and legal overhangs lifting cannot be read from a data feed, so the screen does not score them and does not pretend to. Open a name and ask the Bolton persona what changes it; if there is no answer, that is your answer.",
+      "This list is not a list of buys, and the gap is the whole point. Bolton's framework has a fifth section — the catalyst — and he says cheap without one is a value trap. Restructurings, spin-offs, hidden assets and legal overhangs lifting cannot be read from a data feed, so the screen does not score them and does not pretend to. Where the curated buy-side has written a catalyst up, the row says so — a lead to read, not a score. Open a name and ask the Bolton persona what changes it; if there is no answer, that is your answer.",
   },
   "screen-kiyohara": {
     term: "Kiyohara handbook screen",

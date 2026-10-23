@@ -14,6 +14,7 @@ import { YartsevaPanel } from "./YartsevaPanel";
 import { AcquisitionCompounderPanel } from "./AcquisitionCompounderPanel";
 import { ScreenResults } from "./ScreenResults";
 import { CambrianThesis } from "./CambrianThesis";
+import { BuySideIdeas } from "./BuySideIdeas";
 
 function tickerLooksValid(t: string): boolean {
   const s = t.trim();
@@ -199,6 +200,7 @@ export function ScreenersView() {
         </div>
 
         {active.id === "cambrian_scarcity" && <CambrianThesis />}
+        {active.id === "buyside_ideas" && <BuySideIdeas />}
 
         {active.usesApi && active.screenId && (
           <ScreenResults
@@ -283,7 +285,9 @@ export function ScreenersView() {
           </details>
         )}
 
-        {!active.usesApi && (
+        {/* The ideas view brings its own table; an empty plays grid under it
+         * would read as a second, broken result. */}
+        {!active.usesApi && active.id !== "buyside_ideas" && (
           <div className="bg-surface-card rounded-xl border border-border/60 overflow-hidden">
             <div className="px-5 py-3 border-b border-border/60 flex items-center justify-between">
               <span className="text-sm font-medium text-gray-300">Plays</span>

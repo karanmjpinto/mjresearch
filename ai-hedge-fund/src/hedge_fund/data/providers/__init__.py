@@ -6,6 +6,7 @@ from hedge_fund.data.providers.base import BaseProvider
 from hedge_fund.data.providers import openbb_provider  # noqa: F401
 from hedge_fund.data.providers import yfinance_enhanced  # noqa: F401
 from hedge_fund.data.providers import sector_etf_provider  # noqa: F401
+from hedge_fund.data.providers import bullpen_provider  # noqa: F401
 
 try:
     from hedge_fund.data.providers import edgar_provider  # noqa: F401
