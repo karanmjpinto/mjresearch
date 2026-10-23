@@ -1,5 +1,6 @@
 import type { ScreenName, ScreenInfoTerm } from "@/config/screeners";
 import { RefreshScreenButton } from "./RefreshScreenButton";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api, type ScreenRow } from "@/lib/api";
@@ -82,8 +83,28 @@ export function ScreenResults({
 }: Props) {
   /* Per screen, not one shared default: the multi-bagger screen has a hard
    * market-cap ceiling and passes nothing at all in the S&P 500, so pointing
-   * both screens at the same universe leaves one of them permanently empty. */
-  const uni = universe ?? DEFAULT_UNIVERSE_FOR[screen] ?? "sp500";
+   * both screens at the same universe leaves one of them permanently empty.
+   *
+   * Pickable, and it was not. The `universe` prop existed and nothing ever
+   * passed one, so this table always rendered the screen's default and every
+   * other universe was unreachable: sixteen of them load, sixteen are listed
+   * by the API, and a reader could see the results of exactly one. The
+   * Korean runs sat complete on disk for a week with no way to open them.
+   *
+   * The prop still wins when given, so a caller that wants a fixed universe
+   * keeps one. Otherwise the choice is the reader's and starts at the
+   * screen's own default. */
+  const [picked, setPicked] = useState<string | null>(null);
+  const uni = universe ?? picked ?? DEFAULT_UNIVERSE_FOR[screen] ?? "sp500";
+
+  /* Every universe the server will actually load, so the list cannot claim
+   * one the backend has never heard of. */
+  const universes = useQuery({
+    queryKey: ["screener-universes"],
+    queryFn: api.getScreenerUniverses,
+    staleTime: 60 * 60_000,
+    retry: false,
+  });
 
   /* Needed in the failure branch, where the server's own copy of it never
    * arrived. Same shape the route returns. */
@@ -123,7 +144,38 @@ export function ScreenResults({
                 : `Built ${Math.round(d.age_days ?? 0)} days ago`}
               {d.stale && " · worth refreshing"}
             </p>
-            <div className="mt-xs flex justify-end">
+            <div className="mt-xs flex flex-wrap items-center justify-end gap-xs">
+              {/* Beside the build date on purpose: "built 10 days ago" is a
+                * fact about one universe, and until you can see which, the
+                * date is only half a sentence. */}
+              <label htmlFor={`universe-${screen}`} className="sr-only">
+                Universe for {screen}
+              </label>
+              <select
+                id={`universe-${screen}`}
+                value={uni}
+                onChange={(e) => setPicked(e.target.value)}
+                disabled={universe != null}
+                title={
+                  universe != null
+                    ? "This panel is pinned to one universe"
+                    : "Show this screen's last run over another market"
+                }
+                className="border border-ink-line bg-ink px-sm py-1.5 font-display text-label tracking-label text-on-ink-soft outline-none transition-colors focus:border-cobalt disabled:text-on-ink-faint"
+              >
+                {(universes.data?.universes ?? []).map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.label}
+                  </option>
+                ))}
+                {/* The current universe always has a row, even before the
+                  * list arrives or if the server stops offering it — a
+                  * select whose value is not among its options renders
+                  * blank, which reads as a broken control. */}
+                {!(universes.data?.universes ?? []).some((u) => u.id === uni) && (
+                  <option value={uni}>{uni}</option>
+                )}
+              </select>
               <RefreshScreenButton screen={screen} universe={uni} />
             </div>
             {/* A second kind of stale, and the more dangerous one, because a
