@@ -32,3 +32,13 @@ Cited in `src/hedge_fund/valuation/concentration.py`, which takes from it the di
 **Cite the 1998 revision, not the 1997 conference version.** The title page carries "Montreal, June 1997" with a footnote "Revised May 29, 1998", and the paper discusses 1998 events — so page references taken from this PDF cannot be attributed to the version presented in 1997. Note also that Figures 1–5 and Appendices 2–3 are referenced in the text but absent from this PDF, including the figure underlying the estimation-error section; every passage quoted in this codebase is prose, not read off a missing figure.
 
 **The PDF is not vendored into this repository.** Page 1 carries "©1997" with no licence, no reproduction grant and no public-domain dedication. The only evidence of the author consenting to web distribution is his acknowledgement thanking "Richard Reid for posting this paper on his website" — permission for one posting, not a general grant. This repository is public, so the paper is linked and quoted briefly with page cites, the same way `config/damodaran/` cites a source instead of mirroring the spreadsheets behind it.
+
+### Cover & Thomas — growth rate as relative entropy
+
+> Cover, Thomas M., and Joy A. Thomas. *Elements of Information Theory*. 2nd ed. Wiley, 2006. Chapter 16, "Information Theory and Portfolio Theory".
+
+Cited in `src/hedge_fund/valuation/concentration.py` for the general result behind the Black-Scholes closed form there: log-optimal wealth is proportional to dP/dQ, and the most excess growth an edge can buy is D(P ‖ Q). Nothing is computed from it; it says what the conviction score is not.
+
+> Lihong. "How to Extract Max Value from Your Edge?" *TheLogbook* (Substack), 30 April 2026. <https://freeportlogbook.substack.com/p/how-to-extract-max-value-from-your>
+
+The worked Black–Scholes example in the same docstring (mu = 10%, r = 2%, sigma = 16%, so f* = 3.125 and g* − r = 12.5%) and the point that an option's Sharpe ratio equals the stock's come from this post. It also shows that a single five-year at-the-money call captures about 93% of the Kelly growth; that result is not used here, because nothing in this codebase sizes options. One error in it, so the number is not copied: the summary calls 14.5% the growth "above cash", but its own derivation gives g* = r + 12.5% = 14.5%, so 14.5% is the total and 12.5% is the excess.

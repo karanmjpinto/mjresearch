@@ -2374,6 +2374,30 @@ function BacktestTab({ ticker }: { ticker: string }) {
       )}
       {d && (
         <>
+          {d.verdict && (
+            <p className="text-sm text-gray-300">
+              <span className="font-semibold">
+                {
+                  {
+                    holds: "Holds in both halves",
+                    trade_off: "Trade-off",
+                    no_edge: "No edge",
+                  }[d.verdict.label]
+                }
+              </span>
+              {" — "}
+              {d.verdict.label === "holds"
+                ? "beats buy & hold on growth and on Sharpe, in each half of the window."
+                : d.verdict.label === "trade_off"
+                  ? `beats buy & hold on ${d.verdict.cagr_holds ? "growth" : "Sharpe"} in both halves, not on ${d.verdict.cagr_holds ? "Sharpe" : "growth"}.`
+                  : "does not beat buy & hold on growth or Sharpe in both halves of the window."}{" "}
+              <span className="text-gray-500">
+                Split at {d.verdict.halves[1]?.start_date}. Fees included; slippage and
+                taxes are not.
+              </span>
+            </p>
+          )}
+
           {/* Metric cards — strategy vs benchmark */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <MetricCard

@@ -32,6 +32,7 @@ class BacktestResult:
     metrics: dict  # strategy metrics
     benchmark_metrics: dict  # buy-and-hold metrics (same window)
     trades: list[dict] = field(default_factory=list)  # entry/exit log
+    verdict: dict = field(default_factory=dict)  # see split_verdict
 
     def to_dict(self) -> dict:
         return {
@@ -46,6 +47,7 @@ class BacktestResult:
             "metrics": self.metrics,
             "benchmark_metrics": self.benchmark_metrics,
             "trades": self.trades,
+            "verdict": self.verdict,
         }
 
 
@@ -114,6 +116,7 @@ def run_backtest(
     )
 
     trades = _extract_trades(df, position)
+    verdict = split_verdict(equity, net_ret, position, benchmark, bar_ret, rf_annual)
 
     return BacktestResult(
         ticker=ticker,
@@ -127,7 +130,58 @@ def run_backtest(
         metrics=metrics,
         benchmark_metrics=benchmark_metrics,
         trades=trades,
+        verdict=verdict,
     )
+
+
+def split_verdict(
+    equity: pd.Series,
+    net_ret: pd.Series,
+    position: pd.Series,
+    benchmark: pd.Series,
+    bar_ret: pd.Series,
+    rf_annual: float,
+) -> dict:
+    """Does the strategy beat buy-and-hold in both halves of the window, not just overall?
+
+    A whole-window win can be one lucky stretch. Splitting the window in two and
+    asking for the win in each is the cheapest test of that. The rules here use
+    fixed published parameters, not ones fitted to this data, so neither half is
+    "held out" in the fitting sense — this is a stability check, not an
+    out-of-sample one.
+
+    Two measures, growth (CAGR) and risk-adjusted return (Sharpe). A measure
+    counts only if the strategy wins on it in both halves:
+      - "holds"      both measures hold up in both halves
+      - "trade_off"  one does
+      - "no_edge"    neither does
+    """
+    mid = len(equity) // 2
+    halves = []
+    for sl in (slice(None, mid), slice(mid, None)):
+        s = compute_metrics(equity[sl], net_ret[sl], position[sl], rf_annual=rf_annual)
+        b = compute_metrics(
+            benchmark[sl], bar_ret[sl], pd.Series(1.0, index=bar_ret[sl].index), rf_annual=rf_annual
+        )
+        halves.append(
+            {
+                "start_date": str(equity.index[sl][0])[:10],
+                "end_date": str(equity.index[sl][-1])[:10],
+                "cagr": s["cagr"],
+                "benchmark_cagr": b["cagr"],
+                "sharpe": s["sharpe"],
+                "benchmark_sharpe": b["sharpe"],
+            }
+        )
+    cagr_holds = all(h["cagr"] > h["benchmark_cagr"] for h in halves)
+    sharpe_holds = all(h["sharpe"] > h["benchmark_sharpe"] for h in halves)
+    label = {2: "holds", 1: "trade_off", 0: "no_edge"}[cagr_holds + sharpe_holds]
+    return {
+        "label": label,
+        "cagr_holds": cagr_holds,
+        "sharpe_holds": sharpe_holds,
+        "halves": halves,
+    }
 
 
 def _prepare_prices(df: pd.DataFrame) -> pd.DataFrame:
