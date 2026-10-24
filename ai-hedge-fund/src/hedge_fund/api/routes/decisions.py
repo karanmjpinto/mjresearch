@@ -33,6 +33,20 @@ def _last_price(ticker: str) -> float | None:
         return None
 
 
+def _score_rows(rows: list[dict[str, Any]]) -> None:
+    """Attach `outcome` to each row, fetching each ticker's price once."""
+    prices: dict[str, float | None] = {}
+
+    def price(t: str) -> float | None:
+        if t not in prices:
+            prices[t] = _last_price(t)
+        return prices[t]
+
+    for row in rows:
+        bench = ((row.get("portfolio_context") or {}).get("benchmark") or {}).get("ticker")
+        row["outcome"] = store.score(row, price(row["ticker"]), price(bench) if bench else None)
+
+
 class SizeRequest(BaseModel):
     ticker: str = Field(max_length=32)
     amount: float | None = Field(default=None, gt=0, description="Cash amount to deploy")
@@ -104,6 +118,7 @@ async def create_decision(req: DecisionRequest) -> dict[str, Any]:
 
     ticker = req.ticker.strip().upper()
     portfolio = _portfolio()
+    benchmark = (portfolio.get("benchmark") or "SPY").upper()
     sizing = None
     weight = None
 
@@ -129,6 +144,8 @@ async def create_decision(req: DecisionRequest) -> dict[str, Any]:
             "total_value": portfolio.get("total_value"),
             "cash": portfolio.get("cash"),
             "holdings_count": portfolio.get("holdings_count"),
+            # So the call can be scored against the index, not against zero.
+            "benchmark": {"ticker": benchmark, "price": _last_price(benchmark)},
             "holdings": [
                 {"ticker": h["ticker"], "weight_pct": h["weight_pct"]}
                 for h in (portfolio.get("holdings") or [])
@@ -149,13 +166,16 @@ async def list_decisions(
 ) -> dict[str, Any]:
     """Past decisions, each scored against the price move since."""
     rows = store.list_decisions(ticker=ticker, status=status, limit=limit)
-    prices: dict[str, float | None] = {}
-    for row in rows:
-        t = row["ticker"]
-        if t not in prices:
-            prices[t] = _last_price(t)
-        row["outcome"] = store.score(row, prices[t])
+    _score_rows(rows)
     return {"count": len(rows), "decisions": rows}
+
+
+@router.get("/calibration")
+async def decision_calibration(limit: int = Query(default=500, ge=1, le=500)) -> dict[str, Any]:
+    """Outcome by conviction band: whether the score means anything yet."""
+    rows = store.list_decisions(limit=limit)
+    _score_rows(rows)
+    return store.calibration(rows)
 
 
 class ReviewRequest(BaseModel):

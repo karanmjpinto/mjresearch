@@ -416,6 +416,19 @@ export interface BacktestResult {
   metrics: BacktestMetrics;
   benchmark_metrics: BacktestMetrics;
   trades: BacktestTrade[];
+  verdict: {
+    label: "holds" | "trade_off" | "no_edge";
+    cagr_holds: boolean;
+    sharpe_holds: boolean;
+    halves: Array<{
+      start_date: string;
+      end_date: string;
+      cagr: number;
+      benchmark_cagr: number;
+      sharpe: number;
+      benchmark_sharpe: number;
+    }>;
+  };
 }
 
 // ------------------------------------------------------------------
@@ -744,8 +757,21 @@ export interface DecisionRow {
     move_pct?: number;
     in_your_favour_pct?: number;
     current_price?: number;
+    benchmark?: string | null;
+    benchmark_move_pct?: number | null;
+    /** The move in your favour net of the index over the same span. */
+    vs_index_pct?: number | null;
   };
 }
+
+/** Outcome by conviction band, every number measured against the index. */
+export type DecisionCalibration = {
+  n: number;
+  n_without_index: number;
+  hit_rate_pct: number | null;
+  bands: { band: string; n: number; mean_vs_index_pct: number | null; hit_rate_pct: number | null }[];
+  monotonic: boolean | null;
+};
 
 /** One multiple's implied value range for the subject. */
 export type CompsBand = {
@@ -1448,6 +1474,8 @@ export const api = {
     fetchJSON<{ count: number; decisions: DecisionRow[] }>(
       `/decisions?limit=${limit}${ticker ? `&ticker=${encodeURIComponent(ticker)}` : ""}`,
     ),
+
+  getDecisionCalibration: () => fetchJSON<DecisionCalibration>("/decisions/calibration"),
 
   // --- Setup ---
 

@@ -1,3 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+
+/** Below this many scored calls, your own rate is noise; show the professional base rate. */
+const OWN_RATE_MIN_CALLS = 30;
+
 interface Props {
   score: number | null;
   label?: string;
@@ -6,6 +12,12 @@ interface Props {
 export function ConvictionGauge({ score, label }: Props) {
   const displayScore = score ?? 0;
   const isActive = score !== null;
+  const cal = useQuery({
+    queryKey: ["decision-calibration"],
+    queryFn: api.getDecisionCalibration,
+    staleTime: 5 * 60_000,
+  });
+  const own = cal.data && cal.data.n >= OWN_RATE_MIN_CALLS ? cal.data : null;
 
   // Score band -> palette token. Tokens, not hex, so the gauge tracks the
   // palette in index.css instead of drifting from it.
@@ -73,6 +85,17 @@ export function ConvictionGauge({ score, label }: Props) {
           </span>
         </div>
       </div>
+
+      {isActive && (
+        /* Dimensional's question: are those odds you would bet your savings on?
+         * A high score is a claim to beat the index, so show how often that claim
+         * comes true — the professionals' rate until your own record is large enough. */
+        <p className="text-center text-label leading-relaxed text-on-ink-faint">
+          {own
+            ? `Your calls beat the index ${own.hit_rate_pct}% of the time (${own.n} calls).`
+            : "About 1 US equity fund in 8 survived and beat its index, 2006–2025."}
+        </p>
+      )}
 
       {!isActive && (
         /* This used to read "Enable 'Run AI thesis'", which was a button on

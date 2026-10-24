@@ -86,6 +86,12 @@ export type DocSection = {
    * thing to check.
    */
   sources?: { label: string; url: string }[];
+  /**
+   * Plain questions a reader would ask, each with a short answer and one
+   * comparison from daily life. Borrowed from Dimensional's investor pages:
+   * the question is the heading, so a reader scanning finds their own.
+   */
+  qa?: { q: string; a: string; like?: string }[];
 };
 
 export const OPENING = {
@@ -158,7 +164,7 @@ export const SECTIONS: DocSection[] = [
         name: "Backtests and the out-of-sample test",
         trust: "computed",
         detail:
-          "Rule evaluation, the walk-forward split, and the significance bar that rises as more variants are tried are all deterministic. Only the proposal of a rule involves a model.",
+          "Rule evaluation, the walk-forward split, and the significance bar that rises as more variants are tried are all deterministic. Only the proposal of a rule involves a model. The per-ticker backtest also gives a fixed verdict: the window is cut in half, and growth (CAGR) and Sharpe each count only if the rule beats buy-and-hold on that measure in both halves — both is \"holds\", one is a trade-off, neither is no edge. The rules use fixed published settings, so this is a check against one lucky stretch, not an out-of-sample test.",
       },
       {
         name: "Sizing against the book you already hold",
@@ -385,6 +391,45 @@ export const SECTIONS: DocSection[] = [
     ],
   },
   {
+    id: "odds",
+    title: "Odds",
+    standfirst:
+      "A stock picker has to beat the index, not zero. These are the odds, and where the app shows them.",
+    body: [],
+    qa: [
+      {
+        q: "Do professionals beat the index?",
+        a: "Rarely. Of the US equity funds that existed in 2006, about 12% survived and beat their benchmark to 2025. Of the funds in the top quarter over five years, about one in five stayed there over the next five. A high conviction score is a claim to be in that minority, so the Evaluate gauge shows this rate under the score.",
+        like: "A doctor who quotes the survival rate before the operation, not after it.",
+      },
+      {
+        q: "How are my own decisions scored?",
+        a: "Against the index over the same days. Each decision records the price of the portfolio benchmark (SPY unless changed) when it is made. A buy that rose 10% while the index rose 20% shows as 10% behind. Calibration uses only this number, so a rising market cannot make every call look right. Decisions recorded before this change carry no index price and are counted but left out.",
+        like: "A runner timed against the field, not against standing still.",
+      },
+      {
+        q: "When does the gauge show my own record instead?",
+        a: "After 30 decisions that can be scored against the index. Below that, one lucky quarter moves the rate more than any skill does.",
+        like: "A batting average after three games.",
+      },
+      {
+        q: "Which kind of company has paid best over time?",
+        a: "Dimensional builds its funds on three premiums: small companies, cheap companies and profitable companies. The Factors tab names how many of the three the company sits on the long side of, using the same JKP tilts as the rest of the map. It is a description of the company, not a forecast for it.",
+        like: "Knowing which roads are usually faster does not tell you about today's traffic.",
+      },
+    ],
+    sources: [
+      {
+        label: "Dimensional — What every investor should know",
+        url: "https://www.dimensional.com/us-en/individual/foundations-of-investing/what-every-investor-should-know",
+      },
+      {
+        label: "Fama & French — Luck versus Skill in Mutual Fund Returns (2010)",
+        url: "https://doi.org/10.1111/j.1540-6261.2010.01598.x",
+      },
+    ],
+  },
+  {
     id: "lookback",
     title: "Portfolio",
     standfirst: "Every figure on that screen is measured, not forecast.",
@@ -567,6 +612,10 @@ export const GAPS: [string, string][] = [
   [
     "Factor returns end where the authors' last update does",
     'The JKP file runs to the month printed on the tab, currently December 2024. "Last 12 months" means the last twelve in that file, not the twelve before today.',
+  ],
+  [
+    "A backtest can only be run on a company that survived",
+    "The per-ticker backtest takes a symbol that trades today, so every company that went bankrupt or was delisted is out of reach, and the names you think to test are the ones that did well enough to stay in mind. Its verdict compares a rule against holding that one survivor, which is fair between the two, but says nothing about how the rule would have done across the names that disappeared. The fee is a flat 5 basis points a side by default; slippage, spreads and taxes are not modelled, so a thin edge can be smaller than it looks.",
   ],
   [
     "Verification has real gaps",

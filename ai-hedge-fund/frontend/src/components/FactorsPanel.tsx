@@ -166,6 +166,39 @@ function SourceLine({ data }: { data: FactorThemesResponse }) {
   );
 }
 
+// ── Dimensional's three drivers: small, cheap, profitable ──────────────────
+
+/** The three premiums Dimensional builds its funds on, read off the JKP tilts. */
+const DRIVERS = [
+  { id: "size", long: "small" },
+  { id: "value", long: "cheap" },
+  { id: "profitability", long: "profitable" },
+] as const;
+
+function DriversLine({
+  ticker,
+  tilt,
+}: {
+  ticker: string;
+  tilt: Map<string, { score: number | null }>;
+}) {
+  const read = DRIVERS.map((d) => ({ ...d, score: tilt.get(d.id)?.score ?? null }));
+  const measured = read.filter((d) => d.score !== null);
+  const on = measured.filter((d) => (d.score ?? 0) > 50);
+  const missing = read.filter((d) => d.score === null).map((d) => d.long);
+  return (
+    <p className="mt-2xs max-w-measure text-body-sm text-on-ink-soft">
+      <span className="text-bone">
+        {ticker} is on the long side of {on.length} of {measured.length} measured
+        drivers
+      </span>{" "}
+      that Dimensional builds its funds on: small, cheap and profitable companies.
+      {on.length > 0 && ` Long side: ${on.map((d) => d.long).join(", ")}.`}
+      {missing.length > 0 && ` Not measured: ${missing.join(", ")}.`}
+    </p>
+  );
+}
+
 // ── The map: every theme, the company's tilt, and what the theme has paid ──
 
 function ThemeMap({
@@ -208,6 +241,7 @@ function ThemeMap({
           the side they sell. The numbers are what the theme itself has paid —
           not {ticker}. Pick a row for its history and its factors.
         </p>
+        {profile && <DriversLine ticker={ticker} tilt={tilt} />}
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-ink-line">
