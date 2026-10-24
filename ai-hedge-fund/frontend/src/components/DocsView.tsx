@@ -223,6 +223,22 @@ export function DocsView() {
                 </ul>
               )}
 
+              {s.qa && (
+                <dl className="mt-lg flex flex-col gap-lg">
+                  {s.qa.map((x) => (
+                    <div key={x.q}>
+                      <dt className="text-title-xs font-semibold text-enamel">{x.q}</dt>
+                      <dd className="mt-xs max-w-measure text-body text-on-canvas-soft">{x.a}</dd>
+                      {x.like && (
+                        <dd className="mt-2xs max-w-measure text-body-sm italic text-on-canvas-faint">
+                          {x.like}
+                        </dd>
+                      )}
+                    </div>
+                  ))}
+                </dl>
+              )}
+
               {s.body.length > 0 && (
                 <div className={clsx("flex flex-col gap-md", s.items ? "mt-xl" : "mt-lg")}>
                   {s.body.map((p) => (

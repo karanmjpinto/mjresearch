@@ -100,13 +100,19 @@ def update(decision_id: int, **fields: Any) -> dict[str, Any] | None:
         return _to_dict(row)
 
 
-def score(decision: dict[str, Any], current_price: float | None) -> dict[str, Any]:
-    """What has happened since the call.
+def score(
+    decision: dict[str, Any], current_price: float | None, index_price: float | None = None
+) -> dict[str, Any]:
+    """What has happened since the call, against zero and against the index.
 
     Deliberately reports the move without grading it. A buy that is down is not
     automatically a bad decision, and a lucky win is not a good one — the point
     of reviewing is to check whether the reasoning held, which is a judgement the
     numbers can inform but not make.
+
+    `vs_index_pct` is the one calibration uses. In a rising market nearly every
+    buy is up, so the raw move measures the market, not the pick; the move net of
+    the benchmark over the same span is what a stock picker has to beat.
     """
     entry = decision.get("price_at_decision")
     if entry in (None, 0) or current_price in (None, 0):
@@ -115,12 +121,71 @@ def score(decision: dict[str, Any], current_price: float | None) -> dict[str, An
     move_pct = (current_price / entry - 1) * 100
     action = (decision.get("action") or "").lower()
     # For a pass or a sell, the counterfactual is what you avoided.
-    directional = -move_pct if action in {"sell", "pass"} else move_pct
-    return {
+    sign = -1 if action in {"sell", "pass"} else 1
+    out: dict[str, Any] = {
         "scored": True,
         "price_at_decision": round(entry, 4),
         "current_price": round(current_price, 4),
         "move_pct": round(move_pct, 2),
-        "in_your_favour_pct": round(directional, 2),
+        "in_your_favour_pct": round(sign * move_pct, 2),
+        "benchmark": None,
+        "benchmark_move_pct": None,
+        "vs_index_pct": None,
         "note": "Direction only. Whether the reasoning held is the actual review.",
+    }
+    bench = (decision.get("portfolio_context") or {}).get("benchmark") or {}
+    if bench.get("price") and index_price:
+        bench_move = (index_price / bench["price"] - 1) * 100
+        out["benchmark"] = bench.get("ticker")
+        out["benchmark_move_pct"] = round(bench_move, 2)
+        out["vs_index_pct"] = round(sign * (move_pct - bench_move), 2)
+    return out
+
+
+#: Conviction bands for calibration. Coarse on purpose: a personal book makes
+#: tens of calls, not thousands, and finer bands would be noise.
+CONVICTION_BANDS = ((0, 49), (50, 74), (75, 100))
+
+
+def calibration(scored: list[dict[str, Any]]) -> dict[str, Any]:
+    """Does higher conviction come before better outcomes? The north star to climb.
+
+    Takes decisions that already carry an `outcome` from `score`. Only buy, sell
+    and pass count: hold and watch are not a directional call. Every number is
+    the move against the index (`vs_index_pct`), so a hit means the call beat the
+    benchmark, not that the market rose. `monotonic` is True when each band's mean
+    beats the band below it, and None while any band is empty, because a missing
+    band proves nothing either way.
+    """
+    directional = [
+        d
+        for d in scored
+        if d.get("conviction") is not None
+        and (d.get("action") or "").lower() in {"buy", "sell", "pass"}
+        and (d.get("outcome") or {}).get("scored")
+    ]
+    # shortcut: calls recorded before the index price was captured are left out, not backfilled.
+    calls = [d for d in directional if d["outcome"].get("vs_index_pct") is not None]
+    bands = []
+    for lo, hi in CONVICTION_BANDS:
+        moves = [d["outcome"]["vs_index_pct"] for d in calls if lo <= d["conviction"] <= hi]
+        bands.append(
+            {
+                "band": f"{lo}-{hi}",
+                "n": len(moves),
+                "mean_vs_index_pct": round(sum(moves) / len(moves), 2) if moves else None,
+                "hit_rate_pct": round(100 * sum(m > 0 for m in moves) / len(moves), 1)
+                if moves
+                else None,
+            }
+        )
+    means = [b["mean_vs_index_pct"] for b in bands]
+    monotonic = None if None in means else all(a < b for a, b in zip(means, means[1:]))
+    hits = sum(d["outcome"]["vs_index_pct"] > 0 for d in calls)
+    return {
+        "n": len(calls),
+        "n_without_index": len(directional) - len(calls),
+        "hit_rate_pct": round(100 * hits / len(calls), 1) if calls else None,
+        "bands": bands,
+        "monotonic": monotonic,
     }

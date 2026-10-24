@@ -196,6 +196,12 @@ function DecisionCard({ d }: { d: DecisionRow }) {
             {favour >= 0 ? "+" : ""}
             {favour.toFixed(1)}% in your favour
           </span>
+          {o?.vs_index_pct != null && (
+            <span className={`ml-sm ${o.vs_index_pct >= 0 ? "text-verdigris" : "text-oxide"}`}>
+              {o.vs_index_pct >= 0 ? "+" : ""}
+              {o.vs_index_pct.toFixed(1)}% vs {o.benchmark}
+            </span>
+          )}
           <span className="ml-sm text-on-ink-faint">
             since {n(d.price_at_decision, 2)} → {n(o?.current_price, 2)}
           </span>

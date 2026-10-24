@@ -33,6 +33,31 @@ chain produces neither, and the single number it does produce is a judgment
 about three requisites. What survives without an estimate of f* is the
 *direction* of the adjustment and a ceiling — and Thorp applies both himself.
 
+What those two inputs would buy, so the gap is concrete. Under Black-Scholes
+dynamics with drift mu, volatility sigma and risk-free rate r, the log-optimal
+stock weight is f* = (mu - r) / sigma^2 and the excess growth it earns is
+g* = (mu - r)^2 / (2 sigma^2). The growth curve is g(f) = f(mu - r) - f^2
+sigma^2 / 2, a parabola with roots at 0 and 2f* — which is Thorp's p. 29 result
+below in one line. Put ordinary numbers in and the case for a ceiling makes
+itself: an index view of mu = 10% against r = 2% at sigma = 16% gives
+f* = 3.125, a 312% levered position, for g* - r = 12.5% a year.
+
+In general the optimal terminal wealth is proportional to dP/dQ, your
+probabilities over the market's pricing, and over a horizon T the maximum
+excess growth rate is D(P || Q) / T (Cover & Thomas, ch. 16). That needs a
+complete market and log utility, not normality. An edge is a disagreement with
+the price, and the growth it can buy is bounded by how far your beliefs sit
+from the market's. A conviction score says how sure you are, not how far you
+differ, so it cannot stand in for either number.
+
+That payoff is a power of the price, S_T^f*. Continuously rebalanced levered
+stock replicates it, and so does a weighted strip of calls. Options add no
+edge: a call's instantaneous Sharpe ratio is the stock's, (mu - r) / sigma,
+because its excess return and its volatility both scale by the same leverage.
+They only change the shape of the payoff. This module only sizes stock, and a
+view on the shape of the distribution rather than its drift is out of scope.
+(Worked example and the option cases: Lihong, `third_party/ATTRIBUTION.md`.)
+
 Three of his results set the shape of the table below.
 
   - An overestimated edge is not merely imprecise, it is fatal to growth.
